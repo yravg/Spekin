@@ -39,8 +39,8 @@ Use **"Create a merge commit"**, not squash, for stacked pull requests. A squash
 
 1. Core, not stacked: #1 (IMP-03), #4 (IMP-12), #5 (IMP-11), #7 (IMP-10), #12 (IMP-25), #8 (IMP-22).
 2. Core, stacked: #2 (IMP-04), then #10 (IMP-09) and #13 (IMP-24). #17 (IMP-27) goes after #8. The IMP-28 PR goes after #7.
-3. Core, stacked on all of the above: the IMP-26 PR (API routes). Merge it last.
-4. UI stack, bottom first: #3 (IMP-01) → #6 (IMP-02) → #9 (IMP-23) → #11 (IMP-05) → IMP-07 → IMP-15 → IMP-14.
+3. Core: #20 (IMP-29) is not stacked. The IMP-26 PR (#15, API routes) is stacked on all of the above: merge it last.
+4. UI stack, bottom first: #3 (IMP-01) → #6 (IMP-02) → #9 (IMP-23) → #11 (IMP-05) → #14 (IMP-07) → #16 (IMP-15) → #19 (IMP-14) → the next ones as they open.
 
 All core PRs edit `docs/handoff/lanes/core.md`, and all UI PRs edit `docs/handoff/lanes/ui.md`. If one conflicts there, keep the newer version: workers keep a row for every card. `packages/contracts/src/index.ts` can conflict between core PRs too. Keep both export lines, then run `npm run check:contracts`.
 

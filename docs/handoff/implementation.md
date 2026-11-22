@@ -116,14 +116,14 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-25 | core | Next-request context builder (S29, S35): only the listed chips, pure | – | done, waiting for owner merge: PR #12 |
 | IMP-26 | core | API routes for the core (all core cards) + web client | IMP-03…IMP-25 | done, waiting for owner merge: PR #15 (merge last) |
 | IMP-27 | core | GitHub skill source adapter: pin to SHA, fetch with limits, update check | IMP-22 | done, waiting for owner merge: PR #17, stacked on #8 |
-| IMP-29 | core | Recently deleted and restore: 30-day window, pure | – | open |
+| IMP-29 | core | Recently deleted and restore: 30-day window, pure | – | done, waiting for owner merge: PR #20 |
 | IMP-28 | core | GenUI validation fuzzing (never panics, never partial) | IMP-10 | done, waiting for owner merge: PR #18, stacked on #7 (the fuzzer found and fixed a data: URL hole) |
 | IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
 | IMP-06 | ui | S28 Reference intake | IMP-01 | open |
 | IMP-07 | ui | S29 Frames canvas | IMP-01 | done, waiting for owner merge: PR #14, stacked on #11 (lead re-ran: S29 6/6 PASS) |
 | IMP-08 | ui | S30 Style review | IMP-01 | open |
 | IMP-13 | ui | S31 Alternatives | IMP-01 | open |
-| IMP-14 | ui | S32 Targeted change | IMP-01 | open |
+| IMP-14 | ui | S32 Targeted change | IMP-01 | done, waiting for owner merge: PR #19, stacked on #16 (lead re-ran: S32 6/6 PASS) |
 | IMP-15 | ui | S33 Review and accept | IMP-01 | done, waiting for owner merge: PR #16, stacked on #14 (lead re-ran: S33 6/6 PASS) |
 | IMP-16 | ui | S34 Coding handoff | IMP-01 | open |
 | IMP-17 | ui | S36 Models and usage | IMP-01 | open |
