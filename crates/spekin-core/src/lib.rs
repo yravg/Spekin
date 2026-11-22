@@ -5,11 +5,17 @@
 //! Field names follow the sample project (fixtures/meranti-yard.json), so the boards,
 //! the app and the API read the same shapes (canvas-to-app rule 15, R-ARC-3).
 
+pub mod handoff;
 pub mod project;
 pub mod proposal;
 pub mod revision;
 pub mod stage;
 
+pub use handoff::{
+    ArtifactRevisionRecord, ArtifactRevisionState, Manifest, ManifestArtifact, ManifestError,
+    ManifestExclusion, ManifestInput, ManifestInputStatus, ManifestSelection,
+    ManifestSelectionItem, RequiredInput, build_manifest, sha256_hex,
+};
 pub use project::{Fixture, FixtureError, Project};
 pub use proposal::{Hunk, Proposal, ProposalError, Rejection, accept, reject, revert};
 pub use revision::Revision;

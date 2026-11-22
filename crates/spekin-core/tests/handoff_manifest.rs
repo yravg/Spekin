@@ -131,11 +131,17 @@ fn builds_stable_ordered_manifest_with_sha256_exclusions_and_explicit_missing_in
     // Required inputs sorted stably; missing PRD is explicit and never invented.
     assert_eq!(manifest.required_inputs.len(), 2);
     assert_eq!(manifest.required_inputs[0].name, "DESIGN.md");
-    assert_eq!(manifest.required_inputs[0].status, ManifestInputStatus::Present);
+    assert_eq!(
+        manifest.required_inputs[0].status,
+        ManifestInputStatus::Present
+    );
     assert_eq!(manifest.required_inputs[0].label, "DESIGN.md: r3");
 
     assert_eq!(manifest.required_inputs[1].name, "PRD");
-    assert_eq!(manifest.required_inputs[1].status, ManifestInputStatus::Missing);
+    assert_eq!(
+        manifest.required_inputs[1].status,
+        ManifestInputStatus::Missing
+    );
     assert_eq!(manifest.required_inputs[1].revision, None);
     assert_eq!(manifest.required_inputs[1].label, "PRD: missing");
 
