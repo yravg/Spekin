@@ -392,7 +392,7 @@ These change boards, so only the lead does them: edit the generator, rebuild, li
 | C-02 | F00 and all boards | **done** 23 Nov: `maps-reqs.mjs` traces 200 of 212 stories to PRD v0.2.3 R-IDs (every ID checked against the PRD). 12 have none yet, with a reason (layout details, S40 owner features). F00 shows them. | – |
 | C-03 | S33 | **done, part open**: Reject = no revision plus one audit entry. Still to do: the S30 local accept and S34 re-finalize wording. | S33 card |
 | C-04 | S28 | **done**: the consent line and F146 say files go only to providers whose terms forbid training | – |
-| C-05 | S36 | **done, part open**: the board says pairing and runs ship as a later adapter. Still to do: draw the cli state's pair button as later. | S36 card |
+| C-05 | S36 | ****done** 23 Nov: S36 Pair again is now LATER on the board (the app already matched; S36 6/6 PASS) | S36 card |
 
 ## Open decisions (owner)
 
