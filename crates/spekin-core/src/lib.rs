@@ -5,6 +5,7 @@
 //! Field names follow the sample project (fixtures/meranti-yard.json), so the boards,
 //! the app and the API read the same shapes (canvas-to-app rule 15, R-ARC-3).
 
+pub mod api;
 pub mod context;
 pub mod genui;
 pub mod handoff;
@@ -15,6 +16,11 @@ pub mod proposal;
 pub mod revision;
 pub mod skills;
 pub mod stage;
+
+pub use api::{
+    ApiErrorBody, BuildContextRequest, BuildManifestRequest, CheckSkillUpdateRequest,
+    EstimateRunRequest, RejectProposalRequest, ReserveRunRequest,
+};
 
 pub use context::{
     BoardArtifact, BoardSnapshot, ContextChip, ContextItemStatus, RequestContext,
