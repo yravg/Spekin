@@ -116,6 +116,7 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-25 | core | Next-request context builder (S29, S35): only the listed chips, pure | – | done, waiting for owner merge: PR #12 |
 | IMP-26 | core | API routes for the core (all core cards) + web client | IMP-03…IMP-25 | done, waiting for owner merge: PR #15 (merge last) |
 | IMP-27 | core | GitHub skill source adapter: pin to SHA, fetch with limits, update check | IMP-22 | done, waiting for owner merge: PR #17, stacked on #8 |
+| IMP-29 | core | Recently deleted and restore: 30-day window, pure | – | open |
 | IMP-28 | core | GenUI validation fuzzing (never panics, never partial) | IMP-10 | done, waiting for owner merge: PR #18, stacked on #7 (the fuzzer found and fixed a data: URL hole) |
 | IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
 | IMP-06 | ui | S28 Reference intake | IMP-01 | open |
@@ -249,6 +250,16 @@ Hardening for IMP-10. Proptest strategies generate arbitrary JSON (deep nesting,
 - every accepted card passes the limits again when re-serialised and re-validated (a round trip);
 - no accepted card contains a non-https URL or a script-like string anywhere.
 Run 2,000 cases in CI and 50,000 cases locally with an env var. Fix any bug found, with its failing case first. Stack on IMP-10.
+
+### IMP-29 · Recently deleted and restore (core)
+
+Pure Rust in spekin-core for S27 (states `restore`, F-stories on the Recently deleted list). The restore window is 30 days (DECISIONS.md).
+- `delete(project, now)` marks the project deleted with `deleted_at`. Nothing is removed and its revisions are kept.
+- `restore(project, now)` works only within 30 days. After that it gives a typed error, `WindowClosed { deleted_at, closed_at }`.
+- `purge_due(projects, now)` lists the projects past the window. It removes nothing itself; a later server job uses the list.
+- `days_left(project, now)` gives the number S27 shows ("27 days left").
+- Property tests: restore is the exact inverse of delete inside the window (same content hash); nothing is restorable after the window; `purge_due` never lists a project inside the window; the clock never goes backwards in an accepted operation.
+Times are UTC, passed in as arguments (no system clock in the core). Export the types with ts-rs. Branch from origin/main.
 
 ### UI cards after P1 (written 23 Nov)
 
