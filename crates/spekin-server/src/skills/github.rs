@@ -290,3 +290,35 @@ impl<C: GitHubClient> GitHubSkillSource<C> {
         Ok(check_update(&installed.manifest, &fresh.manifest, policy))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::hardening::GITHUB_TIMEOUT;
+    use std::time::Duration;
+
+    /// IMP-32: the GitHub client has its own 20 s timeout, shorter than nothing
+    /// else, so a stalled upstream can never hold a request past the server's
+    /// own timeout budget. The test uses a loopback socket that never answers.
+    #[tokio::test]
+    async fn github_client_timeout_is_enforced() {
+        assert_eq!(GITHUB_TIMEOUT, Duration::from_secs(20));
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
+            .await
+            .expect("loopback listener");
+        let addr = listener.local_addr().expect("local addr");
+        let held = tokio::spawn(async move {
+            let (_socket, _) = listener.accept().await.expect("accept");
+            tokio::time::sleep(Duration::from_secs(2)).await;
+        });
+        let client = HttpGitHubClient::with_timeout(Duration::from_millis(50));
+        let result = client
+            .get_json(&format!("http://{addr}/never-answers"))
+            .await;
+        held.abort();
+        assert!(
+            matches!(result, Err(GitHubSourceError::Transport { .. })),
+            "a stalled upstream must be a typed transport error, not a hang"
+        );
+    }
+}
