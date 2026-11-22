@@ -11,6 +11,7 @@ Only this lane edits this file. Write here before you stop working.
 | IMP-12 | `imp-12-licences` (PR #4) | done (in PR #4) | – | – |
 | IMP-11 | `imp-11-model-sources` (PR #5) | done (in PR #5) | – | – |
 | IMP-10 | `imp-10-genui-validate` | done | `cargo test --workspace` (17 unit/ts-rs + 5 `tests/genui.rs` + 2 server tests pass); `npm run gate` passes | TS fallback renderer and S38 UI wiring (later UI card) |
+| IMP-28 | `imp-28-genui-fuzz` (stacked on IMP-10) | open | – | – |
 | IMP-22 | – | open | – | – |
 
 ## Requests to lead
