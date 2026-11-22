@@ -1,0 +1,9 @@
+{
+  "example/skills@main": "aaaa1111",
+  "example/skills@v1": "aaaa1111",
+  "example/skills@wording": "bbbb2222",
+  "example/skills@licence": "cccc3333",
+  "example/skills@script": "dddd4444",
+  "example/skills@injection": "eeee5555",
+  "example/skills@nolicence": "ffff6666"
+}

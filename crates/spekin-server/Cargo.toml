@@ -13,6 +13,7 @@ tower-http.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 reqwest.workspace = true
+futures-util.workspace = true
 
 [dev-dependencies]
 tower = { version = "0.5", features = ["util"] }
