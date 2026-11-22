@@ -68,6 +68,7 @@ test('python in a build script or a .py file fails the inventory', () => {
   assert.equal(scanBuildText('ci.yml', 'run: pip install -r requirements.txt').length, 1);
   assert.equal(scanBuildText('tools/build.mjs', 'execFileSync("python", ["-V"])').length, 1);
   assert.equal(scanBuildText('README.md', 'No Python anywhere, ever.').length, 0);
+  assert.equal(scanBuildText('tools/checks/rules.mjs', "fail('R1 no-python', f, 'Python file or manifest');").length, 0);
   assert.equal(scanBuildText('package.json', '{"scripts":{"build":"node build.mjs"}}').length, 0);
   const r = audit({ npm: [], crates: [], files: ['tools/old.py'] });
   assert.equal(r.ok, false);
