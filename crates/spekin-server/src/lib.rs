@@ -22,13 +22,14 @@ use spekin_core::{
     ApiErrorBody, ArtifactRevisionRecord, ArtifactRevisionState, AuditAction, AuditEntry,
     AuditError, AuditEvent, AuditLog, AuditResponse, BoardArtifact, BoardSnapshot,
     BuildContextRequest, BuildManifestRequest, CapabilityRegistry, CheckSkillUpdateRequest,
-    ContextItemStatus, DeletedProjectView, EstimateRunRequest, Fixture, GENESIS_HASH,
-    GenUiValidation, Hunk, Ledger, LedgerCaps, LedgerError, Manifest, ManifestError,
+    ContextItemStatus, ContractsResponse, DeletedProjectView, EstimateRunRequest, Fixture,
+    GENESIS_HASH, GenUiValidation, Hunk, Ledger, LedgerCaps, LedgerError, Manifest, ManifestError,
     ModelCapability, Project, ProjectEntry, Proposal, ProposalError, RejectProposalRequest,
     Rejection, RejectionReason, RequestContext, RequiredInput, Reservation, ReserveRunRequest,
     RestoreError, RevertRevisionRequest, Revision, RunEstimate, SECONDS_PER_DAY, SettleRunRequest,
     Settlement, Stage, UpdateCheck, UsageSnapshot, accept, build_context, build_manifest,
-    check_update, days_left, delete, estimate, reject, restore, revert, validate_genui_json,
+    check_update, days_left, delete, estimate, reject, restore, revert, sample_contracts,
+    sample_evidence, sample_matrix, validate_genui_json,
 };
 
 /// The project id the sample fixture is served under. The URL uses it: /p/meranti-yard/design.
@@ -209,6 +210,7 @@ pub fn router(state: AppState) -> Router {
         .route("/api/projects/{id}/runs/settle", post(settle_run))
         .route("/api/projects/{id}/usage", get(project_usage))
         .route("/api/projects/{id}/audit", get(project_audit))
+        .route("/api/projects/{id}/contracts", get(project_contracts))
         .route("/api/projects/{id}/delete", post(delete_project))
         .route("/api/projects/{id}/restore", post(restore_project))
         .route("/api/projects/deleted", get(deleted_projects))
@@ -435,6 +437,17 @@ async fn project_audit(
         entries: store.audit.entries().to_vec(),
         head_hash: store.audit_head.clone(),
         error,
+    }))
+}
+
+/// S37 build contracts, evidence and matrix (IMP-33). The core seeds the sample
+/// shapes from the board; the server only loads them and returns typed JSON.
+async fn project_contracts(Path(id): Path<String>) -> Result<Json<ContractsResponse>, ServerError> {
+    ensure_project(&id)?;
+    Ok(Json(ContractsResponse {
+        contracts: sample_contracts(),
+        evidence: sample_evidence(),
+        matrix: sample_matrix(),
     }))
 }
 
