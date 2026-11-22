@@ -77,7 +77,7 @@ for (const b of manifest) {
     const bText = norm(await bApp.evaluate((el) => (el.closest('.spwin') || el).innerText));
     // Boards stack notes above the window, so the window can sit at a fractional y (e.g. 232.69 px) and every
     // row would be resampled. Shift the window by the fraction so the capture starts on a whole pixel.
-    await bApp.evaluate((el) => { const w = el.closest('.spwin') || el; const r = el.getBoundingClientRect(); const dx = Math.round(r.x) - r.x, dy = Math.round(r.y) - r.y; if (dx || dy) w.style.transform = 'translate(' + dx + 'px,' + dy + 'px)'; });
+    await bApp.evaluate((el) => { const w = el.closest('.spwin') || el; const r = el.getBoundingClientRect(); const dx = Math.round(r.x) - r.x, dy = Math.round(r.y) - r.y; if (dx || dy) { const cs = getComputedStyle(w); w.style.marginTop = parseFloat(cs.marginTop) + dy + 'px'; w.style.marginLeft = parseFloat(cs.marginLeft) + dx + 'px'; } });
     await bApp.screenshot({ path: base + '-board.png', animations: 'disabled' });
     await bp.close();
     // App side: real clicks only after the first goto
