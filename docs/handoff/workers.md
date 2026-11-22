@@ -5,13 +5,13 @@ The owner runs two AI workers overnight. Each works in its own git worktree, on 
 | Lane | Tool | Model | Worktree |
 |---|---|---|---|
 | ui | Antigravity CLI (`agy`) | `gemini-4-neon-medium` | `../Spekin-ui` |
-| core | OpenCode CLI (`opencode`) | `opencode/deepseek-v4.1-flash-free` (OpenCode Go isn't signed in on this Mac, so the free DeepSeek V4.1 Flash is used) | `../Spekin-core` |
+| core | OpenCode CLI (`opencode`) | `opencode-go/deepseek-v4.1-flash` (OpenCode Go isn't signed in on this Mac, so the free DeepSeek V4.1 Flash is used) | `../Spekin-core` |
 
 ## Model availability, 23 Nov (night)
 
 - **Antigravity (Gemini Neon 4)** hit its individual quota at 18:25 UTC, and it resets at about 22:05 UTC. The UI lane's S30 card (IMP-08) is scheduled to start on it at 22:07 UTC, with the prompt in `tools/workers/prompt-ui-IMP-08.txt`.
 - **OpenCode free models.** `deepseek-v4.1-flash-free`, `nemotron-3.5-super-vl-free` and `flint-40b-free` reached their free limits. `hy4-flash-free` ran the core cards IMP-27 to IMP-34 well. `beam-free` finished the S31 fix, but its runs are killed after about 6 to 10 minutes (exit 143), and one S30 attempt pasted board HTML into a string and edited lead-owned sample files. That attempt was stashed in `../Spekin-ui` (`git stash list`, "do not use"), and rule R11 now rejects markup in strings.
-- 23 Nov, 22:30 UTC: the owner has OpenCode Go. In this CLI the working id is still `opencode/deepseek-v4.1-flash-free` (`opencode-go/...` is not offered), and it runs again. It now runs S36 (IMP-17) in `../Spekin-core` while Antigravity runs S28 (IMP-06) in `../Spekin-ui`.
+- 23 Nov, 22:30 UTC: the owner has OpenCode Go. After `opencode auth login` (OpenCode Go) the CLI offers `opencode-go/deepseek-v4.1-flash`. Use that id; the `-free` id keeps hitting the free limit. It now runs S36 (IMP-17) in `../Spekin-core` while Antigravity runs S28 (IMP-06) in `../Spekin-ui`.
 
 ## Set up a worktree (once per lane)
 
@@ -33,7 +33,7 @@ cd ../Spekin-ui && agy -p "$(cat <repo>/tools/workers/prompt-ui-IMP-01.txt)" --m
   --settings <repo>/tools/workers/agy-settings.json --add-dir <repo>/.git --print-timeout 0s > ../worker-ui.log 2>&1 &
 
 # core: OpenCode uses its normal permission settings.
-cd ../Spekin-core && opencode run -m opencode/deepseek-v4.1-flash-free --title "Spekin core" \
+cd ../Spekin-core && opencode run -m opencode-go/deepseek-v4.1-flash --title "Spekin core" \
   "$(cat <repo>/tools/workers/prompt-core-batch2.txt)" > ../worker-core.log 2>&1 &
 ```
 
