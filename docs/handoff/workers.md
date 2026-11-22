@@ -37,9 +37,10 @@ We don't use `--dangerously-skip-permissions` (Antigravity) or `--auto` (OpenCod
 
 Use **"Create a merge commit"**, not squash, for stacked pull requests. A squash gives the lower branch's commits new ids, so the PR stacked above it then shows conflicts.
 
-1. Core, not stacked: #1 (IMP-03), #4 (IMP-12), #5 (IMP-11), #7 (IMP-10), and then the IMP-25 PR when it opens.
-2. Core, stacked on #2: #2 (IMP-04), then #8 (IMP-22, built without IMP-04 types), #10 (IMP-09), and then the IMP-24 PR.
-3. UI stack, bottom first: #3 (IMP-01) → #6 (IMP-02) → #9 (IMP-23) → #11 (IMP-05) → IMP-07 → IMP-15 → IMP-14.
+1. Core, not stacked: #1 (IMP-03), #4 (IMP-12), #5 (IMP-11), #7 (IMP-10), #12 (IMP-25), #8 (IMP-22).
+2. Core, stacked on #2: #2 (IMP-04), then #10 (IMP-09) and #13 (IMP-24).
+3. Core, stacked on all of the above: the IMP-26 PR (API routes). Merge it last.
+4. UI stack, bottom first: #3 (IMP-01) → #6 (IMP-02) → #9 (IMP-23) → #11 (IMP-05) → IMP-07 → IMP-15 → IMP-14.
 
 All core PRs edit `docs/handoff/lanes/core.md`, and all UI PRs edit `docs/handoff/lanes/ui.md`. If one conflicts there, keep the newer version: workers keep a row for every card. `packages/contracts/src/index.ts` can conflict between core PRs too. Keep both export lines, then run `npm run check:contracts`.
 

@@ -110,8 +110,9 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-11 | core | Model sources and capability registry | – | done, waiting for owner merge: PR #5 (lead review: approve) |
 | IMP-10 | core | GenUI schema validation, fail closed | – | done, waiting for owner merge: PR #7 (lead review: approve) |
 | IMP-22 | core | Skills core: SkillManifest, versions, update policy and update checks | IMP-04 | done, waiting for owner merge: PR #8 (lead review: approve) |
-| IMP-24 | core | Handoff manifest core (S34): accepted revisions, hashes, missing inputs, deterministic | IMP-04 | open |
-| IMP-25 | core | Next-request context builder (S29, S35): only the listed chips, pure | – | open |
+| IMP-24 | core | Handoff manifest core (S34): accepted revisions, hashes, missing inputs, deterministic | IMP-04 | done, waiting for owner merge: PR #13, stacked on #2 |
+| IMP-25 | core | Next-request context builder (S29, S35): only the listed chips, pure | – | done, waiting for owner merge: PR #12 |
+| IMP-26 | core | API routes for the core (all core cards) + web client | IMP-03…IMP-25 | open |
 | IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
 | IMP-06 | ui | S28 Reference intake | IMP-01 | open |
 | IMP-07 | ui | S29 Frames canvas | IMP-01 | open |
@@ -213,6 +214,18 @@ Pure Rust in spekin-core for S29 and S35 (DPAI addendum, point 1). `build_contex
 - building the context never sends, accepts or spends: the function is pure and has no ledger or proposal side effect;
 - the token estimate is the sum of the chip estimates (S35 shows "≈ 9.8k tokens").
 Export the types with ts-rs.
+
+### IMP-26 · API routes for the core (core)
+
+Axum routes in spekin-server that call the pure core. Each route returns typed JSON (the ts-rs types) and typed errors, with one server test per route plus a 4xx test:
+- `POST /api/projects/{id}/proposals/{pid}/accept` and `…/reject` (IMP-04);
+- `POST /api/projects/{id}/runs/estimate` and `…/reserve` (IMP-09); `GET /api/projects/{id}/usage`;
+- `GET /api/models` (IMP-11);
+- `POST /api/genui/validate` (IMP-10);
+- `POST /api/skills/check-update` (IMP-22);
+- `POST /api/projects/{id}/context` (IMP-25);
+- `POST /api/projects/{id}/handoff/manifest` (IMP-24).
+State is in memory, seeded from `fixtures/meranti-yard.json` (no database yet). Add the client functions to `apps/web/src/data/api.ts` with tests (as in IMP-03). Branch: start from origin/main and merge every open core branch into it (`git merge origin/imp-03-api-source origin/imp-04-proposals …`), so the PR is stacked on all of them. Say so in the PR body.
 
 ### UI cards after P1 (written 23 Nov)
 
