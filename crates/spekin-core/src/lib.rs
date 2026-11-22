@@ -9,8 +9,6 @@ pub mod audit;
 pub mod project;
 pub mod stage;
 
-pub use audit::{
-    AuditAction, AuditEntry, AuditError, AuditEvent, AuditLog, GENESIS_HASH, verify,
-};
+pub use audit::{AuditAction, AuditEntry, AuditError, AuditEvent, AuditLog, GENESIS_HASH, verify};
 pub use project::{Fixture, FixtureError, Project};
 pub use stage::{Stage, StageId, StageTone};

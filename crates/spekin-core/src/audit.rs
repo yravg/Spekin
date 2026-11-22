@@ -12,8 +12,7 @@ use sha2::{Digest, Sha256};
 use ts_rs::TS;
 
 /// The `prev_hash` of the first entry: 64 zero hex characters (UTC genesis).
-pub const GENESIS_HASH: &str =
-    "0000000000000000000000000000000000000000000000000000000000000000";
+pub const GENESIS_HASH: &str = "0000000000000000000000000000000000000000000000000000000000000000";
 
 /// What happened. Serialized in snake_case so its canonical JSON is stable.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
@@ -69,7 +68,9 @@ pub struct AuditEntry {
 pub enum AuditError {
     #[error("audit entry {seq} was edited: its hash does not match its content")]
     Edited { seq: u64 },
-    #[error("audit entry {seq} is out of order or has a missing predecessor: prev_hash does not match the chain")]
+    #[error(
+        "audit entry {seq} is out of order or has a missing predecessor: prev_hash does not match the chain"
+    )]
     BrokenChain { seq: u64 },
     #[error("audit entry {seq} breaks the gapless sequence")]
     Sequence { seq: u64 },
@@ -132,16 +133,17 @@ impl AuditLog {
             .entries
             .last()
             .map_or_else(|| GENESIS_HASH.to_owned(), |e| e.hash.clone());
-        let hash = compute_hash(
+        let payload = HashPayload {
             seq,
-            &event.actor,
-            &event.action,
-            &event.target_id,
-            event.revision.as_deref(),
-            &event.reason,
-            now,
-            &prev_hash,
-        );
+            actor: &event.actor,
+            action: &event.action,
+            target_id: &event.target_id,
+            revision: event.revision.as_deref(),
+            reason: &event.reason,
+            at: now,
+            prev_hash: &prev_hash,
+        };
+        let hash = compute_hash(&payload);
         let entry = AuditEntry {
             seq,
             actor: event.actor,
@@ -172,28 +174,9 @@ impl Default for AuditLog {
 
 /// sha256 over the canonical JSON of an entry's fields plus `prev_hash`.
 /// The `hash` field itself is deliberately not part of the input.
-fn compute_hash(
-    seq: u64,
-    actor: &str,
-    action: &AuditAction,
-    target_id: &str,
-    revision: Option<&str>,
-    reason: &str,
-    at: u64,
-    prev_hash: &str,
-) -> String {
-    let payload = HashPayload {
-        seq,
-        actor,
-        action,
-        target_id,
-        revision,
-        reason,
-        at,
-        prev_hash,
-    };
-    let bytes = serde_json::to_vec(&payload).expect("hashing plain fields cannot fail");
-    to_hex(&Sha256::digest(bytes))
+fn compute_hash(payload: &HashPayload<'_>) -> String {
+    let bytes = serde_json::to_vec(payload).expect("hashing plain fields cannot fail");
+    to_hex(Sha256::digest(bytes))
 }
 
 /// Lowercase hex encoding, without another dependency.
@@ -225,16 +208,17 @@ pub fn verify(log: &AuditLog) -> Result<(), AuditError> {
             return Err(AuditError::BrokenChain { seq: entry.seq });
         }
 
-        let recomputed = compute_hash(
-            entry.seq,
-            &entry.actor,
-            &entry.action,
-            &entry.target_id,
-            entry.revision.as_deref(),
-            &entry.reason,
-            entry.at,
-            &entry.prev_hash,
-        );
+        let payload = HashPayload {
+            seq: entry.seq,
+            actor: &entry.actor,
+            action: &entry.action,
+            target_id: &entry.target_id,
+            revision: entry.revision.as_deref(),
+            reason: &entry.reason,
+            at: entry.at,
+            prev_hash: &entry.prev_hash,
+        };
+        let recomputed = compute_hash(&payload);
         if recomputed != entry.hash {
             return Err(AuditError::Edited { seq: entry.seq });
         }
@@ -264,7 +248,7 @@ mod tests {
     fn event(n: u64) -> AuditEvent {
         AuditEvent {
             actor: format!("actor-{n}"),
-            action: if n % 2 == 0 {
+            action: if n.is_multiple_of(2) {
                 AuditAction::Reject
             } else {
                 AuditAction::Accept
