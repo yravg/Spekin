@@ -92,15 +92,29 @@ fn sample_library_has_templates_copies_and_github_sources() {
     let lib = library();
     let skills = lib.list();
     assert_eq!(skills.len(), 9, "the nine SKL_SKILLS rows are seeded");
-    assert_eq!(lib.sources().len(), 3, "SKL_SOURCES: template, github, mine");
+    assert_eq!(
+        lib.sources().len(),
+        3,
+        "SKL_SOURCES: template, github, mine"
+    );
     let kinds = |k| skills.iter().filter(|s| s.kind == k).count();
     assert_eq!(kinds(SkillSourceKind::Template), 3, "ears, trace, release");
     assert_eq!(kinds(SkillSourceKind::Github), 5, "gh-mp skills");
-    assert_eq!(kinds(SkillSourceKind::User), 1, "the workspace copy 'words'");
-    let grill = skills.iter().find(|s| s.manifest.id == "grill").expect("grill");
+    assert_eq!(
+        kinds(SkillSourceKind::User),
+        1,
+        "the workspace copy 'words'"
+    );
+    let grill = skills
+        .iter()
+        .find(|s| s.manifest.id == "grill")
+        .expect("grill");
     assert_eq!(grill.manifest.licence, "MIT");
     assert_eq!(grill.policy, UpdatePolicy::Auto);
-    assert_eq!(grill.manifest.stages, vec![StageId::Planning, StageId::Spec]);
+    assert_eq!(
+        grill.manifest.stages,
+        vec![StageId::Planning, StageId::Spec]
+    );
 }
 
 #[test]
@@ -119,7 +133,11 @@ fn copy_preserves_licence_and_notice_and_leaves_the_template_untouched() {
             copied_from: Some("ears".into())
         }
     );
-    assert_eq!(lib.get("ears").expect("template"), before, "template never changes");
+    assert_eq!(
+        lib.get("ears").expect("template"),
+        before,
+        "template never changes"
+    );
     let history = lib.history("ears-mine");
     assert_eq!(history.len(), 1);
     assert_eq!(history[0].action, SkillHistoryAction::Copied);
@@ -128,7 +146,8 @@ fn copy_preserves_licence_and_notice_and_leaves_the_template_untouched() {
 #[test]
 fn editing_a_user_copy_bumps_its_version_and_keeps_its_source() {
     let mut lib = library();
-    lib.copy_template("ears", "ears-mine", "EARS · mine", 100).unwrap();
+    lib.copy_template("ears", "ears-mine", "EARS · mine", 100)
+        .unwrap();
     let edited = lib
         .edit(
             "ears-mine",
@@ -150,7 +169,11 @@ fn editing_a_user_copy_bumps_its_version_and_keeps_its_source() {
             copied_from: Some("ears".into())
         }
     );
-    assert_eq!(lib.versions("ears-mine").len(), 2, "each edit stores a version");
+    assert_eq!(
+        lib.versions("ears-mine").len(),
+        2,
+        "each edit stores a version"
+    );
     assert_eq!(
         lib.history("ears-mine").last().expect("history").action,
         SkillHistoryAction::Edited
@@ -168,14 +191,14 @@ fn editing_a_template_or_github_skill_is_refused() {
         lib.edit("ears", change.clone(), 100),
         Err(SkillLibraryError::NotEditable {
             id: "ears".into(),
-            source: "template".into()
+            source_kind: "template".into()
         })
     );
     assert_eq!(
         lib.edit("grill", change, 100),
         Err(SkillLibraryError::NotEditable {
             id: "grill".into(),
-            source: "github".into()
+            source_kind: "github".into()
         })
     );
 }
@@ -192,7 +215,13 @@ fn an_applied_update_becomes_a_new_version_and_a_history_entry() {
         "Read the spec.\nAsk one question.",
     );
     let outcome = lib
-        .record_update("grill-gh", &applied_check("grill-gh", "v1.3", "v1.4"), new, diff, 200)
+        .record_update(
+            "grill-gh",
+            &applied_check("grill-gh", "v1.3", "v1.4"),
+            new,
+            diff,
+            200,
+        )
         .expect("record applied update");
     match outcome {
         SkillUpdateOutcome::Applied { version, seq, .. } => {
@@ -201,7 +230,10 @@ fn an_applied_update_becomes_a_new_version_and_a_history_entry() {
         }
         SkillUpdateOutcome::Held { .. } => panic!("a wording-only update applies"),
     }
-    assert_eq!(lib.get("grill-gh").unwrap().manifest.body, "Read the spec.\nAsk one question.");
+    assert_eq!(
+        lib.get("grill-gh").unwrap().manifest.body,
+        "Read the spec.\nAsk one question."
+    );
     assert_eq!(lib.versions("grill-gh").len(), 2);
     assert_eq!(
         lib.history("grill-gh").last().unwrap().action,
@@ -246,7 +278,11 @@ fn a_held_update_records_the_reasons_and_diff_and_changes_nothing() {
         }
         SkillUpdateOutcome::Applied { .. } => panic!("an injection must be held"),
     }
-    assert_eq!(lib.get("grill-gh").unwrap(), before, "nothing changes on hold");
+    assert_eq!(
+        lib.get("grill-gh").unwrap(),
+        before,
+        "nothing changes on hold"
+    );
     assert_eq!(lib.versions("grill-gh").len(), 1);
     assert_eq!(lib.held("grill-gh").len(), 1);
     assert_eq!(
@@ -258,7 +294,8 @@ fn a_held_update_records_the_reasons_and_diff_and_changes_nothing() {
 #[test]
 fn rollback_restores_an_earlier_manifest_as_a_new_version() {
     let mut lib = library();
-    lib.copy_template("ears", "ears-mine", "EARS · mine", 100).unwrap();
+    lib.copy_template("ears", "ears-mine", "EARS · mine", 100)
+        .unwrap();
     let original = lib.get("ears-mine").unwrap().manifest.clone();
     lib.edit(
         "ears-mine",
@@ -274,9 +311,13 @@ fn rollback_restores_an_earlier_manifest_as_a_new_version() {
         .rollback("ears-mine", "1", 300)
         .expect("rollback to version 1");
     assert_eq!(rolled.manifest.title, original.title);
-    assert_eq!(rolled.manifest.version, "3", "a rollback is itself a new version");
+    assert_eq!(
+        rolled.manifest.version, "3",
+        "a rollback is itself a new version"
+    );
     assert_eq!(lib.versions("ears-mine").len(), 3, "no version is lost");
-    let last = lib.history("ears-mine").last().unwrap();
+    let history = lib.history("ears-mine");
+    let last = history.last().unwrap();
     assert_eq!(last.action, SkillHistoryAction::RolledBack);
     assert_eq!(last.reason, "rolled back to version 1");
 }
@@ -301,11 +342,15 @@ fn unknown_ids_and_versions_are_typed_errors() {
 #[test]
 fn diff_text_marks_removed_and_added_lines() {
     let diff = SkillLibrary::diff_text("keep\ngone", "keep\nnew");
-    assert!(diff
-        .iter()
-        .any(|d| d.op == DiffOp::Remove && d.text == "gone"));
+    assert!(
+        diff.iter()
+            .any(|d| d.op == DiffOp::Remove && d.text == "gone")
+    );
     assert!(diff.iter().any(|d| d.op == DiffOp::Add && d.text == "new"));
-    assert!(diff.iter().any(|d| d.op == DiffOp::Context && d.text == "keep"));
+    assert!(
+        diff.iter()
+            .any(|d| d.op == DiffOp::Context && d.text == "keep")
+    );
 }
 
 proptest! {

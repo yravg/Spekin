@@ -18,6 +18,7 @@ pub mod project;
 pub mod proposal;
 pub mod restore;
 pub mod revision;
+pub mod skill_library;
 pub mod skills;
 pub mod stage;
 
@@ -69,6 +70,11 @@ pub use restore::{
     days_left, delete, purge_due, restore, window_close,
 };
 pub use revision::Revision;
+pub use skill_library::{
+    DiffLine, DiffOp, HeldUpdate, LibrarySkill, SkillEdit, SkillHistoryAction, SkillHistoryEntry,
+    SkillLibrary, SkillLibraryError, SkillSourceInfo, SkillSourceKind, SkillUpdateOutcome,
+    SkillsResponse,
+};
 pub use skills::{
     AllowedContext, ContextItem, HoldReason, SkillError, SkillManifest, SkillSource, UpdateCheck,
     UpdateDecision, UpdatePolicy, check_update, classify_update, enforce, parse_skill_md,
