@@ -9,7 +9,9 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
-use crate::skills::{SkillManifest, SkillSource, UpdateCheck, UpdatePolicy, check_update, parse_skill_md};
+use crate::skills::{
+    SkillManifest, SkillSource, UpdateCheck, UpdatePolicy, check_update, parse_skill_md,
+};
 
 /// A validated public GitHub repository reference (owner/repo).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
@@ -89,9 +91,12 @@ fn valid_segment(s: &str) -> bool {
 pub fn parse_github_repo(input: &str) -> Result<GitHubRepo, GitHubSourceError> {
     let input = input.trim();
     let (rest, is_url) = if let Some(after) = input.strip_prefix("https://") {
-        let (host, path) = after.split_once('/').ok_or_else(|| GitHubSourceError::InvalidRepoUrl {
-            input: input.into(),
-        })?;
+        let (host, path) =
+            after
+                .split_once('/')
+                .ok_or_else(|| GitHubSourceError::InvalidRepoUrl {
+                    input: input.into(),
+                })?;
         let host = host.to_ascii_lowercase();
         if host != "github.com" && host != "www.github.com" {
             return Err(GitHubSourceError::UnsupportedHost { host });
@@ -141,8 +146,7 @@ fn is_candidate_path(path: &str) -> bool {
 /// hidden folders and vendored/build output.
 pub fn is_skill_path(path: &str) -> bool {
     is_candidate_path(path)
-        && file_name(path)
-            .is_some_and(|name| name.eq_ignore_ascii_case("SKILL.md"))
+        && file_name(path).is_some_and(|name| name.eq_ignore_ascii_case("SKILL.md"))
 }
 
 /// Whether a path looks like an upstream licence file.
@@ -151,12 +155,7 @@ pub fn is_license_path(path: &str) -> bool {
         && file_name(path).is_some_and(|name| {
             matches!(
                 name.to_ascii_lowercase().as_str(),
-                "license"
-                    | "licence"
-                    | "license.md"
-                    | "licence.md"
-                    | "license.txt"
-                    | "licence.txt"
+                "license" | "licence" | "license.md" | "licence.md" | "license.txt" | "licence.txt"
             )
         })
 }
@@ -201,8 +200,10 @@ fn detect_spdx(text: &str) -> Option<&'static str> {
 /// Find the licence file, preferring a root-level file. Repos with no licence
 /// file are refused by [`import_repository`].
 pub fn detect_license(files: &[GitHubFile]) -> Option<LicenseFile> {
-    let mut candidates: Vec<&GitHubFile> = files.iter().filter(|f| is_license_path(&f.path)).collect();
-    candidates.sort_by(|a, b| (a.path.contains('/'), &a.path).cmp(&(b.path.contains('/'), &b.path)));
+    let mut candidates: Vec<&GitHubFile> =
+        files.iter().filter(|f| is_license_path(&f.path)).collect();
+    candidates
+        .sort_by(|a, b| (a.path.contains('/'), &a.path).cmp(&(b.path.contains('/'), &b.path)));
     let file = candidates.first()?;
     Some(LicenseFile {
         path: file.path.clone(),
@@ -240,14 +241,13 @@ pub fn import_skill(
         .files
         .iter()
         .find(|f| f.path == path)
-        .ok_or_else(|| GitHubSourceError::MissingFile {
-            path: path.into(),
-        })?;
+        .ok_or_else(|| GitHubSourceError::MissingFile { path: path.into() })?;
 
-    let mut manifest = parse_skill_md(&file.content).map_err(|e| GitHubSourceError::InvalidSkill {
-        path: path.into(),
-        message: e.to_string(),
-    })?;
+    let mut manifest =
+        parse_skill_md(&file.content).map_err(|e| GitHubSourceError::InvalidSkill {
+            path: path.into(),
+            message: e.to_string(),
+        })?;
     manifest.source = SkillSource::Github {
         repo: repo.slug(),
         path: path.into(),

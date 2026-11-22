@@ -1,8 +1,8 @@
 //! IMP-27: GitHub skill source adapter (ADR 0007, AC-SPK-39). All data is local fixtures: no network.
 
 use spekin_core::github_source::{
-    GitHubFile, GitHubRepo, GitHubSnapshot, GitHubSourceError, detect_license, discover_skill_paths,
-    import_repository, parse_github_repo, plan_updates,
+    GitHubFile, GitHubRepo, GitHubSnapshot, GitHubSourceError, detect_license,
+    discover_skill_paths, import_repository, parse_github_repo, plan_updates,
 };
 use spekin_core::skills::{HoldReason, SkillSource, UpdateDecision, UpdatePolicy, parse_skill_md};
 
@@ -75,7 +75,10 @@ fn parse_github_repo_accepts_slug_and_https_urls_and_rejects_others() {
         "example/skill/$evil",
     ] {
         assert!(
-            matches!(parse_github_repo(bad), Err(GitHubSourceError::InvalidRepoUrl { .. })),
+            matches!(
+                parse_github_repo(bad),
+                Err(GitHubSourceError::InvalidRepoUrl { .. })
+            ),
             "expected InvalidRepoUrl for {bad}"
         );
     }
@@ -149,7 +152,10 @@ fn import_repository_marks_source_keeps_notice_and_uses_repo_license() {
             commit: "abc123".into(),
         }
     );
-    assert_eq!(skill.licence, "MIT", "the repository LICENSE is authoritative");
+    assert_eq!(
+        skill.licence, "MIT",
+        "the repository LICENSE is authoritative"
+    );
     let notice = skill.notice.as_deref().unwrap_or_default();
     assert!(
         notice.contains("Copyright (c) 2026 Example Author"),
@@ -181,13 +187,21 @@ fn plan_updates_checks_each_stored_skill_with_the_policy() {
     wording.version = "1.4.0".into();
     wording.body = "Ask one concise question at a time. Nothing changes until accepted.".into();
 
-    let auto = plan_updates(&[old.clone()], &[wording.clone()], UpdatePolicy::Auto);
+    let auto = plan_updates(
+        std::slice::from_ref(&old),
+        std::slice::from_ref(&wording),
+        UpdatePolicy::Auto,
+    );
     assert_eq!(auto.len(), 1);
     assert_eq!(auto[0].decision, UpdateDecision::Apply);
     assert_eq!(auto[0].from_version, "1.3.0");
     assert_eq!(auto[0].to_version, "1.4.0");
 
-    let pinned = plan_updates(&[old.clone()], &[wording.clone()], UpdatePolicy::Pinned);
+    let pinned = plan_updates(
+        std::slice::from_ref(&old),
+        std::slice::from_ref(&wording),
+        UpdatePolicy::Pinned,
+    );
     assert!(matches!(
         pinned[0].decision,
         UpdateDecision::Hold { ref reasons } if reasons.contains(&HoldReason::PolicyPinned)
@@ -195,7 +209,7 @@ fn plan_updates_checks_each_stored_skill_with_the_policy() {
 
     let mut with_tool = wording.clone();
     with_tool.tools.push("shell".into());
-    let held = plan_updates(&[old.clone()], &[with_tool], UpdatePolicy::Auto);
+    let held = plan_updates(std::slice::from_ref(&old), &[with_tool], UpdatePolicy::Auto);
     assert!(matches!(
         held[0].decision,
         UpdateDecision::Hold { ref reasons } if reasons.iter().any(|r| matches!(r, HoldReason::ToolAdded { tool } if tool == "shell"))

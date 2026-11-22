@@ -28,10 +28,7 @@ impl<T: GitHubTransport> GitHubSourceAdapter<T> {
     }
 
     /// Import all skills from a public repo, refusing one without a licence.
-    pub async fn import(
-        &self,
-        url_or_slug: &str,
-    ) -> Result<Vec<SkillManifest>, GitHubSourceError> {
+    pub async fn import(&self, url_or_slug: &str) -> Result<Vec<SkillManifest>, GitHubSourceError> {
         let repo = parse_github_repo(url_or_slug)?;
         let snapshot = self.transport.fetch_snapshot(&repo).await?;
         import_repository(&repo, &snapshot)
@@ -86,11 +83,12 @@ impl HttpGitHubTransport {
                 message: format!("{url} -> {status}"),
             });
         }
-        response.json::<serde_json::Value>().await.map_err(|e| {
-            GitHubSourceError::Transport {
+        response
+            .json::<serde_json::Value>()
+            .await
+            .map_err(|e| GitHubSourceError::Transport {
                 message: e.to_string(),
-            }
-        })
+            })
     }
 
     async fn fetch_raw(
@@ -112,23 +110,26 @@ impl HttpGitHubTransport {
             })?
             .extend(path.split('/'));
 
-        let response = self
-            .client
-            .get(url)
-            .send()
-            .await
-            .map_err(|e| GitHubSourceError::Transport {
-                message: e.to_string(),
-            })?;
+        let response =
+            self.client
+                .get(url)
+                .send()
+                .await
+                .map_err(|e| GitHubSourceError::Transport {
+                    message: e.to_string(),
+                })?;
         let status = response.status();
         if !status.is_success() {
             return Err(GitHubSourceError::Transport {
                 message: format!("raw {path} -> {status}"),
             });
         }
-        response.text().await.map_err(|e| GitHubSourceError::Transport {
-            message: e.to_string(),
-        })
+        response
+            .text()
+            .await
+            .map_err(|e| GitHubSourceError::Transport {
+                message: e.to_string(),
+            })
     }
 }
 
