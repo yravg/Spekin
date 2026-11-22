@@ -18,15 +18,15 @@ use axum::{
 use serde_json::Value;
 use spekin_core::{
     ApiErrorBody, ArtifactRevisionRecord, ArtifactRevisionState, AuditAction, AuditEntry,
-    AuditError, AuditEvent, AuditLog, AuditResponse, BoardArtifact, BoardSnapshot, BuildContextRequest,
-    BuildManifestRequest, CapabilityRegistry, CheckSkillUpdateRequest, ContextItemStatus,
-    DeletedProjectView, EstimateRunRequest, Fixture, GENESIS_HASH, GenUiValidation, Hunk, Ledger,
-    LedgerCaps, LedgerError, Manifest, ManifestError, ModelCapability, Project, ProjectEntry,
-    Proposal, ProposalError, RejectProposalRequest, Rejection, RejectionReason, RequestContext,
-    RequiredInput, Reservation, ReserveRunRequest, RestoreError, RevertRevisionRequest, Revision,
-    RunEstimate, SECONDS_PER_DAY, Settlement, SettleRunRequest, Stage,
-    UpdateCheck, UsageSnapshot, accept, build_context, build_manifest, check_update, days_left,
-    delete, estimate, reject, restore, revert, validate_genui_json,
+    AuditError, AuditEvent, AuditLog, AuditResponse, BoardArtifact, BoardSnapshot,
+    BuildContextRequest, BuildManifestRequest, CapabilityRegistry, CheckSkillUpdateRequest,
+    ContextItemStatus, DeletedProjectView, EstimateRunRequest, Fixture, GENESIS_HASH,
+    GenUiValidation, Hunk, Ledger, LedgerCaps, LedgerError, Manifest, ManifestError,
+    ModelCapability, Project, ProjectEntry, Proposal, ProposalError, RejectProposalRequest,
+    Rejection, RejectionReason, RequestContext, RequiredInput, Reservation, ReserveRunRequest,
+    RestoreError, RevertRevisionRequest, Revision, RunEstimate, SECONDS_PER_DAY, SettleRunRequest,
+    Settlement, Stage, UpdateCheck, UsageSnapshot, accept, build_context, build_manifest,
+    check_update, days_left, delete, estimate, reject, restore, revert, validate_genui_json,
 };
 
 /// The project id the sample fixture is served under. The URL uses it: /p/meranti-yard/design.
@@ -169,7 +169,9 @@ fn map_restore_error(err: RestoreError) -> ServerError {
         RestoreError::NotDeleted => ServerError::conflict("not_deleted", message),
         RestoreError::AlreadyDeleted => ServerError::conflict("already_deleted", message),
         RestoreError::WindowClosed { .. } => ServerError::conflict("window_closed", message),
-        RestoreError::ClockBackwards { .. } => ServerError::unprocessable("clock_backwards", message),
+        RestoreError::ClockBackwards { .. } => {
+            ServerError::unprocessable("clock_backwards", message)
+        }
     }
 }
 
@@ -361,7 +363,10 @@ async fn reserve_run(
         AuditAction::Reserve,
         &reservation.run_id,
         None,
-        format!("reserved {} cr for run {}", reservation.reserved, reservation.run_id),
+        format!(
+            "reserved {} cr for run {}",
+            reservation.reserved, reservation.run_id
+        ),
     );
     Ok(Json(reservation))
 }
@@ -746,26 +751,29 @@ fn seed_project_store(raw: &Value, now: i64) -> ProjectStore {
     ];
 
     // 5. Projects for delete / restore (IMP-29) and the audit chain (IMP-30/31).
-    let sample_project: Project = serde_json::from_value(raw["PROJECT"].clone()).unwrap_or(Project {
-        name: "Meranti Yard".to_owned(),
-        product: "Cost variance dashboard".to_owned(),
-        increment: "Inc. 2 · Variance alerts".to_owned(),
-        spec: "r14".to_owned(),
-        user: "Rina (sample)".to_owned(),
-        initials: "RS".to_owned(),
-    });
+    let sample_project: Project =
+        serde_json::from_value(raw["PROJECT"].clone()).unwrap_or(Project {
+            name: "Meranti Yard".to_owned(),
+            product: "Cost variance dashboard".to_owned(),
+            increment: "Inc. 2 · Variance alerts".to_owned(),
+            spec: "r14".to_owned(),
+            user: "Rina (sample)".to_owned(),
+            initials: "RS".to_owned(),
+        });
     let mut project_entries = BTreeMap::new();
     project_entries.insert(
         SAMPLE_PROJECT_ID.to_owned(),
-        ProjectEntry::new(SAMPLE_PROJECT_ID, sample_project.clone(), vec!["r14".to_owned()], now),
+        ProjectEntry::new(
+            SAMPLE_PROJECT_ID,
+            sample_project.clone(),
+            vec!["r14".to_owned()],
+            now,
+        ),
     );
     // The fixture's Recently deleted row (INTAKE_DELETED) seeds one entry three days into
     // the 30-day window, so S27's "27 days left" is served without a clock or a database.
     if let Some(deleted) = raw["INTAKE_DELETED"].as_object() {
-        let id = deleted["id"]
-            .as_str()
-            .unwrap_or("kenari-fleet")
-            .to_owned();
+        let id = deleted["id"].as_str().unwrap_or("kenari-fleet").to_owned();
         let deleted_at = now - 3 * SECONDS_PER_DAY;
         let mut entry = ProjectEntry::new(
             id.clone(),
@@ -773,7 +781,12 @@ fn seed_project_store(raw: &Value, now: i64) -> ProjectStore {
                 name: "Kenari Fleet".to_owned(),
                 ..sample_project
             },
-            vec!["r1".to_owned(), "r2".to_owned(), "r3".to_owned(), "r4".to_owned()],
+            vec![
+                "r1".to_owned(),
+                "r2".to_owned(),
+                "r3".to_owned(),
+                "r4".to_owned(),
+            ],
             deleted_at,
         );
         entry.deleted_at = Some(deleted_at);
@@ -877,7 +890,11 @@ mod tests {
         let head = view.head_hash.clone();
 
         // Tamper only with the separately held head: the log is unchanged.
-        state.project_store.lock().expect("project store lock").audit_head = "deadbeef".to_owned();
+        state
+            .project_store
+            .lock()
+            .expect("project store lock")
+            .audit_head = "deadbeef".to_owned();
         let Json(broken) = project_audit(State(state), Path(SAMPLE_PROJECT_ID.to_owned()))
             .await
             .ok()

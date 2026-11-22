@@ -47,7 +47,11 @@ async fn send(
 async fn audit_entries(app: &axum::Router) -> Vec<Value> {
     let (status, body) = send(app, Method::GET, "/api/projects/meranti-yard/audit", None).await;
     assert_eq!(status, StatusCode::OK, "audit route must work: {body}");
-    assert_eq!(body["error"], Value::Null, "a fresh chain must verify: {body}");
+    assert_eq!(
+        body["error"],
+        Value::Null,
+        "a fresh chain must verify: {body}"
+    );
     body["entries"]
         .as_array()
         .expect("entries array")
@@ -128,7 +132,10 @@ async fn accept_and_revert_each_append_one_audit_entry() {
     )
     .await;
     assert_eq!(rev_status, StatusCode::OK, "body: {rev_body}");
-    assert_eq!(rev_body["n"], 16, "revert writes a new revision, r15 -> r16");
+    assert_eq!(
+        rev_body["n"], 16,
+        "revert writes a new revision, r15 -> r16"
+    );
     assert_eq!(rev_body["content"], "r14 content restored");
 
     let entries = audit_entries(&app).await;
@@ -145,9 +152,17 @@ async fn accept_and_revert_each_append_one_audit_entry() {
         Some(json!({ "to": { "n": 16, "content": "not earlier" } })),
     )
     .await;
-    assert_eq!(bad_status, StatusCode::UNPROCESSABLE_ENTITY, "body: {bad_body}");
+    assert_eq!(
+        bad_status,
+        StatusCode::UNPROCESSABLE_ENTITY,
+        "body: {bad_body}"
+    );
     assert_eq!(bad_body["code"], "revert_not_earlier");
-    assert_eq!(audit_entries(&app).await.len(), 2, "a refused revert adds no entry");
+    assert_eq!(
+        audit_entries(&app).await.len(),
+        2,
+        "a refused revert adds no entry"
+    );
 }
 
 // --- Runs: reserve and settle audit theirs ---
@@ -206,8 +221,7 @@ async fn reserve_and_settle_each_append_one_audit_entry() {
 async fn delete_and_restore_audit_and_the_deleted_list_has_days_left() {
     let app = app();
 
-    let (list_status, list_body) =
-        send(&app, Method::GET, "/api/projects/deleted", None).await;
+    let (list_status, list_body) = send(&app, Method::GET, "/api/projects/deleted", None).await;
     assert_eq!(list_status, StatusCode::OK, "body: {list_body}");
     let seeded = list_body.as_array().expect("deleted list is an array");
     assert!(!seeded.is_empty(), "the sample deleted project is listed");
@@ -229,8 +243,7 @@ async fn delete_and_restore_audit_and_the_deleted_list_has_days_left() {
     assert_eq!(entries.len(), 1);
     assert_eq!(entries[0]["action"], "delete");
 
-    let (list_status, list_body) =
-        send(&app, Method::GET, "/api/projects/deleted", None).await;
+    let (list_status, list_body) = send(&app, Method::GET, "/api/projects/deleted", None).await;
     assert_eq!(list_status, StatusCode::OK);
     let listed = list_body.as_array().expect("deleted list is an array");
     assert!(
