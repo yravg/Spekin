@@ -1,0 +1,179 @@
+{
+  "board": "S31-alternatives.dc.html",
+  "states": {
+    "stack": {
+      "status": "checked",
+      "steps": [
+        {
+          "goto": "/"
+        },
+        {
+          "click": "button.int-cn:has-text(\"Meranti Yard\")"
+        },
+        {
+          "click": "role=tab[name=\"Variance flows\"]"
+        },
+        {
+          "wait": "[data-screen=\"S29\"]"
+        },
+        {
+          "click": "button:has-text(\"Open stack\")"
+        },
+        {
+          "wait": "[data-screen=\"S31\"]"
+        }
+      ]
+    },
+    "grid": {
+      "status": "checked",
+      "steps": [
+        {
+          "goto": "/"
+        },
+        {
+          "click": "button.int-cn:has-text(\"Meranti Yard\")"
+        },
+        {
+          "click": "role=tab[name=\"Variance flows\"]"
+        },
+        {
+          "wait": "[data-screen=\"S29\"]"
+        },
+        {
+          "click": "button:has-text(\"Open stack\")"
+        },
+        {
+          "wait": "[data-screen=\"S31\"]"
+        },
+        {
+          "click": "button:has-text(\"Grid\")"
+        },
+        {
+          "wait": "[data-screen=\"S31\"]"
+        }
+      ]
+    },
+    "cmp": {
+      "status": "checked",
+      "steps": [
+        {
+          "goto": "/"
+        },
+        {
+          "click": "button.int-cn:has-text(\"Meranti Yard\")"
+        },
+        {
+          "click": "role=tab[name=\"Variance flows\"]"
+        },
+        {
+          "wait": "[data-screen=\"S29\"]"
+        },
+        {
+          "click": "button:has-text(\"Open stack\")"
+        },
+        {
+          "wait": "[data-screen=\"S31\"]"
+        },
+        {
+          "click": "button[data-feature=\"F206\"]"
+        },
+        {
+          "wait": "[data-screen=\"S31\"]"
+        }
+      ]
+    },
+    "gen": {
+      "status": "checked",
+      "steps": [
+        {
+          "goto": "/"
+        },
+        {
+          "click": "button.int-cn:has-text(\"Meranti Yard\")"
+        },
+        {
+          "click": "role=tab[name=\"Variance flows\"]"
+        },
+        {
+          "wait": "[data-screen=\"S29\"]"
+        },
+        {
+          "click": "button:has-text(\"Open stack\")"
+        },
+        {
+          "wait": "[data-screen=\"S31\"]"
+        },
+        {
+          "click": "button:has-text(\"More takes\")"
+        },
+        {
+          "wait": "[data-screen=\"S31\"]"
+        }
+      ]
+    },
+    "kept": {
+      "status": "checked",
+      "steps": [
+        {
+          "goto": "/"
+        },
+        {
+          "click": "button.int-cn:has-text(\"Meranti Yard\")"
+        },
+        {
+          "click": "role=tab[name=\"Variance flows\"]"
+        },
+        {
+          "wait": "[data-screen=\"S29\"]"
+        },
+        {
+          "click": "button:has-text(\"Open stack\")"
+        },
+        {
+          "wait": "[data-screen=\"S31\"]"
+        },
+        {
+          "click": "button:has-text(\"Keep on board\")"
+        },
+        {
+          "wait": ".can-toast"
+        }
+      ]
+    },
+    "fail": {
+      "status": "checked",
+      "steps": [
+        {
+          "goto": "/"
+        },
+        {
+          "click": "button.int-cn:has-text(\"Meranti Yard\")"
+        },
+        {
+          "click": "role=tab[name=\"Variance flows\"]"
+        },
+        {
+          "wait": "[data-screen=\"S29\"]"
+        },
+        {
+          "click": "button:has-text(\"Open stack\")"
+        },
+        {
+          "wait": "[data-screen=\"S31\"]"
+        },
+        {
+          "click": "button:has-text(\"More takes\")"
+        },
+        {
+          "wait": "[data-screen=\"S31\"]"
+        },
+        {
+          "click": "button:has-text(\"Stop this take\")"
+        },
+        {
+          "wait": "[data-screen=\"S31\"]"
+        }
+      ]
+    }
+  }
+}

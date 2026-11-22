@@ -12,6 +12,12 @@ import { SkillsWorkArea } from '../skills/SkillsWorkArea';
 import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/FramesCanvasWorkArea';
 import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/ReviewAcceptWorkArea';
 import { TargetedChangeWorkArea } from '../review/TargetedChangeWorkArea';
+import { StyleReviewWorkArea, type StyleShellOverride } from '../style/StyleReviewWorkArea';
+import { ReferenceIntakeWorkArea, type IntakeShellOverride } from '../intake/ReferenceIntakeWorkArea';
+import { CodingHandoffWorkArea, type HandoffMode, type HandoffShellOverride } from '../delivery/CodingHandoffWorkArea';
+import { GenUiWorkArea, type GenUiMode, type GenUiShellOverride } from '../genui/GenUiWorkArea';
+import { useLayoutTier } from '../mobile/layoutTier';
+import { ResponsiveProjectShell } from '../mobile/ResponsiveProjectShell';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -135,9 +141,16 @@ export function ProjectShell() {
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
-  const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted'>('shell');
+  const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style' | 'intake' | 'handoff' | 'genui'>('shell');
+  const [handoffInitialMode, setHandoffInitialMode] = useState<HandoffMode>('select');
+  const [genUiInitialMode, setGenUiInitialMode] = useState<GenUiMode>('stream');
   const [canvasOverride, setCanvasOverride] = useState<CanvasShellOverride>({});
   const [reviewOverride, setReviewOverride] = useState<ReviewShellOverride>({});
+  const [styleOverride, setStyleOverride] = useState<StyleShellOverride>({});
+  const [intakeOverride, setIntakeOverride] = useState<IntakeShellOverride>({});
+  const [handoffOverride, setHandoffOverride] = useState<HandoffShellOverride>({});
+  const [genUiOverride, setGenUiOverride] = useState<GenUiShellOverride>({});
+  const layoutTier = useLayoutTier();
   const save = useWorkspace((s) => s.save);
   const conflict = useWorkspace((s) => s.conflict);
   const project = getProject(projectId);
@@ -149,12 +162,20 @@ export function ProjectShell() {
     stage === 'spec'
       ? 'S40'
       : stage === 'design' && designSub === 'canvas'
-        ? 'S29'
+        ? (canvasOverride.screen ?? 'S29')
         : stage === 'design' && designSub === 'review'
           ? 'S33'
           : stage === 'design' && designSub === 'targeted'
             ? 'S32'
-            : 'S35';
+            : stage === 'design' && designSub === 'style'
+              ? 'S30'
+              : stage === 'design' && designSub === 'intake'
+                ? 'S28'
+                : stage === 'design' && designSub === 'handoff'
+                  ? 'S34'
+                  : stage === 'design' && designSub === 'genui'
+                    ? 'S38'
+                    : 'S35';
   const activeSave =
     stage === 'spec' && specOverride.save
       ? specOverride.save
@@ -162,7 +183,15 @@ export function ProjectShell() {
         ? canvasOverride.save
         : stage === 'design' && designSub === 'review' && reviewOverride.save
           ? reviewOverride.save
-          : save;
+          : stage === 'design' && designSub === 'style' && styleOverride.save
+            ? styleOverride.save
+            : stage === 'design' && designSub === 'intake' && intakeOverride.save
+              ? intakeOverride.save
+              : stage === 'design' && designSub === 'handoff' && handoffOverride.save
+                ? handoffOverride.save
+                : stage === 'design' && designSub === 'genui' && genUiOverride.save
+                  ? genUiOverride.save
+                  : save;
   const activeBusy =
     stage === 'spec'
       ? specOverride.busy
@@ -174,11 +203,29 @@ export function ProjectShell() {
   const displayProject =
     stage === 'design' && designSub === 'review' && reviewOverride.specRev
       ? { ...project, spec: reviewOverride.specRev }
-      : project;
+      : stage === 'design' && designSub === 'style' && styleOverride.specRev
+        ? { ...project, spec: styleOverride.specRev }
+        : project;
   const displayStages =
     stage === 'design' && designSub === 'review' && reviewOverride.specRev === 'r15'
       ? stages.map((s) => (s.id === 'spec' ? { ...s, text: 'Ready · r15' } : s))
       : stages;
+
+  if (layoutTier !== 'desktop') {
+    return (
+      <ResponsiveProjectShell
+        tier={layoutTier}
+        project={displayProject}
+        usage={usage}
+        stages={displayStages}
+        currentStage={currentStage}
+        onSwitchStage={(id) => {
+          if (id === 'design') setDesignSub('shell');
+          navigate('/p/' + projectId + '/' + id);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="ap-root" data-screen={screenId} data-panel={panel ?? undefined}>
@@ -211,14 +258,58 @@ export function ProjectShell() {
             designSub === 'canvas' ? (
               <FramesCanvasWorkArea onShellOverride={setCanvasOverride} />
             ) : designSub === 'review' ? (
-              <ReviewAcceptWorkArea onShellOverride={setReviewOverride} />
+              <ReviewAcceptWorkArea
+                onShellOverride={setReviewOverride}
+                onOpenHandoff={(stale) => {
+                  setHandoffInitialMode(stale ? 'stale' : 'select');
+                  setDesignSub('handoff');
+                }}
+              />
             ) : designSub === 'targeted' ? (
               <TargetedChangeWorkArea onLeaveTargeted={() => setDesignSub('shell')} />
+            ) : designSub === 'style' ? (
+              <StyleReviewWorkArea onShellOverride={setStyleOverride} />
+            ) : designSub === 'intake' ? (
+              <ReferenceIntakeWorkArea
+                onShellOverride={setIntakeOverride}
+                onOpenShell={() => setDesignSub('shell')}
+                onOpenStyle={() => setDesignSub('style')}
+              />
+            ) : designSub === 'handoff' ? (
+              <CodingHandoffWorkArea
+                key={handoffInitialMode}
+                initialMode={handoffInitialMode}
+                onShellOverride={setHandoffOverride}
+                onOpenShell={() => setDesignSub('shell')}
+                onOpenReview={() => setDesignSub('review')}
+              />
+            ) : designSub === 'genui' ? (
+              <GenUiWorkArea
+                key={genUiInitialMode}
+                initialMode={genUiInitialMode}
+                onShellOverride={setGenUiOverride}
+                onOpenReview={() => setDesignSub('review')}
+                onOpenStyle={() => setDesignSub('style')}
+                onOpenHandoff={() => {
+                  setHandoffInitialMode('select');
+                  setDesignSub('handoff');
+                }}
+              />
             ) : (
               <DesignWorkArea
                 onOpenCanvas={() => setDesignSub('canvas')}
                 onOpenReview={() => setDesignSub('review')}
                 onOpenTargeted={() => setDesignSub('targeted')}
+                onOpenStyle={() => setDesignSub('style')}
+                onOpenIntake={() => setDesignSub('intake')}
+                onOpenHandoff={() => {
+                  setHandoffInitialMode('select');
+                  setDesignSub('handoff');
+                }}
+                onOpenGenUi={(m) => {
+                  setGenUiInitialMode(m);
+                  setDesignSub('genui');
+                }}
               />
             )
           ) : stage === 'backend' ? (

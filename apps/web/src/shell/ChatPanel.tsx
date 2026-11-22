@@ -7,6 +7,7 @@ import { Composer } from './Composer';
 
 // Mirrors kit.mjs chatPanel(...). Left conversation panel (F106, F107, F109, F114).
 export function ChatPanel(props: {
+  className?: string;
   title: string;
   sub: string;
   ctxItems: ContextItem[];
@@ -36,6 +37,7 @@ export function ChatPanel(props: {
   children: ReactNode;
 }) {
   const {
+    className,
     title,
     sub,
     ctxItems,
@@ -66,7 +68,11 @@ export function ChatPanel(props: {
   } = props;
 
   return (
-    <aside className="sp-chat" aria-label="Conversation" style={width ? { width: width + 'px' } : undefined}>
+    <aside
+      className={className ? 'sp-chat ' + className : 'sp-chat'}
+      aria-label="Conversation"
+      style={width ? { width: width + 'px' } : undefined}
+    >
       <button
         type="button"
         className="sp-rsz"

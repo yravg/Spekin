@@ -9,6 +9,7 @@ import { ArtifactTabs, type ArtifactTabItem } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
 import { Inspector, InspectorRow } from './Inspector';
 import { MiniDashboard } from './MiniDashboard';
+import { routeGenUiPrompt, type GenUiMode } from '../genui/GenUiWorkArea';
 
 const DESIGN_TABS: ArtifactTabItem[] = [
   { icon: 'grid', name: 'Variance flows' },
@@ -96,7 +97,17 @@ export function ConflictBanner(props: {
 }
 
 // Mirrors boards-shell.mjs Design stage: chat, artifact tabs, canvas with frames, inspector.
-export function DesignWorkArea(props: { onOpenCanvas?: () => void; onOpenReview?: () => void; onOpenTargeted?: () => void } = {}) {
+export function DesignWorkArea(
+  props: {
+    onOpenCanvas?: () => void;
+    onOpenReview?: () => void;
+    onOpenTargeted?: () => void;
+    onOpenStyle?: () => void;
+    onOpenIntake?: () => void;
+    onOpenHandoff?: () => void;
+    onOpenGenUi?: (mode: GenUiMode) => void;
+  } = {},
+) {
   const view = useWorkspace((s) => s.view('design'));
   const setView = useWorkspace((s) => s.setView);
   const chatWidth = useWorkspace((s) => s.chatWidth);
@@ -123,7 +134,10 @@ export function DesignWorkArea(props: { onOpenCanvas?: () => void; onOpenReview?
         icon="download"
         does="Opens S34: downloads only accepted revisions with a fixed revision manifest"
         feature="F104"
-        onClick={() => recordIntent('F104:handoff')}
+        onClick={() => {
+          if (props.onOpenHandoff) props.onOpenHandoff();
+          else recordIntent('F104:handoff');
+        }}
       />
     </>
   );
@@ -153,7 +167,15 @@ export function DesignWorkArea(props: { onOpenCanvas?: () => void; onOpenReview?
           onAttach={() => recordIntent('F114:attach')}
           onMention={() => recordIntent('F106:mention')}
           onOpenModel={() => recordIntent('F107:model')}
-          onSend={() => recordIntent('F114:send')}
+          onSend={() => {
+            if (props.onOpenGenUi) {
+              const nextMode = routeGenUiPrompt(view.draft);
+              setView('design', { draft: '' });
+              props.onOpenGenUi(nextMode);
+            } else {
+              recordIntent('F114:send');
+            }
+          }}
         >
           <div className="sp-ub">Add an alert drawer to the variance table for packages over 3%.</div>
           <div className="sp-ai">
@@ -192,7 +214,7 @@ export function DesignWorkArea(props: { onOpenCanvas?: () => void; onOpenReview?
                     sm
                     does="Expands the card in place: criteria, sources and linked frames; focus stays on the card"
                     feature="F110"
-                    onClick={() => recordIntent('F110:details')}
+                    onClick={() => (props.onOpenGenUi ? props.onOpenGenUi('cards') : recordIntent('F110:details'))}
                   />
                 </div>
               </div>
@@ -248,6 +270,8 @@ export function DesignWorkArea(props: { onOpenCanvas?: () => void; onOpenReview?
           onSelect={(tab) => {
             if (tab === 'F-04 Alert drawer') {
               triggerConflict();
+            } else if (tab === 'DESIGN.md' && props.onOpenStyle) {
+              props.onOpenStyle();
             } else if (tab === 'Variance flows' && activeTab === 'Variance flows' && props.onOpenCanvas) {
               props.onOpenCanvas();
             } else {
@@ -255,7 +279,10 @@ export function DesignWorkArea(props: { onOpenCanvas?: () => void; onOpenReview?
             }
           }}
           onClose={(name) => recordIntent('F104:close:' + name)}
-          onOpenArtifact={() => recordIntent('F104:open')}
+          onOpenArtifact={() => {
+            if (props.onOpenIntake) props.onOpenIntake();
+            else recordIntent('F104:open');
+          }}
           right={right}
         />
         {conflict ? (
@@ -445,7 +472,10 @@ export function DesignWorkArea(props: { onOpenCanvas?: () => void; onOpenReview?
                 does="Imports a PNG, JPEG or WebP the user picks as a reference image (S28)"
                 sm
                 feature="F113"
-                onClick={() => recordIntent('F113:import')}
+                onClick={() => {
+                  if (props.onOpenIntake) props.onOpenIntake();
+                  else recordIntent('F113:import');
+                }}
               />
               <span className="div" />
               <Btn

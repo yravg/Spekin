@@ -117,6 +117,26 @@ export interface SampleIntakeComposer {
   text: string;
   len: number;
 }
+export interface SampleIntakeLimits {
+  types: string;
+  sizeMb: number;
+  perImport: number;
+  keepDays: number;
+}
+export interface SampleIntakeRef {
+  id: string;
+  src: string;
+  kind: string;
+  size: string;
+  dim: string;
+}
+export interface SampleIntakeRefs {
+  r3: SampleIntakeRef;
+  r4: SampleIntakeRef;
+  r5: SampleIntakeRef;
+  r6: SampleIntakeRef;
+}
+export type SampleIntakePiiRow = [string, string, string];
 
 export interface SampleCanvasFrame {
   id: string;
@@ -234,6 +254,49 @@ export interface SampleReviewProposal {
   accepted: { hunks: string; parent: string; snapshot: string };
 }
 
+export interface SampleStyleColor {
+  hex: string;
+  css: string;
+}
+export interface SampleStyleRef {
+  id: string;
+  name: string;
+  kind: string;
+  at: string;
+  read?: string;
+  steps?: number;
+  at_step?: number;
+}
+export type StyleTokenState = 'ok' | 'inf' | 'cf';
+export type StyleTokenGroup = 'color' | 'type' | 'space' | 'radius' | 'icon' | 'cmp';
+export interface SampleStyleToken {
+  id: string;
+  g: StyleTokenGroup;
+  name: string;
+  v?: SampleStyleColor;
+  alt?: { hex?: string; css?: string; spec?: string; r?: number };
+  altName?: string;
+  spec?: string;
+  cls?: string;
+  smp?: string;
+  bars?: number[];
+  r?: number;
+  st: StyleTokenState;
+  refs: string[];
+  seen: string;
+}
+export type StyleHunkLine = ['ctx' | 'add' | 'mod', string];
+export interface SampleStyleHunk {
+  id: string;
+  sec: string;
+  inc: boolean;
+  add: number;
+  del: number;
+  open: boolean;
+  conf?: boolean;
+  lines: StyleHunkLine[];
+}
+
 export declare const PROJECT: SampleProject;
 export declare const STAGES: SampleStage[];
 export declare const USAGE: SampleUsage;
@@ -260,6 +323,9 @@ export declare const INTAKE_SWITCH_ORDER: string[];
 export declare const INTAKE_NEW: SampleIntakeNew;
 export declare const INTAKE_DELETED: SampleIntakeDeleted;
 export declare const INTAKE_COMPOSER: SampleIntakeComposer;
+export declare const INTAKE_LIMITS: SampleIntakeLimits;
+export declare const INTAKE_REFS: SampleIntakeRefs;
+export declare const INTAKE_PII: SampleIntakePiiRow[];
 export declare const CANVAS_FRAMES: SampleCanvasFrames;
 export declare const CANVAS_CHATS: SampleCanvasChat[];
 export declare const CANVAS_VIEWMENU: [string, string][];
@@ -274,4 +340,90 @@ export declare const REVIEW_OUTSIDE: string;
 export declare const REVIEW_VARIANTS: SampleReviewVariant[];
 export declare const REVIEW_NITS: SampleReviewNit[];
 export declare const REVIEW_PROPOSAL: SampleReviewProposal;
+export declare const STYLE_REFS: SampleStyleRef[];
+export declare const STYLE_STEPS: string[];
+export declare const STYLE_NEWREF: SampleStyleRef;
+export declare const STYLE_TOKENS: SampleStyleToken[];
+export declare const STYLE_NEWTOKEN: SampleStyleToken;
+export declare const STYLE_HUNKS: SampleStyleHunk[];
+export interface SampleDeliveryManifest {
+  id: string;
+  next: string;
+  spec: string;
+  sealedAt: string;
+  zip: string;
+  framework: string;
+}
+export interface SampleDeliveryThumb {
+  title: string;
+  chart?: boolean;
+  drawer?: boolean;
+  kpi?: boolean;
+}
+export interface SampleDeliveryItem {
+  id: string;
+  name: string;
+  kind: 'frame' | 'design' | 'takes' | 'ref';
+  rev: string;
+  st: PillTone;
+  stText: string;
+  when: string;
+  size: string;
+  sha?: string;
+  html?: string;
+  png?: string;
+  reason?: string;
+  thumb: SampleDeliveryThumb | null;
+}
+export type SampleDeliveryFile = [string, string, string];
+export interface SampleDeliveryBlockedItem {
+  id: string;
+  rev: string;
+  ok: boolean;
+  kind?: string;
+  text: string;
+}
+export interface SampleDeliveryStale {
+  frame: string;
+  rev: string;
+  at: string;
+  sha: string;
+  html: string;
+  png: string;
+}
+
+export declare const STYLE_CTX: ContextItem[];
+export declare function STYLE_contrast(a: string, b: string): string;
+export declare const DELIVERY_MANIFEST: SampleDeliveryManifest;
+export declare const DELIVERY_FRAMEWORKS: [string, string][];
+export declare const DELIVERY_ITEMS: SampleDeliveryItem[];
+export declare const DELIVERY_FILES: SampleDeliveryFile[];
+export declare const DELIVERY_BLOCKED: SampleDeliveryBlockedItem[];
+export declare const DELIVERY_STALE: SampleDeliveryStale;
+export type SampleDeviceThumbKind = 'chart' | 'table' | 'drawer' | 'image';
+export type SampleDeviceFrame = [string, string, string, PillTuple, SampleDeviceThumbKind];
+export interface SampleDeviceFinding {
+  n: number;
+  of: number;
+  title: string;
+  body: string;
+  base: string;
+  next: string;
+  frame: string;
+  reqs: string[];
+  changed: string;
+}
+export type SampleDeviceBundlePick = [string, string, string, boolean, string?];
+export interface SampleDeviceBundle {
+  pick: SampleDeviceBundlePick[];
+  files: string[];
+  id: string;
+  size: string;
+  spec: string;
+}
+
+export declare const DELIVERY_PROMPT: string[];
+export declare const MODELS_DEVICE_FRAMES: SampleDeviceFrame[];
+export declare const MODELS_FINDING: SampleDeviceFinding;
+export declare const MODELS_BUNDLE: SampleDeviceBundle;
 // Everything else the boards use is exported too; declare it here before use.
