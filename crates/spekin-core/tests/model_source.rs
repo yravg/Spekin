@@ -1,7 +1,6 @@
 use spekin_core::model_source::{
     ApiKeyStatus, CapabilityError, CapabilityRegistry, ConnectorStatus, JobRequirements,
-    LocalCliSource, ModelAvailability, ModelCapability, ModelSource, ModelSourceKind,
-    PricePerUnit,
+    LocalCliSource, ModelAvailability, ModelCapability, ModelSource, ModelSourceKind, PricePerUnit,
 };
 
 #[test]
