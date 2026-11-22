@@ -10,11 +10,11 @@ export function MiniDashboard(props: {
   table?: boolean;
   rows?: number;
   drawer?: boolean;
-  h: number;
+  h?: number;
 }) {
   const { title = 'Variance', kpi = true, chart = false, table = true, rows = 4, drawer = false, h } = props;
   return (
-    <div className="mini" style={{ height: h + 'px', position: 'relative' }}>
+    <div className="mini" style={{ height: h ? h + 'px' : '100%', position: 'relative' }}>
       <div className="mt">
         <i />
         {title}

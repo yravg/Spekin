@@ -84,6 +84,40 @@ export interface SampleSkillUpdate {
 export type SampleSkillDiffRow = [string, string];
 export type SampleSkillGlossRow = [string, string, string, 'proposed' | 'accepted'];
 
+export type IntakeThumb = 'dash' | 'gantt' | 'table' | 'form' | 'cards' | 'empty';
+export interface SampleIntakeProject {
+  id: string;
+  name: string;
+  idea: string;
+  inc: string;
+  stages: StageTone[];
+  now: string;
+  at: string;
+  ago: string;
+  owner: string;
+  ini: string;
+  role: 'Owner' | 'Viewer';
+  thumb: IntakeThumb;
+}
+export interface SampleIntakeNew {
+  name: string;
+  slug: string;
+  idea: string;
+  ideaLen: number;
+  max: number;
+  min: number;
+}
+export interface SampleIntakeDeleted {
+  id: string;
+  by: string;
+  at: string;
+  days: number;
+}
+export interface SampleIntakeComposer {
+  text: string;
+  len: number;
+}
+
 export declare const PROJECT: SampleProject;
 export declare const STAGES: SampleStage[];
 export declare const USAGE: SampleUsage;
@@ -105,4 +139,9 @@ export declare const SKL_GH: SampleSkillGithub;
 export declare const SKL_UPDATES: SampleSkillUpdate[];
 export declare const SKL_DIFF: SampleSkillDiffRow[];
 export declare const SKL_GLOSS: SampleSkillGlossRow[];
+export declare const INTAKE_PROJECTS: SampleIntakeProject[];
+export declare const INTAKE_SWITCH_ORDER: string[];
+export declare const INTAKE_NEW: SampleIntakeNew;
+export declare const INTAKE_DELETED: SampleIntakeDeleted;
+export declare const INTAKE_COMPOSER: SampleIntakeComposer;
 // Everything else the boards use is exported too; declare it here before use.
