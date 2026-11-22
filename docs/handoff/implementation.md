@@ -102,15 +102,17 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 |---|---|---|---|---|
 | IMP-01 | ui | S35 work area: chat, artifact tabs, canvas pane and inspector for the design and backend states | – | done, part open, waiting for owner merge: PR #3. Lead re-ran the gate: design PASS 0.41 %, backend PASS 0.47 %. The conflict state is IMP-02. |
 | IMP-02 | ui | S35 conflict state, save states (F112), per-stage memory across switches | IMP-01 | done, waiting for owner merge: PR #6, stacked on #3 (lead re-ran: S35 3/3 PASS) |
-| IMP-05 | ui | S27 Projects home (6 states), and "/" becomes S27 | IMP-01, C-01 | open (C-01 done 23 Nov) |
+| IMP-05 | ui | S27 Projects home (6 states), and "/" becomes S27 | IMP-01, C-01 | done, part open: PR #11, stacked on #9 (lead re-ran with the harness fixes: S27 6/6, S35 3/3, S40 6/6 PASS; still to do: merge main for the C-01 create redraw) |
 | IMP-03 | core | API source: typed client for the Rust API, equal to the sample | – | done, waiting for owner merge: PR #1 (lead review: approve) |
 | IMP-04 | core | Proposals and revisions in the core (accept, reject, revert, stale) | – | done, waiting for owner merge: PR #2 (lead review: approve; merge after #1) |
 | IMP-12 | core | No-Python and licence inventory check | – | done, waiting for owner merge: PR #4 (lead review: approve; one small follow-up on workspace links) |
-| IMP-09 | core | Ledger: estimate, reserve, settle, caps | IMP-04 | open |
+| IMP-09 | core | Ledger: estimate, reserve, settle, caps | IMP-04 | done, waiting for owner merge: PR #10, stacked on #2 |
 | IMP-11 | core | Model sources and capability registry | – | done, waiting for owner merge: PR #5 (lead review: approve) |
 | IMP-10 | core | GenUI schema validation, fail closed | – | done, waiting for owner merge: PR #7 (lead review: approve) |
 | IMP-22 | core | Skills core: SkillManifest, versions, update policy and update checks | IMP-04 | done, waiting for owner merge: PR #8 (lead review: approve) |
-| IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | open |
+| IMP-24 | core | Handoff manifest core (S34): accepted revisions, hashes, missing inputs, deterministic | IMP-04 | open |
+| IMP-25 | core | Next-request context builder (S29, S35): only the listed chips, pure | – | open |
+| IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
 | IMP-06 | ui | S28 Reference intake | IMP-01 | open |
 | IMP-07 | ui | S29 Frames canvas | IMP-01 | open |
 | IMP-08 | ui | S30 Style review | IMP-01 | open |
@@ -193,6 +195,24 @@ There is no network code in this card. Fetching from GitHub is a later card.
 ### IMP-23 · S40 Skills library (ui)
 
 Board `S40-skills-library.dc.html`, states `library, detail, edit, github, updates, use`. It reads `@spekin/sample` (SKL_*) until IMP-22's API exists. All six states must PASS the harness. The `/` list is keyboard-first: arrows move, Enter picks, Escape closes and keeps the text. A switch never runs anything.
+
+### IMP-24 · Handoff manifest core (core)
+
+Pure Rust in spekin-core for S34 (DPAI addendum, point 3). `build_manifest(selection, revisions, inputs) -> Manifest`:
+- only accepted revisions can be selected; a draft or stale one is refused with a typed error;
+- the manifest lists, in a stable order, each artifact with its exact revision and a sha256 content hash, the exclusions, and the required inputs, where a missing one is listed explicitly (for example `PRD: missing`) and is never invented;
+- `to_json` is deterministic, so two exports of the same selection are byte-identical (a property test);
+- nothing creates a link: no URL, token or expiry field exists (R-WS-3, sharing stays later).
+Export the types with ts-rs. Stack on IMP-04 (uses `Revision`).
+
+### IMP-25 · Next-request context builder (core)
+
+Pure Rust in spekin-core for S29 and S35 (DPAI addendum, point 1). `build_context(chips, board) -> RequestContext`:
+- the request carries exactly the listed chips (artifact id, revision, status); it never includes hidden frames or the whole board (property test: for any board and any chip set, every item in the output is in the chip set);
+- removing a chip changes the context, never the content (the board is unchanged, compared by hash);
+- building the context never sends, accepts or spends: the function is pure and has no ledger or proposal side effect;
+- the token estimate is the sum of the chip estimates (S35 shows "≈ 9.8k tokens").
+Export the types with ts-rs.
 
 ### UI cards after P1 (written 23 Nov)
 
