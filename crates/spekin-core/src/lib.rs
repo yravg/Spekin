@@ -13,6 +13,12 @@ pub use model_source::{
     ApiKeyStatus, CapabilityCheckResult, CapabilityError, CapabilityRegistry, ConnectorStatus,
     JobRequirements, LocalCliSource, ModelAvailability, ModelCapability, ModelSource,
     ModelSourceKind, PricePerUnit,
+pub mod genui;
+
+pub use genui::{
+    AllowedActionKind, ChecklistItem, ChecklistStatus, ComparisonOption, GenUiAction, GenUiCard,
+    GenUiFamily, GenUiValidation, Provenance, QuestionOption, RejectionReason, validate_genui,
+    validate_genui_json,
 };
 pub use project::{Fixture, FixtureError, Project};
 pub use stage::{Stage, StageId, StageTone};
