@@ -113,6 +113,7 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-24 | core | Handoff manifest core (S34): accepted revisions, hashes, missing inputs, deterministic | IMP-04 | done, waiting for owner merge: PR #13, stacked on #2 |
 | IMP-25 | core | Next-request context builder (S29, S35): only the listed chips, pure | – | done, waiting for owner merge: PR #12 |
 | IMP-26 | core | API routes for the core (all core cards) + web client | IMP-03…IMP-25 | done, waiting for owner merge: PR #15 (merge last) |
+| IMP-27 | core | GitHub skill source adapter: pin to SHA, fetch with limits, update check | IMP-22 | open |
 | IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
 | IMP-06 | ui | S28 Reference intake | IMP-01 | open |
 | IMP-07 | ui | S29 Frames canvas | IMP-01 | done, waiting for owner merge: PR #14, stacked on #11 (lead re-ran: S29 6/6 PASS) |
@@ -226,6 +227,16 @@ Axum routes in spekin-server that call the pure core. Each route returns typed J
 - `POST /api/projects/{id}/context` (IMP-25);
 - `POST /api/projects/{id}/handoff/manifest` (IMP-24).
 State is in memory, seeded from `fixtures/meranti-yard.json` (no database yet). Add the client functions to `apps/web/src/data/api.ts` with tests (as in IMP-03). Branch: start from origin/main and merge every open core branch into it (`git merge origin/imp-03-api-source origin/imp-04-proposals …`), so the PR is stacked on all of them. Say so in the PR body.
+
+### IMP-27 · GitHub skill source adapter (core)
+
+Owner request (23 Nov): skills from public GitHub repositories that can update automatically. It works within ADR 0007. In spekin-server, add a `skills::github` module:
+- `resolve(repo, path, git_ref) -> PinnedSource`: resolves a branch or tag to the exact commit SHA. A skill is always stored against a SHA, never against a moving branch.
+- `fetch(pinned) -> SkillBundle`: downloads SKILL.md and the files it lists, plus the repository licence, over HTTPS from the GitHub API or raw content only. Size limits: 256 KB per file, 2 MB per bundle, 50 files. Nothing is executed, and scripts are only listed.
+- `check(installed, policy) -> UpdateCheck`: fetches the newest SHA for the same ref, parses it with `parse_skill_md`, and returns `check_update` from IMP-22 (hold with reasons, or apply).
+- The HTTP client sits behind a trait, so tests use recorded fixtures under `crates/spekin-server/tests/fixtures/github/`. No test touches the network. Add tests for: a licence change, an added script and an injection pattern each hold; a wording-only change applies under Auto; Pinned never changes; the size limits are refused.
+- A new dependency is allowed only under MIT or Apache-2.0 (for example reqwest with rustls). Name it in the PR.
+- No token is needed for public repositories. If `GITHUB_TOKEN` is set it is used, but it is never logged or stored.
 
 ### UI cards after P1 (written 23 Nov)
 
