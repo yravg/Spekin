@@ -70,7 +70,10 @@ fn accepting_twice_gives_the_same_revision_and_the_second_is_stale() {
     let once = accept(&current, &p).unwrap();
     let twice = accept(&current, &p).unwrap();
 
-    assert_eq!(once, twice, "accepting is a pure function of the same inputs");
+    assert_eq!(
+        once, twice,
+        "accepting is a pure function of the same inputs"
+    );
     assert_eq!(
         accept(&once, &p),
         Err(ProposalError::Stale {
@@ -89,7 +92,10 @@ fn reject_records_the_reason_and_changes_no_content() {
 
     assert_eq!(rejection.id, "p-1");
     assert_eq!(rejection.base, 1);
-    assert_eq!(rejection.reason, "The threshold belongs in the design stage.");
+    assert_eq!(
+        rejection.reason,
+        "The threshold belongs in the design stage."
+    );
     // Nothing was applied: the base content is untouched, so no revision was made.
     assert_eq!(Revision::first("one").content, "one");
 }
@@ -156,7 +162,8 @@ proptest! {
         prop_assert_eq!(&first, &second);
         if let Ok(next) = first {
             prop_assert_eq!(next.n, current.n + 1);
-            prop_assert_ne!(next.hash(), current.hash());
+            // The hash detects exactly the content: equal content, equal hash (and the reverse).
+            prop_assert_eq!(next.content == current.content, next.hash() == current.hash());
         }
     }
 
