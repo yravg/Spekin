@@ -4,11 +4,12 @@
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
+use axum::Router;
 use axum::body::Body;
 use axum::http::{Request, StatusCode};
-use axum::Router;
 use http_body_util::BodyExt;
 use serde_json::{Value, json};
+use spekin_core::SkillLibrary;
 use spekin_core::github_source::{BundleFile, GitHubRepo, GitHubSourceError};
 use spekin_server::skills::github::GitHubClient;
 use spekin_server::{AppState, router};
@@ -33,9 +34,7 @@ impl FixtureClient {
     }
 
     fn advance_main_to(&self, commit: &str) {
-        self.refs
-            .lock()
-            .unwrap()["example/skills@main"] = Value::String(commit.into());
+        self.refs.lock().unwrap()["example/skills@main"] = Value::String(commit.into());
     }
 }
 
@@ -92,6 +91,11 @@ fn state(client: FixtureClient) -> AppState {
     AppState::from_fixture_json(SAMPLE)
         .unwrap()
         .with_github_client(client)
+}
+
+/// An empty library for tests that install a GitHub skill with the sample's id.
+fn empty_library() -> SkillLibrary {
+    SkillLibrary::from_fixture(&json!({}))
 }
 
 async fn call(app: &Router, method: &str, uri: &str, body: Option<Value>) -> (StatusCode, Value) {
@@ -158,7 +162,10 @@ async fn copy_route_makes_a_user_copy_and_never_changes_the_template() {
     .await;
     assert_eq!(status, StatusCode::OK);
     assert_eq!(copied["kind"], "user");
-    assert_eq!(copied["manifest"]["licence"], template["manifest"]["licence"]);
+    assert_eq!(
+        copied["manifest"]["licence"],
+        template["manifest"]["licence"]
+    );
     assert_eq!(copied["manifest"]["version"], "1");
     assert_eq!(copied["manifest"]["source"]["kind"], "user");
     assert_eq!(copied["manifest"]["source"]["copied_from"], "ears");
@@ -240,7 +247,7 @@ async fn edit_route_409_for_a_template_or_a_github_skill() {
 
 #[tokio::test]
 async fn add_github_route_pins_a_sha_through_the_injected_client() {
-    let app = router(state(FixtureClient::new()));
+    let app = router(state(FixtureClient::new()).with_library(empty_library()));
     let (status, installed) = call(
         &app,
         "POST",
@@ -257,10 +264,12 @@ async fn add_github_route_pins_a_sha_through_the_injected_client() {
     assert_eq!(installed["kind"], "github");
     assert_eq!(installed["manifest"]["source"]["commit"], "aaaa1111");
     assert_eq!(installed["manifest"]["licence"], "MIT");
-    assert!(installed["manifest"]["notice"]
-        .as_str()
-        .unwrap()
-        .contains("aaaa1111"));
+    assert!(
+        installed["manifest"]["notice"]
+            .as_str()
+            .unwrap()
+            .contains("aaaa1111")
+    );
 }
 
 #[tokio::test]
@@ -285,7 +294,7 @@ async fn add_github_route_400_for_an_invalid_repo() {
 #[tokio::test]
 async fn check_route_applies_a_wording_update_and_appends_one_audit_entry() {
     let client = FixtureClient::new();
-    let app = router(state(client.clone()));
+    let app = router(state(client.clone()).with_library(empty_library()));
     call(
         &app,
         "POST",
@@ -313,7 +322,10 @@ async fn check_route_applies_a_wording_update_and_appends_one_audit_entry() {
         .iter()
         .find(|s| s["manifest"]["id"] == "grill")
         .unwrap();
-    assert_eq!(installed["manifest"]["version"], "2", "a new version was stored");
+    assert_eq!(
+        installed["manifest"]["version"], "2",
+        "a new version was stored"
+    );
 
     let actions = audit_actions(&app).await;
     assert_eq!(actions.len(), before + 1);
@@ -323,7 +335,7 @@ async fn check_route_applies_a_wording_update_and_appends_one_audit_entry() {
 #[tokio::test]
 async fn check_route_holds_a_hostile_update_storing_diff_and_reasons() {
     let client = FixtureClient::new();
-    let app = router(state(client.clone()));
+    let app = router(state(client.clone()).with_library(empty_library()));
     call(
         &app,
         "POST",
@@ -351,7 +363,10 @@ async fn check_route_holds_a_hostile_update_storing_diff_and_reasons() {
         .iter()
         .find(|s| s["manifest"]["id"] == "grill")
         .unwrap();
-    assert_eq!(installed["manifest"]["version"], "1.3.0", "nothing changed on hold");
+    assert_eq!(
+        installed["manifest"]["version"], "1.3.0",
+        "nothing changed on hold"
+    );
 
     let actions = audit_actions(&app).await;
     assert_eq!(actions.len(), before + 1);

@@ -23,9 +23,10 @@ pub mod skills;
 pub mod stage;
 
 pub use api::{
-    ApiErrorBody, AuditResponse, BuildContextRequest, BuildManifestRequest,
-    CheckSkillUpdateRequest, ContractsResponse, DeletedProjectView, EstimateRunRequest,
-    RejectProposalRequest, ReserveRunRequest, RevertRevisionRequest, SettleRunRequest,
+    AddGithubSkillRequest, ApiErrorBody, AuditResponse, BuildContextRequest, BuildManifestRequest,
+    CheckSkillUpdateRequest, ContractsResponse, CopySkillRequest, DeletedProjectView,
+    EditSkillRequest, EstimateRunRequest, RejectProposalRequest, ReserveRunRequest,
+    RevertRevisionRequest, SettleRunRequest, SkillCheckRequest,
 };
 pub use audit::{AuditAction, AuditEntry, AuditError, AuditEvent, AuditLog, GENESIS_HASH, verify};
 pub use context::{

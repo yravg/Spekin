@@ -1,5 +1,6 @@
 // TypeScript types generated from the Rust contract types (crates/spekin-core, ts-rs).
 // Do not edit generated/*.ts by hand: change the Rust type, run `cargo test --workspace`, commit both.
+export type { AddGithubSkillRequest } from './generated/AddGithubSkillRequest';
 export type { AllowedActionKind } from './generated/AllowedActionKind';
 export type { AllowedContext } from './generated/AllowedContext';
 export type { ApiErrorBody } from './generated/ApiErrorBody';
@@ -33,9 +34,11 @@ export type { ContextItemStatus } from './generated/ContextItemStatus';
 export type { Contract } from './generated/Contract';
 export type { ContractStatus } from './generated/ContractStatus';
 export type { ContractsResponse } from './generated/ContractsResponse';
+export type { CopySkillRequest } from './generated/CopySkillRequest';
 export type { DeletedProjectView } from './generated/DeletedProjectView';
 export type { DiffLine } from './generated/DiffLine';
 export type { DiffOp } from './generated/DiffOp';
+export type { EditSkillRequest } from './generated/EditSkillRequest';
 export type { EstimateRunRequest } from './generated/EstimateRunRequest';
 export type { Evidence } from './generated/Evidence';
 export type { EvidenceError } from './generated/EvidenceError';
@@ -97,6 +100,7 @@ export type { RunEstimate } from './generated/RunEstimate';
 export type { SettleRunRequest } from './generated/SettleRunRequest';
 export type { Settlement } from './generated/Settlement';
 export type { SkillBundle } from './generated/SkillBundle';
+export type { SkillCheckRequest } from './generated/SkillCheckRequest';
 export type { SkillEdit } from './generated/SkillEdit';
 export type { SkillError } from './generated/SkillError';
 export type { SkillHistoryAction } from './generated/SkillHistoryAction';

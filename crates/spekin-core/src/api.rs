@@ -7,8 +7,8 @@ use ts_rs::TS;
 
 use crate::{
     ArtifactRevisionRecord, AuditEntry, AuditError, BoardSnapshot, ContextChip, Contract, Evidence,
-    ManifestSelection, MatrixRow, ProjectEntry, RequiredInput, Revision, RunEstimate,
-    SkillManifest, UpdatePolicy,
+    ManifestSelection, MatrixRow, ProjectEntry, RequiredInput, Revision, RunEstimate, SkillEdit,
+    SkillManifest, StageId, UpdatePolicy,
 };
 
 /// Typed error body returned by `spekin-server` on 4xx/5xx responses.
@@ -124,4 +124,59 @@ pub struct ContractsResponse {
     pub contracts: Vec<Contract>,
     pub evidence: Vec<Evidence>,
     pub matrix: Vec<MatrixRow>,
+}
+
+/// Request body for `POST /api/skills/{id}/copy` (IMP-34).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct CopySkillRequest {
+    pub new_id: String,
+    pub new_title: String,
+}
+
+/// Request body for `PUT /api/skills/{id}` (IMP-34). Only a user copy can be edited.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct EditSkillRequest {
+    #[serde(default)]
+    pub title: Option<String>,
+    #[serde(default)]
+    pub description: Option<String>,
+    #[serde(default)]
+    pub stages: Option<Vec<StageId>>,
+    #[serde(default)]
+    pub body: Option<String>,
+}
+
+/// Request body for `POST /api/skills/github` (IMP-34). `git_ref` is pinned to a SHA.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct AddGithubSkillRequest {
+    pub repo: String,
+    pub path: String,
+    pub git_ref: String,
+    pub policy: UpdatePolicy,
+}
+
+/// Request body for `POST /api/skills/{id}/check` (IMP-34). A GitHub skill is checked
+/// through the injected adapter; other kinds need a candidate `new` manifest.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct SkillCheckRequest {
+    #[serde(default)]
+    pub new: Option<SkillManifest>,
+    #[serde(default)]
+    pub policy: Option<UpdatePolicy>,
+}
+
+/// Convert the wire edit request into the pure core edit (IMP-34).
+impl From<EditSkillRequest> for SkillEdit {
+    fn from(req: EditSkillRequest) -> Self {
+        Self {
+            title: req.title,
+            description: req.description,
+            stages: req.stages,
+            body: req.body,
+        }
+    }
 }

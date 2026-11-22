@@ -14,22 +14,26 @@ use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::{IntoResponse, Response},
-    routing::{get, post},
+    routing::{get, post, put},
 };
 use hardening::{HardeningConfig, apply_hardening};
 use serde_json::Value;
+use skills::github::{DynGitHubSkillSource, HttpGitHubClient, injected_source};
 use spekin_core::{
-    ApiErrorBody, ArtifactRevisionRecord, ArtifactRevisionState, AuditAction, AuditEntry,
-    AuditError, AuditEvent, AuditLog, AuditResponse, BoardArtifact, BoardSnapshot,
-    BuildContextRequest, BuildManifestRequest, CapabilityRegistry, CheckSkillUpdateRequest,
-    ContextItemStatus, ContractsResponse, DeletedProjectView, EstimateRunRequest, Fixture,
-    GENESIS_HASH, GenUiValidation, Hunk, Ledger, LedgerCaps, LedgerError, Manifest, ManifestError,
-    ModelCapability, Project, ProjectEntry, Proposal, ProposalError, RejectProposalRequest,
-    Rejection, RejectionReason, RequestContext, RequiredInput, Reservation, ReserveRunRequest,
-    RestoreError, RevertRevisionRequest, Revision, RunEstimate, SECONDS_PER_DAY, SettleRunRequest,
-    Settlement, Stage, UpdateCheck, UsageSnapshot, accept, build_context, build_manifest,
-    check_update, days_left, delete, estimate, reject, restore, revert, sample_contracts,
-    sample_evidence, sample_matrix, validate_genui_json,
+    AddGithubSkillRequest, ApiErrorBody, ArtifactRevisionRecord, ArtifactRevisionState,
+    AuditAction, AuditEntry, AuditError, AuditEvent, AuditLog, AuditResponse, BoardArtifact,
+    BoardSnapshot, BuildContextRequest, BuildManifestRequest, CapabilityRegistry,
+    CheckSkillUpdateRequest, ContextItemStatus, ContractsResponse, CopySkillRequest,
+    DeletedProjectView, EditSkillRequest, EstimateRunRequest, Fixture, GENESIS_HASH,
+    GenUiValidation, GitHubSourceError, Hunk, Ledger, LedgerCaps, LedgerError, LibrarySkill,
+    Manifest, ManifestError, ModelCapability, Project, ProjectEntry, Proposal, ProposalError,
+    RejectProposalRequest, Rejection, RejectionReason, RequestContext, RequiredInput, Reservation,
+    ReserveRunRequest, RestoreError, RevertRevisionRequest, Revision, RunEstimate, SECONDS_PER_DAY,
+    SettleRunRequest, Settlement, SkillCheckRequest, SkillHistoryEntry, SkillLibrary,
+    SkillLibraryError, SkillSourceKind, SkillUpdateOutcome, SkillsResponse, Stage, UpdateCheck,
+    UsageSnapshot, accept, build_context, build_manifest, check_update, days_left, delete,
+    estimate, reject, restore, revert, sample_contracts, sample_evidence, sample_matrix,
+    validate_genui_json,
 };
 
 /// The project id the sample fixture is served under. The URL uses it: /p/meranti-yard/design.
@@ -65,6 +69,10 @@ pub struct AppState {
     pub sample: Arc<Fixture>,
     models: Arc<CapabilityRegistry>,
     project_store: Arc<Mutex<ProjectStore>>,
+    /// IMP-34: the in-memory skills library (templates, copies, GitHub skills).
+    library: Arc<Mutex<SkillLibrary>>,
+    /// IMP-34: the GitHub adapter with an injected client (fixtures in tests).
+    github: Arc<DynGitHubSkillSource>,
     /// UTC Unix seconds for audit entries and the 30-day restore window.
     now: i64,
     /// IMP-32 hardening values and the redacted rejection log.
@@ -80,9 +88,26 @@ impl AppState {
             sample: Arc::new(sample),
             models: Arc::new(CapabilityRegistry::sample_s36()),
             project_store: Arc::new(Mutex::new(store)),
+            library: Arc::new(Mutex::new(SkillLibrary::from_fixture(&raw))),
+            github: Arc::new(injected_source(HttpGitHubClient::new())),
             now: DEFAULT_NOW,
             config: HardeningConfig::from_env(),
         })
+    }
+
+    /// Inject a GitHub client (recorded fixtures in tests, never the network).
+    pub fn with_github_client<C: skills::github::GitHubClient + 'static>(
+        mut self,
+        client: C,
+    ) -> Self {
+        self.github = Arc::new(injected_source(client));
+        self
+    }
+
+    /// Start from an empty skills library (tests that install GitHub skills cleanly).
+    pub fn with_library(mut self, library: SkillLibrary) -> Self {
+        self.library = Arc::new(Mutex::new(library));
+        self
     }
 
     /// Override the clock used by audit and restore routes, for deterministic tests.
@@ -217,6 +242,13 @@ pub fn router(state: AppState) -> Router {
         .route("/api/models", get(list_models))
         .route("/api/genui/validate", post(validate_genui))
         .route("/api/skills/check-update", post(check_skill_update))
+        .route("/api/skills", get(list_skills))
+        .route("/api/skills/github", post(add_github_skill))
+        .route("/api/skills/{id}", put(edit_skill))
+        .route("/api/skills/{id}/copy", post(copy_skill))
+        .route("/api/skills/{id}/check", post(check_skill))
+        .route("/api/skills/{id}/history", get(skill_history))
+        .route("/api/skills/{id}/rollback/{version}", post(rollback_skill))
         .route("/api/projects/{id}/context", post(project_context))
         .route(
             "/api/projects/{id}/handoff/manifest",
@@ -543,6 +575,168 @@ async fn check_skill_update(
     Ok(Json(check_update(&req.old, &req.new, req.policy)))
 }
 
+/// `GET /api/skills`: templates, user copies and GitHub sources with their policy (IMP-34).
+async fn list_skills(State(s): State<AppState>) -> Json<SkillsResponse> {
+    let library = s.library.lock().expect("skills library lock");
+    Json(library.response())
+}
+
+/// `POST /api/skills/{id}/copy`: a template becomes the user's own version 1 (IMP-34).
+async fn copy_skill(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+    Json(req): Json<CopySkillRequest>,
+) -> Result<Json<LibrarySkill>, ServerError> {
+    let mut library = s.library.lock().expect("skills library lock");
+    library
+        .copy_template(&id, req.new_id, req.new_title, s.now)
+        .map(Json)
+        .map_err(map_library_error)
+}
+
+/// `PUT /api/skills/{id}`: edit a user copy, storing a new version (IMP-34).
+async fn edit_skill(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+    Json(req): Json<EditSkillRequest>,
+) -> Result<Json<LibrarySkill>, ServerError> {
+    let mut library = s.library.lock().expect("skills library lock");
+    library
+        .edit(&id, req.into(), s.now)
+        .map(Json)
+        .map_err(map_library_error)
+}
+
+/// `POST /api/skills/github`: resolve a ref to a SHA and store the fetched bundle (IMP-34).
+async fn add_github_skill(
+    State(s): State<AppState>,
+    Json(req): Json<AddGithubSkillRequest>,
+) -> Result<Json<LibrarySkill>, ServerError> {
+    let pinned = s
+        .github
+        .resolve(&req.repo, &req.path, &req.git_ref)
+        .await
+        .map_err(map_github_error)?;
+    let bundle = s.github.fetch(&pinned).await.map_err(map_github_error)?;
+    let mut library = s.library.lock().expect("skills library lock");
+    library
+        .add_github(bundle, req.policy, s.now)
+        .map(Json)
+        .map_err(map_library_error)
+}
+
+/// `POST /api/skills/{id}/check`: run the update check. An applied update makes a new
+/// version; a held one stores the diff and reasons and changes nothing (ADR 0007).
+async fn check_skill(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+    Json(req): Json<SkillCheckRequest>,
+) -> Result<Json<SkillUpdateOutcome>, ServerError> {
+    // Read what we need, then drop the guard: the adapter awaits IO and a MutexGuard
+    // cannot be held across an await in an Axum handler.
+    let (skill, bundle, policy) = {
+        let library = s.library.lock().expect("skills library lock");
+        let skill = library.get(&id).ok_or_else(|| {
+            ServerError::not_found("skill_not_found", format!("unknown skill: {id}"))
+        })?;
+        let policy = req.policy.unwrap_or(skill.policy);
+        let bundle = if skill.kind == SkillSourceKind::Github {
+            Some(library.bundle(&id).ok_or_else(|| {
+                ServerError::not_found("skill_bundle_missing", format!("no bundle for skill: {id}"))
+            })?)
+        } else {
+            None
+        };
+        (skill, bundle, policy)
+    };
+
+    let (check, new_manifest) = if let Some(bundle) = bundle {
+        let check = s
+            .github
+            .check(&bundle, policy)
+            .await
+            .map_err(map_github_error)?;
+        let fresh = s
+            .github
+            .fetch_latest(&bundle)
+            .await
+            .map_err(map_github_error)?;
+        (check, fresh.manifest)
+    } else {
+        let new = req.new.ok_or_else(|| {
+            ServerError::conflict(
+                "no_upstream",
+                format!("skill {id} has no upstream to check"),
+            )
+        })?;
+        if new.id != id {
+            return Err(ServerError::bad_request(
+                "skill_id_mismatch",
+                format!("candidate skill id '{}' does not match {id}", new.id),
+            ));
+        }
+        (check_update(&skill.manifest, &new, policy), new)
+    };
+
+    let diff = SkillLibrary::diff_text(&skill.manifest.body, &new_manifest.body);
+    let mut library = s.library.lock().expect("skills library lock");
+    let outcome = library
+        .record_update(&id, &check, new_manifest, diff, s.now)
+        .map_err(map_library_error)?;
+    let (action, reason) = match &outcome {
+        SkillUpdateOutcome::Applied { version, .. } => (
+            AuditAction::SkillUpdateApplied,
+            format!("applied skill update to {id} version {version}"),
+        ),
+        SkillUpdateOutcome::Held { held, .. } => (
+            AuditAction::SkillUpdateHeld,
+            format!(
+                "held skill update for {id}: {} reason(s)",
+                held.reasons.len()
+            ),
+        ),
+    };
+    let mut store = s.project_store.lock().expect("project store lock");
+    append_audit(&mut store, s.now, action, &id, None, reason);
+    Ok(Json(outcome))
+}
+
+/// `GET /api/skills/{id}/history`: every version and update decision in order (IMP-34).
+async fn skill_history(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<Json<Vec<SkillHistoryEntry>>, ServerError> {
+    let library = s.library.lock().expect("skills library lock");
+    if library.get(&id).is_none() {
+        return Err(ServerError::not_found(
+            "skill_not_found",
+            format!("unknown skill: {id}"),
+        ));
+    }
+    Ok(Json(library.history(&id)))
+}
+
+/// `POST /api/skills/{id}/rollback/{version}`: restore any version as a new one (IMP-34).
+async fn rollback_skill(
+    State(s): State<AppState>,
+    Path((id, version)): Path<(String, String)>,
+) -> Result<Json<LibrarySkill>, ServerError> {
+    let mut library = s.library.lock().expect("skills library lock");
+    let skill = library
+        .rollback(&id, &version, s.now)
+        .map_err(map_library_error)?;
+    let mut store = s.project_store.lock().expect("project store lock");
+    append_audit(
+        &mut store,
+        s.now,
+        AuditAction::Revert,
+        &id,
+        Some(format!("v{}", skill.manifest.version)),
+        format!("rolled back skill {id} to version {version}"),
+    );
+    Ok(Json(skill))
+}
+
 async fn project_context(
     State(s): State<AppState>,
     Path(id): Path<String>,
@@ -625,6 +819,47 @@ fn map_manifest_error(err: ManifestError) -> ServerError {
         ManifestError::StaleRevision { .. } => ServerError::conflict("stale_revision", message),
         ManifestError::NotSelectable { .. } => {
             ServerError::unprocessable("not_selectable", message)
+        }
+    }
+}
+
+fn map_library_error(err: SkillLibraryError) -> ServerError {
+    let message = err.to_string();
+    match err {
+        SkillLibraryError::NotFound { .. } => ServerError::not_found("skill_not_found", message),
+        SkillLibraryError::VersionNotFound { .. } => {
+            ServerError::not_found("version_not_found", message)
+        }
+        SkillLibraryError::TemplateImmutable { .. } => {
+            ServerError::conflict("template_immutable", message)
+        }
+        SkillLibraryError::NotEditable { .. } => ServerError::conflict("not_editable", message),
+        SkillLibraryError::DuplicateId { .. } => {
+            ServerError::conflict("duplicate_skill_id", message)
+        }
+        SkillLibraryError::EmptyCopyId => ServerError::bad_request("empty_copy_id", message),
+    }
+}
+
+fn map_github_error(err: GitHubSourceError) -> ServerError {
+    let message = err.to_string();
+    match err {
+        GitHubSourceError::InvalidRepoUrl { .. }
+        | GitHubSourceError::UnsupportedHost { .. }
+        | GitHubSourceError::InvalidPath { .. }
+        | GitHubSourceError::RefNotFound { .. } => {
+            ServerError::bad_request("invalid_repo_url", message)
+        }
+        GitHubSourceError::NoLicense { .. }
+        | GitHubSourceError::InvalidSkill { .. }
+        | GitHubSourceError::MissingFile { .. }
+        | GitHubSourceError::FileTooLarge { .. }
+        | GitHubSourceError::BundleTooLarge { .. }
+        | GitHubSourceError::TooManyFiles { .. } => {
+            ServerError::unprocessable("invalid_skill_bundle", message)
+        }
+        GitHubSourceError::Transport { .. } => {
+            ServerError::new(StatusCode::BAD_GATEWAY, "github_transport", message)
         }
     }
 }
