@@ -23,6 +23,18 @@ pub use model_source::{
     ModelSourceKind, PricePerUnit,
 pub mod genui;
 
+pub mod api;
+pub mod context;
+
+pub use api::{
+    ApiErrorBody, BuildContextRequest, BuildManifestRequest, CheckSkillUpdateRequest,
+    EstimateRunRequest, RejectProposalRequest, ReserveRunRequest,
+};
+
+pub use context::{
+    BoardArtifact, BoardSnapshot, ContextChip, ContextItemStatus, RequestContext,
+    RequestContextItem, build_context, format_token_estimate,
+};
 pub use genui::{
     AllowedActionKind, ChecklistItem, ChecklistStatus, ComparisonOption, GenUiAction, GenUiCard,
     GenUiFamily, GenUiValidation, Provenance, QuestionOption, RejectionReason, validate_genui,
@@ -57,4 +69,8 @@ pub use revision::Revision;
 pub use restore::{
     ProjectEntry, RESTORE_WINDOW_DAYS, RestoreError, SECONDS_PER_DAY, Timestamp, WINDOW_SECONDS,
     days_left, delete, purge_due, restore, window_close,
+pub use model_source::{
+    ApiKeyStatus, CapabilityCheckResult, CapabilityError, CapabilityRegistry, ConnectorStatus,
+    JobRequirements, LocalCliSource, ModelAvailability, ModelCapability, ModelSource,
+    ModelSourceKind, PricePerUnit,
 pub use stage::{Stage, StageId, StageTone};

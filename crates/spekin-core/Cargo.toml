@@ -16,6 +16,7 @@ sha2 = "0.10"
 [dev-dependencies]
 # Property tests for context builder. Licence: MIT OR Apache-2.0.
 # Property tests for proposals and revisions. Licence: MIT OR Apache-2.0.
+# Property tests for proposals, revisions, ledger, and context builder. Licence: MIT OR Apache-2.0.
 proptest = "1"
 
 [dev-dependencies]
