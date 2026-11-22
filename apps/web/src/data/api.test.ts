@@ -13,7 +13,7 @@ const json = (body: unknown, status = 200) =>
 
 /** Mock fetch with one reply and hand back the spy, so tests can check the URL too. */
 function mockFetch(reply: Response | (() => Response | Promise<Response>)) {
-  const spy = vi.fn(async () => (typeof reply === 'function' ? reply() : reply));
+  const spy = vi.fn(async (..._args: Parameters<typeof fetch>) => (typeof reply === 'function' ? reply() : reply));
   vi.stubGlobal('fetch', spy);
   return spy;
 }
