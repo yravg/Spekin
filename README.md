@@ -8,7 +8,7 @@ Every change to the spec, the screens or the contracts is a reviewed **proposal*
 
 Spekin is open source under the [Apache License 2.0](LICENSE). We build it in the open with several AI coding agents and people working side by side. This repo has the rules and handoffs that keep that work consistent.
 
-> **Status: pre-alpha (P0 baseline).** The design canvas is complete: 13 screen boards, 74 states and 195 features. The app has a working skeleton, the S35 header, and a Rust core with API types shared with the UI. The screens are being built now, one board at a time. See [docs/ROADMAP.md](docs/ROADMAP.md).
+> **Status: pre-alpha (P0 baseline).** The design canvas is complete: 14 screen boards, 80 states and 212 features, including the free Skills library (S40). The app has a working skeleton, the S35 header, and a Rust core with API types shared with the UI. The screens are being built now, one board at a time. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## How we build: canvas first, then the same in code
 
@@ -47,7 +47,7 @@ npx playwright install chromium && npm run harness   # state gate (needs the app
 | `docs/adr`, `docs/DECISIONS.md` | Architecture decisions and the owner's decision log |
 | `docs/GLOSSARY.md` | Every term we use, defined once |
 | `tools/` | Board lint, state gate, house-rule checks and sync scripts |
-| `inputs/` | The PRD (v0.2.2) and the annotated wireframe brief |
+| `inputs/` | The PRD (canonical v0.2.3, with v0.2.2 kept) and the annotated wireframe brief |
 
 ## Contributing
 

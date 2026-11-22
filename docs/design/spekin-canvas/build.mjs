@@ -60,7 +60,8 @@ const PLAN = [
   ['S36', 'Model and usage: Hosted, BYOK, deferred Local agent; estimate, cap, ledger', 'after review'],
   ['S37', 'Build contracts and release readiness (Frontend to Deployment stages)', 'after review'],
   ['S38', 'Contextual GenUI panel: three card families, table fallback', 'after review'],
-  ['BW-T01 · BW-M01–03', 'Tablet and phone: frame list, single-frame review, hand off', 'after review'],
+  ['T01 · BW-T01 · BW-M01–03', 'Tablet and phone: frame list, single-frame review, hand off', 'after review'],
+  ['S40', 'Skills library: free templates, own copies, GitHub sources that update', 'this wave'],
 ];
 const cover = `<div class="board" style="min-height:1240px"><div class="hd"><div class="hdt"><span class="ey"><span class="tier">CANVAS</span>SPEKIN · LIVING SPEC AND DESIGN CANVAS · BY YRAVG</span><h1 class="ttl">Spekin: design canvas for review before build</h1><p class="ext">Browser-first workspace that takes an idea through eight stages, from Planning to Deployment, with a living spec, an infinite canvas and contextual chat. Drawn after OpenDesign (the main reference), with Paraframe, Onlook and Momo as pattern references. Every board shows the new design only. All data is one fictional sample project, Meranti Yard.</p></div></div>
 <div style="display:flex;gap:12px">${kpi('Boards drawn', K.BOARDS.length, 'of ' + PLAN.length + ' planned')}${kpi('Stories', S.length, 'feature IDs F101 and up')}${kpi('New', cnt('new'), 'nothing built yet')}${kpi('Partial / built', cnt('partial') + ' / ' + cnt('built'), 'no Spekin app exists yet')}</div>

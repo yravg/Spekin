@@ -34,7 +34,8 @@ No Python, no new crate without naming its licence in the PR. If unclear, write 
 
 | Area | Status | Evidence |
 |---|---|---|
-| Canvas: 13 boards, 74 states, 195 features, F00 map, R00 references | done | `npm run canvas:lint`: 13 boards pass, manifest current |
+| Canvas: 14 boards, 80 states, 212 features, F00 map, R00 references (S40 Skills library added 23 Nov) | done | `npm run canvas:lint`: 14 boards pass, manifest current |
+| Review supplement v1.0 and PRD v0.2.3 | triaged | [incoming/2026-11-23-review-supplement-v1.0.md](incoming/2026-11-23-review-supplement-v1.0.md). Canonical PRD is `inputs/Spekin-PRD-v0.2.3.md` (v0.2.2 kept for history). |
 | Repo standards: licence, NOTICE, README, CONTRIBUTING, SECURITY, glossary, ADRs, decisions, roadmap | done | this commit |
 | App skeleton: Vite, React, TS strict, router `/p/:project/:stage`, per-stage view store | done | `npm run build`, `npm test` |
 | S35 header (top bar and stage bar), same markup as the board | done, part open | Header text matches the board line for line in the harness. The pixel diff is the unbuilt work area. The `.ap-todo` stand-in is IMP-01. |
@@ -101,13 +102,15 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 |---|---|---|---|---|
 | IMP-01 | ui | S35 work area: chat, artifact tabs, canvas pane and inspector for the design and backend states | – | open |
 | IMP-02 | ui | S35 conflict state, save states (F112), per-stage memory across switches | IMP-01 | open |
-| IMP-05 | ui | S27 Projects home (6 states), and "/" becomes S27 | IMP-01 | open |
+| IMP-05 | ui | S27 Projects home (6 states), and "/" becomes S27 | IMP-01, C-01 | blocked (waits for C-01, the S27 intake redraw) |
 | IMP-03 | core | API source: typed client for the Rust API, equal to the sample | – | open |
 | IMP-04 | core | Proposals and revisions in the core (accept, reject, revert, stale) | – | open |
 | IMP-12 | core | No-Python and licence inventory check | – | open |
 | IMP-09 | core | Ledger: estimate, reserve, settle, caps | IMP-04 | open |
 | IMP-11 | core | Model sources and capability registry | – | open |
 | IMP-10 | core | GenUI schema validation, fail closed | – | open |
+| IMP-22 | core | Skills core: SkillManifest, versions, update policy and update checks | IMP-04 | open |
+| IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | open |
 | IMP-06 … IMP-08, IMP-13 … IMP-21 | ui | S28 … S38, T01, one card per board, written by the lead when P1 is done | P1 | open |
 
 ### IMP-01 · S35 work area (ui)
@@ -154,6 +157,43 @@ Types for the three sources (ADR 0005): Hosted, Local CLI (connector status: not
 ### IMP-10 · GenUI schema validation (core)
 
 A Rust validator for GenUI card JSON (families: checklist, comparison, question, as on S38). It rejects unknown components, invalid enums, excessive nesting or item counts, unsafe URLs, scripts and tool names, and privilege-raising actions. The result is `Ok(validated)` or `Rejected(reason)`, never a partial render. Tests cover each AC-SPK-25 case. This is SPK-T-13.
+
+### IMP-22 · Skills core (core)
+
+ADR 0007, board S40, data `sample/parts/skills.mjs`. In `spekin-core`, these types export to TypeScript:
+- `SkillManifest`: id, title, description, stages, source (template | github {repo, path, commit} | user), licence, notice, version, reads, proposes, tools, invocation.
+- `UpdatePolicy`: Auto | Notify | Pinned.
+- `UpdateCheck`, with outcomes.
+
+Pure functions:
+- `parse_skill_md(text) -> Result<SkillManifest, SkillError>`: YAML frontmatter needs `name` and `description`, and the body is kept as text.
+- `classify_update(old, new) -> Apply | Hold(reasons)`. Hold when the licence changed, a tool was added, a script was added, or the text matches an injection pattern list (AC-SPK-39).
+- `enforce(manifest, context) -> allowed context`, which returns only the declared `reads`.
+
+Tests:
+- a real SKILL.md shape parses, and one without a name fails;
+- wording-only updates apply;
+- an added tool, a script or a licence change is held, each with its reason;
+- a skill asking for shell or secret export is held and stays data;
+- copies keep the notice.
+
+There is no network code in this card. Fetching from GitHub is a later card.
+
+### IMP-23 · S40 Skills library (ui)
+
+Board `S40-skills-library.dc.html`, states `library, detail, edit, github, updates, use`. It reads `@spekin/sample` (SKL_*) until IMP-22's API exists. All six states must PASS the harness. The `/` list is keyboard-first: arrows move, Enter picks, Escape closes and keeps the text. A switch never runs anything.
+
+## Lead canvas tasks (from the review supplement)
+
+These change boards, so only the lead does them: edit the generator, rebuild, lint, `npm run canvas:states`, then republish.
+
+| Task | Board | Change | Blocks |
+|---|---|---|---|
+| C-01 | S27 | "Create" becomes four domain choices plus one idea box, Bahasa first, with no name or language wizard (REV-03; owner to confirm) | IMP-05 |
+| C-02 | F00 and all boards | Add the PRD R-IDs to every story so features trace to requirements (REV-05) | – |
+| C-03 | S33 | Accept/Reject wording, and an audit row when you reject (REV-08) | S33 card |
+| C-04 | S28 | Say "providers must not train on your files" as a requirement we check, not a guarantee (REV-11) | S28 card |
+| C-05 | S36 | Local CLI stays a source; its run path is marked later (REV-02, ADR 0005) | S36 card |
 
 ## Open decisions (owner)
 

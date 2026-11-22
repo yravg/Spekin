@@ -135,6 +135,14 @@
    "h": 3543,
    "title": "T01 · Tablet and phone: frame list, review and hand off",
    "is_interactive": true
+  },
+  "S40-skills-library.dc.html": {
+   "x": 0,
+   "y": 44052,
+   "w": 1900,
+   "h": 3087,
+   "title": "S40 · Skills library: free templates, your own copies, GitHub sources that update",
+   "is_interactive": true
   }
  },
  "order": [
@@ -153,7 +161,8 @@
   "S34-coding-handoff.dc.html",
   "S37-build-contracts.dc.html",
   "S36-models-usage.dc.html",
-  "T01-tablet-phone.dc.html"
+  "T01-tablet-phone.dc.html",
+  "S40-skills-library.dc.html"
  ],
  "notes": {
   "t0": {
@@ -202,6 +211,13 @@
    "x": 0,
    "y": 38292,
    "text": "Models, usage and devices",
+   "kind": "title1",
+   "maxW": 1600
+  },
+  "t7": {
+   "x": 0,
+   "y": 43752,
+   "text": "Skills library",
    "kind": "title1",
    "maxW": 1600
   }

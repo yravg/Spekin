@@ -1,0 +1,17 @@
+{
+  "checked": "2026-11-23 00:08:54 Asia/Shanghai UTC+8",
+  "originalHandoffExactMatch": true,
+  "originalHandoffSha256": "c8211db7ef868956a638361e5d4e1e6357304447fed6dabcda6edb7bc82d156f",
+  "originalHandoffId": "1guu6iTXIAI9Y4WvLUtYLEy-jaMqF_u5n",
+  "originalNotYetGivenToClaude": true,
+  "reviewExactMatch": true,
+  "supplementPromptExactMatch": true,
+  "noTruncatedReads": true,
+  "pdfTextReadable": true,
+  "pdfParentsCorrect": true,
+  "pdfSizeExact": true,
+  "pdfMd5Local": "735c521ef1e09dbbbc5ca6a2a6cafe22",
+  "pdfMd5Drive": null,
+  "pdfShared": false,
+  "pdfBytes": 1099484
+}

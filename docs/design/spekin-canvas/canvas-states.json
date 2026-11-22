@@ -15276,6 +15276,1326 @@
     ]
   },
   {
+    "board": "S40-skills-library.dc.html",
+    "hash": "acd80886a9c738a9",
+    "screen": "S40",
+    "features": [
+      "F361",
+      "F362",
+      "F363",
+      "F364",
+      "F365",
+      "F366",
+      "F367",
+      "F368",
+      "F369",
+      "F370",
+      "F371",
+      "F372",
+      "F373",
+      "F374",
+      "F375",
+      "F376",
+      "F377",
+      "F101",
+      "F102",
+      "F103",
+      "F104",
+      "F106",
+      "F107",
+      "F109",
+      "F111",
+      "F112",
+      "F114",
+      "F115"
+    ],
+    "states": [
+      {
+        "state": "library",
+        "entry": "Any stage › artifact tabs: Skills.",
+        "data": "sample/parts/skills.mjs → SKL_SKILLS, SKL_STAGES, SKL_SOURCES."
+      },
+      {
+        "state": "detail",
+        "entry": "Skills › click Grill the idea.",
+        "data": "sample/parts/skills.mjs → SKL_DETAIL."
+      },
+      {
+        "state": "edit",
+        "entry": "Skills › Grill the idea › Copy and edit.",
+        "data": "sample/parts/skills.mjs → SKL_EDIT."
+      },
+      {
+        "state": "github",
+        "entry": "Skills › Add from GitHub › paste link › Scan.",
+        "data": "sample/parts/skills.mjs → SKL_GH."
+      },
+      {
+        "state": "updates",
+        "entry": "Skills › Updates.",
+        "data": "sample/parts/skills.mjs → SKL_UPDATES, SKL_DIFF."
+      },
+      {
+        "state": "use",
+        "entry": "Specification chat › type / › Grill the idea › Send.",
+        "data": "sample/parts/skills.mjs → SKL_SKILLS, SKL_GLOSS."
+      }
+    ],
+    "controls": [
+      {
+        "does": "Opens the quick project switcher (Cmd/Ctrl+K), most recent first; switching restores only that project's saved state",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens the increment picker: which feature increment the stages describe",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens the accepted spec revision and its history (S07); never edits it",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens S36 usage: estimate, reservations, actuals, cap and remaining credits; the bar turns amber at 70% and red at 90% of the cap",
+        "feature": "F111"
+      },
+      {
+        "does": "Opens the Agent Inbox: running jobs and approvals, beside the work, never over it",
+        "feature": "F109"
+      },
+      {
+        "does": "Shows the UI in English",
+        "feature": "F115"
+      },
+      {
+        "does": "Shows the UI in Bahasa Indonesia",
+        "feature": "F115"
+      },
+      {
+        "does": "Switches the main workspace to Planning in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Specification in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Design in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Frontend in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Backend in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Integration in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Testing in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Deployment in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Opens the stage inspector: required artifacts, blockers, evidence and next proposed action for the current stage",
+        "feature": "F101"
+      },
+      {
+        "does": "Drag to resize the chat column (300 to 520 px); the width is remembered per project",
+        "feature": "F114"
+      },
+      {
+        "does": "Lists earlier chats of this stage",
+        "feature": "F114"
+      },
+      {
+        "does": "Starts a new chat in this stage; the context list is kept",
+        "feature": "F114"
+      },
+      {
+        "does": "Collapses the chat panel; the board keeps its viewport",
+        "feature": "F114"
+      },
+      {
+        "does": "Removes Spec §3 from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Removes GLOSSARY.md from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Removes ADR 0003 from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Adds a frame, artifact, requirement or reference to the context list",
+        "feature": "F106"
+      },
+      {
+        "does": "Attaches a PNG, JPEG or WebP the user picked; nothing is read without a file choice",
+        "feature": "F114"
+      },
+      {
+        "does": "Inserts an artifact reference and adds it to the context list",
+        "feature": "F106"
+      },
+      {
+        "does": "Opens the model source picker: Hosted, BYOK, Local agent (deferred); provider, model, limits, billing source",
+        "feature": "F107"
+      },
+      {
+        "does": "Sends the message with exactly the listed context; a paid run reserves its maximum first",
+        "feature": "F114"
+      },
+      {
+        "does": "Shows Spec §3 in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Shows GLOSSARY.md in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Shows Skills in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Opens another artifact of this project in a new tab",
+        "feature": "F104"
+      },
+      {
+        "does": "Opens S34: downloads only accepted revisions with a fixed revision manifest; chosen skills go in the package",
+        "feature": "F377"
+      },
+      {
+        "does": "Opens the update history: what changed, what was applied, what waits, with roll back",
+        "feature": "F373"
+      },
+      {
+        "does": "Opens the GitHub import: paste a repo link, see its skills and licence, pick, set how it updates",
+        "feature": "F370"
+      },
+      {
+        "does": "Starts a new skill from a blank template or a copy of one you pick",
+        "feature": "F367"
+      },
+      {
+        "does": "Shows only skills for every stage",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills for Planning",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills for Specification",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills for Design",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills for Frontend",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills for Backend",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills for Integration",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills for Testing",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills for Deployment",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills from Spekin templates",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills from mattpocock/skills",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills from Made in this workspace",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills switched on in this project",
+        "feature": "F364"
+      },
+      {
+        "does": "Shows updates that wait for your review",
+        "feature": "F372"
+      },
+      {
+        "does": "Opens Grill the idea with a Use and a Copy button",
+        "feature": "F362"
+      },
+      {
+        "does": "Opens Write the spec in EARS with a Use and a Copy button",
+        "feature": "F362"
+      },
+      {
+        "does": "Opens Split into tickets with a Use and a Copy button",
+        "feature": "F362"
+      },
+      {
+        "does": "Opens Test first with a Use and a Copy button",
+        "feature": "F362"
+      },
+      {
+        "does": "Turns this skill off for this project; runs already made keep their proposals",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Turns this skill off for this project; runs already made keep their proposals",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Turns this skill off for this project; runs already made keep their proposals",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Turns this skill off for this project; runs already made keep their proposals",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Turns this skill on for this project; it then shows in the / list of its stages",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Turns this skill off for this project; runs already made keep their proposals",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Turns this skill off for this project; runs already made keep their proposals",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Turns this skill on for this project; it then shows in the / list of its stages",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Turns this skill off for this project; runs already made keep their proposals",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Opens the quick project switcher (Cmd/Ctrl+K), most recent first; switching restores only that project's saved state",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens the increment picker: which feature increment the stages describe",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens the accepted spec revision and its history (S07); never edits it",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens S36 usage: estimate, reservations, actuals, cap and remaining credits; the bar turns amber at 70% and red at 90% of the cap",
+        "feature": "F111"
+      },
+      {
+        "does": "Opens the Agent Inbox: running jobs and approvals, beside the work, never over it",
+        "feature": "F109"
+      },
+      {
+        "does": "Shows the UI in English",
+        "feature": "F115"
+      },
+      {
+        "does": "Shows the UI in Bahasa Indonesia",
+        "feature": "F115"
+      },
+      {
+        "does": "Switches the main workspace to Planning in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Specification in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Design in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Frontend in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Backend in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Integration in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Testing in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Deployment in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Opens the stage inspector: required artifacts, blockers, evidence and next proposed action for the current stage",
+        "feature": "F101"
+      },
+      {
+        "does": "Drag to resize the chat column (300 to 520 px); the width is remembered per project",
+        "feature": "F114"
+      },
+      {
+        "does": "Lists earlier chats of this stage",
+        "feature": "F114"
+      },
+      {
+        "does": "Starts a new chat in this stage; the context list is kept",
+        "feature": "F114"
+      },
+      {
+        "does": "Collapses the chat panel; the board keeps its viewport",
+        "feature": "F114"
+      },
+      {
+        "does": "Removes Spec §3 from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Removes GLOSSARY.md from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Removes ADR 0003 from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Adds a frame, artifact, requirement or reference to the context list",
+        "feature": "F106"
+      },
+      {
+        "does": "Attaches a PNG, JPEG or WebP the user picked; nothing is read without a file choice",
+        "feature": "F114"
+      },
+      {
+        "does": "Inserts an artifact reference and adds it to the context list",
+        "feature": "F106"
+      },
+      {
+        "does": "Opens the model source picker: Hosted, BYOK, Local agent (deferred); provider, model, limits, billing source",
+        "feature": "F107"
+      },
+      {
+        "does": "Sends the message with exactly the listed context; a paid run reserves its maximum first",
+        "feature": "F114"
+      },
+      {
+        "does": "Shows Spec §3 in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Shows GLOSSARY.md in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Shows Skills in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Opens another artifact of this project in a new tab",
+        "feature": "F104"
+      },
+      {
+        "does": "Opens S34: downloads only accepted revisions with a fixed revision manifest; chosen skills go in the package",
+        "feature": "F377"
+      },
+      {
+        "does": "Goes back to the skills list with your filters kept",
+        "feature": "F365"
+      },
+      {
+        "does": "Makes your own copy (version 1) and opens it in the editor; the original keeps updating",
+        "feature": "F367"
+      },
+      {
+        "does": "Puts /grill in the composer with the current context list; nothing runs until Send",
+        "feature": "F374"
+      },
+      {
+        "does": "Opens the source folder on GitHub at the pinned commit, in a new tab",
+        "feature": "F366"
+      },
+      {
+        "does": "Applies updates that pass the safety checks; anything else waits for you",
+        "feature": "F371"
+      },
+      {
+        "does": "Shows new versions; you apply them",
+        "feature": "F371"
+      },
+      {
+        "does": "Stays on this commit until you change it",
+        "feature": "F371"
+      },
+      {
+        "does": "Turns this skill off for this project; runs already made keep their proposals",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the quick project switcher (Cmd/Ctrl+K), most recent first; switching restores only that project's saved state",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens the increment picker: which feature increment the stages describe",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens the accepted spec revision and its history (S07); never edits it",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens S36 usage: estimate, reservations, actuals, cap and remaining credits; the bar turns amber at 70% and red at 90% of the cap",
+        "feature": "F111"
+      },
+      {
+        "does": "Opens the Agent Inbox: running jobs and approvals, beside the work, never over it",
+        "feature": "F109"
+      },
+      {
+        "does": "Shows the UI in English",
+        "feature": "F115"
+      },
+      {
+        "does": "Shows the UI in Bahasa Indonesia",
+        "feature": "F115"
+      },
+      {
+        "does": "Switches the main workspace to Planning in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Specification in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Design in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Frontend in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Backend in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Integration in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Testing in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Deployment in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Opens the stage inspector: required artifacts, blockers, evidence and next proposed action for the current stage",
+        "feature": "F101"
+      },
+      {
+        "does": "Drag to resize the chat column (300 to 520 px); the width is remembered per project",
+        "feature": "F114"
+      },
+      {
+        "does": "Lists earlier chats of this stage",
+        "feature": "F114"
+      },
+      {
+        "does": "Starts a new chat in this stage; the context list is kept",
+        "feature": "F114"
+      },
+      {
+        "does": "Collapses the chat panel; the board keeps its viewport",
+        "feature": "F114"
+      },
+      {
+        "does": "Removes Spec §3 from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Removes GLOSSARY.md from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Removes ADR 0003 from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Adds a frame, artifact, requirement or reference to the context list",
+        "feature": "F106"
+      },
+      {
+        "does": "Attaches a PNG, JPEG or WebP the user picked; nothing is read without a file choice",
+        "feature": "F114"
+      },
+      {
+        "does": "Inserts an artifact reference and adds it to the context list",
+        "feature": "F106"
+      },
+      {
+        "does": "Opens the model source picker: Hosted, BYOK, Local agent (deferred); provider, model, limits, billing source",
+        "feature": "F107"
+      },
+      {
+        "does": "Sends the message with exactly the listed context; a paid run reserves its maximum first",
+        "feature": "F114"
+      },
+      {
+        "does": "Shows Spec §3 in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Shows GLOSSARY.md in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Shows Skills in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Opens another artifact of this project in a new tab",
+        "feature": "F104"
+      },
+      {
+        "does": "Opens S34: downloads only accepted revisions with a fixed revision manifest; chosen skills go in the package",
+        "feature": "F377"
+      },
+      {
+        "does": "Drops the unsaved changes; the saved version stays",
+        "feature": "F368"
+      },
+      {
+        "does": "Saves version 2; projects using version 1 keep it until you switch them",
+        "feature": "F368"
+      },
+      {
+        "does": "Adds or removes Planning from where this skill is offered",
+        "feature": "F368"
+      },
+      {
+        "does": "Adds or removes Specification from where this skill is offered",
+        "feature": "F368"
+      },
+      {
+        "does": "Adds or removes Design from where this skill is offered",
+        "feature": "F368"
+      },
+      {
+        "does": "Adds or removes Testing from where this skill is offered",
+        "feature": "F368"
+      },
+      {
+        "does": "Runs the draft once more on the sample context; about 3 cr, shown before it runs",
+        "feature": "F369"
+      },
+      {
+        "does": "Opens the quick project switcher (Cmd/Ctrl+K), most recent first; switching restores only that project's saved state",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens the increment picker: which feature increment the stages describe",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens the accepted spec revision and its history (S07); never edits it",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens S36 usage: estimate, reservations, actuals, cap and remaining credits; the bar turns amber at 70% and red at 90% of the cap",
+        "feature": "F111"
+      },
+      {
+        "does": "Opens the Agent Inbox: running jobs and approvals, beside the work, never over it",
+        "feature": "F109"
+      },
+      {
+        "does": "Shows the UI in English",
+        "feature": "F115"
+      },
+      {
+        "does": "Shows the UI in Bahasa Indonesia",
+        "feature": "F115"
+      },
+      {
+        "does": "Switches the main workspace to Planning in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Specification in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Design in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Frontend in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Backend in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Integration in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Testing in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Deployment in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Opens the stage inspector: required artifacts, blockers, evidence and next proposed action for the current stage",
+        "feature": "F101"
+      },
+      {
+        "does": "Drag to resize the chat column (300 to 520 px); the width is remembered per project",
+        "feature": "F114"
+      },
+      {
+        "does": "Lists earlier chats of this stage",
+        "feature": "F114"
+      },
+      {
+        "does": "Starts a new chat in this stage; the context list is kept",
+        "feature": "F114"
+      },
+      {
+        "does": "Collapses the chat panel; the board keeps its viewport",
+        "feature": "F114"
+      },
+      {
+        "does": "Removes Spec §3 from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Removes GLOSSARY.md from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Removes ADR 0003 from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Adds a frame, artifact, requirement or reference to the context list",
+        "feature": "F106"
+      },
+      {
+        "does": "Attaches a PNG, JPEG or WebP the user picked; nothing is read without a file choice",
+        "feature": "F114"
+      },
+      {
+        "does": "Inserts an artifact reference and adds it to the context list",
+        "feature": "F106"
+      },
+      {
+        "does": "Opens the model source picker: Hosted, BYOK, Local agent (deferred); provider, model, limits, billing source",
+        "feature": "F107"
+      },
+      {
+        "does": "Sends the message with exactly the listed context; a paid run reserves its maximum first",
+        "feature": "F114"
+      },
+      {
+        "does": "Shows Spec §3 in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Shows GLOSSARY.md in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Shows Skills in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Opens another artifact of this project in a new tab",
+        "feature": "F104"
+      },
+      {
+        "does": "Opens S34: downloads only accepted revisions with a fixed revision manifest; chosen skills go in the package",
+        "feature": "F377"
+      },
+      {
+        "does": "Opens the update history: what changed, what was applied, what waits, with roll back",
+        "feature": "F373"
+      },
+      {
+        "does": "Opens the GitHub import: paste a repo link, see its skills and licence, pick, set how it updates",
+        "feature": "F370"
+      },
+      {
+        "does": "Starts a new skill from a blank template or a copy of one you pick",
+        "feature": "F367"
+      },
+      {
+        "does": "Shows only skills for every stage",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills for Planning",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills for Specification",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills for Design",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills for Frontend",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills for Backend",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills for Integration",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills for Testing",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills for Deployment",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills from Spekin templates",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills from mattpocock/skills",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills from Made in this workspace",
+        "feature": "F361"
+      },
+      {
+        "does": "Shows only skills switched on in this project",
+        "feature": "F364"
+      },
+      {
+        "does": "Shows updates that wait for your review",
+        "feature": "F372"
+      },
+      {
+        "does": "Opens Grill the idea with a Use and a Copy button",
+        "feature": "F362"
+      },
+      {
+        "does": "Opens Write the spec in EARS with a Use and a Copy button",
+        "feature": "F362"
+      },
+      {
+        "does": "Opens Split into tickets with a Use and a Copy button",
+        "feature": "F362"
+      },
+      {
+        "does": "Opens Test first with a Use and a Copy button",
+        "feature": "F362"
+      },
+      {
+        "does": "Turns this skill off for this project; runs already made keep their proposals",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Turns this skill off for this project; runs already made keep their proposals",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Turns this skill off for this project; runs already made keep their proposals",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Turns this skill off for this project; runs already made keep their proposals",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Turns this skill on for this project; it then shows in the / list of its stages",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Turns this skill off for this project; runs already made keep their proposals",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Turns this skill off for this project; runs already made keep their proposals",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Turns this skill on for this project; it then shows in the / list of its stages",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Turns this skill off for this project; runs already made keep their proposals",
+        "feature": "F364"
+      },
+      {
+        "does": "Opens the skill: what it does, what it reads and proposes, its source, licence and updates",
+        "feature": "F365"
+      },
+      {
+        "does": "Closes the import; nothing is added",
+        "feature": "F370"
+      },
+      {
+        "does": "Reads the repository: finds SKILL.md folders, the licence and any scripts; runs nothing",
+        "feature": "F370"
+      },
+      {
+        "does": "Closes the import; nothing is added",
+        "feature": "F370"
+      },
+      {
+        "does": "Adds the 6 chosen skills at commit 9b1f07e with their licence notice; they start switched off in this project",
+        "feature": "F370"
+      },
+      {
+        "does": "Opens the quick project switcher (Cmd/Ctrl+K), most recent first; switching restores only that project's saved state",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens the increment picker: which feature increment the stages describe",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens the accepted spec revision and its history (S07); never edits it",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens S36 usage: estimate, reservations, actuals, cap and remaining credits; the bar turns amber at 70% and red at 90% of the cap",
+        "feature": "F111"
+      },
+      {
+        "does": "Opens the Agent Inbox: running jobs and approvals, beside the work, never over it",
+        "feature": "F109"
+      },
+      {
+        "does": "Shows the UI in English",
+        "feature": "F115"
+      },
+      {
+        "does": "Shows the UI in Bahasa Indonesia",
+        "feature": "F115"
+      },
+      {
+        "does": "Switches the main workspace to Planning in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Specification in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Design in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Frontend in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Backend in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Integration in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Testing in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Deployment in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Opens the stage inspector: required artifacts, blockers, evidence and next proposed action for the current stage",
+        "feature": "F101"
+      },
+      {
+        "does": "Drag to resize the chat column (300 to 520 px); the width is remembered per project",
+        "feature": "F114"
+      },
+      {
+        "does": "Lists earlier chats of this stage",
+        "feature": "F114"
+      },
+      {
+        "does": "Starts a new chat in this stage; the context list is kept",
+        "feature": "F114"
+      },
+      {
+        "does": "Collapses the chat panel; the board keeps its viewport",
+        "feature": "F114"
+      },
+      {
+        "does": "Removes Spec §3 from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Removes GLOSSARY.md from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Removes ADR 0003 from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Adds a frame, artifact, requirement or reference to the context list",
+        "feature": "F106"
+      },
+      {
+        "does": "Attaches a PNG, JPEG or WebP the user picked; nothing is read without a file choice",
+        "feature": "F114"
+      },
+      {
+        "does": "Inserts an artifact reference and adds it to the context list",
+        "feature": "F106"
+      },
+      {
+        "does": "Opens the model source picker: Hosted, BYOK, Local agent (deferred); provider, model, limits, billing source",
+        "feature": "F107"
+      },
+      {
+        "does": "Sends the message with exactly the listed context; a paid run reserves its maximum first",
+        "feature": "F114"
+      },
+      {
+        "does": "Shows Spec §3 in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Shows GLOSSARY.md in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Shows Skills in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Opens another artifact of this project in a new tab",
+        "feature": "F104"
+      },
+      {
+        "does": "Opens S34: downloads only accepted revisions with a fixed revision manifest; chosen skills go in the package",
+        "feature": "F377"
+      },
+      {
+        "does": "Goes back to the skills list",
+        "feature": "F373"
+      },
+      {
+        "does": "Checks every source for new versions now instead of at 06:00",
+        "feature": "F372"
+      },
+      {
+        "does": "Returns this source to 4c9e2a1; projects keep their accepted proposals",
+        "feature": "F373"
+      },
+      {
+        "does": "Returns this source to e17a6c0; projects keep their accepted proposals",
+        "feature": "F373"
+      },
+      {
+        "does": "Returns this source to v0.3; projects keep their accepted proposals",
+        "feature": "F373"
+      },
+      {
+        "does": "Stays on the current version; the update stays listed",
+        "feature": "F372"
+      },
+      {
+        "does": "Applies the wording change and leaves the new tool out",
+        "feature": "F372"
+      },
+      {
+        "does": "Applies the update including the new tool request; the tool still asks before each use",
+        "feature": "F372"
+      },
+      {
+        "does": "Opens the quick project switcher (Cmd/Ctrl+K), most recent first; switching restores only that project's saved state",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens the increment picker: which feature increment the stages describe",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens the accepted spec revision and its history (S07); never edits it",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens the job list: what is designing, what waits and why; a job never runs without a reserved maximum",
+        "feature": "F109"
+      },
+      {
+        "does": "Opens S36 usage: estimate, reservations, actuals, cap and remaining credits; the bar turns amber at 70% and red at 90% of the cap",
+        "feature": "F111"
+      },
+      {
+        "does": "Opens the Agent Inbox: running jobs and approvals, beside the work, never over it",
+        "feature": "F109"
+      },
+      {
+        "does": "Shows the UI in English",
+        "feature": "F115"
+      },
+      {
+        "does": "Shows the UI in Bahasa Indonesia",
+        "feature": "F115"
+      },
+      {
+        "does": "Switches the main workspace to Planning in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Specification in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Design in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Frontend in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Backend in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Integration in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Testing in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Deployment in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Opens the stage inspector: required artifacts, blockers, evidence and next proposed action for the current stage",
+        "feature": "F101"
+      },
+      {
+        "does": "Drag to resize the chat column (300 to 520 px); the width is remembered per project",
+        "feature": "F114"
+      },
+      {
+        "does": "Lists earlier chats of this stage",
+        "feature": "F114"
+      },
+      {
+        "does": "Starts a new chat in this stage; the context list is kept",
+        "feature": "F114"
+      },
+      {
+        "does": "Collapses the chat panel; the board keeps its viewport",
+        "feature": "F114"
+      },
+      {
+        "does": "Removes Spec §3 from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Removes GLOSSARY.md from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Removes ADR 0003 from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Adds a frame, artifact, requirement or reference to the context list",
+        "feature": "F106"
+      },
+      {
+        "does": "Sends the 3 proposals to S33 review; the spec changes only when you accept there",
+        "feature": "F375"
+      },
+      {
+        "does": "Drops these proposals; the run is kept in history",
+        "feature": "F375"
+      },
+      {
+        "does": "Picks Grill the idea: shows what it reads and an estimate before Send",
+        "feature": "F374"
+      },
+      {
+        "does": "Picks Write the spec in EARS: shows what it reads and an estimate before Send",
+        "feature": "F374"
+      },
+      {
+        "does": "Picks Split into tickets: shows what it reads and an estimate before Send",
+        "feature": "F374"
+      },
+      {
+        "does": "Picks Trace requirement to test: shows what it reads and an estimate before Send",
+        "feature": "F374"
+      },
+      {
+        "does": "Opens the Skills tab",
+        "feature": "F374"
+      },
+      {
+        "does": "Attaches a PNG, JPEG or WebP the user picked; nothing is read without a file choice",
+        "feature": "F114"
+      },
+      {
+        "does": "Inserts an artifact reference and adds it to the context list",
+        "feature": "F106"
+      },
+      {
+        "does": "Opens the model source picker: Hosted, BYOK, Local agent (deferred); provider, model, limits, billing source",
+        "feature": "F107"
+      },
+      {
+        "does": "Sends the message with exactly the listed context; a paid run reserves its maximum first",
+        "feature": "F114"
+      },
+      {
+        "does": "Shows Spec §3 in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Shows GLOSSARY.md in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Shows Skills in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Opens another artifact of this project in a new tab",
+        "feature": "F104"
+      },
+      {
+        "does": "Opens S34: downloads only accepted revisions with a fixed revision manifest; chosen skills go in the package",
+        "feature": "F377"
+      },
+      {
+        "does": "Opens S33 with the waiting proposals for this document",
+        "feature": "F375"
+      }
+    ],
+    "later": [
+      "Share with other workspaces or publish to the community library"
+    ]
+  },
+  {
     "board": "T01-tablet-phone.dc.html",
     "hash": "f3062a1212756277",
     "screen": "T01",

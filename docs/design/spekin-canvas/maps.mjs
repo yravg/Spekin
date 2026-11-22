@@ -16,6 +16,7 @@ export const BOARD_META = {
   S37: { stage: 'Backend to Deployment', layers: ['core', 'ui'] },
   S38: { stage: 'All stages', layers: ['genui', 'core'] },
   T01: { stage: 'Design review on the go', layers: ['ui'] },
+  S40: { stage: 'All stages', layers: ['ui', 'core', 'agent'] },
 };
 
 // The engine Spekin runs on, layer by layer. take = what Spekin uses; from = where the idea or code comes from.
@@ -62,5 +63,6 @@ export const LICENCES = [
   ['OpenDesign', 'nexu-io/open-design @ e033aad', 'Apache-2.0', 'Reuse code with LICENSE, NOTICE and change notes. Bundled templates keep their own licences; brand-named design systems and JiduMono font: do not reuse.'],
   ['Onlook', 'onlook-dev/onlook (v2, Electron)', 'Apache-2.0', 'Pure TS maths and patterns only. Central Icons, Onlook marks, sounds and idea images are not covered: never copy.'],
   ['Momo', 'momo-next', 'none (all rights reserved)', 'Patterns only. Use the same MIT libraries directly (OpenUI react-lang, zod, xyflow, motion).'],
+  ['mattpocock/skills', 'github.com/mattpocock/skills (pinned commit per import)', 'MIT', 'Skills may be bundled, adapted and served. Keep "Copyright (c) 2026 Matt Pocock" and the MIT text with every copy and export; rename skills that carry his name; his courses are not covered.'],
   ['Paraframe', 'proprietary desktop app (doc pack only)', 'proprietary', 'Behaviour only. Terms forbid reverse engineering; never copy labels, wording, URLs or assets.'],
 ];

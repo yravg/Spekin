@@ -1,0 +1,266 @@
+{
+  "generated": "2026-11-23 00:09:45 GMT+8 Asia/Shanghai UTC+8",
+  "scope": "Explicit internal evidence allowlist; no product implementation or existing-file mutation",
+  "files": [
+    {
+      "path": "SUPPLEMENT-READ-ME-v1.0.md",
+      "bytes": 4251,
+      "sha256": "404fe91f1ecaeb79cea1a93b9a81271aa843211badd6002460cb867e2d585eca"
+    },
+    {
+      "path": "SUPPLEMENT-REVIEW-AND-DELTA-v1.0.md",
+      "bytes": 53087,
+      "sha256": "d7a7158716e59fe9cb4eaea7cba5e7bf238c57553f49d4da37bd225536ab5f56"
+    },
+    {
+      "path": "SUPPLEMENT-CLAUDE-CONTINUATION-v1.0.md",
+      "bytes": 6954,
+      "sha256": "f760e89ad7bd516e45417594164d9c52fe8d509b27c573c7b80ce322726f3d7d"
+    },
+    {
+      "path": "Spekin-SUPPLEMENT-v1.0.pdf",
+      "bytes": 1099484,
+      "sha256": "24b59fcb1df94a0ba1111b5530b0a70a5a32f4b00ac1abd840818dc0f3b2ee4b"
+    },
+    {
+      "path": "Spekin-SUPPLEMENT-offline-v1.0.html",
+      "bytes": 765192,
+      "sha256": "41a36c866eccd906cbf5c161604289abf858ccc4275751458fdf9fb9922ae703"
+    },
+    {
+      "path": "ANNOTATED-EXISTING-S29-S35-v1.html",
+      "bytes": 690026,
+      "sha256": "f1c427484b3a348443fe18598125e3b23d7cecf55c5acc2a5b6c4c2319233c10"
+    },
+    {
+      "path": "OPTIONAL-ARCHITECTURE-CLARITY-CONCEPT-v1.svg",
+      "bytes": 5285,
+      "sha256": "55baf11fa529d99998ef4c1410af6bb06b640940e3198ff85aa6f046fe2ca63b"
+    },
+    {
+      "path": "EVIDENCE-GAP-MATRIX-v1.csv",
+      "bytes": 16610,
+      "sha256": "a0578805a90748d6c602e512b8508a808fbe7d18b395c9b931d18ddd9383d758"
+    },
+    {
+      "path": "FEATURE-CLAIMS-195-v1.csv",
+      "bytes": 47636,
+      "sha256": "b74c0c712d6b0ad52bac98ea3f09629be8ea7e73eeae77e6a4c15c410ea6aff5"
+    },
+    {
+      "path": "REQUIREMENT-CROSSWALK-334-v1.csv",
+      "bytes": 167729,
+      "sha256": "c4299cf331b29082160b1c6640e91be3b096b6241db3e9bee474dffbf4a16773"
+    },
+    {
+      "path": "VIDEO-SOURCE-TO-SPEKIN-v1.csv",
+      "bytes": 3565,
+      "sha256": "521e435688f228f1df4e3d910ae52addf3b007edcce2acdb5dd3cd8f2d584b5c"
+    },
+    {
+      "path": "ACCEPTANCE-REVIEW-CHECKS-v1.csv",
+      "bytes": 4673,
+      "sha256": "7b7af880d12c120cff7e7975ce67b1cd6bfe3e4cddb0c237ae03123fa0ee436e"
+    },
+    {
+      "path": "OWNER-CLARIFICATION-AND-DECISION-NOTES-v1.md",
+      "bytes": 3229,
+      "sha256": "ad94032acc300ad5893397fe45bc329840c5eae2cea08693199a6bf130f2816a"
+    },
+    {
+      "path": "REVIEW-INVENTORY-v1.json",
+      "bytes": 900,
+      "sha256": "2d49e7bdaa8a9bfb0240b003ae9e592841097745bc8ba58afbbdd1e41f9343a1"
+    },
+    {
+      "path": "CANONICAL-PRESERVATION-CHECK.json",
+      "bytes": 350,
+      "sha256": "c0261eab449f4dd8456fb4a881d12fd3bca2654ee69fa606aee2a78685cbea76"
+    },
+    {
+      "path": "DRIVE-SUPPLEMENT-READBACK-CHECKS.json",
+      "bytes": 584,
+      "sha256": "ff0ef17b5d90c73e971c7bb7ceb6d3d1835dcd88749a12e51e1d1764cdd2e369"
+    },
+    {
+      "path": "DOCUMENT-RENDER-CHECKS.json",
+      "bytes": 217,
+      "sha256": "2937699b91f12294befe9905b578ea9cc0d330aa0fec45aa53c0d41656a0cc0d"
+    },
+    {
+      "path": "ROOT-README-PRESERVATION-AUDIT.json",
+      "bytes": 1271,
+      "sha256": "ba4ee944ba306fc825f162b547c4a6c2180416a7447f33103131a125d8190610"
+    },
+    {
+      "path": "SUPPLEMENT-LINKS.json",
+      "bytes": 675,
+      "sha256": "2dee21267c192e62a7ce4af987b17f5266bac533859c7509fb593070c5859871"
+    },
+    {
+      "path": "sources/owner-artifact/boards/00-cover.md",
+      "bytes": 4468,
+      "sha256": "6b87f4749a4dd2cf90f9ee4e0787f5be20d4215aff3d392599b17f4d39749686"
+    },
+    {
+      "path": "sources/owner-artifact/boards/01-feature-map.md",
+      "bytes": 36466,
+      "sha256": "003b1a757455c8a546f9224a1d6e71cbda7c7ca0c53697a249fd017b2f4ccd39"
+    },
+    {
+      "path": "sources/owner-artifact/boards/02-references-engine.md",
+      "bytes": 8718,
+      "sha256": "1025d0bd95f9b9fd09ec467c95cdff2056f2d353ca737e0720fff77be513cf6f"
+    },
+    {
+      "path": "sources/owner-artifact/boards/03-project-shell.md",
+      "bytes": 9664,
+      "sha256": "b483c964e6e3d5273d488c45be709f34ec9af2f224108f9283f10716c337e598"
+    },
+    {
+      "path": "sources/owner-artifact/boards/04-projects-home.md",
+      "bytes": 9418,
+      "sha256": "157af02515558985c2d40723f5c5a1548041283c8d4a74af77a31ff1cacaa471"
+    },
+    {
+      "path": "sources/owner-artifact/boards/05-reference-intake.md",
+      "bytes": 9388,
+      "sha256": "74d9b43850df721bd85f938ab3081e2a6aa9317c4c57b52c5edb36344e18cb71"
+    },
+    {
+      "path": "sources/owner-artifact/boards/06-frames-canvas.md",
+      "bytes": 11340,
+      "sha256": "40bd1bffaebe9db6e5c480568b7fcee48aab5384b81f823fe50c7b9987dd2f2a"
+    },
+    {
+      "path": "sources/owner-artifact/boards/07-alternatives.md",
+      "bytes": 12688,
+      "sha256": "bff1d963a8b00049fc6af3abf341168d5aa43818493b78295a5a70706eedfb64"
+    },
+    {
+      "path": "sources/owner-artifact/boards/08-style-review.md",
+      "bytes": 9281,
+      "sha256": "48641abe0e9a54deb0e614aef21014bc781b2eedad7cfc3be3cdda55781c7365"
+    },
+    {
+      "path": "sources/owner-artifact/boards/09-contextual-genui.md",
+      "bytes": 9467,
+      "sha256": "c16728c03c01bcfc752b6542a84c0366d0e67fa300c831b5aebfeb87abe32d1c"
+    },
+    {
+      "path": "sources/owner-artifact/boards/10-targeted-change.md",
+      "bytes": 10356,
+      "sha256": "066c76919284a404374a7b5ef4450f13ce7fc34e3e2b0be63e90dff3b163dd51"
+    },
+    {
+      "path": "sources/owner-artifact/boards/11-review-accept.md",
+      "bytes": 10375,
+      "sha256": "9a0998375a0b0ad7e79e4e0a3f52ee3ea54573cb872e22129d0f661d03122994"
+    },
+    {
+      "path": "sources/owner-artifact/boards/12-coding-handoff.md",
+      "bytes": 9653,
+      "sha256": "69a5d100861d0943f967152af4526ce020bb4442497a0a980a308a760f5c1fb9"
+    },
+    {
+      "path": "sources/owner-artifact/boards/13-build-contracts.md",
+      "bytes": 9187,
+      "sha256": "b95556c36b2f8b0256aa7d32cb90bdc9b413672a021057a14b8bac62c73bbc90"
+    },
+    {
+      "path": "sources/owner-artifact/boards/14-models-usage.md",
+      "bytes": 13495,
+      "sha256": "f3c52ed88da9c3c338961b903f64f679bdb3351cf9dfa110331501360bcd4977"
+    },
+    {
+      "path": "sources/owner-artifact/boards/15-tablet-phone.md",
+      "bytes": 9569,
+      "sha256": "9c47671760d6de5cda80bad2ffa8747f8156ce0bc0fabb5c0687dafcadc87c0f"
+    },
+    {
+      "path": "sources/owner-artifact/index.md",
+      "bytes": 9994,
+      "sha256": "88df06936f741b8baece4cb2f0065d4dd9e1a475282c1899ca76578f464ad275"
+    },
+    {
+      "path": "sources/owner-artifact/09-s29-frames-canvas-readable-100pct.png",
+      "bytes": 288982,
+      "sha256": "64a861b7b7d5948b2ae932f284fe8796280a5230a97ad964c3a907cc9b55697e"
+    },
+    {
+      "path": "sources/owner-artifact/10-s35-project-shell-readable-100pct.png",
+      "bytes": 223921,
+      "sha256": "98bea6efc7f1527449efbfc123e9026b540bc21b946c2a5822571436f684528b"
+    },
+    {
+      "path": "sources/architecture-lesson/step-01-two-levels.png",
+      "bytes": 1550974,
+      "sha256": "0c0e892b2d0cce6488fb76e1633c11b4383f03ac72440d18b419848833294e19"
+    },
+    {
+      "path": "sources/architecture-lesson/step-02-the-map.png",
+      "bytes": 1495558,
+      "sha256": "803c7345274d9c3a6d8fc9e3e8afc779a7db661ac95abcca35d831b8bc162fd9"
+    },
+    {
+      "path": "sources/architecture-lesson/step-03-trade-offs.png",
+      "bytes": 1534408,
+      "sha256": "180dfd48a1240b9d99212e64f6ee64f980d07f474dec5d3b7fa03b7424730076"
+    },
+    {
+      "path": "sources/architecture-lesson/step-04-zoom-in.png",
+      "bytes": 1567608,
+      "sha256": "f60f112308966fa0280d781ea1bd672b4fea7824cc1b78494d034abb889589b7"
+    },
+    {
+      "path": "sources/architecture-lesson/step-05-lld-decisions.png",
+      "bytes": 1513364,
+      "sha256": "2861495f9c5bd8ba9a66e3cc88560962dfad830ebf3e86c7e197c802e4815251"
+    },
+    {
+      "path": "sources/architecture-lesson/step-06-contracts.png",
+      "bytes": 1455597,
+      "sha256": "492d20f6cfc984e50008d125098b2e691ffc5d3b1319581f4ce039a2367eb4ed"
+    },
+    {
+      "path": "sources/architecture-lesson/step-07-top-down.png",
+      "bytes": 1521312,
+      "sha256": "3f5dc5c579d5d1165a80b4e98f8e45f0244e4f0434383597a4b87d23698029d7"
+    },
+    {
+      "path": "sources/architecture-lesson/step-08-recap.png",
+      "bytes": 1571857,
+      "sha256": "21398a9bfe32f6d5642909a51af1b67bb63f529c009e71dd97e4b1192cd83b6e"
+    },
+    {
+      "path": "sources/preserved-and-verified/OpenDesign-e033aad-LICENSE-capture.txt",
+      "bytes": 11382,
+      "sha256": "24a42b8b75b9f593703bef721173d4dda804d87d737b0a6c8c3f160ae0ffeb28"
+    },
+    {
+      "path": "sources/preserved-and-verified/Onlook-main-LICENSE-capture.txt",
+      "bytes": 11428,
+      "sha256": "b074549a4d323572fabcd5fb075d50a0ec03996ed2e1cb8858f232721275f894"
+    },
+    {
+      "path": "sources/preserved-and-verified/root-README-observed-234724.md",
+      "bytes": 762,
+      "sha256": "9a12aac075ed29756cee40f55fb7eb20e09127a994c7a0ad30342c843ce5264a"
+    },
+    {
+      "path": "sources/preserved-and-verified/canonical-v0.2.3-verified-snapshot.md",
+      "bytes": 277521,
+      "sha256": "56fa45ba6cfae3199279c8ca40a8fa2ba0eb311cd234e855fb605c75aa15f4bb"
+    },
+    {
+      "path": "sources/preserved-and-verified/original-v0.2.3-handoff-UNMODIFIED.md",
+      "bytes": 5834,
+      "sha256": "c8211db7ef868956a638361e5d4e1e6357304447fed6dabcda6edb7bc82d156f"
+    },
+    {
+      "path": "sources/preserved-and-verified/PUBLIC-REFERENCE-FACTS-AND-PARAPHRASES.md",
+      "bytes": 1736,
+      "sha256": "0a797418f646fbabe5303aab7de17869af3f8cfcb86b457fb0c67c8a856569cc"
+    }
+  ]
+}

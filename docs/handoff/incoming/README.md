@@ -20,4 +20,4 @@ The lead reads it, sets `Status`, and for each accepted point either adds or cha
 
 | File | Source | Received | Status | Became |
 |---|---|---|---|---|
-| (none yet) | | | | |
+| [2026-11-23-review-supplement-v1.0.md](2026-11-23-review-supplement-v1.0.md) | external review agent (via owner) | 2026-11-23 | triaged | C-01 to C-05, PRD v0.2.3, decisions of 23 Nov |

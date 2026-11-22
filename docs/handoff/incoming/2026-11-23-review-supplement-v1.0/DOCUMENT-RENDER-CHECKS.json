@@ -1,0 +1,9 @@
+{
+  "horizontalOverflow": false,
+  "brokenImages": 0,
+  "tables": 4,
+  "sourceImages": 2,
+  "conceptSvg": 1,
+  "blockedExternalRequests": [],
+  "scope": "document render only; no product/runtime/animation benchmark"
+}

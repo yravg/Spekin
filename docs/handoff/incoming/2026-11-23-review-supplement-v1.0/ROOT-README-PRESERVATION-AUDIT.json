@@ -1,0 +1,33 @@
+{
+  "observedRootReadmeBytes": 762,
+  "rootReadmeSha256": "9a12aac075ed29756cee40f55fb7eb20e09127a994c7a0ad30342c843ce5264a",
+  "birth": "2026-11-22 23:47:24 GMT+8 Asia/Shanghai UTC+8",
+  "modified": "2026-11-22 23:47:24 GMT+8 Asia/Shanghai UTC+8",
+  "unmodifiedByReview": true,
+  "priorRootContentEstablished": false,
+  "restorationPerformed": false,
+  "knownArchiveManifestInspections": [
+    {
+      "archive": "v0.2.3/output/Spekin-v0.2.3-research-standard-Claude-handoff.zip",
+      "readmeEntries": [
+        "README.md"
+      ],
+      "scope": "Archive entry names only; not proof these are a prior workspace-root README"
+    },
+    {
+      "archive": "v0.2.3/output/drive-verified-handoff.zip",
+      "readmeEntries": [
+        "README.md"
+      ],
+      "scope": "Archive entry names only; not proof these are a prior workspace-root README"
+    },
+    {
+      "archive": "v0.2.2/output/Spekin-annotated-wireframe-brief-v0.2.2.zip",
+      "readmeEntries": [
+        "README.md"
+      ],
+      "scope": "Archive entry names only; not proof these are a prior workspace-root README"
+    }
+  ],
+  "conclusion": "No proven prior root README or established overwrite. Preserve observed file; do not invent restoration. Other README entries may have different scopes."
+}

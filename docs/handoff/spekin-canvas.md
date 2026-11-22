@@ -5,7 +5,7 @@ Updated 22 Nov 2026, 22:15 Asia/Shanghai.
 ## Continue prompt (paste into any agent)
 
 ```text
-Work in /Users/ricodmarlon/Developer/github/yravg/Spekin (branch main). Read AGENTS.md, then docs/handoff/spekin-canvas.md (this file), then docs/design/spekin-canvas/BOARD-BRIEF.md.
+Work in a clone of github.com/yravg/Spekin (branch main). Read AGENTS.md, then docs/handoff/spekin-canvas.md (this file), then docs/design/spekin-canvas/BOARD-BRIEF.md.
 State: all 13 planned boards are drawn (S27-S38, S35, T01) plus F00 Feature map and R00 References and engine, published to the canvas below. The owner reviews them next.
 Next step: apply the owner's review comments board by board (each board file is owned by one boards-<group>.mjs; see BOARD-BRIEF.md), then start P0 of the implementation plan only after the owner accepts the boards.
 Checks that must pass (from docs/design/spekin-canvas): node build.mjs; PW_FROM=<package.json with playwright> node render.mjs; node build.mjs; lint every project/S*.dc.html and project/T*.dc.html with yra-skills canvas-to-app lint_boards.mjs --after-only; tastestack slop-scan 0 errors.

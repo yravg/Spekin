@@ -29,6 +29,17 @@ Each term is defined once, here. Use these words the same way in code, boards, d
 | **Domain pack** | A set of domain rules and fixtures (dashboard, CAD/BIM, project control, finance and stock). |
 | **Clean-room** | Learning from a reference product's behaviour without copying its code, text or assets. |
 
+## Skills
+
+| Term | Meaning |
+|---|---|
+| **Skill** | A reusable working method (for example "Grill the idea" or "Test first"): a SKILL.md with a name, when to use it, and plain instructions. A run of a skill makes proposals, never direct changes. |
+| **Skill template** | A skill that ships with Spekin, free for everyone to use and copy. |
+| **Skill copy** | A user's own versioned copy of any skill. It doesn't auto-update. It shows when the original has a newer version. |
+| **Skill source** | Where skills come from: Spekin templates, a GitHub repository (pinned commit, licence and notice kept), or the workspace itself. |
+| **Update policy** | Per source: **Auto-update** (clean updates apply on their own; a new tool, a script or a licence change is held), **Notify me**, or **Pinned**. Every update is listed and can be rolled back. |
+| **Skill manifest** | The Rust record of a skill: source, commit, licence, notice, stages, and what it `reads` and `proposes`. The core enforces both. |
+
 ## Models and money
 
 | Term | Meaning |

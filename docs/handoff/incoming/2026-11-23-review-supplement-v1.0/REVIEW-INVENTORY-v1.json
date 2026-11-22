@@ -1,0 +1,40 @@
+{
+  "prepared": "Sunday, November 22, 2026 at 11:58:22 p.m. GMT+8 (Asia/Shanghai UTC+8)",
+  "canonicalVersion": "v0.2.3",
+  "canonicalRequirementCount": 334,
+  "canonicalMdSha256": "56fa45ba6cfae3199279c8ca40a8fa2ba0eb311cd234e855fb605c75aa15f4bb",
+  "artifactBoardFiles": 16,
+  "productBoards": 13,
+  "uniqueStories": 195,
+  "explicitRequirementIds": 85,
+  "exactCanonicalCited": 85,
+  "uncitedNotMissing": 249,
+  "unrecognizedExplicitRIds": [],
+  "blankRequirementCells": [
+    "F271",
+    "F125",
+    "F128",
+    "F129",
+    "F133",
+    "F139",
+    "F343",
+    "F353",
+    "F103",
+    "F105",
+    "F109",
+    "F115",
+    "F332",
+    "F339"
+  ],
+  "sourceAttributions": {
+    "OpenDesign": 39,
+    "Onlook": 23,
+    "Paraframe": 48,
+    "PRD": 77,
+    "Momo": 8
+  },
+  "runtimeInspected": false,
+  "temporalVideoAnalyzed": false,
+  "canonicalMutated": false,
+  "optionalIsometricAccepted": false
+}

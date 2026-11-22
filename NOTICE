@@ -13,6 +13,8 @@ reused unit must be listed here with its source, version and licence before it i
 - Onlook (Apache-2.0): reference for the canvas engine ideas (frames on an infinite canvas, an operation log).
   No Onlook source files are included at this time.
 - Momo: no licence published. Studied for interaction patterns only. No code, text or assets are copied.
+- mattpocock/skills (MIT, Copyright (c) 2026 Matt Pocock): source for adapted skills in the skills library. Each
+  imported skill keeps this notice and the MIT text, pinned to the commit it came from. None are bundled yet.
 - Paraframe: proprietary. Studied for behaviour only. No code, wording or assets are copied.
 
 Third-party packages

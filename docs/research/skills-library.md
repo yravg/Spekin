@@ -1,6 +1,6 @@
 # Skills library: pre-built skills in Spekin (brainstorm)
 
-Status: **proposal, owner to decide.** Owner request, 23 Nov 2026: "pre-build well-known, good standard skills and plugins in our app, as part of our MCP SaaS features, starting with Matt Pocock's skills (aihero.dev/skills)."
+Status: **decided 23 Nov 2026**. See ADR 0007 and board S40. The owner said yes to the library, templates from the start, easy user changes, free for everyone, and auto-update for GitHub sources. The rest of this file is the background. Owner request, 23 Nov 2026: "pre-build well-known, good standard skills and plugins in our app, as part of our MCP SaaS features, starting with Matt Pocock's skills (aihero.dev/skills)."
 
 Nothing here is built or drawn yet. Canvas first: if accepted, the screens get their own boards before any code (ADR 0003).
 
