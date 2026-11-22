@@ -499,7 +499,10 @@ async fn skills_audit_route_hashes_and_verifies_its_own_chain() {
     assert_eq!(entries.len(), 1);
     assert_eq!(entries[0]["seq"], 1);
     assert_eq!(entries[0]["action"], "revert");
-    assert_eq!(entries[0]["prev_hash"], "0000000000000000000000000000000000000000000000000000000000000000");
+    assert_eq!(
+        entries[0]["prev_hash"],
+        "0000000000000000000000000000000000000000000000000000000000000000"
+    );
     let hash = entries[0]["hash"].as_str().unwrap();
     assert_eq!(hash.len(), 64, "an entry carries its sha256 hash");
     assert_eq!(body["head_hash"], hash, "the head is the last entry's hash");

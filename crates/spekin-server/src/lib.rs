@@ -21,19 +21,18 @@ use serde_json::Value;
 use skills::github::{DynGitHubSkillSource, HttpGitHubClient, injected_source};
 use spekin_core::{
     AddGithubSkillRequest, ApiErrorBody, ArtifactRevisionRecord, ArtifactRevisionState,
-    AuditAction, AuditEntry, AuditError, AuditEvent, AuditLog, AuditResponse, BoardArtifact,
-    BoardSnapshot, BuildContextRequest, BuildManifestRequest, CapabilityRegistry,
-    CheckSkillUpdateRequest, ContextItemStatus, ContractsResponse, CopySkillRequest,
-    DeletedProjectView, EditSkillRequest, EstimateRunRequest, Fixture, GENESIS_HASH,
-    GenUiValidation, GitHubSourceError, Hunk, Ledger, LedgerCaps, LedgerError, LibrarySkill,
-    Manifest, ManifestError, ModelCapability, Project, ProjectEntry, Proposal, ProposalError,
-    RejectProposalRequest, Rejection, RejectionReason, RequestContext, RequiredInput, Reservation,
-    ReserveRunRequest, RestoreError, RevertRevisionRequest, Revision, RunEstimate, SECONDS_PER_DAY,
-    SettleRunRequest, Settlement, SkillCheckRequest, SkillHistoryEntry, SkillLibrary,
-    SkillLibraryError, SkillSourceKind, SkillUpdateOutcome, SkillsResponse, Stage, UpdateCheck,
-    UsageSnapshot, accept, build_context, build_manifest, check_update, days_left, delete,
-    estimate, reject, restore, revert, sample_contracts, sample_evidence, sample_matrix,
-    validate_genui_json,
+    AuditAction, AuditEntry, AuditEvent, AuditLog, AuditResponse, BoardArtifact, BoardSnapshot,
+    BuildContextRequest, BuildManifestRequest, CapabilityRegistry, CheckSkillUpdateRequest,
+    ContextItemStatus, ContractsResponse, CopySkillRequest, DeletedProjectView, EditSkillRequest,
+    EstimateRunRequest, Fixture, GENESIS_HASH, GenUiValidation, GitHubSourceError, Hunk, Ledger,
+    LedgerCaps, LedgerError, LibrarySkill, Manifest, ManifestError, ModelCapability, Project,
+    ProjectEntry, Proposal, ProposalError, RejectProposalRequest, Rejection, RejectionReason,
+    RequestContext, RequiredInput, Reservation, ReserveRunRequest, RestoreError,
+    RevertRevisionRequest, Revision, RunEstimate, SECONDS_PER_DAY, SettleRunRequest, Settlement,
+    SkillCheckRequest, SkillHistoryEntry, SkillLibrary, SkillLibraryError, SkillSourceKind,
+    SkillUpdateOutcome, SkillsResponse, Stage, UpdateCheck, UsageSnapshot, accept, build_context,
+    build_manifest, check_update, days_left, delete, estimate, reject, restore, revert,
+    sample_contracts, sample_evidence, sample_matrix, validate_genui_json, verify_with_head,
 };
 
 /// The project id the sample fixture is served under. The URL uses it: /p/meranti-yard/design.
@@ -64,6 +63,14 @@ struct ProjectStore {
     project_entries: BTreeMap<String, ProjectEntry>,
 }
 
+/// The skills library's own append-only chain, with its head held apart from
+/// the stored log (IMP-35, lead's follow-up on #27 and #21). Skills routes are
+/// global, so they must never append to a project's chain.
+struct SkillsAudit {
+    log: AuditLog,
+    head: String,
+}
+
 #[derive(Clone)]
 pub struct AppState {
     pub sample: Arc<Fixture>,
@@ -71,6 +78,8 @@ pub struct AppState {
     project_store: Arc<Mutex<ProjectStore>>,
     /// IMP-34: the in-memory skills library (templates, copies, GitHub skills).
     library: Arc<Mutex<SkillLibrary>>,
+    /// IMP-35: the skills library's own audit chain and its separate head.
+    skills_audit: Arc<Mutex<SkillsAudit>>,
     /// IMP-34: the GitHub adapter with an injected client (fixtures in tests).
     github: Arc<DynGitHubSkillSource>,
     /// UTC Unix seconds for audit entries and the 30-day restore window.
@@ -89,6 +98,10 @@ impl AppState {
             models: Arc::new(CapabilityRegistry::sample_s36()),
             project_store: Arc::new(Mutex::new(store)),
             library: Arc::new(Mutex::new(SkillLibrary::from_fixture(&raw))),
+            skills_audit: Arc::new(Mutex::new(SkillsAudit {
+                log: AuditLog::new(),
+                head: GENESIS_HASH.to_owned(),
+            })),
             github: Arc::new(injected_source(HttpGitHubClient::new())),
             now: DEFAULT_NOW,
             config: HardeningConfig::from_env(),
@@ -193,11 +206,37 @@ fn append_audit(
     entry
 }
 
-/// Hash of the last entry, or the genesis anchor when the log is empty.
-fn tail_hash(log: &AuditLog) -> String {
-    log.entries()
-        .last()
-        .map_or_else(|| GENESIS_HASH.to_owned(), |e| e.hash.clone())
+/// Append one entry to the skills library's own chain and move its separately
+/// held head. A skills route never touches a project's chain (IMP-35).
+fn append_skills_audit(
+    state: &AppState,
+    action: AuditAction,
+    target_id: impl Into<String>,
+    revision: Option<String>,
+    reason: impl Into<String>,
+) {
+    let mut audit = state.skills_audit.lock().expect("skills audit lock");
+    let entry = audit.log.append(
+        AuditEvent {
+            actor: SAMPLE_ACTOR.to_owned(),
+            action,
+            target_id: target_id.into(),
+            revision,
+            reason: reason.into(),
+        },
+        state.now.max(0) as u64,
+    );
+    audit.head = entry.hash;
+}
+
+/// The view both audit routes return: the entries, the head held apart from the
+/// log, and the typed verify result against that head (IMP-35).
+fn audit_response(log: &AuditLog, head: &str) -> AuditResponse {
+    AuditResponse {
+        entries: log.entries().to_vec(),
+        head_hash: head.to_owned(),
+        error: verify_with_head(log, head).err(),
+    }
 }
 
 fn map_restore_error(err: RestoreError) -> ServerError {
@@ -242,6 +281,7 @@ pub fn router(state: AppState) -> Router {
         .route("/api/models", get(list_models))
         .route("/api/genui/validate", post(validate_genui))
         .route("/api/skills/check-update", post(check_skill_update))
+        .route("/api/skills/audit", get(skills_audit))
         .route("/api/skills", get(list_skills))
         .route("/api/skills/github", post(add_github_skill))
         .route("/api/skills/{id}", put(edit_skill))
@@ -458,18 +498,7 @@ async fn project_audit(
 ) -> Result<Json<AuditResponse>, ServerError> {
     ensure_project(&id)?;
     let store = s.project_store.lock().expect("project store lock");
-    let error = match store.audit.verify() {
-        Err(err) => Some(err),
-        Ok(()) if store.audit_head != tail_hash(&store.audit) => Some(AuditError::Truncated {
-            seq: store.audit.len() as u64 + 1,
-        }),
-        Ok(()) => None,
-    };
-    Ok(Json(AuditResponse {
-        entries: store.audit.entries().to_vec(),
-        head_hash: store.audit_head.clone(),
-        error,
-    }))
+    Ok(Json(audit_response(&store.audit, &store.audit_head)))
 }
 
 /// S37 build contracts, evidence and matrix (IMP-33). The core seeds the sample
@@ -573,6 +602,13 @@ async fn check_skill_update(
         ));
     }
     Ok(Json(check_update(&req.old, &req.new, req.policy)))
+}
+
+/// `GET /api/skills/audit`: the skills library's own chain with `verify` checked
+/// against the head the server keeps apart from the log (IMP-35).
+async fn skills_audit(State(s): State<AppState>) -> Json<AuditResponse> {
+    let audit = s.skills_audit.lock().expect("skills audit lock");
+    Json(audit_response(&audit.log, &audit.head))
 }
 
 /// `GET /api/skills`: templates, user copies and GitHub sources with their policy (IMP-34).
@@ -696,8 +732,7 @@ async fn check_skill(
             ),
         ),
     };
-    let mut store = s.project_store.lock().expect("project store lock");
-    append_audit(&mut store, s.now, action, &id, None, reason);
+    append_skills_audit(&s, action, &id, None, reason);
     Ok(Json(outcome))
 }
 
@@ -725,10 +760,8 @@ async fn rollback_skill(
     let skill = library
         .rollback(&id, &version, s.now)
         .map_err(map_library_error)?;
-    let mut store = s.project_store.lock().expect("project store lock");
-    append_audit(
-        &mut store,
-        s.now,
+    append_skills_audit(
+        &s,
         AuditAction::Revert,
         &id,
         Some(format!("v{}", skill.manifest.version)),
@@ -1072,6 +1105,7 @@ mod tests {
     use axum::body::Body;
     use axum::http::Request;
     use http_body_util::BodyExt;
+    use spekin_core::AuditError;
     use tower::ServiceExt;
 
     const SAMPLE: &str = include_str!("../../../fixtures/meranti-yard.json");
@@ -1165,6 +1199,33 @@ mod tests {
             "the broken separate head is reported at the next sequence: {:?}",
             broken.error
         );
+        assert_ne!(head, "deadbeef");
+    }
+
+    /// IMP-35: the skills chain keeps its head apart too; a rewritten stored
+    /// head cannot satisfy the route's verify check.
+    #[tokio::test]
+    async fn skills_audit_head_is_checked_apart_from_the_log() {
+        let state = AppState::from_fixture_json(SAMPLE).expect("sample fixture is valid");
+        append_skills_audit(
+            &state,
+            AuditAction::Revert,
+            "grill",
+            Some("v2".to_owned()),
+            "rolled back skill grill",
+        );
+        let Json(view) = skills_audit(State(state.clone())).await;
+        assert_eq!(view.error, None, "a fresh chain verifies");
+        let head = view.head_hash.clone();
+
+        state.skills_audit.lock().expect("skills audit lock").head = "deadbeef".to_owned();
+        let Json(broken) = skills_audit(State(state)).await;
+        assert_eq!(broken.head_hash, "deadbeef");
+        assert_eq!(broken.entries.len(), 1, "the log itself was not edited");
+        assert!(matches!(
+            broken.error,
+            Some(AuditError::Truncated { seq: 2 })
+        ));
         assert_ne!(head, "deadbeef");
     }
 }

@@ -26,7 +26,10 @@ fn verify_with_head_accepts_a_chain_with_its_separately_held_head() {
     log.append(event(1), 1_700_000_001);
     let head = log.entries()[0].hash.clone();
     assert_eq!(verify_with_head(&log, &head), Ok(()));
-    assert_eq!(verify_with_head(&log, GENESIS_HASH), Err(AuditError::Truncated { seq: 2 }));
+    assert_eq!(
+        verify_with_head(&log, GENESIS_HASH),
+        Err(AuditError::Truncated { seq: 2 })
+    );
 }
 
 #[test]
@@ -43,7 +46,11 @@ fn verify_with_head_catches_a_truncation_the_stored_log_cannot_see() {
     value["head_hash"] = Value::String(log.entries()[0].hash.clone());
     let forged: AuditLog = serde_json::from_value(value).unwrap();
 
-    assert_eq!(verify(&forged), Ok(()), "the stored log now looks valid alone");
+    assert_eq!(
+        verify(&forged),
+        Ok(()),
+        "the stored log now looks valid alone"
+    );
     assert_eq!(
         verify_with_head(&forged, &external_head),
         Err(AuditError::Truncated { seq: 2 })
