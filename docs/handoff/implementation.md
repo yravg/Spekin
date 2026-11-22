@@ -126,14 +126,14 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-30 | core | Audit log core: append-only, hash-chained, verify | – | done, waiting for owner merge: PR #21 (follow-up: store the head hash apart from the log) |
 | IMP-28 | core | GenUI validation fuzzing (never panics, never partial) | IMP-10 | done, waiting for owner merge: PR #18, stacked on #7 (the fuzzer found and fixed a data: URL hole) |
 | IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
-| IMP-06 | ui | S28 Reference intake | IMP-01 | open |
+| IMP-06 | ui | S28 Reference intake | IMP-01 | done, part open: PR #31, stacked on #30 (lead re-ran: S28 6/6 PASS; uploads, PII detector and job cancel record intent only) |
 | IMP-07 | ui | S29 Frames canvas | IMP-01 | done, waiting for owner merge: PR #14, stacked on #11 (lead re-ran: S29 6/6 PASS) |
 | IMP-08 | ui | S30 Style review | IMP-01 | done, part open: PR #30, stacked on #25 (lead re-ran: S30 6/6 PASS; links to later boards record intent only) |
 | IMP-13 | ui | S31 Alternatives | IMP-01 | done, waiting for owner merge: PR #25, stacked on #19 (lead re-ran: S31 6/6 PASS) |
 | IMP-14 | ui | S32 Targeted change | IMP-01 | done, waiting for owner merge: PR #19, stacked on #16 (lead re-ran: S32 6/6 PASS) |
 | IMP-15 | ui | S33 Review and accept | IMP-01 | done, waiting for owner merge: PR #16, stacked on #14 (lead re-ran: S33 6/6 PASS) |
 | IMP-16 | ui | S34 Coding handoff | IMP-01 | open |
-| IMP-17 | ui | S36 Models and usage | IMP-01 | open |
+| IMP-17 | ui | S36 Models and usage | IMP-01 | in progress (OpenCode Go DeepSeek V4.1 Flash, branch imp-17-models-usage, stacked on #30) |
 | IMP-18 | ui | S37 Build contracts | IMP-01 | open |
 | IMP-19 | ui | S38 GenUI panel | IMP-01 | open |
 | IMP-20 | ui | T01 Tablet and phone | IMP-01 | open |
