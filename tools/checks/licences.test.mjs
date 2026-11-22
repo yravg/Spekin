@@ -2,7 +2,10 @@
 // Run with: node --test tools/checks/licences.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { audit, classifyLicence, renderLicences, scanBuildText } from './licences.mjs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { audit, classifyLicence, npmInventory, renderLicences, scanBuildText } from './licences.mjs';
 
 const npmPkg = (name, licence, extra = {}) => ({ name, version: '1.0.0', licence, source: 'npm', scope: 'dev', ...extra });
 const crate = (name, licence, extra = {}) => ({ name, version: '1.0.0', licence, source: 'crate', ...extra });
@@ -91,4 +94,46 @@ test('the rendered inventory lists every package with its licence and says it is
   assert.match(md, /MIT OR Apache-2\.0/);
   assert.match(md, /GPL-3\.0-only/);
   assert.match(md, /npm run check:licences|node tools\/checks\/licences\.mjs/);
+});
+
+test('workspace link entries resolve licence without node_modules and fall back for private packages', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'spekin-licences-'));
+  try {
+    mkdirSync(join(dir, 'apps/web'), { recursive: true });
+    mkdirSync(join(dir, 'packages/priv'), { recursive: true });
+    writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'spekin', private: true, license: 'Apache-2.0' }));
+    writeFileSync(join(dir, 'apps/web/package.json'), JSON.stringify({ name: '@spekin/web', version: '0.1.0', license: 'Apache-2.0' }));
+    writeFileSync(join(dir, 'packages/priv/package.json'), JSON.stringify({ name: '@spekin/priv', version: '0.1.0', private: true }));
+    writeFileSync(
+      join(dir, 'package-lock.json'),
+      JSON.stringify({
+        name: 'spekin',
+        lockfileVersion: 3,
+        packages: {
+          '': { name: 'spekin', license: 'Apache-2.0' },
+          'apps/web': { name: '@spekin/web', version: '0.1.0', license: 'Apache-2.0' },
+          'node_modules/@spekin/web': { resolved: 'apps/web', link: true },
+          'packages/priv': { name: '@spekin/priv', version: '0.1.0' },
+          'node_modules/@spekin/priv': { resolved: 'packages/priv', link: true },
+          'node_modules/third-party': { version: '1.0.0' },
+        },
+      }),
+    );
+
+    const entries = npmInventory(dir);
+    const webLink = entries.find((e) => e.name === '@spekin/web' && e.version === '');
+    const privDirect = entries.find((e) => e.name === '@spekin/priv' && e.version === '0.1.0');
+    const privLink = entries.find((e) => e.name === '@spekin/priv' && e.version === '');
+    const thirdParty = entries.find((e) => e.name === 'third-party');
+
+    assert.equal(webLink?.licence, 'Apache-2.0');
+    assert.equal(privDirect?.licence, 'Apache-2.0');
+    assert.equal(privLink?.licence, 'Apache-2.0');
+    assert.equal(thirdParty?.licence, '');
+
+    const res = audit({ npm: entries.filter((e) => e.name !== 'third-party'), crates: [] });
+    assert.equal(res.ok, true);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

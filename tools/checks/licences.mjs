@@ -238,18 +238,24 @@ function readJson(path) {
   return JSON.parse(readFileSync(path, 'utf8'));
 }
 
-function npmInventory() {
-  const lock = readJson(join(ROOT, 'package-lock.json'));
+export function npmInventory(root = ROOT) {
+  const lock = readJson(join(root, 'package-lock.json'));
+  const rootPkgPath = join(root, 'package.json');
+  const rootPkg = existsSync(rootPkgPath) ? readJson(rootPkgPath) : null;
+  const rootLicence = lock.packages?.['']?.license || rootPkg?.license || 'Apache-2.0';
   const entries = [];
   for (const [key, value] of Object.entries(lock.packages ?? {})) {
     if (!key) continue; // the root package, listed above as the repo
     const name = value.name || key.slice(key.lastIndexOf('node_modules/') + 'node_modules/'.length);
-    const installed = join(ROOT, key, 'package.json');
+    const isWorkspace = Boolean(value.link) || !key.startsWith('node_modules/');
+    const pkgDir = value.link && value.resolved ? value.resolved : key;
+    const manifestPath = join(root, pkgDir, 'package.json');
     let licence = value.license;
     let installScript = '';
-    if (existsSync(installed)) {
-      const pkg = readJson(installed);
+    if (existsSync(manifestPath)) {
+      const pkg = readJson(manifestPath);
       licence = licence || pkg.license;
+      if (!licence && isWorkspace && pkg.private) licence = rootLicence;
       if (value.hasInstallScript) installScript = Object.values(pkg.scripts ?? {}).join('\n');
     }
     entries.push({
