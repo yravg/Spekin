@@ -197,13 +197,8 @@ async fn runs_estimate_returns_typed_estimate_and_400_on_invalid_bounds() {
 async fn runs_reserve_updates_usage_and_over_cap_is_409() {
     let app = app();
 
-    let (before_status, before_body) = send(
-        &app,
-        Method::GET,
-        "/api/projects/meranti-yard/usage",
-        None,
-    )
-    .await;
+    let (before_status, before_body) =
+        send(&app, Method::GET, "/api/projects/meranti-yard/usage", None).await;
     assert_eq!(before_status, StatusCode::OK, "body: {before_body}");
     let before: UsageSnapshot = serde_json::from_value(before_body).expect("typed UsageSnapshot");
     assert_eq!(before.used, 1240);
@@ -226,13 +221,8 @@ async fn runs_reserve_updates_usage_and_over_cap_is_409() {
     assert_eq!(reservation.run_id, "run-0429");
     assert_eq!(reservation.reserved, 36);
 
-    let (after_status, after_body) = send(
-        &app,
-        Method::GET,
-        "/api/projects/meranti-yard/usage",
-        None,
-    )
-    .await;
+    let (after_status, after_body) =
+        send(&app, Method::GET, "/api/projects/meranti-yard/usage", None).await;
     assert_eq!(after_status, StatusCode::OK);
     let after: UsageSnapshot = serde_json::from_value(after_body).expect("typed UsageSnapshot");
     assert_eq!(after.reserved, before.reserved + 36);
@@ -317,7 +307,11 @@ async fn genui_validate_accepts_valid_card_and_rejects_unsafe_card_with_422() {
     });
     let (bad_status, bad_body) =
         send(&app, Method::POST, "/api/genui/validate", Some(unsafe_card)).await;
-    assert_eq!(bad_status, StatusCode::UNPROCESSABLE_ENTITY, "body: {bad_body}");
+    assert_eq!(
+        bad_status,
+        StatusCode::UNPROCESSABLE_ENTITY,
+        "body: {bad_body}"
+    );
     let rejected: GenUiValidation =
         serde_json::from_value(bad_body).expect("typed GenUiValidation");
     assert!(matches!(rejected, GenUiValidation::Rejected { .. }));
@@ -460,8 +454,7 @@ async fn handoff_manifest_seals_accepted_items_and_422_on_draft_or_empty() {
     )
     .await;
     assert_eq!(status, StatusCode::OK, "body: {body}");
-    let manifest: spekin_core::Manifest =
-        serde_json::from_value(body).expect("typed Manifest");
+    let manifest: spekin_core::Manifest = serde_json::from_value(body).expect("typed Manifest");
     assert_eq!(manifest.manifest_id, "m-0008");
     assert_eq!(manifest.artifacts.len(), 2);
     assert!(
@@ -485,6 +478,10 @@ async fn handoff_manifest_seals_accepted_items_and_422_on_draft_or_empty() {
         Some(json!({ "selection": empty })),
     )
     .await;
-    assert_eq!(bad_status, StatusCode::UNPROCESSABLE_ENTITY, "body: {bad_body}");
+    assert_eq!(
+        bad_status,
+        StatusCode::UNPROCESSABLE_ENTITY,
+        "body: {bad_body}"
+    );
     assert_eq!(bad_body["code"], "empty_selection");
 }
