@@ -249,8 +249,8 @@ fn check_safe_url(field: &str, url: &str) -> Result<(), RejectionReason> {
         });
     }
     let lower = trimmed.to_ascii_lowercase();
-    let ok_scheme = lower.starts_with("https://")
-        || (trimmed.starts_with('/') && !trimmed.starts_with("//"));
+    let ok_scheme =
+        lower.starts_with("https://") || (trimmed.starts_with('/') && !trimmed.starts_with("//"));
     if !ok_scheme {
         return Err(RejectionReason::UnsafeUrl {
             field: field.into(),

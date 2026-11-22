@@ -15,7 +15,9 @@ use spekin_core::genui::{GenUiCard, GenUiFamily, GenUiValidation, validate_genui
 /// Default is the CI budget; the env var raises it for local fuzzing.
 fn fuzz_config() -> proptest::test_runner::Config {
     let cases = match std::env::var("SPEKIN_GENUI_FUZZ_CASES") {
-        Ok(raw) => raw.parse().expect("SPEKIN_GENUI_FUZZ_CASES must be a number"),
+        Ok(raw) => raw
+            .parse()
+            .expect("SPEKIN_GENUI_FUZZ_CASES must be a number"),
         Err(_) => 2_000,
     };
     proptest::test_runner::Config {
@@ -70,11 +72,7 @@ fn arbitrary_json() -> impl Strategy<Value = Value> {
         pvec((hostile_string(), arbitrary_leaf()), 0..5).prop_map(|entries| {
             Value::Object(entries.into_iter().collect::<Map<String, Value>>())
         }),
-        pvec(
-            pvec((hostile_string(), arbitrary_leaf()), 0..3),
-            0..3
-        )
-        .prop_map(|groups| {
+        pvec(pvec((hostile_string(), arbitrary_leaf()), 0..3), 0..3).prop_map(|groups| {
             let mut obj = Map::new();
             for (i, group) in groups.into_iter().enumerate() {
                 obj.insert(format!("g{i}"), Value::Object(group.into_iter().collect()));
