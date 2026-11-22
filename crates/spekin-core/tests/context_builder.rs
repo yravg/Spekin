@@ -88,7 +88,10 @@ fn request_carries_only_listed_chips_and_never_unchipped_or_hidden_frames() {
     assert!(!ids.contains(&"F-04"));
     assert!(!ids.contains(&"F-05"));
     assert_eq!(ctx.total_estimated_tokens, 9800);
-    assert_eq!(format_token_estimate(ctx.total_estimated_tokens), "≈ 9.8k tokens");
+    assert_eq!(
+        format_token_estimate(ctx.total_estimated_tokens),
+        "≈ 9.8k tokens"
+    );
 }
 
 #[test]
@@ -223,12 +226,14 @@ fn chip_strategy() -> impl Strategy<Value = ContextChip> {
         status_strategy(),
         0u32..20_000,
     )
-        .prop_map(|(artifact_id, revision, status, estimated_tokens)| ContextChip {
-            artifact_id,
-            revision,
-            status,
-            estimated_tokens,
-        })
+        .prop_map(
+            |(artifact_id, revision, status, estimated_tokens)| ContextChip {
+                artifact_id,
+                revision,
+                status,
+                estimated_tokens,
+            },
+        )
 }
 
 proptest! {
