@@ -6,6 +6,7 @@
 //! the app and the API read the same shapes (canvas-to-app rule 15, R-ARC-3).
 
 pub mod genui;
+pub mod ledger;
 pub mod model_source;
 pub mod project;
 pub mod proposal;
@@ -17,6 +18,11 @@ pub use genui::{
     AllowedActionKind, ChecklistItem, ChecklistStatus, ComparisonOption, GenUiAction, GenUiCard,
     GenUiFamily, GenUiValidation, Provenance, QuestionOption, RejectionReason, validate_genui,
     validate_genui_json,
+};
+pub use ledger::{
+    CRIT_THRESHOLD_PCT, Ledger, LedgerCaps, LedgerEntry, LedgerEntryKind, LedgerError, Reservation,
+    ReservationStatus, RunEstimate, Settlement, UsageSeverity, UsageSnapshot, WARN_THRESHOLD_PCT,
+    estimate, severity_for,
 };
 pub use model_source::{
     ApiKeyStatus, CapabilityCheckResult, CapabilityError, CapabilityRegistry, ConnectorStatus,

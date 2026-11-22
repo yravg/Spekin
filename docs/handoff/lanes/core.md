@@ -12,6 +12,7 @@ Only this lane edits this file. Write here before you stop working.
 | IMP-11 | imp-11-model-sources (PR #5) | done | `cargo test --workspace` (18 unit/ts-rs + 5 `tests/model_source.rs` + 2 server tests pass); `npm run gate` passes | Server endpoints and UI wiring for S36 (later cards) |
 | IMP-10 | imp-10-genui-validate (PR #7) | done | `cargo test --workspace` (17 unit/ts-rs + 5 `tests/genui.rs` + 2 server tests pass); `npm run gate` passes | TS fallback renderer and S38 UI wiring (later UI card) |
 | IMP-22 | imp-22-skills-core (PR #8) | done | `cargo test --workspace` (15 unit/ts-rs + 5 `tests/skills.rs` + 2 server tests pass); `npm run gate` passes | GitHub network fetcher and IMP-04 proposal integration (out of scope / waiting on PR #2) |
+| IMP-09 | imp-09-ledger (PR #10, stacked on #2) | done | `crates/spekin-core/tests/ledger.rs`: 7 unit/integration cases (S36 run 0426 reserve/settle/refund, 70%/90% severity thresholds, no start/settle/cancel without reservation, over-cap refusal for per-run/project/person/concurrency, full & partial cancel like S36 run 0424, idempotent retry on reserve & settle, 8-thread race test) + 4 proptest properties (`a_reserve_never_exceeds_the_cap`, `settle_plus_refund_equals_the_reserve`, `no_charge_without_a_reserve`, `idempotent_settle`) + 3 unit tests in `src/ledger.rs`. `cargo test --workspace` (31 + 11 + 13 + 2 pass); `npm run gate` passes. Bindings committed: `Ledger`, `LedgerCaps`, `LedgerEntry`, `LedgerEntryKind`, `LedgerError`, `Reservation`, `ReservationStatus`, `RunEstimate`, `Settlement`, `UsageSeverity`, `UsageSnapshot`. | No persistence/DB storage, no HTTP API routes, no 5h/7d sliding rate-window enforcement, no payment/top-up adapter (R-PAY-1–5, later), not wired to S36 UI (separate ui card). |
 
 ## Requests to lead
 
@@ -26,6 +27,7 @@ Only this lane edits this file. Write here before you stop working.
 
 ## Log
 
+- 23 Nov 2026 · IMP-09 · `Ledger` (`estimate`, `reserve`, `authorize_start`, `settle`, `cancel`, `cancel_with_usage`), per-run/project/person/concurrency caps, 70%/90% `UsageSeverity`, 7 integration/race tests + 4 proptest properties + 3 unit tests, 11 ts-rs bindings committed (stacked on #2 IMP-04)
 - 2026-11-23 · IMP-22 · Added `crates/spekin-core/src/skills.rs` (`SkillManifest`, `SkillSource`, `UpdatePolicy`, `UpdateCheck`, `parse_skill_md`, `classify_update`, `check_update`, `enforce`, `copy_for_user`), exported ts-rs contracts, and added 5 integration tests without depending on unmerged IMP-04 types.
 - 2026-11-23 · IMP-10 · Added fail-closed GenUI card validator in `crates/spekin-core/src/genui.rs` (checklist, comparison, question families; AC-SPK-25 rejections), exported ts-rs contracts, and added 5 integration tests.
 - 2026-11-23 · IMP-11 · Added `crates/spekin-core/src/model_source.rs` (Hosted, Local CLI with connector status, API provider with key presence/tail only, capability registry with S36 sample, ledger-touch check), exported ts-rs contracts, and added 5 integration tests.
