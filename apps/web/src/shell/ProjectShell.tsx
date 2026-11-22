@@ -11,6 +11,7 @@ import { BackendWorkArea } from './BackendWorkArea';
 import { SkillsWorkArea } from '../skills/SkillsWorkArea';
 import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/FramesCanvasWorkArea';
 import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/ReviewAcceptWorkArea';
+import { TargetedChangeWorkArea } from '../review/TargetedChangeWorkArea';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -134,7 +135,7 @@ export function ProjectShell() {
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
-  const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review'>('shell');
+  const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted'>('shell');
   const [canvasOverride, setCanvasOverride] = useState<CanvasShellOverride>({});
   const [reviewOverride, setReviewOverride] = useState<ReviewShellOverride>({});
   const save = useWorkspace((s) => s.save);
@@ -151,7 +152,9 @@ export function ProjectShell() {
         ? 'S29'
         : stage === 'design' && designSub === 'review'
           ? 'S33'
-          : 'S35';
+          : stage === 'design' && designSub === 'targeted'
+            ? 'S32'
+            : 'S35';
   const activeSave =
     stage === 'spec' && specOverride.save
       ? specOverride.save
@@ -209,8 +212,14 @@ export function ProjectShell() {
               <FramesCanvasWorkArea onShellOverride={setCanvasOverride} />
             ) : designSub === 'review' ? (
               <ReviewAcceptWorkArea onShellOverride={setReviewOverride} />
+            ) : designSub === 'targeted' ? (
+              <TargetedChangeWorkArea onLeaveTargeted={() => setDesignSub('shell')} />
             ) : (
-              <DesignWorkArea onOpenCanvas={() => setDesignSub('canvas')} onOpenReview={() => setDesignSub('review')} />
+              <DesignWorkArea
+                onOpenCanvas={() => setDesignSub('canvas')}
+                onOpenReview={() => setDesignSub('review')}
+                onOpenTargeted={() => setDesignSub('targeted')}
+              />
             )
           ) : stage === 'backend' ? (
             <BackendWorkArea />

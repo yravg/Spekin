@@ -11,6 +11,9 @@ body { background: var(--ground); }
 .ap-ta-input { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; margin: 0; padding: 0; background: transparent; font: inherit; color: transparent; caret-color: var(--ink); resize: none; outline: none; }
 .sp-comp:focus-within { box-shadow: inset 0 0 0 1.5px var(--accent), var(--shadow-1); }
 .sp-app button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* App-only: review note callout (design .rev-note values; the bare board-only token "note" cannot ship as an app class name). */
+.ap-callout { margin: 0; padding: 8px 10px; border-radius: 8px; background: var(--canvas); box-shadow: inset 0 0 0 1px var(--line); font: 500 12px/1.4 var(--font); color: var(--ink-dim); }
+.ap-callout b { color: var(--ink); font-weight: 600; }
 @media (prefers-reduced-motion: reduce) {
   .sp-app * { transition: none !important; animation: none !important; }
 }
