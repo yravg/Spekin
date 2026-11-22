@@ -33,6 +33,8 @@ export type { RequiredInput } from './generated/RequiredInput';
 export type { Revision } from './generated/Revision';
 export type { RunEstimate } from './generated/RunEstimate';
 export type { Settlement } from './generated/Settlement';
+export type { ProjectEntry } from './generated/ProjectEntry';
+export type { RestoreError } from './generated/RestoreError';
 export type { Stage } from './generated/Stage';
 export type { StageId } from './generated/StageId';
 export type { StageTone } from './generated/StageTone';

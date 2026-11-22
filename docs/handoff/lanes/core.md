@@ -25,6 +25,29 @@ Only this lane edits this file. Write here before you stop working.
 | IMP-04 | imp-04-proposals | done | `crates/spekin-core/tests/proposals.rs`: 10 unit cases (exact diff applied, mismatch, stale, accept twice = same revision and second is stale, reject records the reason, revert restores the hash, revert to a later revision refused, out of range, overlap, trailing newline) + 3 proptest properties (`accept_is_deterministic`, `revert_restores_the_content_hash`, `a_stale_proposal_is_never_applied`). `cargo test -p spekin-core`: 17 + 13 pass. `npm run gate` passes (rules, sync, board lint, typecheck, vitest, build, cargo fmt/clippy/test, contracts current). Bindings committed: `Revision`, `Hunk`, `Proposal`, `ProposalError`, `Rejection`. | No diff **generation** (turning two contents into hunks) — a proposal is supplied as an exact diff; that is a later card. No artifact container/store type, no revision history persistence, no API route for proposals. Revisions are held as values; nothing writes them to disk. Not wired to any screen (S33 is a ui card). |
 | IMP-09 | imp-09-ledger (stacked on #2) | done | `crates/spekin-core/tests/ledger.rs`: 7 unit/integration cases (S36 run 0426 reserve/settle/refund, 70%/90% severity thresholds, no start/settle/cancel without reservation, over-cap refusal for per-run/project/person/concurrency, full & partial cancel like S36 run 0424, idempotent retry on reserve & settle, 8-thread race test) + 4 proptest properties (`a_reserve_never_exceeds_the_cap`, `settle_plus_refund_equals_the_reserve`, `no_charge_without_a_reserve`, `idempotent_settle`) + 3 unit tests in `src/ledger.rs`. `cargo test --workspace` (31 + 11 + 13 + 2 pass); `npm run gate` passes. Bindings committed: `Ledger`, `LedgerCaps`, `LedgerEntry`, `LedgerEntryKind`, `LedgerError`, `Reservation`, `ReservationStatus`, `RunEstimate`, `Settlement`, `UsageSeverity`, `UsageSnapshot`. | No persistence/DB storage, no HTTP API routes, no 5h/7d sliding rate-window enforcement, no payment/top-up adapter (R-PAY-1–5, later), not wired to S36 UI (separate ui card). |
 | IMP-24 | imp-24-handoff-manifest (stacked on #2) | done | `crates/spekin-core/tests/handoff_manifest.rs`: 5 unit cases (`builds_stable_ordered_manifest_with_sha256_exclusions_and_explicit_missing_inputs`, `draft_revision_is_refused_with_typed_error`, `stale_revision_is_refused_with_typed_error`, `superseded_accepted_revision_is_detected_as_stale`, `reference_and_empty_selection_are_refused`) + 1 proptest property (`two_exports_of_the_same_selection_are_byte_identical`) + 1 unit test in `src/handoff.rs` (`sha256_hex_matches_known_nist_test_vector`). `cargo test --workspace` (29 + 6 + 13 + 2 pass); `npm run gate` passes (rules, sync, board lint, typecheck, vitest, build, cargo fmt/clippy/test, contracts current). Bindings committed: `ArtifactRevisionRecord`, `ArtifactRevisionState`, `Manifest`, `ManifestArtifact`, `ManifestError`, `ManifestExclusion`, `ManifestInput`, `ManifestInputStatus`, `ManifestSelection`, `ManifestSelectionItem`, `RequiredInput`. | No ZIP archive packaging or file IO (pure core only); no HTTP API route yet; not wired to S34 UI (ui lane card IMP-16); no share link/URL (intentionally omitted per R-WS-3). |
+| IMP-29 | imp-29-restore | done | `npm run gate` PASS (rules, sync, canvas lint, typecheck, web tests, build, `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` 18+2 tests, `check:contracts` current). TDD: 10 card tests red on stubs (commit ab69297), green on implementation (commit f1fbfe0). Test names below. | S27 state gate / PNGs (ui lane, IMP-05); server routes for delete/restore (IMP-26, separate card); wiring into screens (lead step); Windows/Linux; 50k-case property run (default 256 used). |
+
+### IMP-29 · Recently deleted and restore — evidence
+
+Files: `crates/spekin-core/src/restore.rs` (new), `crates/spekin-core/src/lib.rs`, `crates/spekin-core/Cargo.toml`, `Cargo.lock`, `packages/contracts/src/index.ts`, `packages/contracts/src/generated/ProjectEntry.ts`, `packages/contracts/src/generated/RestoreError.ts`.
+
+Type/contract: `ProjectEntry` (id, project, revisions, changed_at, deleted_at) and `RestoreError` (`NotDeleted`, `AlreadyDeleted`, `WindowClosed { deleted_at, closed_at }`, `ClockBackwards { now, before }`) derive `TS`; `Timestamp = i64` (UTC Unix seconds passed in, no system clock). Window = 30 days (DECISIONS.md 22 Nov).
+
+Unit tests (`cargo test -p spekin-core`):
+- `delete_marks_the_project_without_removing_anything`
+- `restore_is_the_exact_inverse_of_delete_inside_the_window`
+- `window_closed_is_a_typed_error_at_and_after_thirty_days`
+- `days_left_counts_down_and_matches_the_board` (3 days elapsed → 27 left, as S27 draws)
+- `deleting_twice_or_restoring_a_live_project_is_refused`
+- `purge_due_lists_only_projects_past_the_window_and_removes_nothing`
+
+Property tests (proptest, 256 cases each):
+- `property_restore_inverts_delete_inside_the_window` (content hash, revisions and payload preserved)
+- `property_nothing_is_restorable_after_the_window`
+- `property_purge_due_never_lists_a_project_inside_the_window`
+- `property_the_clock_never_goes_backwards_in_an_accepted_operation`
+
+New dependency: `proptest = "1"` (dev only), licence **MIT OR Apache-2.0**; named in the PR body. No new runtime dependency. No Python.
 
 ## Requests to lead
 
@@ -47,9 +70,12 @@ Only this lane edits this file. Write here before you stop working.
 (Files you need changed but don't own, board questions, dependency approvals. One line each, with the date.)
 - 23 Nov 2026 · IMP-04: this branch and PR #1 both edit this lane file. If #1 merges first, take this branch's version of the file (it has both rows).
 
+- 23 Nov 2026: none. The S27 restore state and `INTAKE_DELETED` (`days: 30`) already match the 30-day window in DECISIONS.md.
+
 ## Proposed glossary terms
 
 (none)
+- **Restore window** — the 30 days a deleted project stays restorable; after it, `purge_due` lists the project for a later purge job. (Core calls it `RESTORE_WINDOW_DAYS`.)
 
 ## Log
 
@@ -67,3 +93,5 @@ Only this lane edits this file. Write here before you stop working.
 - 2026-11-23 · IMP-27 · Added `spekin-server::skills::github` (`GitHubClient` trait, `HttpGitHubClient`, `GitHubSkillSource::resolve/fetch/check`) with recorded fixtures under `crates/spekin-server/tests/fixtures/github/`. Pure rules and TS contracts added in `spekin-core::github_source` (pinned source, bundle, 256 KB / 2 MB / 50-file limits, licence detection, notices, `plan_updates` via IMP-22 `check_update`). New deps: `reqwest` 0.12 (MIT OR Apache-2.0, rustls) and `futures-util` 0.3 (MIT OR Apache-2.0), named in the PR.
 - 2026-11-23 · IMP-22 · Added `crates/spekin-core/src/skills.rs` (`SkillManifest`, `SkillSource`, `UpdatePolicy`, `UpdateCheck`, `parse_skill_md`, `classify_update`, `check_update`, `enforce`, `copy_for_user`), exported ts-rs contracts, and added 5 integration tests without depending on unmerged IMP-04 types.
 - 23 Nov 2026 · IMP-04 · `Revision` (content hash), `Hunk`/`Proposal` (exact diff), `accept`/`reject`/`revert`, stale never applied; proptest dev-dependency (MIT OR Apache-2.0); ts-rs bindings committed · 3cda706 (test first: 7390ffc)
+
+- 23 Nov 2026 · IMP-29 · implemented delete/restore/purge_due/days_left, typed `WindowClosed`, content-hash inverse property tests, ts-rs contracts; gate green · f1fbfe0 (+ red-test step ab69297).

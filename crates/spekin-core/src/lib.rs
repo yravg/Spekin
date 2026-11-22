@@ -13,6 +13,7 @@ pub mod project;
 pub mod skills;
 pub mod proposal;
 pub mod revision;
+pub mod restore;
 pub mod stage;
 
 pub use model_source::{
@@ -51,4 +52,7 @@ pub use skills::{
 };
 pub use proposal::{Hunk, Proposal, ProposalError, Rejection, accept, reject, revert};
 pub use revision::Revision;
+pub use restore::{
+    ProjectEntry, RESTORE_WINDOW_DAYS, RestoreError, SECONDS_PER_DAY, Timestamp, WINDOW_SECONDS,
+    days_left, delete, purge_due, restore, window_close,
 pub use stage::{Stage, StageId, StageTone};
