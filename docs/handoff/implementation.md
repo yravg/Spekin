@@ -36,6 +36,7 @@ No Python, no new crate without naming its licence in the PR. If unclear, write 
 |---|---|---|
 | Canvas: 14 boards, 80 states, 212 features, F00 map, R00 references (S40 Skills library added 23 Nov) | done | `npm run canvas:lint`: 14 boards pass, manifest current |
 | Build: 21 pull requests (#1 to #21), all reviewed by the lead. [#22](https://github.com/yravg/Spekin/pull/22) merges all of them with the conflicts resolved: gate passes, 207 Rust tests, 48 web tests, 33 of 33 states pass. Waiting for the owner to merge #22, as described in [workers.md](workers.md). Core: IMP-03, 04, 09, 10, 11, 12, 22, 24, 25, 26. UI: IMP-01, 02, 05, 07, 23. | done, waiting for owner merge | The status table below. The lead re-ran the state gate on every UI branch: S27 6/6, S29 6/6, S35 3/3, S40 6/6 PASS, pixel differences 0 to 0.09 %. |
+| CI state gate | part open | [#29](https://github.com/yravg/Spekin/pull/29) (stacked on #22) makes it required for checked click paths. On the #22 code: 33 of 33 pass. Until #29 merges, the job is report-only. |
 | DPAI addendum v1.0 | triaged | [incoming/2026-11-23-dpai-addendum-v1.0.md](incoming/2026-11-23-dpai-addendum-v1.0.md). Its checks are in cards IMP-07, 13, 14, 16, 24 and 25. |
 | Review supplement v1.0 and PRD v0.2.3 | triaged | [incoming/2026-11-23-review-supplement-v1.0.md](incoming/2026-11-23-review-supplement-v1.0.md). Canonical PRD is `inputs/Spekin-PRD-v0.2.3.md` (v0.2.2 kept for history). |
 | Repo standards: licence, NOTICE, README, CONTRIBUTING, SECURITY, glossary, ADRs, decisions, roadmap | done | this commit |
