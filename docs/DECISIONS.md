@@ -4,6 +4,7 @@ One line per decision, newest first. The owner decides product questions. Agents
 
 | Date | Decision | Where it shows |
 |---|---|---|
+| 23 Nov 2026 | S27 create is four domain choices plus one idea box, with no name or language step; Bahasa is the default (owner yes to REV-03). | S27, C-01 |
 | 23 Nov 2026 | Repository made **public** (owner: "Yes, go public"). The PRD (`inputs/`), research notes and canvas are public with it. | README |
 | 23 Nov 2026 | **Skills library:** free for everyone, templates from day one, easy user copies, skills from GitHub repos with Auto-update (bounded, visible, roll back). | ADR 0007, S40 |
 | 23 Nov 2026 | Review supplement v1.0 accepted as input. Two of its points are superseded by owner decisions: S36 Local CLI was the owner's own request (22 Nov comment), and the 30-day restore window was accepted by the owner on 22 Nov. Canonical PRD is now v0.2.3 (`inputs/Spekin-PRD-v0.2.3.md`). | docs/handoff/incoming/2026-11-23-review-supplement-v1.0.md |
@@ -23,4 +24,3 @@ One line per decision, newest first. The owner decides product questions. Agents
 | Payment method for paid plans (PRD T-404). | Midtrans QRIS. This is a recommendation only, not decided. |
 | When to build the MCP server that serves skills to the user's own agent. | After P5, with its own ADR (auth, tokens, connector). |
 | Which other skill sets join the library (each needs a licence check). | Start with mattpocock/skills (MIT) and Spekin templates; add others one repo at a time. |
-| Review supplement REV-03: intake as four domain choices plus one idea box, Bahasa first, instead of the drawn S27 create flow. | Accept, and redraw S27 "create" (lead task C-01) before IMP-05 starts. |

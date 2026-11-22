@@ -1,7 +1,7 @@
 [
   {
     "board": "S27-projects.dc.html",
-    "hash": "656c0ea2603d800f",
+    "hash": "c19dd51f04e4f2a3",
     "screen": "S27",
     "features": [
       "F121",
@@ -827,31 +827,31 @@
         "feature": "F130"
       },
       {
-        "does": "Shows Spekin in Bahasa Indonesia; typed text is kept",
+        "does": "Sets the domain to Dashboard: the interview uses its question bank and pack",
+        "feature": "F130"
+      },
+      {
+        "does": "Sets the domain to Engineering: the interview uses its question bank and pack",
+        "feature": "F130"
+      },
+      {
+        "does": "Sets the domain to Project control: the interview uses its question bank and pack",
+        "feature": "F130"
+      },
+      {
+        "does": "Sets the domain to Finance and stock: the interview uses its question bank and pack",
+        "feature": "F130"
+      },
+      {
+        "does": "Switches the UI to Bahasa Indonesia at once; the idea you typed is kept",
         "feature": "F131"
-      },
-      {
-        "does": "Shows Spekin in English; typed text is kept",
-        "feature": "F131"
-      },
-      {
-        "does": "Starts from the written idea: short questions, then a pitch",
-        "feature": "F130"
-      },
-      {
-        "does": "Creates the project and opens the Design stage import (S28)",
-        "feature": "F130"
-      },
-      {
-        "does": "Creates the project from a pasted or uploaded spec, read as revision r1",
-        "feature": "F130"
       },
       {
         "does": "Closes the dialog without creating anything",
         "feature": "F130"
       },
       {
-        "does": "Creates Lontar Notices and opens it; disabled until the name is set and the idea has 20 characters",
+        "does": "Creates the project and asks the first question; disabled until a domain is picked and the idea has 20 characters",
         "feature": "F130"
       },
       {
@@ -1121,7 +1121,7 @@
   },
   {
     "board": "S28-reference-intake.dc.html",
-    "hash": "fd189c5e6cdc15dc",
+    "hash": "da6ec4d0b87bae5b",
     "screen": "S28",
     "features": [
       "F141",
@@ -8513,7 +8513,7 @@
   },
   {
     "board": "S33-review-accept.dc.html",
-    "hash": "17f5f757266b7951",
+    "hash": "12618e7fc86008ec",
     "screen": "S33",
     "features": [
       "F241",
@@ -9596,7 +9596,7 @@
         "feature": "F249"
       },
       {
-        "does": "Rejects the proposal: nothing is written, r14 stays current and one audit entry is added",
+        "does": "Rejects the proposal: no new revision, r14 stays current; one audit entry is recorded",
         "feature": "F252"
       },
       {
@@ -12390,7 +12390,7 @@
   },
   {
     "board": "S36-models-usage.dc.html",
-    "hash": "bbd51d1a949eeb12",
+    "hash": "9a6d9a695f25868f",
     "screen": "S36",
     "features": [
       "F281",

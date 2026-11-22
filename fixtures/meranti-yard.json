@@ -1140,7 +1140,7 @@
  "INTAKE_NEW": {
   "name": "Lontar Notices",
   "slug": "lontar-notices",
-  "idea": "A notice board for a primary school. Teachers post short notices; parents read them in Bahasa Indonesia or English.",
+  "idea": "Weekly progress and cost for a warehouse build. Flag any package more than 3% over budget, in Bahasa Indonesia first.",
   "ideaLen": 117,
   "max": 4000,
   "min": 20

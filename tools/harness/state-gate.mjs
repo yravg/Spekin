@@ -6,7 +6,7 @@
 // A state PASSES only when all hold:
 //   reached  the click path in app-paths.json ran with no URL jumps after the first goto, and [data-screen] matches the board
 //   text     the app's visible text in .sp-app equals the board's (board-only marks removed); line diff shown when not
-//   pixels   pixelmatch difference of the 1440 x 900 .sp-app <= 1.0 %
+//   pixels   pixelmatch difference of the 1440 x 900 app root (.sp-app, or .int-app on S27) <= 1.0 %
 //   built    no [data-todo] stand-ins in the app (a drawn placeholder counts as FAIL, never as done)
 //   later    the app has no more data-later controls than the board marks as later (nothing silently deferred)
 import { createRequire } from 'node:module';
@@ -21,6 +21,8 @@ const { PNG } = req('pngjs');
 const pixelmatch = req('pixelmatch').default ?? req('pixelmatch');
 const APP = (process.env.APP_URL || 'http://127.0.0.1:5173').replace(/\/$/, '');
 const ONLY = process.argv[2] || process.env.ONLY || '';
+// The app root on a board and in the app: .sp-app inside a project, .int-app on S27 (outside a project).
+const APP_ROOT = '.sp-app, .int-app';
 const MAX_DIFF = 1.0;
 const OUT = ROOT + 'tools/harness/out';
 fs.mkdirSync(OUT, { recursive: true });
@@ -69,8 +71,13 @@ for (const b of manifest) {
     const sb = bp.locator('.vw button[data-state="' + st.state + '"]');
     if (await sb.count()) await sb.first().click();
     await bp.evaluate(() => document.fonts.ready);
-    const bApp = bp.locator('.spwin .sp-app').filter({ visible: true }).first();
-    const bText = norm(await bApp.innerText());
+    const bApp = bp.locator(APP_ROOT.split(',').map((s) => '.spwin ' + s.trim()).join(',')).filter({ visible: true }).first();
+    // Read the whole window: some boards draw overlays (S27's switcher and create modal) beside the app root.
+    // Board notes are hidden by BOARD_ONLY_CSS, so they are not in innerText.
+    const bText = norm(await bApp.evaluate((el) => (el.closest('.spwin') || el).innerText));
+    // Boards stack notes above the window, so the window can sit at a fractional y (e.g. 232.69 px) and every
+    // row would be resampled. Shift the window by the fraction so the capture starts on a whole pixel.
+    await bApp.evaluate((el) => { const w = el.closest('.spwin') || el; const r = el.getBoundingClientRect(); const dx = Math.round(r.x) - r.x, dy = Math.round(r.y) - r.y; if (dx || dy) w.style.transform = 'translate(' + dx + 'px,' + dy + 'px)'; });
     await bApp.screenshot({ path: base + '-board.png', animations: 'disabled' });
     await bp.close();
     // App side: real clicks only after the first goto
@@ -91,7 +98,7 @@ for (const b of manifest) {
       await ap.waitForSelector('[data-screen="' + b.screen + '"]', { timeout: 5000 });
     } catch (e) { r.reasons.push('not reached: ' + e.message.split('\n')[0]); await ap.close(); continue; }
     await ap.evaluate(() => document.fonts.ready);
-    const aApp = ap.locator('.sp-app').first();
+    const aApp = ap.locator(APP_ROOT).first();
     const aText = norm(await aApp.innerText());
     await aApp.screenshot({ path: base + '-app.png', animations: 'disabled' });
     const todo = await ap.locator('[data-todo]').count();

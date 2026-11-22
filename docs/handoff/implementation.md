@@ -100,18 +100,31 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 
 | Card | Lane | Title | Depends on | Status |
 |---|---|---|---|---|
-| IMP-01 | ui | S35 work area: chat, artifact tabs, canvas pane and inspector for the design and backend states | – | open |
-| IMP-02 | ui | S35 conflict state, save states (F112), per-stage memory across switches | IMP-01 | open |
-| IMP-05 | ui | S27 Projects home (6 states), and "/" becomes S27 | IMP-01, C-01 | blocked (waits for C-01, the S27 intake redraw) |
-| IMP-03 | core | API source: typed client for the Rust API, equal to the sample | – | open |
-| IMP-04 | core | Proposals and revisions in the core (accept, reject, revert, stale) | – | open |
-| IMP-12 | core | No-Python and licence inventory check | – | open |
-| IMP-09 | core | Ledger: estimate, reserve, settle, caps | IMP-04 | open |
-| IMP-11 | core | Model sources and capability registry | – | open |
-| IMP-10 | core | GenUI schema validation, fail closed | – | open |
-| IMP-22 | core | Skills core: SkillManifest, versions, update policy and update checks | IMP-04 | open |
-| IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | open |
-| IMP-06 … IMP-08, IMP-13 … IMP-21 | ui | S28 … S38, T01, one card per board, written by the lead when P1 is done | P1 | open |
+| IMP-01 | ui | S35 work area: chat, artifact tabs, canvas pane and inspector for the design and backend states | – | done, part open, waiting for owner merge: PR #3. Lead re-ran the gate: design PASS 0.41 %, backend PASS 0.47 %. The conflict state is IMP-02. |
+| IMP-02 | ui | S35 conflict state, save states (F112), per-stage memory across switches | IMP-01 | done, waiting for owner merge: PR #6, stacked on #3 (lead re-ran: S35 3/3 PASS) |
+| IMP-05 | ui | S27 Projects home (6 states), and "/" becomes S27 | IMP-01, C-01 | done, part open: PR #11, stacked on #9 (lead re-ran with the harness fixes: S27 6/6, S35 3/3, S40 6/6 PASS; still to do: merge main for the C-01 create redraw) |
+| IMP-03 | core | API source: typed client for the Rust API, equal to the sample | – | done, waiting for owner merge: PR #1 (lead review: approve) |
+| IMP-04 | core | Proposals and revisions in the core (accept, reject, revert, stale) | – | done, waiting for owner merge: PR #2 (lead review: approve; merge after #1) |
+| IMP-12 | core | No-Python and licence inventory check | – | done, waiting for owner merge: PR #4 (lead review: approve; one small follow-up on workspace links) |
+| IMP-09 | core | Ledger: estimate, reserve, settle, caps | IMP-04 | done, waiting for owner merge: PR #10, stacked on #2 |
+| IMP-11 | core | Model sources and capability registry | – | done, waiting for owner merge: PR #5 (lead review: approve) |
+| IMP-10 | core | GenUI schema validation, fail closed | – | done, waiting for owner merge: PR #7 (lead review: approve) |
+| IMP-22 | core | Skills core: SkillManifest, versions, update policy and update checks | IMP-04 | done, waiting for owner merge: PR #8 (lead review: approve) |
+| IMP-24 | core | Handoff manifest core (S34): accepted revisions, hashes, missing inputs, deterministic | IMP-04 | open |
+| IMP-25 | core | Next-request context builder (S29, S35): only the listed chips, pure | – | open |
+| IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
+| IMP-06 | ui | S28 Reference intake | IMP-01 | open |
+| IMP-07 | ui | S29 Frames canvas | IMP-01 | open |
+| IMP-08 | ui | S30 Style review | IMP-01 | open |
+| IMP-13 | ui | S31 Alternatives | IMP-01 | open |
+| IMP-14 | ui | S32 Targeted change | IMP-01 | open |
+| IMP-15 | ui | S33 Review and accept | IMP-01 | open |
+| IMP-16 | ui | S34 Coding handoff | IMP-01 | open |
+| IMP-17 | ui | S36 Models and usage | IMP-01 | open |
+| IMP-18 | ui | S37 Build contracts | IMP-01 | open |
+| IMP-19 | ui | S38 GenUI panel | IMP-01 | open |
+| IMP-20 | ui | T01 Tablet and phone | IMP-01 | open |
+| IMP-21 | ui | Screens read the API instead of the sample (reserved) | IMP-03 and server routes | open |
 
 ### IMP-01 · S35 work area (ui)
 
@@ -183,17 +196,91 @@ There is no network code in this card. Fetching from GitHub is a later card.
 
 Board `S40-skills-library.dc.html`, states `library, detail, edit, github, updates, use`. It reads `@spekin/sample` (SKL_*) until IMP-22's API exists. All six states must PASS the harness. The `/` list is keyboard-first: arrows move, Enter picks, Escape closes and keeps the text. A switch never runs anything.
 
+### IMP-24 · Handoff manifest core (core)
+
+Pure Rust in spekin-core for S34 (DPAI addendum, point 3). `build_manifest(selection, revisions, inputs) -> Manifest`:
+- only accepted revisions can be selected; a draft or stale one is refused with a typed error;
+- the manifest lists, in a stable order, each artifact with its exact revision and a sha256 content hash, the exclusions, and the required inputs, where a missing one is listed explicitly (for example `PRD: missing`) and is never invented;
+- `to_json` is deterministic, so two exports of the same selection are byte-identical (a property test);
+- nothing creates a link: no URL, token or expiry field exists (R-WS-3, sharing stays later).
+Export the types with ts-rs. Stack on IMP-04 (uses `Revision`).
+
+### IMP-25 · Next-request context builder (core)
+
+Pure Rust in spekin-core for S29 and S35 (DPAI addendum, point 1). `build_context(chips, board) -> RequestContext`:
+- the request carries exactly the listed chips (artifact id, revision, status); it never includes hidden frames or the whole board (property test: for any board and any chip set, every item in the output is in the chip set);
+- removing a chip changes the context, never the content (the board is unchanged, compared by hash);
+- building the context never sends, accepts or spends: the function is pure and has no ledger or proposal side effect;
+- the token estimate is the sum of the chip estimates (S35 shows "≈ 9.8k tokens").
+Export the types with ts-rs.
+
+### UI cards after P1 (written 23 Nov)
+
+Order: IMP-07 (S29), IMP-15 (S33), IMP-14 (S32), IMP-13 (S31), IMP-08 (S30), IMP-06 (S28), IMP-16 (S34), IMP-17 (S36), IMP-19 (S38), IMP-18 (S37), IMP-20 (T01). Each card branches from the previous ui branch while the earlier pull requests are still open (stacked), or from origin/main once they are merged. IMP-21 is kept free for "screens read the API" after the core API routes exist.
+
+### IMP-06 · S28 Reference intake (ui)
+
+Board `S28-reference-intake.dc.html`, states `empty, drop, imported, rejected, pii, pasted`. Add `tools/harness/paths/S28.json` and mark each state "checked" only after it passes. The limits and messages come from `sample/parts/intake.mjs` (INTAKE_LIMITS). A rejected file shows its reason and is never stored. The PII state blocks the import until the user chooses. Consent wording follows C-04: files go only to providers whose terms forbid training. All states must PASS the harness.
+
+### IMP-07 · S29 Frames canvas (ui)
+
+Board `S29-frames-canvas.dc.html`, states `board, multi, chat, jobs, over, empty`. Add `tools/harness/paths/S29.json` and mark each state "checked" only after it passes. A press of 3 px or less is a click; a longer press is a drag (F162). Zoom, fit, 100 % and pan come from the toolbar and the keys. **DPAI checks:** (1) a unit test builds the next request from the context strip and shows that it carries only the listed chips, never hidden frames or the whole board. Removing a chip changes context, not content. Select, pin and navigate never send, accept or spend. (2) Logical frames are counted apart from takes and previews. (3) Escape leaves select mode, the active tool is visible, and Tab reaches the artifact tabs and the sidebar. All states must PASS the harness.
+
+### IMP-08 · S30 Style review (ui)
+
+Board `S30-style-review.dc.html`, states `learning, review, conflict, markdown, promote, accepted`. Add `tools/harness/paths/S30.json` and mark each state "checked" only after it passes. DESIGN.md is a view of accepted tokens and is only changed through review (proposal → diff → accept). It is never edited directly. The conflict state shows both values and the source of each. All states must PASS the harness.
+
+### IMP-13 · S31 Alternatives (ui)
+
+Board `S31-alternatives.dc.html`, states `stack, grid, cmp, gen, kept, fail`. Add `tools/harness/paths/S31.json` and mark each state "checked" only after it passes. Takes are previews of one logical frame. The frame count does not change when takes are added. A failed take shows its error and a retry button that never spends without the estimate shown first. **DPAI:** a viewport width switch changes only the preview, never the frame. All states must PASS the harness.
+
+### IMP-14 · S32 Targeted change (ui)
+
+Board `S32-targeted-change.dc.html`, states `select, working, applied, compare, variations, clip`. Add `tools/harness/paths/S32.json` and mark each state "checked" only after it passes. A targeted change creates a proposal and never edits the frame directly. **DPAI:** the targeted-edit mode is visible, Escape leaves it, and keyboard focus can reach the tabs and sidebar from inside it. All states must PASS the harness.
+
+### IMP-15 · S33 Review and accept (ui)
+
+Board `S33-review-accept.dc.html`, states `pins, hover, stale, diff, accepted, rejected`. Add `tools/harness/paths/S33.json` and mark each state "checked" only after it passes. Uses the IMP-04 types (Proposal, Revision, Rejection) from `@spekin/contracts` once PR #2 is merged. Until then it uses sample data shaped like them. Accept creates exactly one revision. Reject creates no revision and adds one audit entry (C-03). A stale proposal cannot be accepted. An empty review list is never shown as accepted. All states must PASS the harness.
+
+### IMP-16 · S34 Coding handoff (ui)
+
+Board `S34-coding-handoff.dc.html`, states `select, manifest, ready, copied, blocked, stale`. Add `tools/harness/paths/S34.json` and mark each state "checked" only after it passes. Only accepted revisions can be selected. **DPAI checks:** the manifest lists exact revisions, exclusions and hashes, and names missing inputs explicitly (for example "PRD: missing"). Two exports of the same selection are byte-identical (unit test). No share link is created; Share stays LATER (R-WS-3). All states must PASS the harness.
+
+### IMP-17 · S36 Models and usage (ui)
+
+Board `S36-models-usage.dc.html`, states `source, cli, api, estimate, ledger, capped`. Add `tools/harness/paths/S36.json` and mark each state "checked" only after it passes. Reads the IMP-11 (model sources) and IMP-09 (ledger) shapes; uses sample data until their API routes exist. An API key is shown as presence plus the last 4 characters only. The CLI pair button is LATER (C-05). No prices or quotas that the sample does not hold. All states must PASS the harness.
+
+### IMP-18 · S37 Build contracts (ui)
+
+Board `S37-build-contracts.dc.html`, states `contracts, detail, matrix, gate, fail, evidence`. Add `tools/harness/paths/S37.json` and mark each state "checked" only after it passes. Evidence shows what ran, when, and its result. A missing check shows as "not run", never as passed. All states must PASS the harness.
+
+### IMP-19 · S38 GenUI panel (ui)
+
+Board `S38-genui-panel.dc.html`, states `stream, cards, question, fallback, confirm, pinned`. Add `tools/harness/paths/S38.json` and mark each state "checked" only after it passes. The card families and actions are the ones IMP-10 validates. An invalid card shows the fallback state and never renders partly. A confirm action never runs before the user confirms. All states must PASS the harness.
+
+### IMP-20 · T01 Tablet and phone (ui)
+
+Board `T01-tablet-phone.dc.html`, states `tablet, tabreview, phlist, phreview, phhand`. Add `tools/harness/paths/T01.json` and mark each state "checked" only after it passes. Same components at narrower widths (no separate mobile app). The harness path sets the viewport per state. No horizontal scroll at the phone width. All states must PASS the harness.
+
+## Carry-forward checks for later ui cards (DPAI addendum, 23 Nov)
+
+When the lead writes the S29, S31, S32 and S34 cards, add these acceptance lines (see incoming/2026-11-23-dpai-addendum-v1.0.md):
+- **S29:** a payload test shows the next request carries only the listed context chips. Removing a chip changes context, not content. Select, pin and navigate never send, accept or spend.
+- **S29 and S31:** logical frames are counted apart from their takes and previews. A viewport width changes the preview only.
+- **S29 and S32:** Escape leaves select and targeted-edit modes, the active mode is visible, and keyboard focus can reach the tabs and sidebar.
+- **S34:** the manifest has exact revisions, exclusions and hashes, and lists missing inputs (for example "PRD: missing"). Two exports are byte-identical. No share link is created (R-WS-3).
+
 ## Lead canvas tasks (from the review supplement)
 
 These change boards, so only the lead does them: edit the generator, rebuild, lint, `npm run canvas:states`, then republish.
 
 | Task | Board | Change | Blocks |
 |---|---|---|---|
-| C-01 | S27 | "Create" becomes four domain choices plus one idea box, Bahasa first, with no name or language wizard (REV-03; owner to confirm) | IMP-05 |
-| C-02 | F00 and all boards | Add the PRD R-IDs to every story so features trace to requirements (REV-05) | – |
-| C-03 | S33 | Accept/Reject wording, and an audit row when you reject (REV-08) | S33 card |
-| C-04 | S28 | Say "providers must not train on your files" as a requirement we check, not a guarantee (REV-11) | S28 card |
-| C-05 | S36 | Local CLI stays a source; its run path is marked later (REV-02, ADR 0005) | S36 card |
+| C-01 | S27 | **done** 23 Nov (owner yes): create is four domain choices plus one idea box; name comes from the pitch; Bahasa default with a one-click switch. Part open: the first-run start cards and the Home "Start from" chips still show three starts. | – |
+| C-02 | F00 and all boards | **done** 23 Nov: `maps-reqs.mjs` traces 200 of 212 stories to PRD v0.2.3 R-IDs (every ID checked against the PRD). 12 have none yet, with a reason (layout details, S40 owner features). F00 shows them. | – |
+| C-03 | S33 | **done, part open**: Reject = no revision plus one audit entry. Still to do: the S30 local accept and S34 re-finalize wording. | S33 card |
+| C-04 | S28 | **done**: the consent line and F146 say files go only to providers whose terms forbid training | – |
+| C-05 | S36 | **done, part open**: the board says pairing and runs ship as a later adapter. Still to do: draw the cli state's pair button as later. | S36 card |
 
 ## Open decisions (owner)
 
