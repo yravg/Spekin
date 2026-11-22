@@ -692,7 +692,7 @@ export function ResponsiveProjectShell(props: {
           <div className="mod-sf">
             <input
               type="text"
-              className="ap-sf-input"
+              className="ap-sf-plain"
               aria-label="Describe proposed change"
               placeholder="Describe change…"
               value={proposalText}
@@ -746,7 +746,7 @@ export function ResponsiveProjectShell(props: {
             <div className="pj">
               {project.name}
               <span>
-                {project.increment} · Spec {project.spec}
+                {project.increment.split(' · ')[0]} · Spec {project.spec}
               </span>
             </div>
             <span className="fl" />
@@ -1225,13 +1225,13 @@ export function ResponsiveProjectShell(props: {
                   <span>Canvas editing is on desktop. Review and hand off work here.</span>
                 </div>
                 <div className="mod-sr">
-                  <div className="mod-sf">
+                  <div className="mod-sf ap-sf-wrap">
                     <DeviceIcon name="search" size={18} />
+                    {search ? null : <span className="ap-sf-ph">Search frames</span>}
                     <input
                       type="search"
                       className="ap-sf-input"
                       aria-label="Search frames"
-                      placeholder="Search frames"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                     />

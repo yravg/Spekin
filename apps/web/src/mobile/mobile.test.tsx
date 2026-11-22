@@ -64,6 +64,8 @@ describe('T01 Tablet and phone (IMP-20)', () => {
   it('renders tablet board (tablet) and review panel replacing the list (tabreview) with no data-todo or board-only classes', () => {
     const tabletHtml = renderResponsive({ tier: 'tablet', initialTab: 'frames' });
     expect(tabletHtml).toContain('data-screen="T01"');
+    expect(tabletHtml).toContain('Inc. 2 · Spec r14');
+    expect(tabletHtml).not.toContain('Variance alerts');
     expect(tabletHtml).toContain('mod-rail');
     expect(tabletHtml).not.toContain('mod-pn');
     expect(tabletHtml).toContain('5 on this board');
@@ -87,6 +89,7 @@ describe('T01 Tablet and phone (IMP-20)', () => {
   it('renders all three phone states (phlist, phreview, phhand) with sheets, touch targets and accepted-only handoff', () => {
     const phListHtml = renderResponsive({ tier: 'phone', initialTab: 'frames', initialSheet: 'actions' });
     expect(phListHtml).toContain('data-screen="T01"');
+    expect(phListHtml).toContain('>Search frames<');
     expect(phListHtml).toContain('mod-tb');
     expect(phListHtml).toContain('Move earlier');
     expect(phListHtml).toContain('Duplicate as draft');

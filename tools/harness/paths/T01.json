@@ -2,16 +2,18 @@
   "board": "T01-tablet-phone.dc.html",
   "states": {
     "tablet": {
-      "status": "draft",
+      "status": "checked",
       "viewport": { "width": 820, "height": 1180 },
+      "frame": { "index": 0 },
       "steps": [
         { "goto": "/p/meranti-yard/design" },
         { "wait": "[data-screen=\"T01\"][data-tier=\"tablet\"] .mod-rail" }
       ]
     },
     "tabreview": {
-      "status": "draft",
+      "status": "checked",
       "viewport": { "width": 820, "height": 1180 },
+      "frame": { "index": 0 },
       "steps": [
         { "goto": "/p/meranti-yard/design" },
         { "wait": "[data-screen=\"T01\"][data-tier=\"tablet\"] .mod-rail" },
@@ -20,8 +22,9 @@
       ]
     },
     "phlist": {
-      "status": "draft",
+      "status": "checked",
       "viewport": { "width": 390, "height": 844 },
+      "frame": { "index": 1 },
       "steps": [
         { "goto": "/p/meranti-yard/design" },
         { "wait": "[data-screen=\"T01\"][data-tier=\"phone\"] .mod-pl" },
@@ -30,8 +33,9 @@
       ]
     },
     "phreview": {
-      "status": "draft",
+      "status": "checked",
       "viewport": { "width": 390, "height": 844 },
+      "frame": { "index": 1 },
       "steps": [
         { "goto": "/p/meranti-yard/design" },
         { "wait": "[data-screen=\"T01\"][data-tier=\"phone\"] .mod-tb" },
@@ -41,8 +45,9 @@
       ]
     },
     "phhand": {
-      "status": "draft",
+      "status": "checked",
       "viewport": { "width": 390, "height": 844 },
+      "frame": { "index": 1 },
       "steps": [
         { "goto": "/p/meranti-yard/design" },
         { "wait": "[data-screen=\"T01\"][data-tier=\"phone\"] .mod-tb" },
