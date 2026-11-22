@@ -136,7 +136,7 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-17 | ui | S36 Models and usage | IMP-01 | done, part open: PR #33, stacked on #30 (lead re-ran: S36 6/6 PASS; ledger and model actions record intent only) |
 | IMP-18 | ui | S37 Build contracts | IMP-01 | done, part open: PR #36, stacked on #33 (lead re-ran: S37 6/6 PASS; some board copy still to move into sample data) |
 | IMP-19 | ui | S38 GenUI panel | IMP-01 | done, part open: PR #34, stacked on #32 (lead re-ran: S38 6/6 PASS; a TS mirror of the Rust validator is used until IMP-21) |
-| IMP-20 | ui | T01 Tablet and phone | IMP-01 | part open: PR #35, stacked on #34 (harness now compares device frames; phone review and hand-off states pass; tablet top line and phone search field being fixed) |
+| IMP-20 | ui | T01 Tablet and phone | IMP-01 | done, part open: PR #35, stacked on #34 (lead re-ran: T01 5/5 PASS with device frames; real upload, zip download and keyboard-only traversal not checked) |
 | IMP-21 | ui | Screens read the API instead of the sample, and S38 calls POST /api/genui/validate in place of the TS mirror (apps/web/src/genui/validate.ts, then deleted) | IMP-26 | open |
 
 ### IMP-01 · S35 work area (ui)
