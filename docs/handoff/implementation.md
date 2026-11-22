@@ -118,7 +118,8 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-27 | core | GitHub skill source adapter: pin to SHA, fetch with limits, update check | IMP-22 | done, waiting for owner merge: PR #17, stacked on #8 |
 | IMP-29 | core | Recently deleted and restore: 30-day window, pure | – | done, waiting for owner merge: PR #20 |
 | IMP-31 | core | Audit and restore in the API (routes, one audit entry per action, head kept apart) | IMP-26, IMP-29, IMP-30 | done, waiting for owner merge: PR #23, stacked on #22 |
-| IMP-32 | core | Server hardening: body limit, JSON only, timeout, CORS, headers, loopback bind | IMP-31 | open |
+| IMP-32 | core | Server hardening: body limit, JSON only, timeout, CORS, headers, loopback bind | IMP-31 | done, waiting for owner merge: PR #24, stacked on #23 |
+| IMP-33 | core | Build contracts and evidence core (S37): not run is never passed | IMP-32 | open |
 | IMP-30 | core | Audit log core: append-only, hash-chained, verify | – | done, waiting for owner merge: PR #21 (follow-up: store the head hash apart from the log) |
 | IMP-28 | core | GenUI validation fuzzing (never panics, never partial) | IMP-10 | done, waiting for owner merge: PR #18, stacked on #7 (the fuzzer found and fixed a data: URL hole) |
 | IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
@@ -291,6 +292,17 @@ Builds on IMP-31 (branch from `origin/imp-31-audit-restore-api`). Axum and tower
 - security headers on every response: `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Cache-Control: no-store` on `/api`;
 - the server binds to 127.0.0.1 by default; `SPEKIN_BIND` changes it, and a log line says when it is not loopback;
 - errors never echo request bodies, tokens or file paths (a test sends a fake token and checks that the response and logs do not contain it).
+
+### IMP-33 · Build contracts and evidence core (core)
+
+Pure Rust in spekin-core for S37 (R-EVD-1, R-EVD-4, AC-SPK-22). Branch from `origin/imp-32-server-hardening`.
+- A `Contract` is a named requirement, for example `R-EDT-3: accept creates one revision`. It has a list of `Check`s (test name, kind unit/property/e2e/harness, owner lane).
+- `Evidence` records one run of one check: commit SHA, UTC time, result `passed | failed | skipped`, duration, and a log excerpt of at most 4 KB.
+- `status(contract, evidence) -> ContractStatus` returns `met | failing | not_run | stale`. A check with no evidence is `not_run`, never passed. Evidence from a commit older than the contract's last change is `stale`.
+- `matrix(contracts, evidence)` gives the S37 matrix rows: requirement × check × status.
+- `gate(contracts, evidence, required)` passes only when every required contract is `met`. It lists the reasons otherwise.
+- Property tests: missing evidence is never `met`; any failed required check fails the gate; adding newer passing evidence never turns `met` into `failing`.
+- Seed the S37 sample shapes from `docs/design/spekin-canvas/sample/parts/` (contracts, matrix). Export the types with ts-rs. Add `GET /api/projects/{id}/contracts` with a test.
 
 ### UI cards after P1 (written 23 Nov)
 
