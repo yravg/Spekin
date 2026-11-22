@@ -125,3 +125,4 @@
 .skl-glr.prop{background:var(--warn-soft)}
 @media (prefers-reduced-motion: reduce){.skl-sw i{transition:none}}
 .skl-prop>.newtag,.skl-menu>.newtag{right:4px}
+.mp-rn{display:block;font:400 10.5px/1.3 var(--font);color:var(--ink-faint)}

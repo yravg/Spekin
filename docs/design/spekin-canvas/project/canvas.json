@@ -21,7 +21,7 @@
    "x": 2020,
    "y": 300,
    "w": 1900,
-   "h": 11071,
+   "h": 12173,
    "title": "F00 · Feature map",
    "is_interactive": true
   },
@@ -29,12 +29,12 @@
    "x": 4040,
    "y": 300,
    "w": 1900,
-   "h": 2304,
+   "h": 2359,
    "title": "R00 · References, taste and engine"
   },
   "S35-project-shell.dc.html": {
    "x": 0,
-   "y": 11791,
+   "y": 12893,
    "w": 1900,
    "h": 3572,
    "title": "S35 · Project shell: eight stages, artifacts, chat and canvas",
@@ -42,7 +42,7 @@
   },
   "S27-projects.dc.html": {
    "x": 0,
-   "y": 15783,
+   "y": 16885,
    "w": 1900,
    "h": 4270,
    "title": "S27 · Projects home: home, all projects, switcher, create",
@@ -50,15 +50,15 @@
   },
   "S28-reference-intake.dc.html": {
    "x": 2020,
-   "y": 15783,
+   "y": 16885,
    "w": 1900,
-   "h": 3927,
+   "h": 3983,
    "title": "S28 · Reference intake: drop, pick, paste screenshots",
    "is_interactive": true
   },
   "S29-frames-canvas.dc.html": {
    "x": 0,
-   "y": 20473,
+   "y": 21575,
    "w": 1900,
    "h": 4307,
    "title": "S29 · Frames canvas: board, frames, prompt bar and jobs",
@@ -66,7 +66,7 @@
   },
   "S31-alternatives.dc.html": {
    "x": 2020,
-   "y": 20473,
+   "y": 21575,
    "w": 1900,
    "h": 3553,
    "title": "S31 · Alternatives: takes stack and compare with the baseline",
@@ -74,7 +74,7 @@
   },
   "S30-style-review.dc.html": {
    "x": 0,
-   "y": 25200,
+   "y": 26302,
    "w": 1900,
    "h": 3490,
    "title": "S30 · Style review: tokens learned from references",
@@ -82,7 +82,7 @@
   },
   "S38-genui-panel.dc.html": {
    "x": 2020,
-   "y": 25200,
+   "y": 26302,
    "w": 1900,
    "h": 3973,
    "title": "S38 · Contextual GenUI panel in chat",
@@ -90,7 +90,7 @@
   },
   "S32-targeted-change.dc.html": {
    "x": 0,
-   "y": 29593,
+   "y": 30695,
    "w": 1900,
    "h": 4311,
    "title": "S32 · Targeted change: select a part, instruct, review in place",
@@ -98,15 +98,15 @@
   },
   "S33-review-accept.dc.html": {
    "x": 2020,
-   "y": 29593,
+   "y": 30695,
    "w": 1900,
-   "h": 4374,
+   "h": 4393,
    "title": "S33 · Review and accept: nitpick pins, stale items and the S08 exact diff",
    "is_interactive": true
   },
   "S34-coding-handoff.dc.html": {
    "x": 0,
-   "y": 34387,
+   "y": 35508,
    "w": 1900,
    "h": 3616,
    "title": "S34 · Coding hand-off",
@@ -114,7 +114,7 @@
   },
   "S37-build-contracts.dc.html": {
    "x": 2020,
-   "y": 34387,
+   "y": 35508,
    "w": 1900,
    "h": 3803,
    "title": "S37 · Build contracts and release readiness",
@@ -122,15 +122,15 @@
   },
   "S36-models-usage.dc.html": {
    "x": 0,
-   "y": 38610,
+   "y": 39731,
    "w": 1900,
-   "h": 5040,
+   "h": 5060,
    "title": "S36 · Models and usage: source, local CLI, API key, estimate, ledger and caps",
    "is_interactive": true
   },
   "T01-tablet-phone.dc.html": {
    "x": 2020,
-   "y": 38610,
+   "y": 39731,
    "w": 1900,
    "h": 3543,
    "title": "T01 · Tablet and phone: frame list, review and hand off",
@@ -138,7 +138,7 @@
   },
   "S40-skills-library.dc.html": {
    "x": 0,
-   "y": 44070,
+   "y": 45211,
    "w": 1900,
    "h": 3087,
    "title": "S40 · Skills library: free templates, your own copies, GitHub sources that update",
@@ -167,56 +167,56 @@
  "notes": {
   "t0": {
    "x": 0,
-   "y": 11491,
+   "y": 12593,
    "text": "Shell: project context, eight stages, artifacts, chat",
    "kind": "title1",
    "maxW": 1600
   },
   "t1": {
    "x": 0,
-   "y": 15483,
+   "y": 16585,
    "text": "Start: projects and reference intake",
    "kind": "title1",
    "maxW": 1600
   },
   "t2": {
    "x": 0,
-   "y": 20173,
+   "y": 21275,
    "text": "Frames: board canvas and alternatives",
    "kind": "title1",
    "maxW": 1600
   },
   "t3": {
    "x": 0,
-   "y": 24900,
+   "y": 26002,
    "text": "Style and contextual GenUI",
    "kind": "title1",
    "maxW": 1600
   },
   "t4": {
    "x": 0,
-   "y": 29293,
+   "y": 30395,
    "text": "Change: targeted edit and review",
    "kind": "title1",
    "maxW": 1600
   },
   "t5": {
    "x": 0,
-   "y": 34087,
+   "y": 35208,
    "text": "Delivery: hand-off and build contracts",
    "kind": "title1",
    "maxW": 1600
   },
   "t6": {
    "x": 0,
-   "y": 38310,
+   "y": 39431,
    "text": "Models, usage and devices",
    "kind": "title1",
    "maxW": 1600
   },
   "t7": {
    "x": 0,
-   "y": 43770,
+   "y": 44911,
    "text": "Skills library",
    "kind": "title1",
    "maxW": 1600

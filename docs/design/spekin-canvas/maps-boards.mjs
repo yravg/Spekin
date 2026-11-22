@@ -1,12 +1,15 @@
 // F00 feature map and R00 references-and-engine boards. Generated from the stories on every board (K.STORIES)
 // and maps.mjs, so the map cannot drift from the boards. Lead-owned.
 import { BOARD_META, ENGINE, TASTE, LICENCES } from './maps.mjs';
+import { REQS, REQS_NOTE } from './maps-reqs.mjs';
 
 const REFS = ['OpenDesign', 'Paraframe', 'Onlook', 'Momo', 'PRD'];
 const RCLS = { OpenDesign: 'od', Paraframe: 'pf', Onlook: 'on', Momo: 'mo', PRD: 'prd' };
 const LAYER = Object.fromEntries(ENGINE.map((e) => [e.id, e.name]));
 const SHORT = { ui: 'UI shell', canvas: 'Canvas', preview: 'Preview', genui: 'GenUI', agent: 'Agent loop', core: 'Rust core' };
 const strip = (t) => String(t).replace(/<[^>]+>/g, '');
+// Requirement IDs: those cited in the story text plus the traced ones in maps-reqs.mjs (review REV-05).
+const idsOf = (s) => [...new Set([...ids(s.t), ...(REQS[s.id] || [])])];
 const ids = (t) => [...new Set((strip(t).match(/\b(?:R-[A-Z]+-\d+(?:\.\.\d+)?|AC-[A-Z-]*\d+|FR-\d+)\b/g) || []))];
 const bar = (label, n, max, cls, href) => `<div class="mp-bar"><span class="l">${href ? `<a href="${href}">${label}</a>` : label}</span><span class="t"><i class="${cls}" style="width:${Math.max(3, Math.round(n / max * 100))}%"></i></span><b>${n}</b></div>`;
 const rchip = (r) => `<span class="mp-ref ${RCLS[r] || 'prd'}">${r}</span>`;
@@ -17,13 +20,13 @@ export function featureMap(K) {
   const byRef = REFS.map((r) => [r, S.filter((s) => s.src === r).length]);
   const byBoard = boards.map((b) => [b.code, S.filter((s) => s.code === b.code).length, b.file]);
   const maxR = Math.max(...byRef.map((x) => x[1]), 1), maxB = Math.max(...byBoard.map((x) => x[1]), 1);
-  const reqs = new Set(S.flatMap((s) => ids(s.t).filter((x) => x.startsWith('R-'))));
+  const reqs = new Set(S.flatMap((s) => idsOf(s).filter((x) => x.startsWith('R-'))));
   const kpi = (l, v, sub) => `<div class="mp-kpi"><span class="lbl">${l}</span><b>${v}</b><span>${sub}</span></div>`;
-  const head = `<div class="mp-kpis">${kpi('Features', S.length, 'one story ID each, F101 and up')}${kpi('Drawn on the canvas', S.length + ' of ' + S.length, 'each has its board and state')}${kpi('Boards', boards.length, '13 screens planned in the PRD')}${kpi('PRD requirements cited', reqs.size, 'R- IDs named in the stories')}${kpi('Built in an app', 0, 'no Spekin app exists yet')}</div>
+  const head = `<div class="mp-kpis">${kpi('Features', S.length, 'one story ID each, F101 and up')}${kpi('Drawn on the canvas', S.length + ' of ' + S.length, 'each has its board and state')}${kpi('Boards', boards.length, '13 screens planned in the PRD')}${kpi('PRD requirements traced', reqs.size, S.filter((s) => idsOf(s).some((x) => x.startsWith('R-'))).length + ' of ' + S.length + ' features trace to an R- ID')}${kpi('Built in an app', 0, 'no Spekin app exists yet')}</div>
 <div class="mp-charts"><div class="card"><span class="lbl">Feature source</span>${byRef.map(([r, n]) => bar(r, n, maxR, RCLS[r])).join('')}<p class="mp-cap">Where the behaviour comes from. PRD means the PRD asks for it and no reference shows it.</p></div>
 <div class="card"><span class="lbl">Features per board</span><div class="mp-cols">${byBoard.map(([c, n, f]) => bar(c, n, maxB, 'bd', f)).join('')}</div></div>
 <div class="card mp-how"><span class="lbl">How to read this map</span><p><b>Click a board code</b> to jump to that board on the canvas. Its stories carry the same feature ID.</p><p><b>Filter</b> with the buttons at the top right: one reference at a time.</p><p><b>Engine</b> names the layer that does the work (see R00 for the stack).</p><p><b>Status</b>: every feature is drawn; none is built. Build order follows the phased plan in the handoff.</p></div></div>`;
-  const table = (rows) => `<div class="card mp-tw"><table class="sp-tbl mp-t"><thead><tr><th style="width:62px">Feature</th><th style="width:70px">Board</th><th style="width:128px">Stage</th><th>What it does</th><th style="width:150px">Requirements</th><th style="width:98px">Source</th><th style="width:200px">Engine</th><th style="width:104px">Status</th></tr></thead><tbody>${rows.map((s) => { const m = BOARD_META[s.code] || { stage: '', layers: [] }; const r = ids(s.t); return `<tr><td><span class="sid">${s.id}</span></td><td><a href="${s.file}">${s.code}</a></td><td>${m.stage}</td><td>${strip(s.t).replace(/\s*\((?:R-|§|AC-|FR-)[^)]*\)\s*\.?$/, '.')}</td><td class="mono mp-ids">${r.slice(0, 4).join(' ')}${r.length > 4 ? ' +' + (r.length - 4) : ''}</td><td>${rchip(s.src)}</td><td class="mp-eng">${m.layers.map((l) => `<span class="mp-ly">${SHORT[l]}</span>`).join('')}</td><td><span class="pill ok">Drawn</span></td></tr>`; }).join('')}</tbody></table></div>`;
+  const table = (rows) => `<div class="card mp-tw"><table class="sp-tbl mp-t"><thead><tr><th style="width:62px">Feature</th><th style="width:70px">Board</th><th style="width:128px">Stage</th><th>What it does</th><th style="width:150px">Requirements</th><th style="width:98px">Source</th><th style="width:200px">Engine</th><th style="width:104px">Status</th></tr></thead><tbody>${rows.map((s) => { const m = BOARD_META[s.code] || { stage: '', layers: [] }; const r = idsOf(s); return `<tr><td><span class="sid">${s.id}</span></td><td><a href="${s.file}">${s.code}</a></td><td>${m.stage}</td><td>${strip(s.t).replace(/\s*\((?:R-|§|AC-|FR-)[^)]*\)\s*\.?$/, '.')}</td><td class="mono mp-ids">${r.slice(0, 4).join(' ')}${r.length > 4 ? ' +' + (r.length - 4) : ''}${REQS_NOTE[s.id] ? `<span class="mp-rn" title="${REQS_NOTE[s.id].replace(/"/g, '&quot;')}">${r.length ? ' · note' : 'none yet'}</span>` : ''}</td><td>${rchip(s.src)}</td><td class="mp-eng">${m.layers.map((l) => `<span class="mp-ly">${SHORT[l]}</span>`).join('')}</td><td><span class="pill ok">Drawn</span></td></tr>`; }).join('')}</tbody></table></div>`;
   const views = [{ id: 'all', label: 'All', rows: S }, ...REFS.map((r) => ({ id: RCLS[r], label: r === 'PRD' ? 'PRD only' : r, rows: S.filter((s) => s.src === r) }))]
     .map((v) => ({ ...v, entry: v.id === 'all' ? 'Canvas: F00 Feature map.' : 'F00: click ' + v.label + ' at the top right.', data: 'Stories on every board (build.mjs → K.STORIES) and maps.mjs → BOARD_META.' }));
   const h = 560 + S.length * 44;

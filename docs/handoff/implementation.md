@@ -190,7 +190,7 @@ These change boards, so only the lead does them: edit the generator, rebuild, li
 | Task | Board | Change | Blocks |
 |---|---|---|---|
 | C-01 | S27 | **done** 23 Nov (owner yes): create is four domain choices plus one idea box; name comes from the pitch; Bahasa default with a one-click switch. Part open: the first-run start cards and the Home "Start from" chips still show three starts. | – |
-| C-02 | F00 and all boards | Add the PRD R-IDs to every story so features trace to requirements (REV-05) | – |
+| C-02 | F00 and all boards | **done** 23 Nov: `maps-reqs.mjs` traces 200 of 212 stories to PRD v0.2.3 R-IDs (every ID checked against the PRD). 12 have none yet, with a reason (layout details, S40 owner features). F00 shows them. | – |
 | C-03 | S33 | **done, part open**: Reject = no revision plus one audit entry. Still to do: the S30 local accept and S34 re-finalize wording. | S33 card |
 | C-04 | S28 | **done**: the consent line and F146 say files go only to providers whose terms forbid training | – |
 | C-05 | S36 | **done, part open**: the board says pairing and runs ship as a later adapter. Still to do: draw the cli state's pair button as later. | S36 card |
