@@ -33,32 +33,110 @@ const PERMISSIVE = new Set([
   'MIT', 'MIT-0', 'APACHE-2.0', 'ISC', 'BSD-2-CLAUSE', 'BSD-3-CLAUSE', '0BSD', 'UNLICENSE',
   'CC0-1.0', 'CC-BY-3.0', 'CC-BY-4.0', 'ZLIB', 'BLUEOAK-1.0.0', 'UNICODE-3.0',
   'UNICODE-DFS-2016', 'BSL-1.0', 'W3C', 'W3C-20150313', 'CC-BY-2.5', 'PUBLIC-DOMAIN',
+  'CDLA-PERMISSIVE-2.0', // permissive data licence (webpki-roots)
 ]);
 // Exceptions that ride on top of a permissive base licence.
 const EXCEPTIONS = new Set(['LLVM-EXCEPTION']);
 
+// SPDX precedence: WITH binds tightest, then AND, then OR. '/' is cargo's legacy OR.
+const SEVERITY = { permissive: 0, unknown: 1, copyleft: 2 };
+const isGpl = (id) => /^(A?GPL|L?GPL)[-0-9.]/.test(id) || id === 'GPL' || id === 'AGPL' || id === 'LGPL';
+const gplFamily = (id) => (id.startsWith('AGPL') ? 'AGPL' : id.startsWith('LGPL') ? 'LGPL' : 'GPL');
+
+function classifyId(id) {
+  const upper = String(id).trim().toUpperCase();
+  if (PERMISSIVE.has(upper) || EXCEPTIONS.has(upper)) return { kind: 'permissive', copyleft: false };
+  if (isGpl(upper)) return { kind: 'copyleft', copyleft: true, family: gplFamily(upper) };
+  return { kind: 'unknown', copyleft: false };
+}
+
+// OR lets the user pick a branch: one permissive option is enough.
+// AND needs every branch: the most restrictive part decides.
+function combine(a, b, op) {
+  if (op === 'OR' && (a.kind === 'permissive' || b.kind === 'permissive')) {
+    return { kind: 'permissive', copyleft: false };
+  }
+  return SEVERITY[a.kind] >= SEVERITY[b.kind] ? a : b;
+}
+
+function tokenise(expression) {
+  const tokens = [];
+  const re = /\(|\)|\bAND\b|\bOR\b|\bWITH\b|\/|[^\s()/]+/gi;
+  let m;
+  while ((m = re.exec(expression))) {
+    const raw = m[0];
+    const upper = raw.toUpperCase();
+    if (raw === '(' || raw === ')') tokens.push({ type: raw });
+    else if (upper === 'AND' || upper === 'OR' || upper === 'WITH') tokens.push({ type: upper });
+    else if (raw === '/') tokens.push({ type: 'OR' }); // legacy cargo expression
+    else tokens.push({ type: 'ID', value: raw });
+  }
+  return tokens;
+}
+
+function parseExpression(tokens, pos) {
+  // expression := orExpr ; orExpr := andExpr (OR andExpr)* ; andExpr := withExpr (AND withExpr)*
+  // withExpr := atom (WITH ID)? ; atom := '(' expression ')' | ID
+  const parseAtom = () => {
+    if (pos.i < tokens.length && tokens[pos.i].type === '(') {
+      pos.i += 1;
+      const inner = parseOr();
+      if (pos.i < tokens.length && tokens[pos.i].type === ')') pos.i += 1;
+      return inner;
+    }
+    if (pos.i < tokens.length && tokens[pos.i].type === 'ID') {
+      const id = tokens[pos.i++].value;
+      let result = classifyId(id);
+      if (pos.i < tokens.length && tokens[pos.i].type === 'WITH') {
+        pos.i += 1;
+        if (pos.i < tokens.length && tokens[pos.i].type === 'ID') {
+          const exception = tokens[pos.i++].value.toUpperCase();
+          if (result.kind === 'permissive' && !EXCEPTIONS.has(exception)) {
+            result = { kind: 'unknown', copyleft: false };
+          }
+        } else {
+          result = { kind: 'unknown', copyleft: false };
+        }
+      }
+      return result;
+    }
+    pos.i += 1; // malformed input: consume so the caller terminates; reported as unknown below
+    return { kind: 'unknown', copyleft: false };
+  };
+  const parseAnd = () => {
+    let result = parseAtom();
+    while (pos.i < tokens.length && tokens[pos.i].type === 'AND') {
+      pos.i += 1;
+      result = combine(result, parseAtom(), 'AND');
+    }
+    return result;
+  };
+  const parseOr = () => {
+    let result = parseAnd();
+    while (pos.i < tokens.length && tokens[pos.i].type === 'OR') {
+      pos.i += 1;
+      result = combine(result, parseAnd(), 'OR');
+    }
+    return result;
+  };
+  return parseOr();
+}
+
 /**
  * Classify one licence expression (SPDX, cargo's legacy `MIT/Apache-2.0`, or an OR/AND list).
+ * An OR expression is permissive when any option is permissive; AND needs every part allowed.
  * Returns { kind: 'permissive' | 'copyleft' | 'unknown', copyleft: boolean, family?: 'GPL'|'LGPL'|'AGPL' }.
  */
 export function classifyLicence(expression) {
   const text = String(expression ?? '').trim();
   if (!text) return { kind: 'unknown', copyleft: false };
-  const ids = text
-    .replace(/[()]/g, ' ')
-    .split(/\s+OR\s+|\s+AND\s+|\s+WITH\s+|\//i)
-    .map((s) => s.trim().toUpperCase())
-    .filter(Boolean);
-  if (ids.length === 0) return { kind: 'unknown', copyleft: false };
-
-  const gpl = ids.filter((id) => /^(A?GPL|L?GPL)[-0-9.]/.test(id) || id === 'GPL' || id === 'AGPL' || id === 'LGPL');
-  if (gpl.length) {
-    const family = gpl.some((id) => id.startsWith('AGPL')) ? 'AGPL' : gpl.some((id) => id.startsWith('LGPL')) ? 'LGPL' : 'GPL';
-    return { kind: 'copyleft', copyleft: true, family };
-  }
-  const unknown = ids.filter((id) => !PERMISSIVE.has(id) && !EXCEPTIONS.has(id));
-  if (unknown.length) return { kind: 'unknown', copyleft: false };
-  return { kind: 'permissive', copyleft: false };
+  const tokens = tokenise(text);
+  if (tokens.length === 0) return { kind: 'unknown', copyleft: false };
+  const pos = { i: 0 };
+  const result = parseExpression(tokens, pos);
+  // Unbalanced parentheses or trailing junk: never silently permissive.
+  if (pos.i !== tokens.length) return { kind: 'unknown', copyleft: false };
+  return result;
 }
 
 // Python in a build or a package script. Written so that prose ("no Python anywhere") does not match:
