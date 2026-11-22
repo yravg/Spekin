@@ -8,9 +8,9 @@ It lists every npm package (from `package-lock.json`) and every crate (from `car
 |---|---|
 | npm packages | 170 |
 | crates | 185 |
-| copyleft, allowed | 1 |
+| copyleft, allowed | 0 |
 | copyleft, not allowed | 0 |
-| unclassified | 1 |
+| unclassified | 0 |
 | Python | 0 |
 
 ## npm packages
@@ -380,10 +380,7 @@ It lists every npm package (from `package-lock.json`) and every crate (from `car
 
 ## Copyleft and unclassified
 
-| Package | Licence | Family | Allow-list entry |
-|---|---|---|---|
-| r-efi | MIT OR Apache-2.0 OR LGPL-2.1-or-later | LGPL | yes |
-| webpki-roots | CDLA-Permissive-2.0 | unclassified | yes |
+None. Every package and crate is under a permissive licence.
 
 ## No Python
 
