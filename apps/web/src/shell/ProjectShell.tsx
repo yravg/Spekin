@@ -9,6 +9,7 @@ import { NotFound } from './NotFound';
 import { DesignWorkArea } from './DesignWorkArea';
 import { BackendWorkArea } from './BackendWorkArea';
 import { SkillsWorkArea } from '../skills/SkillsWorkArea';
+import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/FramesCanvasWorkArea';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -132,6 +133,8 @@ export function ProjectShell() {
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
+  const [designSub, setDesignSub] = useState<'shell' | 'canvas'>('shell');
+  const [canvasOverride, setCanvasOverride] = useState<CanvasShellOverride>({});
   const save = useWorkspace((s) => s.save);
   const conflict = useWorkspace((s) => s.conflict);
   const project = getProject(projectId);
@@ -139,14 +142,20 @@ export function ProjectShell() {
   const stages = getStages(projectId);
   if (!project || !usage || !isStageId(stages, stage)) return <NotFound />;
   const currentStage = stages.find((s) => s.id === stage)!;
-  const screenId = stage === 'spec' ? 'S40' : 'S35';
-  const activeSave = stage === 'spec' && specOverride.save ? specOverride.save : save;
+  const screenId = stage === 'spec' ? 'S40' : stage === 'design' && designSub === 'canvas' ? 'S29' : 'S35';
+  const activeSave =
+    stage === 'spec' && specOverride.save
+      ? specOverride.save
+      : stage === 'design' && designSub === 'canvas' && canvasOverride.save
+        ? canvasOverride.save
+        : save;
   const activeBusy =
     stage === 'spec'
       ? specOverride.busy
-      : stage === 'design' && !conflict
+      : stage === 'design' && designSub === 'shell' && !conflict
         ? '1 designing · 1 waiting'
         : undefined;
+  const activeBusyNode = stage === 'design' && designSub === 'canvas' ? canvasOverride.busyNode : undefined;
 
   return (
     <div className="ap-root" data-screen={screenId} data-panel={panel ?? undefined}>
@@ -156,6 +165,7 @@ export function ProjectShell() {
           usage={usage}
           save={activeSave}
           busy={activeBusy}
+          busyNode={activeBusyNode}
           onOpenSwitcher={() => setPanel('switcher')}
           onOpenIncrement={() => setPanel('increment')}
           onOpenSpec={() => setPanel('spec')}
@@ -164,10 +174,22 @@ export function ProjectShell() {
           lang={lang}
           onLang={setLang}
         />
-        <StageBar stages={stages} current={stage} onSwitch={(id) => navigate('/p/' + projectId + '/' + id)} onReadiness={() => setPanel('readiness')} />
+        <StageBar
+          stages={stages}
+          current={stage}
+          onSwitch={(id) => {
+            if (id === 'design') setDesignSub('shell');
+            navigate('/p/' + projectId + '/' + id);
+          }}
+          onReadiness={() => setPanel('readiness')}
+        />
         <div className="sp-body">
           {stage === 'design' ? (
-            <DesignWorkArea />
+            designSub === 'canvas' ? (
+              <FramesCanvasWorkArea onShellOverride={setCanvasOverride} />
+            ) : (
+              <DesignWorkArea onOpenCanvas={() => setDesignSub('canvas')} />
+            )
           ) : stage === 'backend' ? (
             <BackendWorkArea />
           ) : stage === 'spec' ? (

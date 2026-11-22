@@ -118,6 +118,55 @@ export interface SampleIntakeComposer {
   len: number;
 }
 
+export interface SampleCanvasFrame {
+  id: string;
+  name: string;
+  rev: string;
+  st: 'accepted' | 'draft' | 'reference';
+  ui: string;
+  size: string;
+  kind?: string;
+}
+export interface SampleCanvasFrames {
+  f01: SampleCanvasFrame;
+  f02: SampleCanvasFrame;
+  f03: SampleCanvasFrame;
+  f04: SampleCanvasFrame;
+  f05: SampleCanvasFrame;
+  ref2: SampleCanvasFrame;
+}
+export interface SampleCanvasChat {
+  t: string;
+  meta: string;
+}
+export interface SampleCanvasJobs {
+  cap: number;
+  designing: string[];
+  waiting: string[];
+  failed: string[];
+}
+export interface SampleCanvasTake {
+  n: number;
+  angle: string;
+  ui: string;
+  line: string;
+  changes: [string, string][];
+}
+export interface SampleCanvasBaseline {
+  frame: string;
+  name: string;
+  rev: string;
+  size: string;
+  ds: string;
+  req: string;
+}
+export interface SampleCanvasStack {
+  count: number;
+  input: string[];
+  cost: string;
+  kept: { id: string; from: number };
+}
+
 export declare const PROJECT: SampleProject;
 export declare const STAGES: SampleStage[];
 export declare const USAGE: SampleUsage;
@@ -144,4 +193,12 @@ export declare const INTAKE_SWITCH_ORDER: string[];
 export declare const INTAKE_NEW: SampleIntakeNew;
 export declare const INTAKE_DELETED: SampleIntakeDeleted;
 export declare const INTAKE_COMPOSER: SampleIntakeComposer;
+export declare const CANVAS_FRAMES: SampleCanvasFrames;
+export declare const CANVAS_CHATS: SampleCanvasChat[];
+export declare const CANVAS_VIEWMENU: [string, string][];
+export declare const CANVAS_JOBS: SampleCanvasJobs;
+export declare const CANVAS_BASELINE: SampleCanvasBaseline;
+export declare const CANVAS_TAKES: SampleCanvasTake[];
+export declare const CANVAS_REGIONS: [string, number, number, number, number][];
+export declare const CANVAS_STACK: SampleCanvasStack;
 // Everything else the boards use is exported too; declare it here before use.

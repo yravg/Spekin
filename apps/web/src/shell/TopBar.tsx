@@ -10,6 +10,7 @@ export function TopBar(props: {
   usage: SampleUsage;
   save: SaveState;
   busy?: string;
+  busyNode?: React.ReactNode;
   onOpenSwitcher: () => void;
   onOpenIncrement: () => void;
   onOpenSpec: () => void;
@@ -44,7 +45,9 @@ export function TopBar(props: {
         </button>
       </div>
       <span className="sp-fill" />
-      {busy ? (
+      {props.busyNode ? (
+        props.busyNode
+      ) : busy ? (
         <button type="button" className="sp-busy" data-does="Opens the job list: what is designing, what waits and why; a job never runs without a reserved maximum" data-feature="F109" onClick={props.onOpenInbox}>
           <span className="pulse" aria-hidden="true" />
           {busy}
