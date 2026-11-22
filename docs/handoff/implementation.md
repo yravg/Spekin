@@ -100,12 +100,12 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 
 | Card | Lane | Title | Depends on | Status |
 |---|---|---|---|---|
-| IMP-01 | ui | S35 work area: chat, artifact tabs, canvas pane and inspector for the design and backend states | – | in progress (Antigravity, branch imp-01-shell-work-area) |
+| IMP-01 | ui | S35 work area: chat, artifact tabs, canvas pane and inspector for the design and backend states | – | done, part open, waiting for owner merge: PR #3. Lead re-ran the gate: design PASS 0.41 %, backend PASS 0.47 %. The conflict state is IMP-02. |
 | IMP-02 | ui | S35 conflict state, save states (F112), per-stage memory across switches | IMP-01 | open |
 | IMP-05 | ui | S27 Projects home (6 states), and "/" becomes S27 | IMP-01, C-01 | open (C-01 done 23 Nov) |
 | IMP-03 | core | API source: typed client for the Rust API, equal to the sample | – | done, waiting for owner merge: PR #1 (lead review: approve) |
 | IMP-04 | core | Proposals and revisions in the core (accept, reject, revert, stale) | – | done, waiting for owner merge: PR #2 (lead review: approve; merge after #1) |
-| IMP-12 | core | No-Python and licence inventory check | – | open |
+| IMP-12 | core | No-Python and licence inventory check | – | done, waiting for owner merge: PR #4 (lead review: approve; one small follow-up on workspace links) |
 | IMP-09 | core | Ledger: estimate, reserve, settle, caps | IMP-04 | open |
 | IMP-11 | core | Model sources and capability registry | – | open |
 | IMP-10 | core | GenUI schema validation, fail closed | – | open |
@@ -182,6 +182,14 @@ There is no network code in this card. Fetching from GitHub is a later card.
 ### IMP-23 · S40 Skills library (ui)
 
 Board `S40-skills-library.dc.html`, states `library, detail, edit, github, updates, use`. It reads `@spekin/sample` (SKL_*) until IMP-22's API exists. All six states must PASS the harness. The `/` list is keyboard-first: arrows move, Enter picks, Escape closes and keeps the text. A switch never runs anything.
+
+## Carry-forward checks for later ui cards (DPAI addendum, 23 Nov)
+
+When the lead writes the S29, S31, S32 and S34 cards, add these acceptance lines (see incoming/2026-11-23-dpai-addendum-v1.0.md):
+- **S29:** a payload test shows the next request carries only the listed context chips. Removing a chip changes context, not content. Select, pin and navigate never send, accept or spend.
+- **S29 and S31:** logical frames are counted apart from their takes and previews. A viewport width changes the preview only.
+- **S29 and S32:** Escape leaves select and targeted-edit modes, the active mode is visible, and keyboard focus can reach the tabs and sidebar.
+- **S34:** the manifest has exact revisions, exclusions and hashes, and lists missing inputs (for example "PRD: missing"). Two exports are byte-identical. No share link is created (R-WS-3).
 
 ## Lead canvas tasks (from the review supplement)
 
