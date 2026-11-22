@@ -7,6 +7,7 @@
 
 pub mod context;
 pub mod genui;
+pub mod handoff;
 pub mod ledger;
 pub mod model_source;
 pub mod project;
@@ -23,6 +24,11 @@ pub use genui::{
     AllowedActionKind, ChecklistItem, ChecklistStatus, ComparisonOption, GenUiAction, GenUiCard,
     GenUiFamily, GenUiValidation, Provenance, QuestionOption, RejectionReason, validate_genui,
     validate_genui_json,
+};
+pub use handoff::{
+    ArtifactRevisionRecord, ArtifactRevisionState, Manifest, ManifestArtifact, ManifestError,
+    ManifestExclusion, ManifestInput, ManifestInputStatus, ManifestSelection,
+    ManifestSelectionItem, RequiredInput, build_manifest, sha256_hex,
 };
 pub use ledger::{
     CRIT_THRESHOLD_PCT, Ledger, LedgerCaps, LedgerEntry, LedgerEntryKind, LedgerError, Reservation,

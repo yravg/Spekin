@@ -10,6 +10,8 @@ serde.workspace = true
 serde_json.workspace = true
 ts-rs.workspace = true
 thiserror.workspace = true
+# SHA-256 content hashes for handoff manifests (IMP-24). Licence: MIT OR Apache-2.0.
+sha2 = "0.10"
 
 [dev-dependencies]
 # Property tests for proposals, revisions, ledger, and context builder. Licence: MIT OR Apache-2.0.
