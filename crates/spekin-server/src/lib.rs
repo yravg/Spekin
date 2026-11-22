@@ -81,6 +81,23 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn project_matches_the_fixture_exactly() {
+        let (status, body) = get_json("/api/projects/meranti-yard").await;
+        assert_eq!(status, StatusCode::OK);
+        let fixture: serde_json::Value = serde_json::from_str(SAMPLE).unwrap();
+        assert_eq!(
+            body, fixture["PROJECT"],
+            "API project must equal the sample the boards draw"
+        );
+    }
+
+    #[tokio::test]
+    async fn unknown_project_is_404_for_the_project_route() {
+        let (status, _) = get_json("/api/projects/nope").await;
+        assert_eq!(status, StatusCode::NOT_FOUND);
+    }
+
+    #[tokio::test]
     async fn stages_match_the_fixture_exactly() {
         let (status, body) = get_json("/api/projects/meranti-yard/stages").await;
         assert_eq!(status, StatusCode::OK);
