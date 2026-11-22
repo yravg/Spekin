@@ -325,4 +325,94 @@ export declare const STYLE_NEWTOKEN: SampleStyleToken;
 export declare const STYLE_HUNKS: SampleStyleHunk[];
 export declare const STYLE_CTX: ContextItem[];
 export declare function STYLE_contrast(a: string, b: string): string;
+
+// S36 Models and usage. Credits are fixture units, not a price list (PRD AC-SPK-8).
+export type ModelsSourceId = 'hosted' | 'cli' | 'api';
+export type ModelsSeverity = 'calm' | 'warn' | 'crit';
+export type ModelsUsageMoment = 'calm' | 'near' | 'capped';
+export type ModelsRegistryState = 'sel' | 'ok' | 'off';
+export type ModelsAgentInstalled = 'ok' | 'none';
+export type ModelsAgentSignIn = 'ok' | 'no' | 'unknown';
+export type ModelsLedgerKind = 'reserve' | 'settle' | 'refund' | 'hold' | 'byok' | 'cli';
+export interface SampleModelsUsage {
+  used: number;
+  reserved: number;
+  pending: number;
+  cap: number;
+  sev: ModelsSeverity;
+  win5: [number, number, string];
+  win7: [number, number, string];
+}
+export interface SampleModelsPeriod { label: string; resets: string; days: number; workspaceCap: number; workspaceUsed: number }
+export interface SampleModelsCaps { perRun: number; monthly: number; concurrency: number }
+export interface SampleModelSource { id: ModelsSourceId; name: string; short?: string; icon: string; bills: string; sub: string; billsC: string }
+export interface SampleModelRegistryRow { name: string; id: string; caps: string[]; lim: string; rc: string; est: string; st: ModelsRegistryState; note: string }
+export type SampleModelEffort = [string, string];
+export type SampleModelTask = [string, string, string, PillTuple];
+export interface SampleModelsKey {
+  provider: string;
+  tail: string;
+  by: string;
+  added: string;
+  tested: string;
+  models: number;
+  tests: ['ok' | 'warn', string, string][];
+  usage: { tokensIn: string; tokensOut: string; runs: number };
+}
+export interface SampleModelsApi {
+  providers: [string, string, boolean, string][];
+  sel: number;
+  fetched: [string, string, 'sel' | 'ok'][];
+  fetchedCount: number;
+}
+export interface SampleModelsConnector { state: string; paired: string; since: string; version: string; addr: string; os: string; code: string }
+export interface SampleModelsAgent { name: string; ver?: string; inst: ModelsAgentInstalled; sign: ModelsAgentSignIn; pick?: boolean; sub: string; hint?: string }
+export interface SampleModelsAgentRun {
+  agent: string;
+  model: string;
+  models: string[];
+  effort: string;
+  efforts: string[];
+  perm: number;
+  perms: [string, string][];
+  copy: string;
+  branch: string;
+  usage: { runs: number; tokens: string; plan: string };
+}
+export interface SampleModelsRun {
+  id: string;
+  task: string;
+  target: string;
+  model: string;
+  effort: string;
+  est: [number, number];
+  reserve: number;
+  expect: number;
+  release: number;
+  outCap: string;
+  key: string;
+  limitIn: string;
+  rc: string;
+  ctx: [string, string, number][];
+  checks: [string, string][];
+}
+export interface SampleModelsLedgerRow { t: string; run: string; kind: ModelsLedgerKind; task: string; model: string; amt: string; left: string; st: PillTuple; sel?: boolean }
+export interface SampleModelsLedgerDetail { run: string; title: string; consumed: string; released: string; pending: string; provider: string; key: string }
+export declare const MODELS_READY: boolean;
+export declare const MODELS_USAGE: Record<ModelsUsageMoment, SampleModelsUsage>;
+export declare const MODELS_PERIOD: SampleModelsPeriod;
+export declare const MODELS_CAPS: SampleModelsCaps;
+export declare const MODELS_SOURCES: SampleModelSource[];
+export declare const MODELS_PROVIDERS: [string, number][];
+export declare const MODELS_REGISTRY: SampleModelRegistryRow[];
+export declare const MODELS_EFFORT: SampleModelEffort[];
+export declare const MODELS_TASKS: SampleModelTask[];
+export declare const MODELS_KEY: SampleModelsKey;
+export declare const MODELS_API: SampleModelsApi;
+export declare const MODELS_CONNECTOR: SampleModelsConnector;
+export declare const MODELS_AGENTS: SampleModelsAgent[];
+export declare const MODELS_AGENT_RUN: SampleModelsAgentRun;
+export declare const MODELS_RUN: SampleModelsRun;
+export declare const MODELS_LEDGER: SampleModelsLedgerRow[];
+export declare const MODELS_LEDGER_DETAIL: SampleModelsLedgerDetail;
 // Everything else the boards use is exported too; declare it here before use.

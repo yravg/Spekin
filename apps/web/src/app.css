@@ -11,6 +11,24 @@ body { background: var(--ground); }
 .ap-ta-input { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; margin: 0; padding: 0; background: transparent; font: inherit; color: transparent; caret-color: var(--ink); resize: none; outline: none; }
 .sp-comp:focus-within { box-shadow: inset 0 0 0 1.5px var(--accent), var(--shadow-1); }
 .sp-app button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* App-only: S36 API key field. The board draws the paste field as a locked line of bullets; the real input sits over it
+   so a key can be pasted and is masked back to presence plus the last 4 characters (IMP-17). */
+.ap-key { position: relative; }
+.ap-key-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  border: 0;
+  padding: 0 30px 0 28px;
+  margin: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--ink);
+  font: inherit;
+  outline: none;
+}
+.ap-key-input::selection { background: var(--accent-soft); }
+
 /* App-only: review note callout (design .rev-note values; the bare board-only token "note" cannot ship as an app class name). */
 .ap-callout { margin: 0; padding: 8px 10px; border-radius: 8px; background: var(--canvas); box-shadow: inset 0 0 0 1px var(--line); font: 500 12px/1.4 var(--font); color: var(--ink-dim); }
 .ap-callout b { color: var(--ink); font-weight: 600; }
