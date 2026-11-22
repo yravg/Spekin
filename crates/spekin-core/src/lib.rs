@@ -6,7 +6,12 @@
 //! the app and the API read the same shapes (canvas-to-app rule 15, R-ARC-3).
 
 pub mod project;
+pub mod restore;
 pub mod stage;
 
 pub use project::{Fixture, FixtureError, Project};
+pub use restore::{
+    ProjectEntry, RestoreError, RESTORE_WINDOW_DAYS, SECONDS_PER_DAY, Timestamp, WINDOW_SECONDS,
+    days_left, delete, purge_due, restore, window_close,
+};
 pub use stage::{Stage, StageId, StageTone};

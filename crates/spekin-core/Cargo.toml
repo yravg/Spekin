@@ -11,5 +11,9 @@ serde_json.workspace = true
 ts-rs.workspace = true
 thiserror.workspace = true
 
+[dev-dependencies]
+# Property tests for the restore window (IMP-29). Licence: MIT OR Apache-2.0.
+proptest = "1"
+
 [lints]
 workspace = true
