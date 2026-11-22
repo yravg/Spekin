@@ -117,6 +117,7 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-26 | core | API routes for the core (all core cards) + web client | IMP-03…IMP-25 | done, waiting for owner merge: PR #15 (merge last) |
 | IMP-27 | core | GitHub skill source adapter: pin to SHA, fetch with limits, update check | IMP-22 | done, waiting for owner merge: PR #17, stacked on #8 |
 | IMP-29 | core | Recently deleted and restore: 30-day window, pure | – | done, waiting for owner merge: PR #20 |
+| IMP-31 | core | Audit and restore in the API (routes, one audit entry per action, head kept apart) | IMP-26, IMP-29, IMP-30 | open |
 | IMP-30 | core | Audit log core: append-only, hash-chained, verify | – | done, waiting for owner merge: PR #21 (follow-up: store the head hash apart from the log) |
 | IMP-28 | core | GenUI validation fuzzing (never panics, never partial) | IMP-10 | done, waiting for owner merge: PR #18, stacked on #7 (the fuzzer found and fixed a data: URL hole) |
 | IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
@@ -270,6 +271,14 @@ Pure Rust in spekin-core. S33 needs it, because a reject adds exactly one audit 
 - There is no update or delete function.
 - Property tests: any edit to any entry fails verify at that entry; appending never changes earlier hashes; sequence numbers are gapless.
 - A new dependency only under MIT or Apache-2.0 (sha2). Export the types with ts-rs. Branch from origin/main.
+
+### IMP-31 · Audit and restore in the API (core)
+
+Builds on IMP-26, IMP-29 and IMP-30. Branch from `origin/integration-2026-11-23` (PR #22).
+- The accept, reject and revert routes each append exactly one audit entry (C-03: a reject makes no revision and one audit entry). Reserve and settle append theirs too.
+- The server keeps the audit head hash apart from the log, as the lead's follow-up on #21 asks. `GET /api/projects/{id}/audit` returns the entries and the result of `verify` checked against that separate head.
+- `POST /api/projects/{id}/delete` and `…/restore` use the IMP-29 core and audit both. `GET /api/projects/deleted` lists entries with `days_left`.
+- One server test per route plus a 4xx test. One test shows that a reject adds exactly one audit entry and no revision. Add the client functions to `apps/web/src/data/api.ts`, with tests.
 
 ### UI cards after P1 (written 23 Nov)
 
