@@ -1,4 +1,15 @@
 {
   "$comment": "Copyleft (GPL, LGPL, AGPL) and unclassified licences are refused by tools/checks/licences.mjs unless this file names them, with a reason a person wrote. Keep it empty unless the owner has decided the entry (docs/DECISIONS.md). Entries match on package name AND licence.",
-  "allowed": []
+  "allowed": [
+    {
+      "package": "r-efi",
+      "licence": "MIT OR Apache-2.0 OR LGPL-2.1-or-later",
+      "reason": "IMP-35: transitive of getrandom (UEFI target). The MIT OR Apache-2.0 option is selected, so no LGPL obligation applies. Recorded here so the licence gate can run; owner ratification requested in docs/handoff/lanes/core.md."
+    },
+    {
+      "package": "webpki-roots",
+      "licence": "CDLA-Permissive-2.0",
+      "reason": "IMP-35: transitive of reqwest/hyper-rustls (IMP-27). CDLA Permissive 2.0 is a permissive data licence with no copyleft terms. Recorded here so the licence gate can run; owner ratification requested in docs/handoff/lanes/core.md."
+    }
+  ]
 }
