@@ -1,0 +1,66 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: House rules
+        run: npm run check:rules
+      - name: Design copy and fixtures match the canvas
+        run: npm run check:sync
+      - name: Board lint and state manifest
+        run: npm run canvas:lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo test --workspace
+      - name: Generated TypeScript contracts are committed
+        run: node tools/check-contracts.mjs
+  state-gate:
+    # Report only for now: it lists which board states the app reaches and matches. It becomes required per board
+    # when that board's task card is done (see docs/handoff/implementation.md, "Definition of done").
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - name: State gate
+        run: |
+          npm run preview -w @spekin/web &
+          npx --yes wait-on@8 http://127.0.0.1:5173/ --timeout 60000
+          npm run harness
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: state-gate
+          path: tools/harness/out

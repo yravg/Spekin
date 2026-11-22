@@ -190,3 +190,6 @@ ${swaps(views)}
   writeFileSync(`${R}/${file}.dc.html`, page(`${code} ${name}`, body, logicOf(views, s), W, h));
   BOARDS.push({ file: file + '.dc.html', title: `${code} · ${name}`, code, tier, name, h });
 }
+
+// The app uses the same icon paths (tools/sync-design.mjs writes packages/design/icons.json).
+export { P as ICONS };

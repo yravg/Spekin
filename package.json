@@ -1,0 +1,38 @@
+{
+  "name": "spekin",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "npm run dev -w @spekin/web",
+    "build": "npm run build -w @spekin/web",
+    "typecheck": "npm run typecheck -w @spekin/web",
+    "test": "npm run test -w @spekin/web",
+    "sync:design": "node tools/sync-design.mjs",
+    "sync:fixtures": "node tools/export-fixtures.mjs",
+    "check:sync": "node tools/sync-design.mjs --check && node tools/export-fixtures.mjs --check",
+    "check:rules": "node tools/checks/rules.mjs",
+    "canvas:build": "node docs/design/spekin-canvas/build.mjs",
+    "canvas:lint": "node tools/canvas/lint-all.mjs",
+    "harness": "node tools/harness/state-gate.mjs",
+    "rust:check": "cargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace",
+    "check:contracts": "node tools/check-contracts.mjs",
+    "gate": "npm run check:rules && npm run check:sync && npm run canvas:lint && npm run typecheck && npm test && npm run build && npm run rust:check && npm run check:contracts",
+    "preview": "npm run preview -w @spekin/web",
+    "canvas:states": "node tools/canvas/lint-all.mjs --write",
+    "server": "cargo run -p spekin-server",
+    "canvas:serve": "node tools/canvas/serve.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "pixelmatch": "^7.1.0",
+    "pngjs": "^7.0.0"
+  }
+}

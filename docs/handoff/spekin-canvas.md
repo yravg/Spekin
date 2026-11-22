@@ -80,3 +80,7 @@ Workers, when needed: Antigravity Gemini Neon 4 (medium) or Sonnet 5.5 (high) (o
 ## Restore reference images (gitignored, private to the canvas)
 
 See docs/design/spekin-canvas/refs-sources.md: one line per image with its source path in the OpenDesign, Onlook or Momo clone. Convert with `sips -s format png -Z 1400`. Uploaded copies are on the canvas as assets (ids in blobs.json).
+
+## Build phase (23 Nov 2026)
+
+The canvas phase is done. Implementation continues in [implementation.md](implementation.md): lanes, task cards and the state gate.

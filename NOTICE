@@ -1,0 +1,21 @@
+Spekin
+Copyright 2026 The Spekin Authors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+References and reuse
+--------------------
+Spekin's design studied the products and code below. Only code whose licence allows it may be reused, and every
+reused unit must be listed here with its source, version and licence before it is merged (docs/adr/0004).
+
+- OpenDesign (Apache-2.0): primary reference for the app shell and the model-source flows (hosted, bring your own
+  agent through a CLI, API keys). No OpenDesign source files are included at this time.
+- Onlook (Apache-2.0): reference for the canvas engine ideas (frames on an infinite canvas, an operation log).
+  No Onlook source files are included at this time.
+- Momo: no licence published. Studied for interaction patterns only. No code, text or assets are copied.
+- Paraframe: proprietary. Studied for behaviour only. No code, wording or assets are copied.
+
+Third-party packages
+--------------------
+npm and Cargo dependencies keep their own licences (package-lock.json, Cargo.lock). Run the licence inventory
+before a release (docs/ROADMAP.md, task card IMP-12).

@@ -1,0 +1,9 @@
+/* App-only rules. Everything visual comes from @spekin/design/spekin.css (the canvas stylesheet).
+   Never use the board-only classes here: isnew, newtag, part, parttag, latertag, note, board, aside. */
+html, body, #root { height: 100%; margin: 0; }
+body { background: var(--ground); }
+/* On a board .sp-app sits in a 1440 x 900 window; in the app it fills the viewport. */
+.ap-root { height: 100vh; background: var(--ground); }
+.ap-grp { display: flex; align-items: center; gap: 8px; position: relative; }
+/* Temporary stand-in for a region a task card has not built yet. The harness reports it as DRAWN (a fail). */
+.ap-todo { display: flex; align-items: center; justify-content: center; flex: 1; margin: 0 0 0 10px; border: 1px dashed var(--line-strong); border-radius: 12px; font: 500 13px/1.4 var(--font); color: var(--ink-dim); }

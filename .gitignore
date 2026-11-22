@@ -1,2 +1,12 @@
 /graft/
 .DS_Store
+node_modules/
+dist/
+target/
+coverage/
+test-results/
+playwright-report/
+tools/harness/out/
+.env
+.env.*
+*.log

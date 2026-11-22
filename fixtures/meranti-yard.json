@@ -1,0 +1,3121 @@
+{
+ "BACKEND": {
+  "contract": {
+   "name": "API contract: variance alerts",
+   "rev": "r2"
+  },
+  "endpoints": [
+   [
+    "GET",
+    "/projects/{id}/variance-alerts",
+    "R-DASH-014",
+    "Viewer",
+    [
+     "warn",
+     "Needs review"
+    ]
+   ],
+   [
+    "POST",
+    "/variance-alerts/{id}/acknowledge",
+    "R-DASH-019",
+    "Editor",
+    [
+     "acc",
+     "Proposal"
+    ]
+   ],
+   [
+    "GET",
+    "/packages/{id}/cost-lines",
+    "R-DASH-015",
+    "Viewer",
+    [
+     "ok",
+     "Accepted"
+    ]
+   ]
+  ],
+  "entity": [
+   [
+    "id",
+    "uuid"
+   ],
+   [
+    "package_id",
+    "P-01 … P-04"
+   ],
+   [
+    "variance_pct",
+    "decimal(5,2)"
+   ],
+   [
+    "periods_over",
+    "int"
+   ],
+   [
+    "threshold_rev",
+    "spec revision, e.g. r14"
+   ],
+   [
+    "acknowledged_by",
+    "user id, nullable"
+   ]
+  ],
+  "ready": [
+   [
+    "ok",
+    "Entities",
+    "Accepted r1"
+   ],
+   [
+    "warn",
+    "API contract",
+    "Needs review"
+   ],
+   [
+    "bad",
+    "Auth and permissions",
+    "Missing"
+   ],
+   [
+    "mute",
+    "Migration proposal 0007",
+    "Draft"
+   ],
+   [
+    "bad",
+    "Rollback notes",
+    "Missing"
+   ],
+   [
+    "mute",
+    "Evidence for pinned build",
+    "None yet"
+   ]
+  ],
+  "checks": [
+   [
+    "off",
+    "Alert raised over 3% for 2 periods",
+    [
+     "mute",
+     "Untested"
+    ]
+   ],
+   [
+    "on",
+    "Threshold read from accepted spec r14",
+    [
+     "ok",
+     "Passed · fixture"
+    ]
+   ],
+   [
+    "off",
+    "No alert for P-04 at −3.4%",
+    [
+     "bad",
+     "No evidence"
+    ]
+   ]
+  ]
+ },
+ "CANVAS_BASELINE": {
+  "frame": "F-03",
+  "name": "Variance table",
+  "rev": "r8",
+  "size": "1280 × 900",
+  "ds": "DESIGN.md r3",
+  "req": "R-DASH-014 r14"
+ },
+ "CANVAS_CHATS": [
+  {
+   "t": "Alert drawer for packages over 3%",
+   "meta": "6 messages · F-04 · 12:20"
+  },
+  {
+   "t": "5 takes on the variance table",
+   "meta": "4 messages · F-03 · 11:52"
+  },
+  {
+   "t": "Wording for the empty state",
+   "meta": "3 messages · F-05 · 11:30"
+  }
+ ],
+ "CANVAS_FRAMES": {
+  "f01": {
+   "id": "F-01",
+   "name": "Portfolio overview",
+   "rev": "r4",
+   "st": "accepted",
+   "ui": "portfolio",
+   "size": "1280 × 900"
+  },
+  "f02": {
+   "id": "F-02",
+   "name": "Package drill-down",
+   "rev": "r2",
+   "st": "accepted",
+   "ui": "drill",
+   "size": "1280 × 900"
+  },
+  "f03": {
+   "id": "F-03",
+   "name": "Variance table",
+   "rev": "r6",
+   "st": "accepted",
+   "ui": "base",
+   "size": "1280 × 900"
+  },
+  "f04": {
+   "id": "F-04",
+   "name": "Alert drawer",
+   "rev": "r1",
+   "st": "draft",
+   "ui": "drawer",
+   "size": "1280 × 900"
+  },
+  "f05": {
+   "id": "F-05",
+   "name": "Empty state",
+   "rev": "r1",
+   "st": "draft",
+   "ui": "empty",
+   "size": "1280 × 900"
+  },
+  "ref2": {
+   "id": "REF-02",
+   "name": "Site cost report",
+   "rev": "",
+   "st": "reference",
+   "ui": "ref",
+   "size": "960 × 900",
+   "kind": "PNG · imported"
+  }
+ },
+ "CANVAS_JOBS": {
+  "cap": 2,
+  "designing": [
+   "F-03 r7",
+   "F-04 r2"
+  ],
+  "waiting": [
+   "F-02 r3"
+  ],
+  "failed": [
+   "F-05 r1"
+  ]
+ },
+ "CANVAS_REGIONS": [
+  [
+   "1",
+   12,
+   148,
+   616,
+   38
+  ],
+  [
+   "2",
+   12,
+   224,
+   616,
+   38
+  ],
+  [
+   "3",
+   496,
+   120,
+   132,
+   180
+  ]
+ ],
+ "CANVAS_STACK": {
+  "count": 5,
+  "input": [
+   "F-03 r8",
+   "DESIGN.md r3",
+   "R-DASH-014 r14"
+  ],
+  "cost": "≈ 54 cr for 5 takes",
+  "kept": {
+   "id": "F-06",
+   "from": 3
+  }
+ },
+ "CANVAS_TAKES": [
+  {
+   "n": 1,
+   "angle": "Hierarchy",
+   "ui": "hierarchy",
+   "line": "The total variance becomes one large figure above the table.",
+   "changes": [
+    [
+     "Header",
+     "Variance +3.3% is the hero figure; Budget and Forecast step back"
+    ],
+    [
+     "Table",
+     "Unchanged"
+    ]
+   ]
+  },
+  {
+   "n": 2,
+   "angle": "Density",
+   "ui": "density",
+   "line": "Rows shrink to 28 px so six packages fit without scrolling.",
+   "changes": [
+    [
+     "Rows",
+     "38 px to 28 px, two more packages visible"
+    ],
+    [
+     "Chart",
+     "Removed to make room"
+    ]
+   ]
+  },
+  {
+   "n": 3,
+   "angle": "Contrast",
+   "ui": "contrast",
+   "line": "Packages over 3% get a solid band and an icon, so status no longer rests on red text alone.",
+   "changes": [
+    [
+     "Over-threshold rows",
+     "Solid left band and tinted row"
+    ],
+    [
+     "Variance figures",
+     "Bold, full-strength ink"
+    ],
+    [
+     "Status column",
+     "Icon and the words \"Over 3%\""
+    ]
+   ]
+  },
+  {
+   "n": 4,
+   "angle": "Layout",
+   "ui": "layout",
+   "line": "A filter bar replaces the KPI row and the totals stay pinned under the table.",
+   "changes": [
+    [
+     "Filters",
+     "Period, package group, over 3% only"
+    ],
+    [
+     "Totals",
+     "Pinned footer row"
+    ]
+   ]
+  },
+  {
+   "n": 5,
+   "angle": "Copy",
+   "ui": "copy",
+   "line": "Plainer column names: Planned, Expected, Over plan.",
+   "changes": [
+    [
+     "Headers",
+     "Four columns renamed"
+    ],
+    [
+     "Status",
+     "\"Needs a look\" instead of \"Alert\""
+    ]
+   ]
+  }
+ ],
+ "CANVAS_VIEWMENU": [
+  [
+   "Zoom to fit",
+   "Shift+1"
+  ],
+  [
+   "Zoom to selection",
+   "Shift+2"
+  ],
+  [
+   "Actual size (100%)",
+   "Ctrl+0"
+  ],
+  [
+   "Zoom in",
+   "Ctrl+ +"
+  ],
+  [
+   "Zoom out",
+   "Ctrl+ −"
+  ]
+ ],
+ "CONFLICT": {
+  "frame": "F-04 Alert drawer",
+  "rev": "r8",
+  "by": "Dimas (sample)",
+  "at": "12:43"
+ },
+ "CTX_BACKEND": [
+  [
+   "server",
+   "API contract · variance alerts",
+   "r2"
+  ],
+  [
+   "db",
+   "Entity VarianceAlert",
+   "r1"
+  ],
+  [
+   "req",
+   "R-DASH-014",
+   "r14"
+  ]
+ ],
+ "CTX_DESIGN": [
+  [
+   "frame",
+   "F-03 Variance table",
+   "r6"
+  ],
+  [
+   "doc",
+   "DESIGN.md",
+   "r3"
+  ],
+  [
+   "req",
+   "R-DASH-014",
+   "r14"
+  ],
+  [
+   "image",
+   "REF-02 Site cost report",
+   "r1"
+  ]
+ ],
+ "DELIVERY_BLOCKED": [
+  {
+   "id": "F-01",
+   "rev": "r4",
+   "ok": true,
+   "text": "Accepted r4"
+  },
+  {
+   "id": "F-03",
+   "rev": "r5",
+   "ok": false,
+   "kind": "Stale",
+   "text": "r6 was accepted at 12:20. Pick r6."
+  },
+  {
+   "id": "F-04",
+   "rev": "r1",
+   "ok": false,
+   "kind": "Draft",
+   "text": "Not accepted. Review it in S33."
+  }
+ ],
+ "DELIVERY_BUILD": {
+  "commit": "b4a1f9c",
+  "env": "staging",
+  "at": "12:31",
+  "pack": "RC-0003"
+ },
+ "DELIVERY_CHECKS": [
+  {
+   "k": "ok",
+   "t": "Schema is valid OpenAPI 3.1",
+   "p": "Passed",
+   "ev": "EV-0431"
+  },
+  {
+   "k": "ok",
+   "t": "Every endpoint links a requirement",
+   "p": "Passed",
+   "ev": "EV-0431"
+  },
+  {
+   "k": "warn",
+   "t": "Threshold comes from accepted spec r14",
+   "p": "Needs review",
+   "ev": "EV-0409",
+   "why": "The contract cites r13 (5%). Spec r14 says 3%."
+  },
+  {
+   "k": "bad",
+   "t": "Auth and permissions section present",
+   "p": "Failed",
+   "ev": "EV-0447",
+   "why": "Missing. Roles are named per endpoint, but no rule says what each role may do."
+  },
+  {
+   "k": "ok",
+   "t": "Fixture matches entity VarianceAlert r1",
+   "p": "Passed",
+   "ev": "EV-0431"
+  },
+  {
+   "k": "mute",
+   "t": "No breaking change against r1",
+   "p": "Evidence missing",
+   "ev": "",
+   "why": "No diff check was recorded for this revision."
+  }
+ ],
+ "DELIVERY_CONTRACTS": [
+  {
+   "stage": "Frontend",
+   "n": "04",
+   "kind": "Test definitions",
+   "ic": "req",
+   "name": "Variance table behaviour",
+   "ver": "r1",
+   "st": [
+    "mute",
+    "Draft"
+   ],
+   "link": "R-DASH-014",
+   "checks": "0 of 4 run"
+  },
+  {
+   "stage": "Backend",
+   "n": "05",
+   "kind": "API contract",
+   "ic": "server",
+   "name": "Variance alerts",
+   "ver": "r2",
+   "st": [
+    "warn",
+    "Needs review"
+   ],
+   "link": "R-DASH-014, 015, 019",
+   "checks": "3 of 6 pass",
+   "sel": true
+  },
+  {
+   "stage": "Backend",
+   "n": "05",
+   "kind": "Entity",
+   "ic": "db",
+   "name": "VarianceAlert",
+   "ver": "r1",
+   "st": [
+    "ok",
+    "Accepted"
+   ],
+   "link": "R-DASH-014",
+   "checks": "4 of 4 pass"
+  },
+  {
+   "stage": "Backend",
+   "n": "05",
+   "kind": "Migration",
+   "ic": "layers",
+   "name": "0007 add variance_alerts",
+   "ver": "r1",
+   "st": [
+    "mute",
+    "Draft"
+   ],
+   "link": "R-DASH-019",
+   "checks": "1 of 3 pass"
+  },
+  {
+   "stage": "Backend",
+   "n": "05",
+   "kind": "Test definitions",
+   "ic": "req",
+   "name": "AC-DASH-014 alert rules",
+   "ver": "r1",
+   "st": [
+    "acc",
+    "Proposed"
+   ],
+   "link": "R-DASH-014",
+   "checks": "3 criteria"
+  },
+  {
+   "stage": "Integration",
+   "n": "06",
+   "kind": "Test definitions",
+   "ic": "req",
+   "name": "Contract fixtures, GET alerts",
+   "ver": "r1",
+   "st": [
+    "bad",
+    "Blocked"
+   ],
+   "link": "R-DASH-014",
+   "checks": "1 failed"
+  },
+  {
+   "stage": "Testing",
+   "n": "07",
+   "kind": "Test definitions",
+   "ic": "req",
+   "name": "Acceptance criteria, 11",
+   "ver": "r3",
+   "st": [
+    "acc",
+    "In progress"
+   ],
+   "link": "R-DASH-*",
+   "checks": "4 of 11 pass"
+  },
+  {
+   "stage": "Deployment",
+   "n": "08",
+   "kind": "Release checklist",
+   "ic": "flag",
+   "name": "Staging release, pinned",
+   "ver": "r1",
+   "st": [
+    "mute",
+    "Draft"
+   ],
+   "link": "Build b4a1f9c",
+   "checks": "0 of 6 run"
+  }
+ ],
+ "DELIVERY_FILES": [
+  [
+   "manifest.json",
+   "1.4 KB",
+   "b1dfde80"
+  ],
+  [
+   "GUIDE.md",
+   "2.6 KB",
+   "c40a77e2"
+  ],
+  [
+   "DESIGN.md",
+   "3.2 KB",
+   "e6eb549e"
+  ],
+  [
+   "frames/F-01-r4.html",
+   "18.4 KB",
+   "1bea36aa"
+  ],
+  [
+   "frames/F-01-r4.png",
+   "212 KB",
+   "b6738a5e"
+  ],
+  [
+   "frames/F-03-r6.html",
+   "24.1 KB",
+   "54d939e2"
+  ],
+  [
+   "frames/F-03-r6.png",
+   "268 KB",
+   "79dbc815"
+  ]
+ ],
+ "DELIVERY_FRAMEWORKS": [
+  [
+   "react",
+   "React"
+  ],
+  [
+   "vue",
+   "Vue.js"
+  ],
+  [
+   "svelte",
+   "Svelte"
+  ],
+  [
+   "next",
+   "Next.js"
+  ],
+  [
+   "vanilla",
+   "JS"
+  ]
+ ],
+ "DELIVERY_GATE": [
+  {
+   "id": "tests",
+   "title": "Acceptance tests",
+   "ic": "req",
+   "pill": [
+    "bad",
+    "Blocked"
+   ],
+   "big": "4 of 11",
+   "sub": "criteria passed on build b4a1f9c",
+   "reason": "7 required criteria have no result. Untested is never shown as passed.",
+   "ev": [
+    [
+     "EV-0431",
+     "Test run"
+    ]
+   ]
+  },
+  {
+   "id": "perf",
+   "title": "Performance budget",
+   "ic": "gauge",
+   "pill": [
+    "bad",
+    "Failed"
+   ],
+   "big": "2.9 s",
+   "sub": "table first render, budget 2.5 s",
+   "reason": "F-03 with 500 rows is 0.4 s over budget on staging.",
+   "ev": [
+    [
+     "EV-0452",
+     "Budget run"
+    ]
+   ]
+  },
+  {
+   "id": "a11y",
+   "title": "Accessibility",
+   "ic": "eye",
+   "pill": [
+    "warn",
+    "Evidence missing"
+   ],
+   "big": "No report",
+   "sub": "for build b4a1f9c",
+   "reason": "The last report is for b3c7d2e, two builds ago. It cannot verify this build.",
+   "ev": [
+    [
+     "EV-0388",
+     "Report, b3c7d2e"
+    ]
+   ]
+  },
+  {
+   "id": "sec",
+   "title": "Security checks",
+   "ic": "shield",
+   "pill": [
+    "bad",
+    "Failed"
+   ],
+   "big": "1 open",
+   "sub": "secrets scan passed, auth rules missing",
+   "reason": "The auth and permissions section is missing from the API contract. Keys appear by name only.",
+   "ev": [
+    [
+     "EV-0447",
+     "Contract check"
+    ]
+   ]
+  }
+ ],
+ "DELIVERY_ITEMS": [
+  {
+   "id": "F-01",
+   "name": "Portfolio overview",
+   "kind": "frame",
+   "rev": "r4",
+   "st": "ok",
+   "stText": "Accepted r4",
+   "when": "Accepted 11:52",
+   "size": "1440 × 900",
+   "sha": "1bea36aa0b49b414c5906d42435b2177e8610dfb1fdb467eff324374b9d4078a",
+   "html": "18.4 KB",
+   "png": "212 KB",
+   "thumb": {
+    "title": "Portfolio overview",
+    "chart": true
+   }
+  },
+  {
+   "id": "F-03",
+   "name": "Variance table",
+   "kind": "frame",
+   "rev": "r6",
+   "st": "ok",
+   "stText": "Accepted r6",
+   "when": "Accepted 12:20",
+   "size": "1440 × 900",
+   "sha": "54d939e262a812760917ed1ed32809b1ae29088fb3ea4bdac65c9ac663a62023",
+   "html": "24.1 KB",
+   "png": "268 KB",
+   "thumb": {
+    "title": "Variance table"
+   }
+  },
+  {
+   "id": "F-04",
+   "name": "Alert drawer",
+   "kind": "frame",
+   "rev": "r1",
+   "st": "warn",
+   "stText": "Draft",
+   "when": "Draft 12:38",
+   "size": "1440 × 900",
+   "reason": "Draft, not accepted. Accept it in review first.",
+   "thumb": {
+    "title": "Alert drawer",
+    "drawer": true
+   }
+  },
+  {
+   "id": "F-03",
+   "name": "Variance table, 3 takes",
+   "kind": "takes",
+   "rev": "3 takes",
+   "st": "mute",
+   "stText": "Pending",
+   "when": "Alternatives, not chosen",
+   "size": "",
+   "reason": "Pending alternatives are never bundled. Accept one take first.",
+   "thumb": {
+    "title": "Take 1 of 3",
+    "kpi": false
+   }
+  },
+  {
+   "id": "REF-02",
+   "name": "Site cost report",
+   "kind": "ref",
+   "rev": "r1",
+   "st": "mute",
+   "stText": "Reference",
+   "when": "PNG · imported",
+   "size": "",
+   "reason": "Reference image, not a design frame.",
+   "thumb": null
+  },
+  {
+   "id": "DESIGN.md",
+   "name": "Design guide",
+   "kind": "design",
+   "rev": "r3",
+   "st": "ok",
+   "stText": "Fresh",
+   "when": "Finalized 12:24",
+   "size": "",
+   "sha": "e6eb549e20044f7639023ccdcf498cbafc365e37550eb1cd11db4fedf89eb7b9",
+   "html": "3.2 KB",
+   "png": "",
+   "thumb": null
+  }
+ ],
+ "DELIVERY_MANIFEST": {
+  "id": "m-0007",
+  "next": "m-0008",
+  "spec": "r14",
+  "sealedAt": "12:47",
+  "zip": "meranti-yard-handoff-m0007.zip",
+  "framework": "React"
+ },
+ "DELIVERY_MATRIX": [
+  [
+   "planning",
+   6,
+   6,
+   1,
+   1,
+   0,
+   0,
+   [
+    [
+     "EV-0101",
+     "Plan r3"
+    ]
+   ],
+   ""
+  ],
+  [
+   "spec",
+   9,
+   9,
+   1,
+   1,
+   0,
+   0,
+   [
+    [
+     "EV-0140",
+     "Spec r14"
+    ]
+   ],
+   ""
+  ],
+  [
+   "design",
+   4,
+   6,
+   2,
+   3,
+   0,
+   0,
+   [
+    [
+     "EV-0288",
+     "F-01 r4, F-03 r6"
+    ]
+   ],
+   "F-04 is a draft"
+  ],
+  [
+   "frontend",
+   0,
+   5,
+   0,
+   1,
+   0,
+   4,
+   [],
+   "Not started"
+  ],
+  [
+   "backend",
+   4,
+   6,
+   0,
+   1,
+   3,
+   6,
+   [
+    [
+     "EV-0409",
+     "Fixture run"
+    ]
+   ],
+   "Spec r14 change"
+  ],
+  [
+   "integration",
+   1,
+   4,
+   0,
+   1,
+   0,
+   3,
+   [
+    [
+     "EV-0447",
+     "Run #38 failed"
+    ]
+   ],
+   "Contract mismatch"
+  ],
+  [
+   "testing",
+   5,
+   8,
+   0,
+   1,
+   4,
+   11,
+   [
+    [
+     "EV-0431",
+     "Build b4a1f9c"
+    ]
+   ],
+   "7 untested"
+  ],
+  [
+   "deploy",
+   0,
+   6,
+   0,
+   1,
+   0,
+   6,
+   [],
+   "Waits for Testing"
+  ]
+ ],
+ "DELIVERY_PROMPT": [
+  "Build the Meranti Yard cost variance dashboard from this design hand-off.",
+  "Framework: React (TypeScript). Manifest m-0007, spec r14, sealed 12:47.",
+  "",
+  "Frames, accepted revisions only",
+  "F-01 Portfolio overview · r4 · 1440 × 900",
+  "  frames/F-01-r4.html  sha256 1bea36aa…",
+  "  frames/F-01-r4.png",
+  "F-03 Variance table · r6 · 1440 × 900",
+  "  frames/F-03-r6.html  sha256 54d939e2…",
+  "  frames/F-03-r6.png",
+  "",
+  "Read GUIDE.md first, then DESIGN.md r3 for tokens.",
+  "Build only the listed frames. F-04 is a draft and is not included.",
+  "Ask before you change a token. Report the run and test commands when done."
+ ],
+ "DELIVERY_READY": true,
+ "DELIVERY_RUN": {
+  "id": "Run #38",
+  "check": "integration-contract",
+  "commit": "b4a1f9c",
+  "at": "12:31",
+  "steps": [
+   [
+    "ok",
+    "Fetch accepted contract r2",
+    "Applied",
+    "0.4 s"
+   ],
+   [
+    "ok",
+    "Start fixture server",
+    "Applied",
+    "1.9 s"
+   ],
+   [
+    "bad",
+    "GET /projects/{id}/variance-alerts",
+    "Failed",
+    "0.8 s"
+   ],
+   [
+    "mute",
+    "POST /variance-alerts/{id}/acknowledge",
+    "Skipped",
+    ""
+   ],
+   [
+    "mute",
+    "GET /packages/{id}/cost-lines",
+    "Skipped",
+    ""
+   ],
+   [
+    "warn",
+    "Stop fixture server",
+    "Unknown",
+    "runner lost"
+   ]
+  ],
+  "classes": [
+   [
+    "Contract mismatch",
+    true
+   ],
+   [
+    "Test code",
+    false
+   ],
+   [
+    "Environment",
+    false
+   ],
+   [
+    "Timeout",
+    false
+   ],
+   [
+    "Permission",
+    false
+   ]
+  ]
+ },
+ "DELIVERY_STALE": {
+  "frame": "F-03",
+  "rev": "r7",
+  "at": "12:52",
+  "sha": "d1253e5ae19ce445f5c566ce7b3febcfeb5d224e5c67817b651c64a9251fa535",
+  "html": "24.6 KB",
+  "png": "271 KB"
+ },
+ "DELIVERY_TIMELINE": [
+  [
+   "PR #41 check",
+   "contract-fixtures",
+   "12:31",
+   [
+    "bad",
+    "Failed"
+   ],
+   "T-212 · b4a1f9c",
+   "Linked by commit"
+  ],
+  [
+   "Runner ci-linux-2",
+   "queued job #39",
+   "waiting 9 min",
+   [
+    "acc",
+    "Queued"
+   ],
+   "b4a1f9c",
+   "No result yet"
+  ],
+  [
+   "main build 91c3e07",
+   "all checks",
+   "12:12",
+   [
+    "ok",
+    "Passed"
+   ],
+   "other commit",
+   "Not this release. Not linked."
+  ],
+  [
+   "Staging deploy",
+   "b4a1f9c",
+   "20 Nov",
+   [
+    "warn",
+    "Stale"
+   ],
+   "b3c7d2e",
+   "2 days old, older build"
+  ],
+  [
+   "Accessibility report",
+   "axe on staging",
+   "no source",
+   [
+    "mute",
+    "Unavailable"
+   ],
+   "",
+   "Connection removed"
+  ],
+  [
+   "Production",
+   "any observation",
+   "none",
+   [
+    "mute",
+    "Unknown"
+   ],
+   "",
+   "Never shown as passed"
+  ]
+ ],
+ "FRAMES": {
+  "f01": {
+   "id": "F-01",
+   "name": "Portfolio overview",
+   "rev": "r4",
+   "st": "accepted"
+  },
+  "f03": {
+   "id": "F-03",
+   "name": "Variance table",
+   "rev": "r6",
+   "st": "accepted"
+  },
+  "f04": {
+   "id": "F-04",
+   "name": "Alert drawer",
+   "rev": "r1",
+   "st": "draft"
+  },
+  "alt": {
+   "id": "F-03",
+   "name": "alternatives",
+   "takes": 3
+  },
+  "ref": {
+   "id": "REF-02",
+   "name": "Site cost report",
+   "kind": "PNG · imported"
+  }
+ },
+ "INTAKE_COMPOSER": {
+  "text": "A cost variance dashboard for offshore project teams. Flag any work package that is more than 3 percent over budget, and show why.",
+  "len": 131
+ },
+ "INTAKE_DELETED": {
+  "id": "kenari-fleet",
+  "by": "Dimas (sample)",
+  "at": "12:43",
+  "days": 30
+ },
+ "INTAKE_LIMITS": {
+  "types": "PNG, JPEG, WebP",
+  "sizeMb": 10,
+  "perImport": 30,
+  "keepDays": 30
+ },
+ "INTAKE_NEW": {
+  "name": "Lontar Notices",
+  "slug": "lontar-notices",
+  "idea": "A notice board for a primary school. Teachers post short notices; parents read them in Bahasa Indonesia or English.",
+  "ideaLen": 117,
+  "max": 4000,
+  "min": 20
+ },
+ "INTAKE_PII": [
+  [
+   "Putri Lestari",
+   "putri.l@example.test",
+   "P-01"
+  ],
+  [
+   "Bayu Santoso",
+   "bayu.s@example.test",
+   "P-02"
+  ],
+  [
+   "Citra Dewi",
+   "citra.d@example.test",
+   "P-03"
+  ],
+  [
+   "Eko Prasetyo",
+   "eko.p@example.test",
+   "P-04"
+  ]
+ ],
+ "INTAKE_PROJECTS": [
+  {
+   "id": "meranti-yard",
+   "name": "Meranti Yard",
+   "idea": "Cost variance dashboard",
+   "inc": "Inc. 2 · Variance alerts",
+   "stages": [
+    "ok",
+    "ok",
+    "half",
+    "ring",
+    "warn",
+    "bad",
+    "half",
+    "ring"
+   ],
+   "now": "Design · 3 to review",
+   "at": "Today 12:41",
+   "ago": "12:41",
+   "owner": "Rina (sample)",
+   "ini": "RS",
+   "role": "Owner",
+   "thumb": "dash"
+  },
+  {
+   "id": "kenari-fleet",
+   "name": "Kenari Fleet",
+   "idea": "Vessel schedule board",
+   "inc": "Inc. 1 · First release",
+   "stages": [
+    "ok",
+    "ok",
+    "ok",
+    "half",
+    "ring",
+    "ring",
+    "ring",
+    "ring"
+   ],
+   "now": "Frontend · in progress",
+   "at": "Today 09:15",
+   "ago": "09:15",
+   "owner": "Dimas (sample)",
+   "ini": "DM",
+   "role": "Viewer",
+   "thumb": "gantt"
+  },
+  {
+   "id": "bakau-permits",
+   "name": "Bakau Permits",
+   "idea": "Permit tracker",
+   "inc": "Inc. 3 · Renewal reminders",
+   "stages": [
+    "ok",
+    "ok",
+    "ok",
+    "ok",
+    "ok",
+    "half",
+    "half",
+    "ring"
+   ],
+   "now": "Integration · in progress",
+   "at": "Yesterday",
+   "ago": "Yesterday",
+   "owner": "Rina (sample)",
+   "ini": "RS",
+   "role": "Owner",
+   "thumb": "table"
+  },
+  {
+   "id": "pelita-clinic",
+   "name": "Pelita Clinic",
+   "idea": "Booking portal",
+   "inc": "Inc. 1 · Slots and reminders",
+   "stages": [
+    "ok",
+    "ok",
+    "half",
+    "ring",
+    "ring",
+    "ring",
+    "ring",
+    "ring"
+   ],
+   "now": "Design · in progress",
+   "at": "19 Nov",
+   "ago": "19 Nov",
+   "owner": "Ayu (sample)",
+   "ini": "AY",
+   "role": "Viewer",
+   "thumb": "form"
+  },
+  {
+   "id": "rawa-warehouse",
+   "name": "Rawa Warehouse",
+   "idea": "Stock count app",
+   "inc": "Inc. 2 · Cycle counts",
+   "stages": [
+    "ok",
+    "ok",
+    "ok",
+    "ok",
+    "warn",
+    "ring",
+    "ring",
+    "ring"
+   ],
+   "now": "Backend · needs review",
+   "at": "17 Nov",
+   "ago": "17 Nov",
+   "owner": "Dimas (sample)",
+   "ini": "DM",
+   "role": "Owner",
+   "thumb": "cards"
+  },
+  {
+   "id": "tembaga-quote",
+   "name": "Tembaga Quote",
+   "idea": "Quote builder",
+   "inc": "Inc. 1 · Price lists",
+   "stages": [
+    "ok",
+    "half",
+    "ring",
+    "ring",
+    "ring",
+    "ring",
+    "ring",
+    "ring"
+   ],
+   "now": "Specification · in progress",
+   "at": "14 Nov",
+   "ago": "14 Nov",
+   "owner": "Rina (sample)",
+   "ini": "RS",
+   "role": "Owner",
+   "thumb": "form"
+  },
+  {
+   "id": "sagu-field",
+   "name": "Sagu Field Notes",
+   "idea": "Inspection forms",
+   "inc": "Inc. 1 · Offline forms",
+   "stages": [
+    "half",
+    "ring",
+    "ring",
+    "ring",
+    "ring",
+    "ring",
+    "ring",
+    "ring"
+   ],
+   "now": "Planning · in progress",
+   "at": "11 Nov",
+   "ago": "11 Nov",
+   "owner": "Ayu (sample)",
+   "ini": "AY",
+   "role": "Owner",
+   "thumb": "empty"
+  }
+ ],
+ "INTAKE_READY": true,
+ "INTAKE_REFS": {
+  "r3": {
+   "id": "REF-03",
+   "src": "site-costs-q2.png",
+   "kind": "PNG",
+   "size": "1.2 MB",
+   "dim": "1440 × 900"
+  },
+  "r4": {
+   "id": "REF-04",
+   "src": "tracker-weekly.webp",
+   "kind": "WebP",
+   "size": "860 KB",
+   "dim": "1280 × 800"
+  },
+  "r5": {
+   "id": "REF-05",
+   "src": "status-board.png",
+   "kind": "PNG",
+   "size": "520 KB",
+   "dim": "1280 × 720"
+  },
+  "r6": {
+   "id": "REF-06",
+   "src": "Pasted screenshot 12:36",
+   "kind": "PNG",
+   "size": "340 KB",
+   "dim": "1280 × 720"
+  }
+ },
+ "INTAKE_SWITCH_ORDER": [
+  "meranti-yard",
+  "kenari-fleet",
+  "bakau-permits",
+  "pelita-clinic",
+  "rawa-warehouse",
+  "tembaga-quote",
+  "sagu-field"
+ ],
+ "KPIS": [
+  [
+   "Budget",
+   "30.65"
+  ],
+  [
+   "Forecast",
+   "31.65"
+  ],
+  [
+   "Variance",
+   "+3.3%",
+   "neg"
+  ],
+  [
+   "Alerts",
+   "2"
+  ]
+ ],
+ "MODEL": {
+  "source": "HOSTED",
+  "name": "Sonnet 5.5",
+  "est": "≈ 18–30 cr"
+ },
+ "MODELS_AGENTS": [
+  {
+   "name": "Claude Code",
+   "ver": "2.4.1",
+   "inst": "ok",
+   "sign": "ok",
+   "pick": true,
+   "sub": "Installed, signed in"
+  },
+  {
+   "name": "Codex CLI",
+   "ver": "1.8.0",
+   "inst": "ok",
+   "sign": "ok",
+   "sub": "Installed, signed in"
+  },
+  {
+   "name": "OpenCode",
+   "ver": "0.9.6",
+   "inst": "ok",
+   "sign": "no",
+   "sub": "Installed, not signed in",
+   "hint": "Sign in"
+  },
+  {
+   "name": "Antigravity (Gemini)",
+   "ver": "0.7.2",
+   "inst": "ok",
+   "sign": "unknown",
+   "sub": "Installed, sign-in not checked"
+  },
+  {
+   "name": "Cursor Agent",
+   "inst": "none",
+   "sub": "Not found on this computer",
+   "hint": "Install guide"
+  },
+  {
+   "name": "GitHub Copilot CLI",
+   "inst": "none",
+   "sub": "Not found on this computer",
+   "hint": "Install guide"
+  }
+ ],
+ "MODELS_AGENT_RUN": {
+  "agent": "Claude Code",
+  "model": "Sonnet 5.5",
+  "models": [
+   "Sonnet 5.5",
+   "Opus 5",
+   "Haiku 5"
+  ],
+  "effort": "Medium",
+  "efforts": [
+   "Low",
+   "Medium",
+   "High"
+  ],
+  "perm": 0,
+  "perms": [
+   [
+    "Ask before writing files",
+    "Each write waits for your click."
+   ],
+   [
+    "Edit files in a work copy only",
+    "Writes go only to the work copy."
+   ]
+  ],
+  "copy": "~/.spekin/work/meranti-yard/run-0430",
+  "branch": "spekin/run-0430",
+  "usage": {
+   "runs": 9,
+   "tokens": "not reported",
+   "plan": "not reported"
+  }
+ },
+ "MODELS_API": {
+  "providers": [
+   [
+    "Anthropic",
+    "https://api.anthropic.com",
+    true,
+    "Messages API"
+   ],
+   [
+    "OpenAI",
+    "https://api.openai.com/v1",
+    true,
+    "Chat and responses API"
+   ],
+   [
+    "Google Gemini",
+    "https://generativelanguage.googleapis.com",
+    true,
+    "Gemini API"
+   ],
+   [
+    "Azure OpenAI",
+    "https://meranti-sample.openai.azure.com",
+    true,
+    "Your own resource and deployment"
+   ],
+   [
+    "Ollama on this computer",
+    "http://127.0.0.1:11434",
+    false,
+    "No key; reached through the Connector"
+   ],
+   [
+    "Custom OpenAI-compatible",
+    "https://llm.meranti-sample.test/v1",
+    true,
+    "Any server with the same API shape"
+   ]
+  ],
+  "sel": 0,
+  "fetched": [
+   [
+    "claude-sonnet-5-5",
+    "Sonnet 5.5",
+    "sel"
+   ],
+   [
+    "claude-haiku-5",
+    "Haiku 5",
+    "ok"
+   ],
+   [
+    "claude-opus-5",
+    "Opus 5",
+    "ok"
+   ]
+  ],
+  "fetchedCount": 6
+ },
+ "MODELS_BUNDLE": {
+  "pick": [
+   [
+    "F-01",
+    "Portfolio overview",
+    "r4",
+    true
+   ],
+   [
+    "F-03",
+    "Variance table",
+    "r6",
+    true
+   ],
+   [
+    "F-04",
+    "Alert drawer",
+    "r1 draft",
+    false,
+    "Draft, not accepted"
+   ],
+   [
+    "F-03",
+    "alternatives",
+    "3 takes",
+    false,
+    "Pending alternatives"
+   ]
+  ],
+  "files": [
+   "PNG per frame",
+   "DESIGN.md r3",
+   "manifest.json",
+   "HANDOFF.md"
+  ],
+  "id": "HO-0007",
+  "size": "1.4 MB",
+  "spec": "r14"
+ },
+ "MODELS_CAPS": {
+  "perRun": 60,
+  "monthly": 5000,
+  "concurrency": 2
+ },
+ "MODELS_CONNECTOR": {
+  "state": "Running",
+  "paired": "Paired with this browser",
+  "since": "12:31",
+  "version": "0.4.2",
+  "addr": "127.0.0.1:47821",
+  "os": "macOS",
+  "code": "6 digits, one use, expires in 2 minutes"
+ },
+ "MODELS_DEVICE_FRAMES": [
+  [
+   "F-01",
+   "Portfolio overview",
+   "r4",
+   [
+    "ok",
+    "Accepted"
+   ],
+   "chart"
+  ],
+  [
+   "F-03",
+   "Variance table",
+   "r6",
+   [
+    "ok",
+    "Accepted"
+   ],
+   "table"
+  ],
+  [
+   "F-04",
+   "Alert drawer",
+   "r1",
+   [
+    "warn",
+    "Draft"
+   ],
+   "drawer"
+  ],
+  [
+   "F-03",
+   "alternatives",
+   "3 takes",
+   [
+    "mute",
+    "Pending"
+   ],
+   "table"
+  ],
+  [
+   "REF-02",
+   "Site cost report",
+   "PNG",
+   [
+    "mute",
+    "Reference"
+   ],
+   "image"
+  ]
+ ],
+ "MODELS_EFFORT": [
+  [
+   "Low",
+   "≈ 0.6× tokens, fastest"
+  ],
+  [
+   "Medium",
+   "balanced"
+  ],
+  [
+   "High",
+   "≈ 1.6× tokens, slower"
+  ]
+ ],
+ "MODELS_FINDING": {
+  "n": 1,
+  "of": 3,
+  "title": "Clearer variance flags",
+  "body": "Over-threshold rows now show a pill with the reason. Compare the whole frame before you apply.",
+  "base": "r6",
+  "next": "r7",
+  "frame": "F-03 Variance table",
+  "reqs": [
+   "R-DASH-014"
+  ],
+  "changed": "3 rows"
+ },
+ "MODELS_KEY": {
+  "provider": "Anthropic",
+  "tail": "9f2a",
+  "by": "Rina (sample)",
+  "added": "12 Nov",
+  "tested": "12:38",
+  "models": 6,
+  "tests": [
+   [
+    "ok",
+    "Provider reachable",
+    "184 ms"
+   ],
+   [
+    "ok",
+    "Key accepted",
+    "scope: messages"
+   ],
+   [
+    "ok",
+    "Models listed",
+    "6 found, Sonnet 5.5 among them"
+   ],
+   [
+    "ok",
+    "Vision available",
+    "image input accepted"
+   ],
+   [
+    "warn",
+    "Provider spend limit",
+    "not reported by this provider"
+   ]
+  ],
+  "usage": {
+   "tokensIn": "412k",
+   "tokensOut": "96k",
+   "runs": 14
+  }
+ },
+ "MODELS_LEDGER": [
+  {
+   "t": "12:44",
+   "run": "0428",
+   "kind": "reserve",
+   "task": "Spec draft · R-DASH-019",
+   "model": "Sonnet 5.5 · Medium",
+   "amt": "−24",
+   "left": "3,706",
+   "st": [
+    "acc",
+    "Running"
+   ]
+  },
+  {
+   "t": "12:41",
+   "run": "0426",
+   "kind": "refund",
+   "task": "Visual alternatives · F-04",
+   "model": "Sonnet 5.5 · High",
+   "amt": "+12",
+   "left": "3,730",
+   "st": [
+    "ok",
+    "Settled"
+   ]
+  },
+  {
+   "t": "12:41",
+   "run": "0426",
+   "kind": "settle",
+   "task": "Visual alternatives · F-04",
+   "model": "Sonnet 5.5 · High",
+   "amt": "24",
+   "left": "3,718",
+   "st": [
+    "ok",
+    "Settled"
+   ]
+  },
+  {
+   "t": "12:40",
+   "run": "0426",
+   "kind": "reserve",
+   "task": "Visual alternatives · F-04",
+   "model": "Sonnet 5.5 · High",
+   "amt": "−36",
+   "left": "3,718",
+   "st": [
+    "ok",
+    "Settled"
+   ]
+  },
+  {
+   "t": "12:20",
+   "run": "0425",
+   "kind": "refund",
+   "task": "Reference analysis · REF-02",
+   "model": "Sonnet 5.5 · High",
+   "amt": "+9",
+   "left": "3,754",
+   "st": [
+    "ok",
+    "Settled"
+   ]
+  },
+  {
+   "t": "12:20",
+   "run": "0425",
+   "kind": "settle",
+   "task": "Reference analysis · REF-02",
+   "model": "Sonnet 5.5 · High",
+   "amt": "21",
+   "left": "3,745",
+   "st": [
+    "ok",
+    "Settled"
+   ]
+  },
+  {
+   "t": "12:18",
+   "run": "0425",
+   "kind": "reserve",
+   "task": "Reference analysis · REF-02",
+   "model": "Sonnet 5.5 · High",
+   "amt": "−30",
+   "left": "3,745",
+   "st": [
+    "ok",
+    "Settled"
+   ]
+  },
+  {
+   "t": "12:10",
+   "run": "0424",
+   "kind": "refund",
+   "task": "Alternatives · F-03 takes",
+   "model": "Sonnet 5.5 · High",
+   "amt": "+30",
+   "left": "3,775",
+   "st": [
+    "bad",
+    "Cancelled"
+   ],
+   "sel": true
+  },
+  {
+   "t": "12:10",
+   "run": "0424",
+   "kind": "settle",
+   "task": "Alternatives · F-03 takes",
+   "model": "Sonnet 5.5 · High",
+   "amt": "6",
+   "left": "3,745",
+   "st": [
+    "bad",
+    "Cancelled"
+   ],
+   "sel": true
+  },
+  {
+   "t": "12:08",
+   "run": "0424",
+   "kind": "reserve",
+   "task": "Alternatives · F-03 takes",
+   "model": "Sonnet 5.5 · High",
+   "amt": "−36",
+   "left": "3,745",
+   "st": [
+    "bad",
+    "Cancelled"
+   ],
+   "sel": true
+  },
+  {
+   "t": "11:30",
+   "run": "0423",
+   "kind": "byok",
+   "task": "Style summary",
+   "model": "Haiku 5 · BYOK",
+   "amt": "0 cr",
+   "left": "3,781",
+   "st": [
+    "mute",
+    "Provider-billed"
+   ]
+  },
+  {
+   "t": "11:05",
+   "run": "0422",
+   "kind": "hold",
+   "task": "Independent review",
+   "model": "Google · Pro tier",
+   "amt": "30 held",
+   "left": "3,781",
+   "st": [
+    "warn",
+    "Pending"
+   ]
+  },
+  {
+   "t": "10:52",
+   "run": "0421",
+   "kind": "cli",
+   "task": "Reference notes · REF-01",
+   "model": "Claude Code · Sonnet 5.5",
+   "amt": "18.2k tok",
+   "left": "3,781",
+   "st": [
+    "mute",
+    "Agent-billed"
+   ]
+  },
+  {
+   "t": "10:31",
+   "run": "0420",
+   "kind": "cli",
+   "task": "Spec draft · R-DASH-018",
+   "model": "Codex CLI",
+   "amt": "not reported",
+   "left": "3,781",
+   "st": [
+    "mute",
+    "Agent-billed"
+   ]
+  }
+ ],
+ "MODELS_LEDGER_DETAIL": {
+  "run": "0424",
+  "title": "Cancelled after partial usage",
+  "consumed": "6 cr",
+  "released": "30 cr",
+  "pending": "0 cr",
+  "provider": "rc-7 · provider cost 5.8 cr · charged 6 cr",
+  "key": "k-2b90de"
+ },
+ "MODELS_PERIOD": {
+  "label": "1–30 Nov",
+  "resets": "1 Dec",
+  "days": 8,
+  "workspaceCap": 20000,
+  "workspaceUsed": 8420
+ },
+ "MODELS_PROVIDERS": [
+  [
+   "Anthropic",
+   3
+  ],
+  [
+   "Google",
+   2
+  ],
+  [
+   "OpenAI",
+   2
+  ]
+ ],
+ "MODELS_READY": true,
+ "MODELS_REGISTRY": [
+  {
+   "name": "Sonnet 5.5",
+   "id": "claude-sonnet-5-5",
+   "caps": [
+    "Text",
+    "Vision",
+    "Code",
+    "Structured"
+   ],
+   "lim": "200k in · 16k out",
+   "rc": "rc-7",
+   "est": "18–30 cr",
+   "st": "sel",
+   "note": "Default for spec drafts and alternatives"
+  },
+  {
+   "name": "Haiku 5",
+   "id": "claude-haiku-5",
+   "caps": [
+    "Text",
+    "Vision",
+    "Structured"
+   ],
+   "lim": "200k in · 8k out",
+   "rc": "rc-7",
+   "est": "4–9 cr",
+   "st": "ok",
+   "note": "Fast and light; summaries and checks"
+  },
+  {
+   "name": "Opus 5",
+   "id": "claude-opus-5",
+   "caps": [
+    "Text",
+    "Vision",
+    "Code",
+    "Structured"
+   ],
+   "lim": "200k in · 32k out",
+   "rc": "rc-7",
+   "est": "60–110 cr",
+   "st": "off",
+   "note": "Not in the Hosted sample plan. Use your own key or agent."
+  }
+ ],
+ "MODELS_RUN": {
+  "id": "0429",
+  "task": "Visual alternatives",
+  "target": "F-04 Alert drawer",
+  "model": "Sonnet 5.5",
+  "effort": "High",
+  "est": [
+   18,
+   30
+  ],
+  "reserve": 36,
+  "expect": 24,
+  "release": 12,
+  "outCap": "8k tokens",
+  "key": "k-7f3c91",
+  "limitIn": "200k",
+  "rc": "rc-7",
+  "ctx": [
+   [
+    "F-03 Variance table",
+    "r6",
+    3.1
+   ],
+   [
+    "DESIGN.md",
+    "r3",
+    2.4
+   ],
+   [
+    "R-DASH-014",
+    "r14",
+    0.6
+   ],
+   [
+    "REF-02 Site cost report",
+    "r1",
+    3.7
+   ]
+  ],
+  "checks": [
+   [
+    "Model reads images",
+    "REF-02 is a PNG and Sonnet 5.5 takes images"
+   ],
+   [
+    "Context fits",
+    "9.8k of 200k input tokens; the whole board is not sent"
+   ],
+   [
+    "Rate card rc-7 is active",
+    "Hosted price known, so a paid run is allowed"
+   ],
+   [
+    "Reserve fits the caps",
+    "36 is under the per-run cap of 60 and the 3,706 left"
+   ],
+   [
+    "Runs in flight",
+    "1 of 2 allowed; this one would be the second"
+   ]
+  ]
+ },
+ "MODELS_SOURCES": [
+  {
+   "id": "hosted",
+   "name": "Hosted",
+   "icon": "cloud",
+   "bills": "Spekin credits",
+   "sub": "No setup. Runs reserve and settle credits.",
+   "billsC": "Spekin credits"
+  },
+  {
+   "id": "cli",
+   "name": "Local CLI",
+   "short": "CLI",
+   "icon": "terminal",
+   "bills": "your agent's own plan",
+   "billsC": "your agent's plan",
+   "sub": "Bring your own agent. Spekin credits are not used."
+  },
+  {
+   "id": "api",
+   "name": "API provider",
+   "short": "BYOK",
+   "icon": "plug",
+   "bills": "your provider",
+   "billsC": "your provider",
+   "sub": "Your own key. Spekin adds no model cost."
+  }
+ ],
+ "MODELS_TASKS": [
+  [
+   "Interview and spec draft",
+   "Sonnet 5.5 · Medium",
+   "Hosted",
+   [
+    "mute",
+    "Auto"
+   ]
+  ],
+  [
+   "Reference analysis (vision)",
+   "Sonnet 5.5 · High",
+   "Hosted",
+   [
+    "mute",
+    "Fixed"
+   ]
+  ],
+  [
+   "Visual alternatives",
+   "Sonnet 5.5 · High",
+   "Hosted",
+   [
+    "mute",
+    "Fixed"
+   ]
+  ],
+  [
+   "Independent review",
+   "Google · Pro tier",
+   "Hosted",
+   [
+    "ok",
+    "Different vendor"
+   ]
+  ]
+ ],
+ "MODELS_USAGE": {
+  "calm": {
+   "used": 1240,
+   "reserved": 24,
+   "pending": 30,
+   "cap": 5000,
+   "sev": "calm",
+   "win5": [
+    312,
+    900,
+    "17:10"
+   ],
+   "win7": [
+    842,
+    2400,
+    "Mon 08:00"
+   ]
+  },
+  "near": {
+   "used": 3820,
+   "reserved": 60,
+   "pending": 0,
+   "cap": 5000,
+   "sev": "warn",
+   "win5": [
+    640,
+    900,
+    "17:10"
+   ],
+   "win7": [
+    1980,
+    2400,
+    "Mon 08:00"
+   ]
+  },
+  "capped": {
+   "used": 4946,
+   "reserved": 24,
+   "pending": 30,
+   "cap": 5000,
+   "sev": "crit",
+   "win5": [
+    188,
+    900,
+    "17:10"
+   ],
+   "win7": [
+    2340,
+    2400,
+    "Mon 08:00"
+   ]
+  }
+ },
+ "PACKAGES": [
+  [
+   "P-01 Jacket fabrication",
+   "12.40",
+   "13.10",
+   "+5.6%",
+   "bad"
+  ],
+  [
+   "P-02 Topside piping",
+   "8.25",
+   "8.31",
+   "+0.7%",
+   "ok"
+  ],
+  [
+   "P-03 Hook-up and commissioning",
+   "5.90",
+   "6.28",
+   "+6.4%",
+   "bad"
+  ],
+  [
+   "P-04 Marine spread",
+   "4.10",
+   "3.96",
+   "−3.4%",
+   "ok"
+  ]
+ ],
+ "PROJECT": {
+  "name": "Meranti Yard",
+  "product": "Cost variance dashboard",
+  "increment": "Inc. 2 · Variance alerts",
+  "spec": "r14",
+  "user": "Rina (sample)",
+  "initials": "RS"
+ },
+ "REQS": [
+  {
+   "id": "R-DASH-014",
+   "t": "Variance threshold per package",
+   "sub": "Accepted in spec r14",
+   "pill": [
+    "ok",
+    "Accepted"
+   ]
+  },
+  {
+   "id": "R-DASH-015",
+   "t": "Drill down from package to cost lines",
+   "sub": "Accepted in spec r14",
+   "pill": [
+    "ok",
+    "Accepted"
+   ]
+  },
+  {
+   "id": "R-DASH-019",
+   "t": "Alert after 2 periods over 3%",
+   "sub": "Proposal from chat, not in spec",
+   "pill": [
+    "acc",
+    "Proposal"
+   ]
+  }
+ ],
+ "REVIEW_ALSO": [
+  {
+   "el": "P-03 variance",
+   "where": "Row P-03",
+   "from": "+6.4%",
+   "to": "+0.8%"
+  },
+  {
+   "el": "Forecast total",
+   "where": "KPI row",
+   "from": "31.65",
+   "to": "31.32"
+  },
+  {
+   "el": "Variance KPI",
+   "where": "KPI row",
+   "from": "+3.3%",
+   "to": "+2.2%"
+  },
+  {
+   "el": "Alerts KPI",
+   "where": "KPI row",
+   "from": "2",
+   "to": "1"
+  }
+ ],
+ "REVIEW_NITS": [
+  {
+   "n": 1,
+   "el": "Page title",
+   "what": "Sentence case",
+   "tip": "Title reads in sentence case at 15 px.",
+   "key": "title"
+  },
+  {
+   "n": 2,
+   "el": "Threshold chip",
+   "what": "Cites r14",
+   "tip": "Chip now reads “Threshold 3% · r14”.",
+   "key": "thr"
+  },
+  {
+   "n": 3,
+   "el": "KPI cards",
+   "what": "Equal height",
+   "tip": "Four cards share one height; figures use tabular digits.",
+   "key": "kpi"
+  },
+  {
+   "n": 4,
+   "el": "Table header",
+   "what": "Dim 11 px labels",
+   "tip": "Labels moved from 13 px ink to 11 px dim ink in a 32 px row.",
+   "before": "13 px ink",
+   "after": "11 px dim",
+   "key": "head"
+  },
+  {
+   "n": 5,
+   "el": "Forecast cell P-03",
+   "what": "Padding 12 px",
+   "tip": "Cell padding 10 to 12 px, mono weight 500.",
+   "key": "f3",
+   "stale": true,
+   "seen": "6.28",
+   "now": "5.95"
+  },
+  {
+   "n": 6,
+   "el": "Variance pill P-03",
+   "what": "AA contrast",
+   "tip": "Pill text raised to AA contrast.",
+   "key": "v3"
+  },
+  {
+   "n": 7,
+   "el": "Source line",
+   "what": "Names spec r14",
+   "tip": "Source line names the spec revision.",
+   "key": "foot"
+  }
+ ],
+ "REVIEW_OUTSIDE": "F-04 Alert drawer still lists P-03 at +6.4%. This edit did not touch it.",
+ "REVIEW_PART": {
+  "frame": "F-03 Variance table",
+  "rev": "r6",
+  "draft": "r7",
+  "cell": {
+   "name": "Forecast cell",
+   "pkg": "P-03",
+   "size": "46 × 22",
+   "font": "12.5 px mono",
+   "before": "6.28",
+   "after": "5.95",
+   "ask": "Set the forecast to 5.95 after the re-quote"
+  },
+  "pill": {
+   "name": "Variance pill",
+   "pkg": "P-03",
+   "size": "57 × 22",
+   "font": "12 px 600",
+   "text": "+6.4%",
+   "ask": "Show how many periods it is over"
+  }
+ },
+ "REVIEW_PROPOSAL": {
+  "id": "P-07",
+  "from": "r14",
+  "to": "r15",
+  "title": "Add the 2-period alert rule and the variance display rule",
+  "by": "Spekin, from the F-03 review",
+  "at": "12:46",
+  "snapshot": "7a1e…c4d",
+  "hunks": [
+   {
+    "id": "H1",
+    "kind": "Added requirement",
+    "ref": "R-DASH-019",
+    "name": "Alert after 2 periods over 3%",
+    "src": "Chat proposal, 12:44",
+    "old": null,
+    "now": [
+     [
+      "add",
+      "Raise an alert for a package when its variance stays above 3% for 2 consecutive periods."
+     ]
+    ]
+   },
+   {
+    "id": "H2",
+    "kind": "Added requirement",
+    "ref": "R-DASH-020",
+    "name": "Variance display",
+    "src": "F-03 review, item 6",
+    "old": null,
+    "now": [
+     [
+      "add",
+      "Show variance with a sign and one decimal place, for example +6.4% or −3.4%."
+     ]
+    ]
+   },
+   {
+    "id": "H3",
+    "kind": "Changed criterion",
+    "ref": "AC-014.2",
+    "name": "Over-threshold rows flagged",
+    "src": "F-03 review, item 6",
+    "old": [
+     [
+      "eq",
+      "Over-threshold rows are flagged."
+     ]
+    ],
+    "now": [
+     [
+      "eq",
+      "Over-threshold rows are flagged"
+     ],
+     [
+      "add",
+      " with a pill that shows the number of periods"
+     ],
+     [
+      "eq",
+      "."
+     ]
+    ]
+   },
+   {
+    "id": "H4",
+    "kind": "Added ticket",
+    "ref": "T-219",
+    "name": "Empty state when no package is over 3%",
+    "src": "Gap check, S35",
+    "old": null,
+    "now": [
+     [
+      "add",
+      "Show “No package over 3% this period” when no row is over. Proposed ticket."
+     ]
+    ]
+   }
+  ],
+  "links": [
+   {
+    "id": "R-DASH-019",
+    "t": "Alert after 2 periods over 3%",
+    "sub": "New in r15 · from chat proposal",
+    "p": [
+     "acc",
+     "New"
+    ]
+   },
+   {
+    "id": "R-DASH-020",
+    "t": "Variance display",
+    "sub": "New in r15 · from F-03 review",
+    "p": [
+     "acc",
+     "New"
+    ]
+   },
+   {
+    "id": "R-DASH-014",
+    "t": "Variance threshold per package",
+    "sub": "Unchanged · accepted r14",
+    "p": [
+     "ok",
+     "Unchanged"
+    ]
+   }
+  ],
+  "affected": [
+   {
+    "id": "AC-014.2",
+    "t": "Over-threshold rows flagged",
+    "sub": "Criterion text changes (H3)",
+    "p": [
+     "warn",
+     "Needs review"
+    ]
+   },
+   {
+    "id": "T-212",
+    "t": "Build variance table",
+    "sub": "Frontend task · not started",
+    "p": [
+     "warn",
+     "Needs review"
+    ]
+   },
+   {
+    "id": "AC-019.1",
+    "t": "Alert raised after 2 periods",
+    "sub": "New criterion · no evidence yet",
+    "p": [
+     "mute",
+     "Untested"
+    ]
+   },
+   {
+    "id": "API-2",
+    "t": "API contract · variance alerts",
+    "sub": "Backend · contract r2",
+    "p": [
+     "warn",
+     "Needs review"
+    ]
+   },
+   {
+    "id": "T-219",
+    "t": "Empty state, no package over 3%",
+    "sub": "Proposed ticket · joins S15 on accept",
+    "p": [
+     "acc",
+     "Proposed"
+    ]
+   }
+  ],
+  "sources": [
+   "F-03 review · 7 changes",
+   "REF-02 Site cost report",
+   "Gap check, S35"
+  ],
+  "audit": {
+   "accepted": {
+    "id": "A-0231",
+    "at": "12:52",
+    "text": "Accepted P-07: created r15 from r14, 4 of 4 hunks"
+   },
+   "rejected": {
+    "id": "A-0232",
+    "at": "12:52",
+    "text": "Rejected P-07: r14 stays current, nothing written"
+   }
+  },
+  "accepted": {
+   "hunks": "4 of 4 hunks",
+   "parent": "r14",
+   "snapshot": "7a1e…c4d"
+  }
+ },
+ "REVIEW_READY": true,
+ "REVIEW_VARIANTS": [
+  {
+   "id": 1,
+   "label": "Count in the pill",
+   "hint": "One pill, count after a dot",
+   "text": "+6.4% · 2 periods",
+   "badge": ""
+  },
+  {
+   "id": 2,
+   "label": "Arrow and count",
+   "hint": "Trend arrow, short count",
+   "text": "▲ +6.4% · 2 per.",
+   "badge": ""
+  },
+  {
+   "id": 3,
+   "label": "Count badge",
+   "hint": "Pill stays, small badge",
+   "text": "+6.4%",
+   "badge": "2"
+  }
+ ],
+ "STAGES": [
+  {
+   "id": "planning",
+   "n": "01",
+   "name": "Planning",
+   "st": "ok",
+   "text": "Ready · 6 of 6"
+  },
+  {
+   "id": "spec",
+   "n": "02",
+   "name": "Specification",
+   "st": "ok",
+   "text": "Ready · r14"
+  },
+  {
+   "id": "design",
+   "n": "03",
+   "name": "Design",
+   "st": "half",
+   "text": "In progress · 3 to review"
+  },
+  {
+   "id": "frontend",
+   "n": "04",
+   "name": "Frontend",
+   "st": "ring",
+   "text": "Not started"
+  },
+  {
+   "id": "backend",
+   "n": "05",
+   "name": "Backend",
+   "st": "warn",
+   "text": "Needs review · 2"
+  },
+  {
+   "id": "integration",
+   "n": "06",
+   "name": "Integration",
+   "st": "bad",
+   "text": "Blocked · 1"
+  },
+  {
+   "id": "testing",
+   "n": "07",
+   "name": "Testing",
+   "st": "half",
+   "text": "In progress · 4 of 11"
+  },
+  {
+   "id": "deploy",
+   "n": "08",
+   "name": "Deployment",
+   "st": "ring",
+   "text": "Not started"
+  }
+ ],
+ "STYLE_CTX": [
+  [
+   "doc",
+   "DESIGN.md",
+   "r3"
+  ],
+  [
+   "image",
+   "REF-02 Site cost report",
+   "r1"
+  ],
+  [
+   "image",
+   "REF-03 Package status page",
+   "r1"
+  ]
+ ],
+ "STYLE_HUNKS": [
+  {
+   "id": "H1",
+   "sec": "Colour roles",
+   "inc": true,
+   "add": 3,
+   "del": 0,
+   "open": true,
+   "lines": [
+    [
+     "ctx",
+     "| canvas | #FAF9F5 | Page ground |"
+    ],
+    [
+     "add",
+     "| table-band | #F3EFE8 | Alternate table rows |"
+    ],
+    [
+     "add",
+     "| focus-ring | #93B5A0 | Focus outline |"
+    ],
+    [
+     "add",
+     "| chart-2 | #8B8440 | Second chart series |"
+    ]
+   ]
+  },
+  {
+   "id": "H2",
+   "sec": "Type scale",
+   "inc": true,
+   "add": 2,
+   "del": 0,
+   "open": true,
+   "lines": [
+    [
+     "ctx",
+     "| body | 13 / 1.45 · 400 |"
+    ],
+    [
+     "add",
+     "| caption | 11 / 1.3 · 500 · caps |"
+    ],
+    [
+     "add",
+     "| figures | Mono 12 · tabular |"
+    ]
+   ]
+  },
+  {
+   "id": "H3",
+   "sec": "Spacing",
+   "inc": false,
+   "add": 1,
+   "del": 0,
+   "open": false,
+   "lines": [
+    [
+     "add",
+     "| half-step | 4 |"
+    ]
+   ]
+  },
+  {
+   "id": "H4",
+   "sec": "Radius",
+   "inc": true,
+   "add": 1,
+   "del": 1,
+   "open": true,
+   "conf": true,
+   "lines": [
+    [
+     "mod",
+     "| card | ~~10~~ **16** | Changes a confirmed token |"
+    ]
+   ]
+  },
+  {
+   "id": "H5",
+   "sec": "Icons",
+   "inc": true,
+   "add": 2,
+   "del": 0,
+   "open": false,
+   "lines": [
+    [
+     "add",
+     "## Icons"
+    ],
+    [
+     "add",
+     "Outline, 1.5 stroke, 16 px."
+    ]
+   ]
+  },
+  {
+   "id": "H6",
+   "sec": "Components",
+   "inc": true,
+   "add": 2,
+   "del": 0,
+   "open": false,
+   "lines": [
+    [
+     "add",
+     "| toggle | 30 × 18 · ink on |"
+    ],
+    [
+     "add",
+     "| banded-table | band on odd rows |"
+    ]
+   ]
+  }
+ ],
+ "STYLE_NEWREF": {
+  "id": "REF-04",
+  "name": "Yard KPI sheet",
+  "kind": "PNG · imported",
+  "at": "13:05"
+ },
+ "STYLE_NEWTOKEN": {
+  "id": "color.chart3",
+  "g": "color",
+  "name": "Chart series 3",
+  "v": {
+   "hex": "#A65B27",
+   "css": "color-mix(in srgb, var(--danger) 60%, var(--warn))"
+  },
+  "st": "inf",
+  "refs": [
+   "REF-04"
+  ],
+  "seen": "1 chart"
+ },
+ "STYLE_REFS": [
+  {
+   "id": "REF-02",
+   "name": "Site cost report",
+   "kind": "PNG · imported",
+   "at": "12:31",
+   "read": "Read in full",
+   "steps": 5
+  },
+  {
+   "id": "REF-03",
+   "name": "Package status page",
+   "kind": "PNG · imported",
+   "at": "12:33",
+   "read": "Reading",
+   "steps": 5,
+   "at_step": 3
+  }
+ ],
+ "STYLE_STEPS": [
+  "Read the image",
+  "Find colours",
+  "Find type",
+  "Find shapes and icons",
+  "Write the draft"
+ ],
+ "STYLE_TOKENS": [
+  {
+   "id": "color.canvas",
+   "g": "color",
+   "name": "Canvas",
+   "v": {
+    "hex": "#FAF9F5",
+    "css": "var(--canvas)"
+   },
+   "st": "ok",
+   "refs": [
+    "REF-02",
+    "REF-03"
+   ],
+   "seen": "page ground"
+  },
+  {
+   "id": "color.ink",
+   "g": "color",
+   "name": "Ink",
+   "v": {
+    "hex": "#1F1F1F",
+    "css": "var(--ink)"
+   },
+   "st": "ok",
+   "refs": [
+    "REF-02",
+    "REF-03"
+   ],
+   "seen": "body text"
+  },
+  {
+   "id": "color.line",
+   "g": "color",
+   "name": "Line",
+   "v": {
+    "hex": "#E6E2D8",
+    "css": "var(--line)"
+   },
+   "st": "ok",
+   "refs": [
+    "REF-02"
+   ],
+   "seen": "14 dividers"
+  },
+  {
+   "id": "color.accent",
+   "g": "color",
+   "name": "Accent",
+   "v": {
+    "hex": "#B4532A",
+    "css": "var(--accent)"
+   },
+   "alt": {
+    "hex": "#37664B",
+    "css": "color-mix(in srgb, var(--ok) 75%, var(--ink))"
+   },
+   "st": "cf",
+   "refs": [
+    "REF-03"
+   ],
+   "seen": "6 elements",
+   "altName": "forest"
+  },
+  {
+   "id": "color.success",
+   "g": "color",
+   "name": "Success",
+   "v": {
+    "hex": "#3F7D5A",
+    "css": "var(--ok)"
+   },
+   "st": "ok",
+   "refs": [
+    "REF-02"
+   ],
+   "seen": "3 status dots"
+  },
+  {
+   "id": "color.warning",
+   "g": "color",
+   "name": "Warning",
+   "v": {
+    "hex": "#C98A2B",
+    "css": "var(--warn)"
+   },
+   "st": "ok",
+   "refs": [
+    "REF-02"
+   ],
+   "seen": "2 flags"
+  },
+  {
+   "id": "color.band",
+   "g": "color",
+   "name": "Table band",
+   "v": {
+    "hex": "#F3EFE8",
+    "css": "color-mix(in srgb, var(--track) 60%, var(--canvas))"
+   },
+   "st": "inf",
+   "refs": [
+    "REF-02"
+   ],
+   "seen": "12 rows"
+  },
+  {
+   "id": "color.focus",
+   "g": "color",
+   "name": "Focus ring",
+   "v": {
+    "hex": "#93B5A0",
+    "css": "color-mix(in srgb, var(--ok) 55%, var(--canvas))"
+   },
+   "st": "inf",
+   "refs": [
+    "REF-03"
+   ],
+   "seen": "4 focused fields"
+  },
+  {
+   "id": "color.chart2",
+   "g": "color",
+   "name": "Chart series 2",
+   "v": {
+    "hex": "#8B8440",
+    "css": "color-mix(in srgb, var(--warn) 55%, var(--ok))"
+   },
+   "st": "inf",
+   "refs": [
+    "REF-02"
+   ],
+   "seen": "1 chart"
+  },
+  {
+   "id": "type.display",
+   "g": "type",
+   "name": "Display",
+   "spec": "44 / 1.1 · 600",
+   "cls": "t44",
+   "st": "ok",
+   "refs": [
+    "REF-02",
+    "REF-03"
+   ],
+   "seen": "1 heading",
+   "smp": "Aa 3.3%"
+  },
+  {
+   "id": "type.title",
+   "g": "type",
+   "name": "Title",
+   "spec": "26 / 1.2 · 600",
+   "cls": "t26",
+   "st": "ok",
+   "refs": [
+    "REF-02",
+    "REF-03"
+   ],
+   "seen": "2 headings",
+   "smp": "Variance"
+  },
+  {
+   "id": "type.heading",
+   "g": "type",
+   "name": "Heading",
+   "spec": "18 / 1.3 · 600",
+   "cls": "t18",
+   "st": "ok",
+   "refs": [
+    "REF-02"
+   ],
+   "seen": "5 headings",
+   "smp": "Packages"
+  },
+  {
+   "id": "type.body",
+   "g": "type",
+   "name": "Body",
+   "spec": "13 / 1.45 · 400",
+   "cls": "t13",
+   "st": "ok",
+   "refs": [
+    "REF-02",
+    "REF-03"
+   ],
+   "seen": "30+ lines",
+   "smp": "Forecast exceeds budget by 3.3%"
+  },
+  {
+   "id": "type.caption",
+   "g": "type",
+   "name": "Caption",
+   "spec": "11 / 1.3 · 500 · caps",
+   "cls": "cap",
+   "st": "inf",
+   "refs": [
+    "REF-03"
+   ],
+   "seen": "9 labels",
+   "smp": "PACKAGE · BUDGET"
+  },
+  {
+   "id": "type.figure",
+   "g": "type",
+   "name": "Figures",
+   "spec": "Mono 12 · tabular",
+   "cls": "fig",
+   "st": "inf",
+   "refs": [
+    "REF-02"
+   ],
+   "seen": "4 columns",
+   "smp": "31.65  +3.3%"
+  },
+  {
+   "id": "space.scale",
+   "g": "space",
+   "name": "Scale",
+   "spec": "8 · 16 · 24 · 32",
+   "bars": [
+    8,
+    16,
+    24,
+    32
+   ],
+   "st": "ok",
+   "refs": [
+    "REF-02",
+    "REF-03"
+   ],
+   "seen": "40+ gaps"
+  },
+  {
+   "id": "space.half",
+   "g": "space",
+   "name": "Half step",
+   "spec": "4",
+   "bars": [
+    4
+   ],
+   "st": "inf",
+   "refs": [
+    "REF-02"
+   ],
+   "seen": "11 gaps"
+  },
+  {
+   "id": "radius.input",
+   "g": "radius",
+   "name": "Input",
+   "spec": "8",
+   "r": 8,
+   "st": "ok",
+   "refs": [
+    "REF-02",
+    "REF-03"
+   ],
+   "seen": "3 fields"
+  },
+  {
+   "id": "radius.card",
+   "g": "radius",
+   "name": "Card",
+   "spec": "10",
+   "r": 10,
+   "alt": {
+    "spec": "16",
+    "r": 16
+   },
+   "st": "cf",
+   "refs": [
+    "REF-03"
+   ],
+   "seen": "5 cards"
+  },
+  {
+   "id": "radius.pill",
+   "g": "radius",
+   "name": "Pill",
+   "spec": "999",
+   "r": 999,
+   "st": "ok",
+   "refs": [
+    "REF-02"
+   ],
+   "seen": "6 chips"
+  },
+  {
+   "id": "icon.style",
+   "g": "icon",
+   "name": "Icon style",
+   "spec": "Outline · 1.5 stroke · 16",
+   "st": "inf",
+   "refs": [
+    "REF-03"
+   ],
+   "seen": "14 icons"
+  },
+  {
+   "id": "cmp.button",
+   "g": "cmp",
+   "name": "Button",
+   "spec": "ink fill · 8 radius",
+   "st": "ok",
+   "refs": [
+    "REF-02",
+    "REF-03"
+   ],
+   "seen": "4 buttons"
+  },
+  {
+   "id": "cmp.input",
+   "g": "cmp",
+   "name": "Input",
+   "spec": "30 high · line border",
+   "st": "ok",
+   "refs": [
+    "REF-03"
+   ],
+   "seen": "3 fields"
+  },
+  {
+   "id": "cmp.pill",
+   "g": "cmp",
+   "name": "Status pill",
+   "spec": "soft fill · 10.5 bold",
+   "st": "ok",
+   "refs": [
+    "REF-02"
+   ],
+   "seen": "6 pills"
+  },
+  {
+   "id": "cmp.toggle",
+   "g": "cmp",
+   "name": "Toggle",
+   "spec": "30 × 18 · ink on",
+   "st": "inf",
+   "refs": [
+    "REF-03"
+   ],
+   "seen": "2 toggles"
+  },
+  {
+   "id": "cmp.table",
+   "g": "cmp",
+   "name": "Banded table",
+   "spec": "band on odd rows",
+   "st": "inf",
+   "refs": [
+    "REF-02"
+   ],
+   "seen": "1 table"
+  }
+ ],
+ "USAGE": {
+  "source": "Hosted",
+  "used": 1240,
+  "cap": 5000
+ }
+}

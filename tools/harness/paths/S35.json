@@ -1,0 +1,45 @@
+{
+  "board": "S35-project-shell.dc.html",
+  "states": {
+    "design": {
+      "status": "checked",
+      "steps": [
+        {
+          "goto": "/"
+        },
+        {
+          "wait": "[data-stage=\"design\"][aria-current=\"page\"]"
+        }
+      ]
+    },
+    "backend": {
+      "status": "checked",
+      "steps": [
+        {
+          "goto": "/"
+        },
+        {
+          "click": "[data-stage=\"backend\"]"
+        },
+        {
+          "wait": "[data-stage=\"backend\"][aria-current=\"page\"]"
+        }
+      ]
+    },
+    "conflict": {
+      "status": "draft",
+      "steps": [
+        {
+          "goto": "/"
+        },
+        {
+          "click": "role=tab[name=/F-04/]"
+        },
+        {
+          "wait": "[data-save=\"conflict\"]"
+        }
+      ],
+      "note": "Needs IMP-02 (tabs) and the CONFLICT fixture wired to a save from another session."
+    }
+  }
+}
