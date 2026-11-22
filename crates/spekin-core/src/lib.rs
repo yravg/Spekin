@@ -9,6 +9,8 @@ pub mod model_source;
 pub mod github_source;
 pub mod project;
 pub mod skills;
+pub mod proposal;
+pub mod revision;
 pub mod stage;
 
 pub use model_source::{
@@ -37,4 +39,6 @@ pub use skills::{
     AllowedContext, ContextItem, HoldReason, SkillError, SkillManifest, SkillSource, UpdateCheck,
     UpdateDecision, UpdatePolicy, check_update, classify_update, enforce, parse_skill_md,
 };
+pub use proposal::{Hunk, Proposal, ProposalError, Rejection, accept, reject, revert};
+pub use revision::Revision;
 pub use stage::{Stage, StageId, StageTone};

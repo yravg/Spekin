@@ -13,6 +13,7 @@ thiserror.workspace = true
 
 [dev-dependencies]
 # Property tests for context builder. Licence: MIT OR Apache-2.0.
+# Property tests for proposals and revisions. Licence: MIT OR Apache-2.0.
 proptest = "1"
 
 [lints]
