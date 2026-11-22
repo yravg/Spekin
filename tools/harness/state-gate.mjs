@@ -77,13 +77,16 @@ for (const b of manifest) {
     let bApp;
     if (frame) {
       // Pick the frame inside the visible window by position: hiding the other frames must not change which one this is.
-      bApp = bp.locator('.spwin').filter({ visible: true }).first().locator('.mod-dsc').nth(frame.index || 0);
+      bApp = bp.locator('.spwin:has(.mod-dsc)').filter({ visible: true }).first().locator('.mod-dsc').nth(frame.index || 0);
       await bApp.evaluate((el) => {
         const win = el.closest('.spwin');
         for (const d of win.querySelectorAll('.mod-dv, .mod-spec, .mod-st')) if (!d.contains(el)) d.style.visibility = 'hidden';
         for (const s of el.querySelectorAll('.mod-sbar, .mod-ph-bar, .mod-hb')) s.style.display = 'none';
         el.style.transform = 'none';
         for (let a = el.parentElement; a && a !== win; a = a.parentElement) { a.style.overflow = 'visible'; a.style.width = 'auto'; a.style.height = 'auto'; a.style.transform = 'none'; }
+        // The window clips at 900 px; grow it to hold the unscaled frame (frames are absolutely placed, so not 'auto').
+        win.style.overflow = 'visible'; win.style.boxShadow = 'none';
+        win.style.height = Math.ceil(el.getBoundingClientRect().bottom - win.getBoundingClientRect().top + 8) + 'px';
       });
     } else bApp = bp.locator(APP_ROOT.split(',').map((s) => '.spwin ' + s.trim()).join(',')).filter({ visible: true }).first();
     // Read the whole window: some boards draw overlays (S27's switcher and create modal) beside the app root.
