@@ -28,7 +28,10 @@ pub use api::{
     EditSkillRequest, EstimateRunRequest, RejectProposalRequest, ReserveRunRequest,
     RevertRevisionRequest, SettleRunRequest, SkillCheckRequest,
 };
-pub use audit::{AuditAction, AuditEntry, AuditError, AuditEvent, AuditLog, GENESIS_HASH, verify};
+pub use audit::{
+    AuditAction, AuditEntry, AuditError, AuditEvent, AuditLog, GENESIS_HASH, head_hash, verify,
+    verify_with_head,
+};
 pub use context::{
     BoardArtifact, BoardSnapshot, ContextChip, ContextItemStatus, RequestContext,
     RequestContextItem, build_context, format_token_estimate,
