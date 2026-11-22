@@ -11,8 +11,8 @@ pub mod skills;
 pub mod stage;
 
 pub use github_source::{
-    BundleFile, GitHubRepo, GitHubSourceError, LicenseFile, MAX_BUNDLE_BYTES, MAX_FILES,
-    MAX_FILE_BYTES, PinnedSource, SkillBundle, assemble_bundle, build_notice, check_bundle_limits,
+    BundleFile, GitHubRepo, GitHubSourceError, LicenseFile, MAX_BUNDLE_BYTES, MAX_FILE_BYTES,
+    MAX_FILES, PinnedSource, SkillBundle, assemble_bundle, build_notice, check_bundle_limits,
     is_license_path, join_relative, license_from, listed_files, parse_github_repo, plan_updates,
     skill_md_path,
 };

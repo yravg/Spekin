@@ -8,7 +8,9 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
-use crate::skills::{SkillManifest, SkillSource, UpdateCheck, UpdatePolicy, check_update, parse_skill_md};
+use crate::skills::{
+    SkillManifest, SkillSource, UpdateCheck, UpdatePolicy, check_update, parse_skill_md,
+};
 
 /// Per-file, per-bundle and file-count limits for a GitHub skill fetch (IMP-27).
 pub const MAX_FILE_BYTES: usize = 256 * 1024;
@@ -116,9 +118,12 @@ fn valid_segment(s: &str) -> bool {
 pub fn parse_github_repo(input: &str) -> Result<GitHubRepo, GitHubSourceError> {
     let input = input.trim();
     let (rest, is_url) = if let Some(after) = input.strip_prefix("https://") {
-        let (host, path) = after.split_once('/').ok_or_else(|| GitHubSourceError::InvalidRepoUrl {
-            input: input.into(),
-        })?;
+        let (host, path) =
+            after
+                .split_once('/')
+                .ok_or_else(|| GitHubSourceError::InvalidRepoUrl {
+                    input: input.into(),
+                })?;
         let host = host.to_ascii_lowercase();
         if host != "github.com" && host != "www.github.com" {
             return Err(GitHubSourceError::UnsupportedHost { host });
@@ -288,7 +293,9 @@ pub fn license_from(path: &str, text: &str) -> LicenseFile {
 pub fn build_notice(source: &PinnedSource, license: &LicenseFile) -> String {
     format!(
         "Source: github.com/{}@{commit}\nLicence: {}\nSee {} in the upstream repository.",
-        source.repo, license.spdx, license.path,
+        source.repo,
+        license.spdx,
+        license.path,
         commit = source.commit,
     )
 }

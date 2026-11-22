@@ -1,9 +1,9 @@
 //! IMP-27: pure GitHub source rules. All data is local fixtures: no network.
 
 use spekin_core::github_source::{
-    BundleFile, GitHubSourceError, MAX_BUNDLE_BYTES, MAX_FILES, MAX_FILE_BYTES, PinnedSource,
-    assemble_bundle, check_bundle_limits, is_license_path, join_relative, license_from,
-    listed_files, parse_github_repo, plan_updates, skill_md_path,
+    BundleFile, GitHubSourceError, MAX_FILE_BYTES, MAX_FILES, PinnedSource, assemble_bundle,
+    check_bundle_limits, is_license_path, join_relative, license_from, listed_files,
+    parse_github_repo, plan_updates, skill_md_path,
 };
 use spekin_core::skills::{HoldReason, SkillSource, UpdateDecision, UpdatePolicy, parse_skill_md};
 
@@ -73,7 +73,10 @@ fn parse_github_repo_accepts_slug_and_https_urls_and_rejects_others() {
         "example/skill/$evil",
     ] {
         assert!(
-            matches!(parse_github_repo(bad), Err(GitHubSourceError::InvalidRepoUrl { .. })),
+            matches!(
+                parse_github_repo(bad),
+                Err(GitHubSourceError::InvalidRepoUrl { .. })
+            ),
             "expected InvalidRepoUrl for {bad}"
         );
     }
@@ -82,7 +85,10 @@ fn parse_github_repo_accepts_slug_and_https_urls_and_rejects_others() {
 #[test]
 fn skill_md_path_and_join_relative_reject_traversal() {
     assert_eq!(skill_md_path("").unwrap(), "SKILL.md");
-    assert_eq!(skill_md_path("skills/grill").unwrap(), "skills/grill/SKILL.md");
+    assert_eq!(
+        skill_md_path("skills/grill").unwrap(),
+        "skills/grill/SKILL.md"
+    );
     assert_eq!(
         skill_md_path("skills/grill/SKILL.md").unwrap(),
         "skills/grill/SKILL.md"
@@ -137,7 +143,10 @@ fn assemble_bundle_marks_source_keeps_notice_and_uses_repo_license() {
             commit: "abc123".into(),
         }
     );
-    assert_eq!(manifest.licence, "MIT", "the repository LICENSE is authoritative");
+    assert_eq!(
+        manifest.licence, "MIT",
+        "the repository LICENSE is authoritative"
+    );
     let notice = manifest.notice.as_deref().unwrap_or_default();
     assert!(
         notice.contains("Copyright (c) 2026 Example Author"),
@@ -203,11 +212,13 @@ fn check_bundle_limits_refuses_oversized_file_bundle_and_count() {
         check_bundle_limits(&total),
         Err(GitHubSourceError::BundleTooLarge { .. })
     ));
-    assert!(check_bundle_limits(&[BundleFile {
-        path: "ok.md".into(),
-        content: "fine".into(),
-    }])
-    .is_ok());
+    assert!(
+        check_bundle_limits(&[BundleFile {
+            path: "ok.md".into(),
+            content: "fine".into(),
+        }])
+        .is_ok()
+    );
 }
 
 #[test]
@@ -247,5 +258,8 @@ fn plan_updates_checks_each_stored_skill_with_the_policy() {
 
     let mut new_skill = wording.clone();
     new_skill.id = "brand-new".into();
-    assert_eq!(plan_updates(&[old], &[wording, new_skill], UpdatePolicy::Auto).len(), 1);
+    assert_eq!(
+        plan_updates(&[old], &[wording, new_skill], UpdatePolicy::Auto).len(),
+        1
+    );
 }
