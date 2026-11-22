@@ -7,6 +7,12 @@ The owner runs two AI workers overnight. Each works in its own git worktree, on 
 | ui | Antigravity CLI (`agy`) | `gemini-4-neon-medium` | `../Spekin-ui` |
 | core | OpenCode CLI (`opencode`) | `opencode/deepseek-v4.1-flash-free` (OpenCode Go isn't signed in on this Mac, so the free DeepSeek V4.1 Flash is used) | `../Spekin-core` |
 
+## Model availability, 23 Nov (night)
+
+- **Antigravity (Gemini Neon 4)** hit its individual quota at 18:25 UTC, and it resets at about 22:05 UTC. The UI lane's S30 card (IMP-08) is scheduled to start on it at 22:07 UTC, with the prompt in `tools/workers/prompt-ui-IMP-08.txt`.
+- **OpenCode free models.** `deepseek-v4.1-flash-free`, `nemotron-3.5-super-vl-free` and `flint-40b-free` reached their free limits. `hy4-flash-free` ran the core cards IMP-27 to IMP-34 well. `beam-free` finished the S31 fix, but its runs are killed after about 6 to 10 minutes (exit 143), and one S30 attempt pasted board HTML into a string and edited lead-owned sample files. That attempt was stashed in `../Spekin-ui` (`git stash list`, "do not use"), and rule R11 now rejects markup in strings.
+- Signing in to OpenCode Go would give the core lane a steadier model.
+
 ## Set up a worktree (once per lane)
 
 ```sh

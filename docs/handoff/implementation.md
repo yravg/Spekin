@@ -126,7 +126,7 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
 | IMP-06 | ui | S28 Reference intake | IMP-01 | open |
 | IMP-07 | ui | S29 Frames canvas | IMP-01 | done, waiting for owner merge: PR #14, stacked on #11 (lead re-ran: S29 6/6 PASS) |
-| IMP-08 | ui | S30 Style review | IMP-01 | open |
+| IMP-08 | ui | S30 Style review | IMP-01 | open; scheduled on Antigravity at 22:07 UTC 23 Nov (a free-model attempt was stashed, see workers.md) |
 | IMP-13 | ui | S31 Alternatives | IMP-01 | done, waiting for owner merge: PR #25, stacked on #19 (lead re-ran: S31 6/6 PASS) |
 | IMP-14 | ui | S32 Targeted change | IMP-01 | done, waiting for owner merge: PR #19, stacked on #16 (lead re-ran: S32 6/6 PASS) |
 | IMP-15 | ui | S33 Review and accept | IMP-01 | done, waiting for owner merge: PR #16, stacked on #14 (lead re-ran: S33 6/6 PASS) |
