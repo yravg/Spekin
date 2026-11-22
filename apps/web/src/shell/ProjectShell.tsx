@@ -12,6 +12,7 @@ import { SkillsWorkArea } from '../skills/SkillsWorkArea';
 import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/FramesCanvasWorkArea';
 import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/ReviewAcceptWorkArea';
 import { TargetedChangeWorkArea } from '../review/TargetedChangeWorkArea';
+import { StyleReviewWorkArea, type StyleShellOverride } from '../style/StyleReviewWorkArea';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -135,9 +136,10 @@ export function ProjectShell() {
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
-  const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted'>('shell');
+  const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style'>('shell');
   const [canvasOverride, setCanvasOverride] = useState<CanvasShellOverride>({});
   const [reviewOverride, setReviewOverride] = useState<ReviewShellOverride>({});
+  const [styleOverride, setStyleOverride] = useState<StyleShellOverride>({});
   const save = useWorkspace((s) => s.save);
   const conflict = useWorkspace((s) => s.conflict);
   const project = getProject(projectId);
@@ -154,7 +156,9 @@ export function ProjectShell() {
           ? 'S33'
           : stage === 'design' && designSub === 'targeted'
             ? 'S32'
-            : 'S35';
+            : stage === 'design' && designSub === 'style'
+              ? 'S30'
+              : 'S35';
   const activeSave =
     stage === 'spec' && specOverride.save
       ? specOverride.save
@@ -162,7 +166,9 @@ export function ProjectShell() {
         ? canvasOverride.save
         : stage === 'design' && designSub === 'review' && reviewOverride.save
           ? reviewOverride.save
-          : save;
+          : stage === 'design' && designSub === 'style' && styleOverride.save
+            ? styleOverride.save
+            : save;
   const activeBusy =
     stage === 'spec'
       ? specOverride.busy
@@ -174,7 +180,9 @@ export function ProjectShell() {
   const displayProject =
     stage === 'design' && designSub === 'review' && reviewOverride.specRev
       ? { ...project, spec: reviewOverride.specRev }
-      : project;
+      : stage === 'design' && designSub === 'style' && styleOverride.specRev
+        ? { ...project, spec: styleOverride.specRev }
+        : project;
   const displayStages =
     stage === 'design' && designSub === 'review' && reviewOverride.specRev === 'r15'
       ? stages.map((s) => (s.id === 'spec' ? { ...s, text: 'Ready · r15' } : s))
@@ -214,11 +222,14 @@ export function ProjectShell() {
               <ReviewAcceptWorkArea onShellOverride={setReviewOverride} />
             ) : designSub === 'targeted' ? (
               <TargetedChangeWorkArea onLeaveTargeted={() => setDesignSub('shell')} />
+            ) : designSub === 'style' ? (
+              <StyleReviewWorkArea onShellOverride={setStyleOverride} />
             ) : (
               <DesignWorkArea
                 onOpenCanvas={() => setDesignSub('canvas')}
                 onOpenReview={() => setDesignSub('review')}
                 onOpenTargeted={() => setDesignSub('targeted')}
+                onOpenStyle={() => setDesignSub('style')}
               />
             )
           ) : stage === 'backend' ? (

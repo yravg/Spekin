@@ -234,6 +234,49 @@ export interface SampleReviewProposal {
   accepted: { hunks: string; parent: string; snapshot: string };
 }
 
+export interface SampleStyleColor {
+  hex: string;
+  css: string;
+}
+export interface SampleStyleRef {
+  id: string;
+  name: string;
+  kind: string;
+  at: string;
+  read?: string;
+  steps?: number;
+  at_step?: number;
+}
+export type StyleTokenState = 'ok' | 'inf' | 'cf';
+export type StyleTokenGroup = 'color' | 'type' | 'space' | 'radius' | 'icon' | 'cmp';
+export interface SampleStyleToken {
+  id: string;
+  g: StyleTokenGroup;
+  name: string;
+  v?: SampleStyleColor;
+  alt?: { hex?: string; css?: string; spec?: string; r?: number };
+  altName?: string;
+  spec?: string;
+  cls?: string;
+  smp?: string;
+  bars?: number[];
+  r?: number;
+  st: StyleTokenState;
+  refs: string[];
+  seen: string;
+}
+export type StyleHunkLine = ['ctx' | 'add' | 'mod', string];
+export interface SampleStyleHunk {
+  id: string;
+  sec: string;
+  inc: boolean;
+  add: number;
+  del: number;
+  open: boolean;
+  conf?: boolean;
+  lines: StyleHunkLine[];
+}
+
 export declare const PROJECT: SampleProject;
 export declare const STAGES: SampleStage[];
 export declare const USAGE: SampleUsage;
@@ -274,4 +317,12 @@ export declare const REVIEW_OUTSIDE: string;
 export declare const REVIEW_VARIANTS: SampleReviewVariant[];
 export declare const REVIEW_NITS: SampleReviewNit[];
 export declare const REVIEW_PROPOSAL: SampleReviewProposal;
+export declare const STYLE_REFS: SampleStyleRef[];
+export declare const STYLE_STEPS: string[];
+export declare const STYLE_NEWREF: SampleStyleRef;
+export declare const STYLE_TOKENS: SampleStyleToken[];
+export declare const STYLE_NEWTOKEN: SampleStyleToken;
+export declare const STYLE_HUNKS: SampleStyleHunk[];
+export declare const STYLE_CTX: ContextItem[];
+export declare function STYLE_contrast(a: string, b: string): string;
 // Everything else the boards use is exported too; declare it here before use.
