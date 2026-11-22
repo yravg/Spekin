@@ -1,0 +1,53 @@
+{
+  "board": "S27-projects.dc.html",
+  "states": {
+    "home": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "wait": "[data-screen=\"S27\"]" }
+      ]
+    },
+    "all": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-nav:has-text(\"Projects\")" },
+        { "wait": "h1:has-text(\"All projects\")" }
+      ]
+    },
+    "switch": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-nav:has-text(\"Projects\")" },
+        { "click": "button:has-text(\"Switch project\")" },
+        { "wait": "[role=\"dialog\"][aria-label=\"Switch project\"]" }
+      ]
+    },
+    "create": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-nav:has-text(\"Projects\")" },
+        { "click": ".int-ph button:has-text(\"New project\")" },
+        { "wait": "[role=\"dialog\"][aria-label=\"New project\"]" }
+      ]
+    },
+    "first": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/welcome" },
+        { "wait": "h1:has-text(\"Start your first project\")" }
+      ]
+    },
+    "restore": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-nav:has-text(\"Recently deleted\")" },
+        { "wait": "[role=\"alert\"]:has-text(\"Kenari Fleet was deleted\")" }
+      ]
+    }
+  }
+}
