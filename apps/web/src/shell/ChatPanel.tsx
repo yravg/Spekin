@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 import type { ContextItem, SampleModel } from '@spekin/sample';
 import { Icon } from '../ui/Icon';
 import { IconBtn } from '../ui/Button';
@@ -17,6 +17,7 @@ export function ChatPanel(props: {
   width?: number | null;
   run?: [string, string, string];
   jump?: boolean;
+  beforeComposer?: ReactNode;
   onResize: (delta: number) => void;
   onHistory: () => void;
   onNewChat: () => void;
@@ -27,6 +28,7 @@ export function ChatPanel(props: {
   onShowSteps?: () => void;
   onStopRun?: () => void;
   onDraftChange: (value: string) => void;
+  onComposerKeyDown?: (e: KeyboardEvent<HTMLTextAreaElement>) => void;
   onAttach: () => void;
   onMention: () => void;
   onOpenModel: () => void;
@@ -44,6 +46,7 @@ export function ChatPanel(props: {
     width,
     run,
     jump,
+    beforeComposer,
     onResize,
     onHistory,
     onNewChat,
@@ -54,6 +57,7 @@ export function ChatPanel(props: {
     onShowSteps,
     onStopRun,
     onDraftChange,
+    onComposerKeyDown,
     onAttach,
     onMention,
     onOpenModel,
@@ -137,11 +141,13 @@ export function ChatPanel(props: {
           />
         </div>
       ) : null}
+      {beforeComposer}
       <Composer
         placeholder={placeholder}
         draft={draft}
         model={model}
         onDraftChange={onDraftChange}
+        onKeyDown={onComposerKeyDown}
         onAttach={onAttach}
         onMention={onMention}
         onOpenModel={onOpenModel}

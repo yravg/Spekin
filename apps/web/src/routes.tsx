@@ -7,6 +7,7 @@ import { SAMPLE_PROJECT_ID } from './data/source';
 // "/" goes to the sample project until S27 Projects home is built (task card IMP-05); then "/" renders S27.
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to={'/p/' + SAMPLE_PROJECT_ID + '/design'} replace /> },
+  { path: '/skills', element: <Navigate to={'/p/' + SAMPLE_PROJECT_ID + '/spec'} replace /> },
   { path: '/p/:project/:stage', element: <ProjectShell /> },
   { path: '*', element: <NotFound /> },
 ]);
