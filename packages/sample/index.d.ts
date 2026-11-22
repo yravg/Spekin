@@ -415,4 +415,59 @@ export declare const MODELS_AGENT_RUN: SampleModelsAgentRun;
 export declare const MODELS_RUN: SampleModelsRun;
 export declare const MODELS_LEDGER: SampleModelsLedgerRow[];
 export declare const MODELS_LEDGER_DETAIL: SampleModelsLedgerDetail;
+
+// S37 Build contracts and release readiness. A check is passed only with evidence (IMP-18).
+export interface SampleDeliveryContract {
+  stage: string;
+  n: string;
+  kind: string;
+  ic: 'req' | 'server' | 'db' | 'layers' | 'flag';
+  name: string;
+  ver: string;
+  st: PillTuple;
+  link: string;
+  checks: string;
+  sel?: boolean;
+}
+export interface SampleDeliveryBuild {
+  commit: string;
+  env: string;
+  at: string;
+  pack: string;
+}
+export interface SampleDeliveryCheck {
+  k: PillTone;
+  t: string;
+  p: string;
+  ev: string;
+  why?: string;
+}
+export type SampleDeliveryMatrixRow = [StageId, number, number, number, number, number, number, [string, string][], string];
+export interface SampleDeliveryGate {
+  id: string;
+  title: string;
+  ic: 'req' | 'gauge' | 'eye' | 'shield';
+  pill: PillTuple;
+  big: string;
+  sub: string;
+  reason: string;
+  ev: [string, string][];
+}
+export interface SampleDeliveryRun {
+  id: string;
+  check: string;
+  commit: string;
+  at: string;
+  steps: [PillTone, string, string, string][];
+  classes: [string, boolean][];
+}
+export type SampleDeliveryTimelineRow = [string, string, string, PillTuple, string, string];
+export declare const DELIVERY_READY: boolean;
+export declare const DELIVERY_CONTRACTS: SampleDeliveryContract[];
+export declare const DELIVERY_BUILD: SampleDeliveryBuild;
+export declare const DELIVERY_CHECKS: SampleDeliveryCheck[];
+export declare const DELIVERY_MATRIX: SampleDeliveryMatrixRow[];
+export declare const DELIVERY_GATE: SampleDeliveryGate[];
+export declare const DELIVERY_RUN: SampleDeliveryRun;
+export declare const DELIVERY_TIMELINE: SampleDeliveryTimelineRow[];
 // Everything else the boards use is exported too; declare it here before use.

@@ -35,6 +35,15 @@ body { background: var(--ground); }
 .ap-sticky { margin-top: auto; padding: 9px 11px; border-radius: 10px; background: var(--canvas); box-shadow: inset 0 0 0 1px var(--line); font: 500 12px/1.4 var(--font); color: var(--ink-dim); }
 .ap-sticky b { color: var(--ink); font-weight: 600; }
 
+/* App-only: the artifact picker menu (the plus in the tab row). It opens artifacts the board draws, such as Release readiness. */
+.ap-open-wrap { position: relative; display: inline-flex; }
+.ap-menu { position: absolute; top: 30px; left: 0; z-index: 40; min-width: 190px; padding: 5px; border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-2), inset 0 0 0 1px var(--line); display: flex; flex-direction: column; gap: 2px; }
+.ap-menu-it { display: flex; align-items: center; gap: 8px; width: 100%; height: 30px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; text-align: left; font: 500 12.5px/1 var(--font); color: var(--ink); }
+.ap-menu-it:hover, .ap-menu-it:focus-visible { background: var(--accent-soft); }
+/* App-only: the board's first run step keeps a top border (its first child is the hidden NEW tag, not the row). */
+.ap-steps-first { border-top: 1px solid var(--line); }
+.del-steps div.ap-steps-first { border-top: 1px solid var(--line); }
+
 @media (prefers-reduced-motion: reduce) {
   .sp-app * { transition: none !important; animation: none !important; }
 }

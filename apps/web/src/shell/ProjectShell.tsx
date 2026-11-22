@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
-import { MODEL, MODELS_USAGE, type SampleStage } from '@spekin/sample';
+import { MODEL, MODELS_USAGE, type SampleStage, type StageId } from '@spekin/sample';
 import { getProject, getStages, getUsage, isStageId } from '../data/source';
 import { useWorkspace, type SaveState } from '../state/workspace';
 import { TopBar } from './TopBar';
@@ -13,14 +13,8 @@ import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/Frames
 import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/ReviewAcceptWorkArea';
 import { TargetedChangeWorkArea } from '../review/TargetedChangeWorkArea';
 import { StyleReviewWorkArea, type StyleShellOverride } from '../style/StyleReviewWorkArea';
-import {
-  ModelsUsageWorkArea,
-  isUsageMoment,
-  isUsageSection,
-  usagePct,
-  type UsageMoment,
-  type UsageSection,
-} from '../models/ModelsUsageWorkArea';
+import { ModelsUsageWorkArea, isUsageMoment, isUsageSection, usagePct, type UsageMoment, type UsageSection } from '../models/ModelsUsageWorkArea';
+import { DeliveryWorkArea, deliveryStageView, deliveryViewStage, isDeliveryView } from '../delivery/DeliveryWorkArea';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -29,7 +23,7 @@ import { Btn, IconBtn } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { Pill } from '../ui/Pill';
 
-function StagePlaceholderWorkArea({ stage }: { stage: SampleStage }) {
+function StagePlaceholderWorkArea({ stage, onOpenDelivery }: { stage: SampleStage; onOpenDelivery?: (stage: SampleStage) => void }) {
   const view = useWorkspace((s) => s.view(stage.id));
   const setView = useWorkspace((s) => s.setView);
   const chatWidth = useWorkspace((s) => s.chatWidth);
@@ -82,6 +76,17 @@ function StagePlaceholderWorkArea({ stage }: { stage: SampleStage }) {
           onSelect={(tab) => setView(stage.id, { tab })}
           onClose={(name) => recordIntent('F104:close:' + name)}
           onOpenArtifact={() => recordIntent('F104:open')}
+          openItems={
+            stage.id === 'integration' || stage.id === 'deploy'
+              ? [
+                  {
+                    icon: 'flag',
+                    name: 'Release readiness',
+                    onSelect: () => (onOpenDelivery ? onOpenDelivery(stage) : recordIntent('F104:release-readiness')),
+                  },
+                ]
+              : undefined
+          }
           right={
             <>
               <Btn label="Share" icon="share" later="Share and comment links (deferred in the browser MVP, R-WS-3)" />
@@ -144,7 +149,10 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   const navigate = useNavigate();
   const [search, setSearch] = useSearchParams();
   const section: UsageSection = isUsageSection(search.get('section')) ? (search.get('section') as UsageSection) : 'models';
-  const moment = isUsageMoment(search.get('moment')) ? (search.get('moment') as UsageMoment) : 'calm';
+  const moment: UsageMoment = isUsageMoment(search.get('moment')) ? (search.get('moment') as UsageMoment) : 'calm';
+  // S37 keeps its artifact view in the query (never draft text): /p/meranti-yard/backend?view=contracts.
+  const viewParam = search.get('view');
+  const delivery = isDeliveryView(viewParam) ? viewParam : null;
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
@@ -163,8 +171,10 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   const currentStage = stages.find((s) => s.id === stage)!;
   const screenId = usageView
     ? 'S36'
-    : stage === 'spec'
-      ? 'S40'
+    : delivery
+      ? 'S37'
+      : stage === 'spec'
+        ? 'S40'
       : stage === 'design' && designSub === 'canvas'
         ? (canvasOverride.screen ?? 'S29')
         : stage === 'design' && designSub === 'review'
@@ -207,6 +217,7 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
     stage === 'design' && designSub === 'review' && reviewOverride.specRev === 'r15'
       ? stages.map((s) => (s.id === 'spec' ? { ...s, text: 'Ready · r15' } : s))
       : stages;
+  const openDelivery = (from: StageId) => navigate('/p/' + projectId + '/' + from + '?view=' + deliveryStageView(from));
 
   return (
     <div className="ap-root" data-screen={screenId} data-panel={panel ?? undefined}>
@@ -252,6 +263,12 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
               }}
               onIntent={recordIntent}
             />
+          ) : delivery ? (
+            <DeliveryWorkArea
+              view={delivery}
+              onView={(next) => navigate('/p/' + projectId + '/' + deliveryViewStage(next) + '?view=' + next)}
+              onIntent={recordIntent}
+            />
           ) : stage === 'design' ? (
             designSub === 'canvas' ? (
               <FramesCanvasWorkArea onShellOverride={setCanvasOverride} />
@@ -271,11 +288,11 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
               />
             )
           ) : stage === 'backend' ? (
-            <BackendWorkArea />
+            <BackendWorkArea onOpenDelivery={() => openDelivery('backend')} />
           ) : stage === 'spec' ? (
             <SkillsWorkArea onShellOverride={setSpecOverride} />
           ) : (
-            <StagePlaceholderWorkArea stage={currentStage} />
+            <StagePlaceholderWorkArea stage={currentStage} onOpenDelivery={(s) => openDelivery(s.id)} />
           )}
         </div>
       </div>
