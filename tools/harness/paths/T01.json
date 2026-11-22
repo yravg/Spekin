@@ -1,0 +1,55 @@
+{
+  "board": "T01-tablet-phone.dc.html",
+  "states": {
+    "tablet": {
+      "status": "draft",
+      "viewport": { "width": 820, "height": 1180 },
+      "steps": [
+        { "goto": "/p/meranti-yard/design" },
+        { "wait": "[data-screen=\"T01\"][data-tier=\"tablet\"] .mod-rail" }
+      ]
+    },
+    "tabreview": {
+      "status": "draft",
+      "viewport": { "width": 820, "height": 1180 },
+      "steps": [
+        { "goto": "/p/meranti-yard/design" },
+        { "wait": "[data-screen=\"T01\"][data-tier=\"tablet\"] .mod-rail" },
+        { "click": "button.mod-it:has-text(\"Review queue\")" },
+        { "wait": "[data-screen=\"T01\"][data-tier=\"tablet\"] .mod-pn" }
+      ]
+    },
+    "phlist": {
+      "status": "draft",
+      "viewport": { "width": 390, "height": 844 },
+      "steps": [
+        { "goto": "/p/meranti-yard/design" },
+        { "wait": "[data-screen=\"T01\"][data-tier=\"phone\"] .mod-pl" },
+        { "click": "button[aria-label=\"Actions for F-03 Variance table\"]" },
+        { "wait": "[data-screen=\"T01\"][data-tier=\"phone\"] .mod-sh" }
+      ]
+    },
+    "phreview": {
+      "status": "draft",
+      "viewport": { "width": 390, "height": 844 },
+      "steps": [
+        { "goto": "/p/meranti-yard/design" },
+        { "wait": "[data-screen=\"T01\"][data-tier=\"phone\"] .mod-tb" },
+        { "click": ".mod-tb button[role=\"tab\"]:has-text(\"Review\")" },
+        { "click": "button:has-text(\"Apply change\")" },
+        { "wait": "[data-screen=\"T01\"][data-tier=\"phone\"] .mod-sh" }
+      ]
+    },
+    "phhand": {
+      "status": "draft",
+      "viewport": { "width": 390, "height": 844 },
+      "steps": [
+        { "goto": "/p/meranti-yard/design" },
+        { "wait": "[data-screen=\"T01\"][data-tier=\"phone\"] .mod-tb" },
+        { "click": ".mod-tb button[role=\"tab\"]:has-text(\"Hand off\")" },
+        { "click": "button:has-text(\"Prepare download\")" },
+        { "wait": "[data-screen=\"T01\"][data-tier=\"phone\"] .mod-sh" }
+      ]
+    }
+  }
+}
