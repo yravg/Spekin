@@ -104,7 +104,7 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 |---|---|---|---|---|
 | IMP-01 | ui | S35 work area: chat, artifact tabs, canvas pane and inspector for the design and backend states | – | done, part open, waiting for owner merge: PR #3. Lead re-ran the gate: design PASS 0.41 %, backend PASS 0.47 %. The conflict state is IMP-02. |
 | IMP-02 | ui | S35 conflict state, save states (F112), per-stage memory across switches | IMP-01 | done, waiting for owner merge: PR #6, stacked on #3 (lead re-ran: S35 3/3 PASS) |
-| IMP-05 | ui | S27 Projects home (6 states), and "/" becomes S27 | IMP-01, C-01 | done, part open: PR #11, stacked on #9 (lead re-ran with the harness fixes: S27 6/6, S35 3/3, S40 6/6 PASS; still to do: merge main for the C-01 create redraw) |
+| IMP-05 | ui | S27 Projects home (6 states), and "/" becomes S27 | IMP-01, C-01 | done, part open: PR #11, stacked on #9 (lead re-ran with the harness fixes: S27 6/6, S35 3/3, S40 6/6 PASS; C-01 create redraw matched in 271558a) |
 | IMP-03 | core | API source: typed client for the Rust API, equal to the sample | – | done, waiting for owner merge: PR #1 (lead review: approve) |
 | IMP-04 | core | Proposals and revisions in the core (accept, reject, revert, stale) | – | done, waiting for owner merge: PR #2 (lead review: approve; merge after #1) |
 | IMP-12 | core | No-Python and licence inventory check | – | done, waiting for owner merge: PR #4 (lead review: approve; one small follow-up on workspace links) |
@@ -122,7 +122,7 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-08 | ui | S30 Style review | IMP-01 | open |
 | IMP-13 | ui | S31 Alternatives | IMP-01 | open |
 | IMP-14 | ui | S32 Targeted change | IMP-01 | open |
-| IMP-15 | ui | S33 Review and accept | IMP-01 | open |
+| IMP-15 | ui | S33 Review and accept | IMP-01 | done, waiting for owner merge: PR #16, stacked on #14 (lead re-ran: S33 6/6 PASS) |
 | IMP-16 | ui | S34 Coding handoff | IMP-01 | open |
 | IMP-17 | ui | S36 Models and usage | IMP-01 | open |
 | IMP-18 | ui | S37 Build contracts | IMP-01 | open |
