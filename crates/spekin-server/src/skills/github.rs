@@ -6,9 +6,12 @@
 //! upstream ref using IMP-22's `check_update`. All HTTP is behind
 //! [`GitHubClient`], so tests use recorded fixtures and never touch the network.
 
+use std::time::Duration;
+
 use futures_util::StreamExt;
 use reqwest::RequestBuilder;
 
+use crate::hardening::GITHUB_TIMEOUT;
 use spekin_core::github_source::{
     BundleFile, GitHubRepo, GitHubSourceError, MAX_FILE_BYTES, PinnedSource, SkillBundle,
     assemble_bundle, join_relative, license_from, listed_files, parse_github_repo, skill_md_path,
@@ -53,8 +56,15 @@ impl Default for HttpGitHubClient {
 
 impl HttpGitHubClient {
     pub fn new() -> Self {
+        Self::with_timeout(GITHUB_TIMEOUT)
+    }
+
+    /// The GitHub adapter has its own 20 s client timeout in production; tests
+    /// pass a short one so a stalled loopback socket proves it is enforced.
+    pub fn with_timeout(timeout: Duration) -> Self {
         Self {
             client: reqwest::Client::builder()
+                .timeout(timeout)
                 .user_agent(concat!("spekin-skills/", env!("CARGO_PKG_VERSION")))
                 .build()
                 .unwrap_or_else(|_| reqwest::Client::new()),

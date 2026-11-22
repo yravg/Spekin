@@ -16,8 +16,8 @@ use serde_json::{Value, json};
 use spekin_server::{
     AppState,
     hardening::{
-        BODY_LIMIT_BYTES, DEFAULT_BIND, DEFAULT_WEB_ORIGIN, GITHUB_TIMEOUT, REQUEST_TIMEOUT,
-        HardeningConfig, apply_hardening, bind_addr, is_loopback,
+        BODY_LIMIT_BYTES, DEFAULT_BIND, DEFAULT_WEB_ORIGIN, GITHUB_TIMEOUT, HardeningConfig,
+        REQUEST_TIMEOUT, apply_hardening, bind_addr, is_loopback,
     },
     router,
 };
@@ -140,7 +140,8 @@ async fn a_slow_request_is_a_typed_504() {
         ),
         cfg,
     );
-    let (status, _, body) = call(&app, Request::get("/api/slow").body(Body::empty()).unwrap()).await;
+    let (status, _, body) =
+        call(&app, Request::get("/api/slow").body(Body::empty()).unwrap()).await;
     assert_eq!(status, StatusCode::GATEWAY_TIMEOUT);
     assert_eq!(body["code"], json!("request_timeout"));
 }

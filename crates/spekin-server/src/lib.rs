@@ -3,6 +3,7 @@
 //! The server holds in-memory state seeded from `fixtures/meranti-yard.json` and calls
 //! `spekin-core` for all business rules (ADR 0002).
 
+pub mod hardening;
 pub mod skills;
 
 use std::collections::BTreeMap;
@@ -15,6 +16,7 @@ use axum::{
     response::{IntoResponse, Response},
     routing::{get, post},
 };
+use hardening::{HardeningConfig, apply_hardening};
 use serde_json::Value;
 use spekin_core::{
     ApiErrorBody, ArtifactRevisionRecord, ArtifactRevisionState, AuditAction, AuditEntry,
@@ -64,6 +66,8 @@ pub struct AppState {
     project_store: Arc<Mutex<ProjectStore>>,
     /// UTC Unix seconds for audit entries and the 30-day restore window.
     now: i64,
+    /// IMP-32 hardening values and the redacted rejection log.
+    pub config: HardeningConfig,
 }
 
 impl AppState {
@@ -76,6 +80,7 @@ impl AppState {
             models: Arc::new(CapabilityRegistry::sample_s36()),
             project_store: Arc::new(Mutex::new(store)),
             now: DEFAULT_NOW,
+            config: HardeningConfig::from_env(),
         })
     }
 
@@ -83,6 +88,12 @@ impl AppState {
     pub fn with_now(mut self, now: i64) -> Self {
         self.now = now;
         self
+    }
+
+    /// IMP-32: the fixed, redacted reason strings recorded by hardening layers.
+    /// No request body, token or path is ever included.
+    pub fn log_lines(&self) -> Vec<String> {
+        self.config.log.lines()
     }
 }
 
@@ -176,7 +187,8 @@ fn map_restore_error(err: RestoreError) -> ServerError {
 }
 
 pub fn router(state: AppState) -> Router {
-    Router::new()
+    let hardening = state.config.clone();
+    let app = Router::new()
         .route("/api/health", get(|| async { "ok" }))
         .route("/api/projects/{id}", get(project))
         .route("/api/projects/{id}/stages", get(stages))
@@ -208,7 +220,8 @@ pub fn router(state: AppState) -> Router {
             "/api/projects/{id}/handoff/manifest",
             post(project_handoff_manifest),
         )
-        .with_state(state)
+        .with_state(state);
+    apply_hardening(app, hardening)
 }
 
 fn ensure_project(id: &str) -> Result<(), ServerError> {
