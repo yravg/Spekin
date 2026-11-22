@@ -1,6 +1,6 @@
 use spekin_core::genui::{
-    validate_genui, validate_genui_json, GenUiFamily, GenUiValidation, Provenance, RejectionReason,
-    MAX_ITEMS, MAX_NESTING_DEPTH,
+    GenUiFamily, GenUiValidation, MAX_ITEMS, MAX_NESTING_DEPTH, Provenance, RejectionReason,
+    validate_genui, validate_genui_json,
 };
 
 fn valid_checklist_json() -> &'static str {
@@ -110,9 +110,7 @@ fn ac_spk_25_rejects_excessive_nesting_and_item_counts() {
 
     let items: Vec<String> = (0..=MAX_ITEMS)
         .map(|i| {
-            format!(
-                r#"{{"id":"i{i}","label":"Item {i}","checked":false,"status":"untested"}}"#
-            )
+            format!(r#"{{"id":"i{i}","label":"Item {i}","checked":false,"status":"untested"}}"#)
         })
         .collect();
     let too_many = format!(
@@ -170,8 +168,15 @@ fn ac_spk_25_rejects_unsafe_urls_scripts_tools_and_privilege_escalation() {
         );
     }
 
-    for priv_action in ["accept_spec", "deploy", "spend_credits", "run_shell", "grant_admin"] {
-        let json = valid_checklist_json().replace("\"expand_details\"", &format!("\"{priv_action}\""));
+    for priv_action in [
+        "accept_spec",
+        "deploy",
+        "spend_credits",
+        "run_shell",
+        "grant_admin",
+    ] {
+        let json =
+            valid_checklist_json().replace("\"expand_details\"", &format!("\"{priv_action}\""));
         assert!(
             matches!(
                 validate_genui_json(&json),

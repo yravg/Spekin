@@ -5,8 +5,14 @@
 //! Field names follow the sample project (fixtures/meranti-yard.json), so the boards,
 //! the app and the API read the same shapes (canvas-to-app rule 15, R-ARC-3).
 
+pub mod genui;
 pub mod project;
 pub mod stage;
 
+pub use genui::{
+    AllowedActionKind, ChecklistItem, ChecklistStatus, ComparisonOption, GenUiAction, GenUiCard,
+    GenUiFamily, GenUiValidation, Provenance, QuestionOption, RejectionReason, validate_genui,
+    validate_genui_json,
+};
 pub use project::{Fixture, FixtureError, Project};
 pub use stage::{Stage, StageId, StageTone};
