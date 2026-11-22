@@ -16,6 +16,8 @@ body { background: var(--ground); }
 .ap-callout b { color: var(--ink); font-weight: 600; }
 .ap-sticky { margin-top: auto; padding: 9px 11px; border-radius: 10px; background: var(--canvas); box-shadow: inset 0 0 0 1px var(--line); font: 500 12px/1.4 var(--font); color: var(--ink-dim); }
 .ap-sticky b { color: var(--ink); font-weight: 600; }
+/* App-only: custom answer row (design .sty-note-in values; the bare board-only token "note" cannot ship as an app class name). */
+.ap-custom-answer { display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 9px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--line-strong); font: 12px/1 var(--font); color: var(--ink-faint); }
 
 @media (prefers-reduced-motion: reduce) {
   .sp-app * { transition: none !important; animation: none !important; }

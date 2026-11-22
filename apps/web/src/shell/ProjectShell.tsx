@@ -15,6 +15,7 @@ import { TargetedChangeWorkArea } from '../review/TargetedChangeWorkArea';
 import { StyleReviewWorkArea, type StyleShellOverride } from '../style/StyleReviewWorkArea';
 import { ReferenceIntakeWorkArea, type IntakeShellOverride } from '../intake/ReferenceIntakeWorkArea';
 import { CodingHandoffWorkArea, type HandoffMode, type HandoffShellOverride } from '../delivery/CodingHandoffWorkArea';
+import { GenUiWorkArea, type GenUiMode, type GenUiShellOverride } from '../genui/GenUiWorkArea';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -138,13 +139,15 @@ export function ProjectShell() {
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
-  const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style' | 'intake' | 'handoff'>('shell');
+  const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style' | 'intake' | 'handoff' | 'genui'>('shell');
   const [handoffInitialMode, setHandoffInitialMode] = useState<HandoffMode>('select');
+  const [genUiInitialMode, setGenUiInitialMode] = useState<GenUiMode>('stream');
   const [canvasOverride, setCanvasOverride] = useState<CanvasShellOverride>({});
   const [reviewOverride, setReviewOverride] = useState<ReviewShellOverride>({});
   const [styleOverride, setStyleOverride] = useState<StyleShellOverride>({});
   const [intakeOverride, setIntakeOverride] = useState<IntakeShellOverride>({});
   const [handoffOverride, setHandoffOverride] = useState<HandoffShellOverride>({});
+  const [genUiOverride, setGenUiOverride] = useState<GenUiShellOverride>({});
   const save = useWorkspace((s) => s.save);
   const conflict = useWorkspace((s) => s.conflict);
   const project = getProject(projectId);
@@ -167,7 +170,9 @@ export function ProjectShell() {
                 ? 'S28'
                 : stage === 'design' && designSub === 'handoff'
                   ? 'S34'
-                  : 'S35';
+                  : stage === 'design' && designSub === 'genui'
+                    ? 'S38'
+                    : 'S35';
   const activeSave =
     stage === 'spec' && specOverride.save
       ? specOverride.save
@@ -181,7 +186,9 @@ export function ProjectShell() {
               ? intakeOverride.save
               : stage === 'design' && designSub === 'handoff' && handoffOverride.save
                 ? handoffOverride.save
-                : save;
+                : stage === 'design' && designSub === 'genui' && genUiOverride.save
+                  ? genUiOverride.save
+                  : save;
   const activeBusy =
     stage === 'spec'
       ? specOverride.busy
@@ -257,6 +264,18 @@ export function ProjectShell() {
                 onOpenShell={() => setDesignSub('shell')}
                 onOpenReview={() => setDesignSub('review')}
               />
+            ) : designSub === 'genui' ? (
+              <GenUiWorkArea
+                key={genUiInitialMode}
+                initialMode={genUiInitialMode}
+                onShellOverride={setGenUiOverride}
+                onOpenReview={() => setDesignSub('review')}
+                onOpenStyle={() => setDesignSub('style')}
+                onOpenHandoff={() => {
+                  setHandoffInitialMode('select');
+                  setDesignSub('handoff');
+                }}
+              />
             ) : (
               <DesignWorkArea
                 onOpenCanvas={() => setDesignSub('canvas')}
@@ -267,6 +286,10 @@ export function ProjectShell() {
                 onOpenHandoff={() => {
                   setHandoffInitialMode('select');
                   setDesignSub('handoff');
+                }}
+                onOpenGenUi={(m) => {
+                  setGenUiInitialMode(m);
+                  setDesignSub('genui');
                 }}
               />
             )

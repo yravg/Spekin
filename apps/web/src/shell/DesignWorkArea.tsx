@@ -9,6 +9,7 @@ import { ArtifactTabs, type ArtifactTabItem } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
 import { Inspector, InspectorRow } from './Inspector';
 import { MiniDashboard } from './MiniDashboard';
+import { routeGenUiPrompt, type GenUiMode } from '../genui/GenUiWorkArea';
 
 const DESIGN_TABS: ArtifactTabItem[] = [
   { icon: 'grid', name: 'Variance flows' },
@@ -104,6 +105,7 @@ export function DesignWorkArea(
     onOpenStyle?: () => void;
     onOpenIntake?: () => void;
     onOpenHandoff?: () => void;
+    onOpenGenUi?: (mode: GenUiMode) => void;
   } = {},
 ) {
   const view = useWorkspace((s) => s.view('design'));
@@ -165,7 +167,15 @@ export function DesignWorkArea(
           onAttach={() => recordIntent('F114:attach')}
           onMention={() => recordIntent('F106:mention')}
           onOpenModel={() => recordIntent('F107:model')}
-          onSend={() => recordIntent('F114:send')}
+          onSend={() => {
+            if (props.onOpenGenUi) {
+              const nextMode = routeGenUiPrompt(view.draft);
+              setView('design', { draft: '' });
+              props.onOpenGenUi(nextMode);
+            } else {
+              recordIntent('F114:send');
+            }
+          }}
         >
           <div className="sp-ub">Add an alert drawer to the variance table for packages over 3%.</div>
           <div className="sp-ai">
@@ -204,7 +214,7 @@ export function DesignWorkArea(
                     sm
                     does="Expands the card in place: criteria, sources and linked frames; focus stays on the card"
                     feature="F110"
-                    onClick={() => recordIntent('F110:details')}
+                    onClick={() => (props.onOpenGenUi ? props.onOpenGenUi('cards') : recordIntent('F110:details'))}
                   />
                 </div>
               </div>
