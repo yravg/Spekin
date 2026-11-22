@@ -400,5 +400,30 @@ export declare const DELIVERY_ITEMS: SampleDeliveryItem[];
 export declare const DELIVERY_FILES: SampleDeliveryFile[];
 export declare const DELIVERY_BLOCKED: SampleDeliveryBlockedItem[];
 export declare const DELIVERY_STALE: SampleDeliveryStale;
+export type SampleDeviceThumbKind = 'chart' | 'table' | 'drawer' | 'image';
+export type SampleDeviceFrame = [string, string, string, PillTuple, SampleDeviceThumbKind];
+export interface SampleDeviceFinding {
+  n: number;
+  of: number;
+  title: string;
+  body: string;
+  base: string;
+  next: string;
+  frame: string;
+  reqs: string[];
+  changed: string;
+}
+export type SampleDeviceBundlePick = [string, string, string, boolean, string?];
+export interface SampleDeviceBundle {
+  pick: SampleDeviceBundlePick[];
+  files: string[];
+  id: string;
+  size: string;
+  spec: string;
+}
+
 export declare const DELIVERY_PROMPT: string[];
+export declare const MODELS_DEVICE_FRAMES: SampleDeviceFrame[];
+export declare const MODELS_FINDING: SampleDeviceFinding;
+export declare const MODELS_BUNDLE: SampleDeviceBundle;
 // Everything else the boards use is exported too; declare it here before use.

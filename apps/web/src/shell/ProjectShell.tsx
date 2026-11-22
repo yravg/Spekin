@@ -16,6 +16,8 @@ import { StyleReviewWorkArea, type StyleShellOverride } from '../style/StyleRevi
 import { ReferenceIntakeWorkArea, type IntakeShellOverride } from '../intake/ReferenceIntakeWorkArea';
 import { CodingHandoffWorkArea, type HandoffMode, type HandoffShellOverride } from '../delivery/CodingHandoffWorkArea';
 import { GenUiWorkArea, type GenUiMode, type GenUiShellOverride } from '../genui/GenUiWorkArea';
+import { useLayoutTier } from '../mobile/layoutTier';
+import { ResponsiveProjectShell } from '../mobile/ResponsiveProjectShell';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -148,6 +150,7 @@ export function ProjectShell() {
   const [intakeOverride, setIntakeOverride] = useState<IntakeShellOverride>({});
   const [handoffOverride, setHandoffOverride] = useState<HandoffShellOverride>({});
   const [genUiOverride, setGenUiOverride] = useState<GenUiShellOverride>({});
+  const layoutTier = useLayoutTier();
   const save = useWorkspace((s) => s.save);
   const conflict = useWorkspace((s) => s.conflict);
   const project = getProject(projectId);
@@ -207,6 +210,22 @@ export function ProjectShell() {
     stage === 'design' && designSub === 'review' && reviewOverride.specRev === 'r15'
       ? stages.map((s) => (s.id === 'spec' ? { ...s, text: 'Ready · r15' } : s))
       : stages;
+
+  if (layoutTier !== 'desktop') {
+    return (
+      <ResponsiveProjectShell
+        tier={layoutTier}
+        project={displayProject}
+        usage={usage}
+        stages={displayStages}
+        currentStage={currentStage}
+        onSwitchStage={(id) => {
+          if (id === 'design') setDesignSub('shell');
+          navigate('/p/' + projectId + '/' + id);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="ap-root" data-screen={screenId} data-panel={panel ?? undefined}>

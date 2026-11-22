@@ -25,3 +25,19 @@ body { background: var(--ground); }
 
 .can-cover .ac { gap: 0; }
 .int-cv:focus:not(:focus-visible) { outline: none; }
+
+/* T01 Tablet and phone (< 1024 px): same ProjectShell route at narrower widths, zero horizontal scroll. */
+.sp-app.ap-t01 { display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 100%; overflow-x: hidden; font: 400 16px/1.4 var(--font); background: var(--canvas); position: relative; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); box-sizing: border-box; }
+.ap-t01-scroll { overflow-y: auto; overflow-x: hidden; padding-bottom: 16px; }
+.ap-t01-pvw { max-width: 100%; }
+/* App-only: T01 info callout (design .mod-note values; the bare board-only token "note" cannot ship as an app class name). */
+.ap-mod-callout { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); font: 500 14px/1.4 var(--font); color: var(--ink-dim); }
+.ap-mod-callout .ic { margin-top: 1px; color: var(--ink); flex: none; }
+.ap-mod-callout b { color: var(--ink); font-weight: 600; }
+.ap-sf-input { flex: 1; min-width: 0; border: 0; background: transparent; font: 400 16px/1.2 var(--font); color: var(--ink); outline: none; }
+.ap-sf-input::placeholder { color: var(--ink-faint); }
+.ap-kv-pair { display: contents; }
+@media (max-width: 767px) {
+  /* Ensure S27 Projects home has no horizontal scroll at phone width when navigating into a project. */
+  .int-app { overflow-x: hidden; max-width: 100%; }
+}
