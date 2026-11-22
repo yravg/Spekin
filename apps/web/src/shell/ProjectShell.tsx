@@ -149,7 +149,7 @@ export function ProjectShell() {
     stage === 'spec'
       ? 'S40'
       : stage === 'design' && designSub === 'canvas'
-        ? 'S29'
+        ? (canvasOverride.screen ?? 'S29')
         : stage === 'design' && designSub === 'review'
           ? 'S33'
           : stage === 'design' && designSub === 'targeted'

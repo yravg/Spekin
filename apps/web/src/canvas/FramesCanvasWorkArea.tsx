@@ -1,7 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
+  CANVAS_BASELINE,
   CANVAS_CHATS,
   CANVAS_FRAMES,
+  CANVAS_REGIONS,
+  CANVAS_STACK,
   CANVAS_TAKES,
   CANVAS_VIEWMENU,
   MODEL,
@@ -17,6 +20,10 @@ import { ChatPanel } from '../shell/ChatPanel';
 import { CanvasMiniUi, ReferenceImageStub, ScaledCanvasUi } from './CanvasMiniUi';
 
 export type CanvasBoardState = 'board' | 'multi' | 'chat' | 'jobs' | 'over' | 'empty';
+
+// S31 Alternatives: the takes stack viewer over the board (stack, grid, cmp, gen, fail) and the kept toast.
+export type TakesViewerKind = 'stack' | 'grid' | 'cmp' | 'gen' | 'fail';
+export type TakesViewerState = TakesViewerKind | 'closed';
 
 export interface CanvasContextChip {
   icon: IconName;
@@ -325,7 +332,7 @@ function StackCard({
         <span className="bk" style={{ transform: 'translate(12px,12px)' }} />
         <span className="bk" style={{ transform: 'translate(6px,6px)' }} />
         <div className="can-fb" style={{ height: h + 'px' }}>
-          <ScaledCanvasUi kind={CANVAS_TAKES[0]?.ui ?? 'hierarchy'} scale={w / 640} />
+          <ScaledCanvasUi kind={CANVAS_TAKES[0]!?.ui ?? 'hierarchy'} scale={w / 640} />
         </div>
       </div>
     </div>
@@ -335,6 +342,7 @@ function StackCard({
 export interface CanvasShellOverride {
   save?: SaveState;
   busyNode?: React.ReactNode;
+  screen?: string;
 }
 
 // S29 Frames canvas (boards-canvas.mjs). States: board, multi, chat, jobs, over, empty.
@@ -351,15 +359,30 @@ export function FramesCanvasWorkArea(props: {
   const [chatsFanned, setChatsFanned] = useState(initialState === 'over');
   const [removedChips, setRemovedChips] = useState<string[]>([]);
   const [chatDraft, setChatDraft] = useState('');
+  const [viewer, setViewer] = useState<TakesViewerState>('closed');
+  const [takeIdx, setTakeIdx] = useState(2);
+  const [kept, setKept] = useState(false);
+
+  const viewerOpen = viewer !== 'closed';
+  const openStack = () => {
+    setTakeIdx(2);
+    setViewer('stack');
+  };
+  const keepTake = () => {
+    setKept(true);
+    setViewer('closed');
+  };
 
   // Sync top bar save state & busy chip to match the board's state.
   useLayoutEffect(() => {
     if (!onShellOverride) return;
+    const screen = viewerOpen || kept ? 'S31' : undefined;
+    const saveText = viewerOpen || kept ? 'Saved 12:47' : null;
     if (mode === 'multi') {
-      onShellOverride({ save: { status: 'saved', tone: 'ok', text: 'Saved 12:44' } });
-    } else if (mode === 'jobs') {
+      onShellOverride({ save: { status: 'saved', tone: 'ok', text: saveText ?? 'Saved 12:44' }, screen });
+    } else if (mode === 'jobs' || viewer === 'gen') {
       onShellOverride({
-        save: { status: 'saving', tone: 'warn', text: 'Saving…' },
+        save: { status: 'saving', tone: 'warn', text: saveText ?? 'Saving…' },
         busyNode: (
           <span style={{ position: 'relative', display: 'inline-flex' }} data-feature="F171">
             <button
@@ -376,18 +399,23 @@ export function FramesCanvasWorkArea(props: {
             </button>
           </span>
         ),
+        screen,
       });
     } else if (mode === 'empty') {
-      onShellOverride({ save: { status: 'saved', tone: 'ok', text: 'Saved 12:02' } });
+      onShellOverride({ save: { status: 'saved', tone: 'ok', text: saveText ?? 'Saved 12:02' }, screen });
     } else {
-      onShellOverride({ save: { status: 'saved', tone: 'ok', text: 'Saved 12:41' } });
+      onShellOverride({ save: { status: 'saved', tone: 'ok', text: saveText ?? 'Saved 12:41' }, screen });
     }
-  }, [mode, onShellOverride, recordIntent]);
+  }, [mode, viewer, viewerOpen, kept, onShellOverride, recordIntent]);
 
   // DPAI check 3: Escape leaves select mode / closes overlays, active tool is visible, keys switch tools & zoom.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
+        if (viewerOpen) {
+          setViewer('closed');
+          return;
+        }
         setViewMenuOpen(false);
         setChatsFanned(false);
         setTool('pointer');
@@ -408,21 +436,25 @@ export function FramesCanvasWorkArea(props: {
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [mode]);
+  }, [mode, viewerOpen]);
 
   const counts = countBoardItems(Object.values(CANVAS_FRAMES), CANVAS_TAKES.length);
   const subtitle =
-    mode === 'multi'
-      ? `3 of ${counts.frames} frames selected`
-      : mode === 'chat'
-        ? `${counts.frames} frames · F-04 selected`
-        : mode === 'jobs'
-          ? `${counts.frames} frames · 4 jobs`
-          : mode === 'empty'
-            ? 'empty'
-            : `${counts.frames} frames · ${counts.takes} takes`;
+    viewerOpen || kept
+      ? kept
+        ? '7 frames · 4 takes'
+        : '6 frames · 5 takes'
+      : mode === 'multi'
+        ? `3 of ${counts.frames} frames selected`
+        : mode === 'chat'
+          ? `${counts.frames} frames · F-04 selected`
+          : mode === 'jobs'
+            ? `${counts.frames} frames · 4 jobs`
+            : mode === 'empty'
+              ? 'empty'
+              : `${counts.frames} frames · ${counts.takes} takes`;
 
-  const zoomLabel = mode === 'multi' ? '34%' : mode === 'chat' ? '17%' : mode === 'over' ? '10%' : mode === 'empty' ? '100%' : '20%';
+  const zoomLabel = viewerOpen || kept ? '20%' : mode === 'multi' ? '34%' : mode === 'chat' ? '17%' : mode === 'over' ? '10%' : mode === 'empty' ? '100%' : '20%';
 
   const boardChips: CanvasContextChip[] =
     mode === 'board'
@@ -479,6 +511,131 @@ export function FramesCanvasWorkArea(props: {
 
   const c3 = [60, 318, 576, 834] as const;
   const o5 = [120, 280, 440, 600] as const;
+  const take = CANVAS_TAKES[Math.min(Math.max(takeIdx, 0), CANVAS_TAKES.length - 1)]!;
+  const F03bFrame: SampleCanvasFrame = { ...CANVAS_FRAMES.f03, rev: 'r8' };
+  const F06Frame: SampleCanvasFrame = { id: 'F-06', name: 'Variance table, contrast', rev: 'r1', st: 'draft', ui: 'contrast', size: '1280 × 900' };
+
+  const segSG = (cur: 'single' | 'grid') => (
+    <div className="sp-seg" role="group" aria-label="Layout">
+      {(['Single', 'Grid'] as const).map((v, i) => (
+        <button
+          key={v}
+          type="button"
+          aria-pressed={v.toLowerCase() === cur}
+          data-does={v === 'Single' ? 'Shows one take at a time, large and live' : 'Shows the baseline and all takes together; a click opens one in Single'}
+          data-feature="F204"
+          onClick={() => setViewer(v === 'Grid' ? 'grid' : 'stack')}
+        >
+          <Icon name={i === 0 ? 'square' : 'grid'} size={14} />
+          {v}
+        </button>
+      ))}
+    </div>
+  );
+  const cmpBtn = (
+    <Btn
+      label={<>Compare <span className="can-kbd">Hold B</span></>}
+      icon="cols"
+      does="Opens Compare: baseline r8 beside this take with changed regions outlined. Holding B instead fades the take to the baseline while the key is down"
+      feature="F206"
+      onClick={() => setViewer('cmp')}
+    />
+  );
+  const keepBtn = (
+    <Btn
+      label={<>Keep on board <span className="can-kbd">Enter</span></>}
+      cls="ink"
+      icon="check"
+      does="Adds this take to the board as a new draft with its own ID. F-03 r8 stays as it is until a review accepts something"
+      feature="F205"
+      onClick={() => keepTake()}
+    />
+  );
+  const keepOff = (
+    <button type="button" className="sp-btn ghost" disabled aria-disabled="true" data-does="Unavailable until the take is finished" data-feature="F208">
+      Keep on board
+    </button>
+  );
+  const cancelRun = (
+    <Btn
+      label="Cancel run"
+      does="Stops the 3 unfinished takes, keeps the 2 finished ones and releases the unused reservation; F-03 r8 is untouched"
+      feature="F210"
+      onClick={() => setViewer('closed')}
+    />
+  );
+  const vhDone = (
+    <>
+      <span className="can-prog">2 of 5 done<i>
+        <u style={{ width: '40%' }} />
+      </i></span>
+      {segSG('single')}
+      <span className="size">Not finished</span>
+      {cancelRun}
+      {keepOff}
+    </>
+  );
+  const vhFailed = (
+    <>
+      <span className="can-prog">4 of 5 done · 1 failed</span>
+      {segSG('single')}
+      <span className="size">Not available</span>
+      {keepOff}
+    </>
+  );
+
+  const stripFor = (states: string[], cur: number) => {
+    const dotsFor = (st: string) => (st === 'failed' ? 'bad' : st === 'designing' || st === 'waiting' ? 'warn' : 'ok');
+    return (
+      <footer className="can-vf" aria-label="Takes">
+        <button type="button" className="can-th" data-does="Shows the accepted baseline F-03 r8 in the stage, read only" data-feature="F203">
+          <span className="pic" style={{ width: 128, height: 90 }}>
+            <ScaledCanvasUi kind="base" scale={0.2} />
+          </span>
+          <span className="can-cp">
+            <b>r8</b>Baseline
+            <Icon name="lock" size={11} />
+          </span>
+        </button>
+        <span className="can-vsep" />
+        {CANVAS_TAKES.map((t, i) => {
+          const st = states[i] ?? 'done';
+          const unfinished = st === 'designing' || st === 'waiting' || st === 'failed';
+          const tag = st === 'designing' ? <span className="st">Designing</span> : st === 'waiting' ? <span className="st">Waiting</span> : st === 'failed' ? <span className="st bad">Failed</span> : null;
+          return (
+            <button
+              key={i}
+              type="button"
+              className={'can-th' + (i === cur ? ' act' : '')}
+              data-does={unfinished ? `Shows Take ${t.n} (${t.angle}); it is not finished, so it cannot be kept` : `Shows Take ${t.n} (${t.angle}) in the stage`}
+              data-feature="F203"
+              onClick={() => {
+                setTakeIdx(i);
+                setViewer('stack');
+              }}
+            >
+              <span className="pic" style={{ width: 128, height: 90 }}>
+                {tag}
+                <span style={{ display: 'block', opacity: unfinished ? 0.5 : 1 }}>
+                  <ScaledCanvasUi kind={unfinished ? 'base' : t.ui} scale={0.2} />
+                </span>
+              </span>
+              <span className="can-cp">
+                <b>{t.n}</b>
+                {t.angle}
+                <span className={'dot ' + dotsFor(st)} />
+              </span>
+            </button>
+          );
+        })}
+        <span className="can-fill" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
+          <Btn label="Dismiss take" sm cls="plain" does="Removes this take from the stack; the baseline and the other takes are unchanged" feature="F205" onClick={() => recordIntent('F205:dismiss')} />
+          <Btn label="More takes" sm does="Asks for more takes from other angles; shows the estimate and the exact inputs first" feature="F215" onClick={() => setViewer('gen')} />
+        </div>
+      </footer>
+    );
+  };
 
   return (
     <>
@@ -649,7 +806,7 @@ export function FramesCanvasWorkArea(props: {
               Variance flows<span>{subtitle}</span>
             </div>
 
-            {mode === 'board' ? (
+            {mode === 'board' && !viewerOpen && !kept ? (
               <div className="can-world">
                 <FlowArrows id="can-a1" lines={flowLines} />
                 <BoardFrame frame={CANVAS_FRAMES.f01} x={COL[0]} y={R1} z={Z_BOARD} onMore={(id) => recordIntent('F164:' + id)} />
@@ -684,11 +841,11 @@ export function FramesCanvasWorkArea(props: {
                   onMore={(id) => recordIntent('F164:' + id)}
                 />
                 <BoardFrame frame={CANVAS_FRAMES.ref2} x={COL[1]} y={R2} z={Z_BOARD} onMore={(id) => recordIntent('F164:' + id)} />
-                <StackCard x={COL[2]} y={R2} z={Z_BOARD} n={5} onOpenStack={() => recordIntent('F164:stack')} />
+                <StackCard x={COL[2]} y={R2} z={Z_BOARD} n={5} onOpenStack={openStack} />
               </div>
             ) : null}
 
-            {mode === 'multi' ? (
+            {mode === 'multi' && !viewerOpen && !kept ? (
               <>
                 <div className="can-world">
                   <FlowArrows
@@ -728,7 +885,7 @@ export function FramesCanvasWorkArea(props: {
               </>
             ) : null}
 
-            {mode === 'chat' ? (
+            {mode === 'chat' && !viewerOpen && !kept ? (
               <div className="can-world">
                 <FlowArrows
                   id="can-a3"
@@ -744,7 +901,7 @@ export function FramesCanvasWorkArea(props: {
                 <BoardFrame frame={CANVAS_FRAMES.f04} x={c3[3]} y={R1} z={0.17} sel handles size />
                 <BoardFrame frame={CANVAS_FRAMES.f05} x={c3[0]} y={290} z={0.17} />
                 <BoardFrame frame={CANVAS_FRAMES.ref2} x={c3[1]} y={290} z={0.17} />
-                <StackCard x={c3[2]} y={290} z={0.17} n={5} onOpenStack={() => recordIntent('F164:stack')} />
+                <StackCard x={c3[2]} y={290} z={0.17} n={5} onOpenStack={openStack} />
                 <button
                   type="button"
                   className="can-lin"
@@ -759,7 +916,7 @@ export function FramesCanvasWorkArea(props: {
               </div>
             ) : null}
 
-            {mode === 'jobs' ? (
+            {mode === 'jobs' && !viewerOpen && !kept ? (
               <>
                 <div className="can-world">
                   <FlowArrows id="can-a4" lines={flowLines} />
@@ -837,7 +994,7 @@ export function FramesCanvasWorkArea(props: {
                 <BoardFrame frame={CANVAS_FRAMES.f04} x={o5[3]} y={98} z={0.1} />
                 <BoardFrame frame={CANVAS_FRAMES.f05} x={o5[0]} y={244} z={0.1} />
                 <BoardFrame frame={CANVAS_FRAMES.ref2} x={o5[1]} y={244} z={0.1} />
-                <StackCard x={o5[2]} y={244} z={0.1} n={5} open={false} onOpenStack={() => recordIntent('F164:stack')} />
+                <StackCard x={o5[2]} y={244} z={0.1} n={5} open={false} onOpenStack={openStack} />
               </div>
             ) : null}
 
@@ -921,7 +1078,7 @@ export function FramesCanvasWorkArea(props: {
               </div>
             ) : null}
 
-            {chatsFanned && mode !== 'chat' ? (
+            {chatsFanned && mode !== 'chat' && !viewerOpen && !kept ? (
               <div className="can-fan" role="list" aria-label="Earlier chats">
                 {CANVAS_CHATS.map((c, i) => (
                   <button
@@ -943,7 +1100,7 @@ export function FramesCanvasWorkArea(props: {
               </div>
             ) : null}
 
-            {mode !== 'chat' ? (
+            {mode !== 'chat' && !viewerOpen && !kept ? (
               <div className="can-pb" data-feature="F167">
                 <span className="pk a" />
                 <span className="pk b" />
@@ -1074,6 +1231,525 @@ export function FramesCanvasWorkArea(props: {
                 }}
               />
             </div>
+
+            {viewerOpen ? (
+              <div className="can-world">
+                <FlowArrows id="can-b1" lines={flowLines} />
+                <BoardFrame frame={CANVAS_FRAMES.f01} x={COL[0]} y={R1} z={Z_BOARD} onMore={(id) => recordIntent('F164:' + id)} />
+                <BoardFrame frame={CANVAS_FRAMES.f02} x={COL[1]} y={R1} z={Z_BOARD} onMore={(id) => recordIntent('F164:' + id)} />
+                <BoardFrame frame={F03bFrame} x={COL[2]} y={R1} z={Z_BOARD} sel handles onMore={(id) => recordIntent('F164:' + id)} />
+                <BoardFrame frame={CANVAS_FRAMES.f04} x={COL[3]} y={R1} z={Z_BOARD} onMore={(id) => recordIntent('F164:' + id)} />
+                <BoardFrame frame={CANVAS_FRAMES.f05} x={COL[0]} y={R2} z={Z_BOARD} onMore={(id) => recordIntent('F164:' + id)} />
+                <BoardFrame frame={CANVAS_FRAMES.ref2} x={COL[1]} y={R2} z={Z_BOARD} onMore={(id) => recordIntent('F164:' + id)} />
+                <StackCard x={COL[2]} y={R2} z={Z_BOARD} n={5} onOpenStack={openStack} />
+                <div className="can-scrim" />
+                <section className="can-vw" role="dialog" aria-label="Takes of F-03 Variance table" data-feature="F201">
+                  {viewer === 'stack' ? (
+                    <>
+                      <div className="can-vh" data-feature="F214">
+                        <IconBtn
+                          icon="x"
+                          label="Close the stack (Esc)"
+                          sm
+                          does="Closes the viewer; clicking beside it does the same. The board and the baseline stay exactly as they were"
+                          feature="F214"
+                          onClick={() => setViewer('closed')}
+                        />
+                        <div className="ti">
+                          <b>5 takes on F-03 Variance table</b>
+                          <span>Baseline r8 stays accepted</span>
+                        </div>
+                        <span className="step">
+                          <span className="can-flip">
+                            <IconBtn
+                              icon="chevR"
+                              label="Previous take"
+                              sm
+                              does="Shows the previous take; the Left arrow key does the same"
+                              feature="F202"
+                              onClick={() => setTakeIdx((takeIdx - 1 + CANVAS_TAKES.length) % CANVAS_TAKES.length)}
+                            />
+                          </span>
+                          <b>Take {take.n} of {CANVAS_TAKES.length}</b>
+                          <IconBtn
+                            icon="chevR"
+                            label="Next take"
+                            sm
+                            does="Shows the next take; the Right arrow key does the same"
+                            feature="F202"
+                            onClick={() => setTakeIdx((takeIdx + 1) % CANVAS_TAKES.length)}
+                          />
+                        </span>
+                        <span className="ang">{take.angle}</span>
+                        <span className="can-fill" />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          {segSG('single')}
+                          <span className="can-live" data-feature="F209">
+                            <i />
+                            Live
+                          </span>
+                          <span className="size">1280 × 900 · 50%</span>
+                          {cmpBtn}
+                          {keepBtn}
+                        </div>
+                      </div>
+                      <div className="can-vb">
+                        <div className="can-stage">
+                          <div className="can-take act" style={{ width: 640, height: 450 }}>
+                            <ScaledCanvasUi kind={take.ui} scale={1} />
+                          </div>
+                          <div className="can-hint">
+                            <span className="can-kbd">B</span> hold to compare <span className="can-kbd">←</span>
+                            <span className="can-kbd">→</span> step <span className="can-kbd">G</span> grid
+                          </div>
+                        </div>
+                        <aside className="can-side" aria-label="Take details">
+                          <div>
+                            <h4>Take {take.n} · {take.angle}</h4>
+                            <p>{take.line}</p>
+                          </div>
+                          <div>
+                            <h4>Changed from baseline</h4>
+                            <div className="can-chg">
+                              {take.changes.map(([a, b], i) => (
+                                <div key={i}>
+                                  <i>{i + 1}</i>
+                                  <span>
+                                    <b>{a}</b>: {b}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div data-feature="F213">
+                            <h4>Input for this run</h4>
+                            <div className="can-in">
+                              <span className="can-chatchip">
+                                <Icon name="frame" size={12} />
+                                {CANVAS_STACK.input[0]}
+                              </span>
+                              <span className="can-chatchip">
+                                <Icon name="doc" size={12} />
+                                {CANVAS_STACK.input[1]}
+                              </span>
+                              <span className="can-chatchip">
+                                <Icon name="req" size={12} />
+                                {CANVAS_STACK.input[2]}
+                              </span>
+                            </div>
+                            <p className="can-small">
+                              The whole board was not sent. {CANVAS_STACK.cost}. 0 new tokens inferred; the style stays at {CANVAS_BASELINE.ds}.
+                            </p>
+                          </div>
+                          <div className="ap-sticky">
+                            <b>Baseline stays.</b> F-03 r8 remains the accepted frame. Keep adds this take as a draft.
+                          </div>
+                        </aside>
+                      </div>
+                      {stripFor(['done', 'done', 'done', 'done', 'done'], takeIdx)}
+                    </>
+                  ) : viewer === 'grid' ? (
+                    <>
+                      <div className="can-vh" data-feature="F214">
+                        <IconBtn
+                          icon="x"
+                          label="Close the stack (Esc)"
+                          sm
+                          does="Closes the viewer; clicking beside it does the same. The board and the baseline stay exactly as they were"
+                          feature="F214"
+                          onClick={() => setViewer('closed')}
+                        />
+                        <div className="ti">
+                          <b>5 takes on F-03 Variance table</b>
+                          <span>Baseline r8 stays accepted</span>
+                        </div>
+                        <span className="ang">Take 3 selected</span>
+                        <span className="can-fill" />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          {segSG('grid')}
+                          <span className="size">1280 × 900 · 46%</span>
+                          {cmpBtn}
+                          <Btn
+                            label={<>Keep Take 3 <span className="can-kbd">Enter</span></>}
+                            cls="ink"
+                            icon="check"
+                            does="Adds the selected take to the board as a new draft; F-03 r8 is unchanged"
+                            feature="F205"
+                            onClick={() => keepTake()}
+                          />
+                        </div>
+                      </div>
+                      <div className="can-vb">
+                        <div className="can-grid">
+                          <div className="can-cell">
+                            <div className="lb">
+                              <b>r8</b>Baseline
+                              <span className="pill ok">Accepted</span>
+                            </div>
+                            <button type="button" className="can-take can-cellb" data-does="Opens this take in Single view" data-feature="F204" onClick={() => setViewer('stack')}>
+                              <ScaledCanvasUi kind="base" scale={0.46} />
+                            </button>
+                          </div>
+                          {CANVAS_TAKES.map((t, i) => (
+                            <div className="can-cell" key={i}>
+                              <div className="lb">
+                                <b>{t.n}</b>
+                                {t.angle}
+                              </div>
+                              <button type="button" className="can-take can-cellb" data-does="Opens this take in Single view" data-feature="F204" onClick={() => setViewer('stack')}>
+                                <ScaledCanvasUi kind={t.ui} scale={0.46} />
+                              </button>
+                              {t.n === 3 ? (
+                                <span className="keep">
+                                  <Btn label="Keep" sm cls="ink" does="Keeps Take 3 directly from the grid as a new draft" feature="F205" onClick={() => keepTake()} />
+                                </span>
+                              ) : null}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  ) : viewer === 'cmp' ? (
+                    <>
+                      <div className="can-vh" data-feature="F214">
+                        <IconBtn
+                          icon="x"
+                          label="Close the stack (Esc)"
+                          sm
+                          does="Closes the viewer; clicking beside it does the same. The board and the baseline stay exactly as they were"
+                          feature="F214"
+                          onClick={() => setViewer('closed')}
+                        />
+                        <div className="ti">
+                          <b>Compare: Take 3 · Contrast with baseline r8</b>
+                          <span>3 regions changed · read only</span>
+                        </div>
+                        <span className="can-fill" />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <Btn label="Back to Take 3" does="Returns to the Single view of Take 3" feature="F207" onClick={() => setViewer('stack')} />
+                          {keepBtn}
+                        </div>
+                      </div>
+                      <div className="can-vb">
+                        <div className="can-cmp">
+                          <div className="can-panes">
+                            <div className="can-pane">
+                              <div className="lb">
+                                <b>Baseline r8</b>
+                                <span className="pill ok">Accepted</span>
+                              </div>
+                              <div className="can-take" style={{ width: 461, height: 324 }}>
+                                <ScaledCanvasUi kind="base" scale={0.72} />
+                                {CANVAS_REGIONS.map(([n, l, t, w, h], i) => (
+                                  <span key={i} className="can-rg" style={{ left: Math.round(l * 0.72), top: Math.round(t * 0.72), width: Math.round(w * 0.72), height: Math.round(h * 0.72) }}>
+                                    <i>{n}</i>
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="can-pane">
+                              <div className="lb">
+                                <b>Take 3 · Contrast</b>
+                                <span className="pill warn">Not kept</span>
+                              </div>
+                              <div className="can-take" style={{ width: 461, height: 324 }}>
+                                <ScaledCanvasUi kind={take.ui} scale={0.72} />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="can-cl">
+                            {take.changes.map(([a, b], i) => (
+                              <div key={i}>
+                                <i>{i + 1}</i>
+                                <span>
+                                  <b>{a}</b>
+                                  {b}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="can-gen">
+                            <Icon name="spark" size={13} />
+                            Generated comparison against R-DASH-014. It describes differences; it is not test evidence.
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : viewer === 'gen' ? (
+                    <>
+                      <div className="can-vh" data-feature="F214">
+                        <IconBtn
+                          icon="x"
+                          label="Close the stack (Esc)"
+                          sm
+                          does="Closes the viewer; clicking beside it does the same. The board and the baseline stay exactly as they were"
+                          feature="F214"
+                          onClick={() => setViewer('closed')}
+                        />
+                        <div className="ti">
+                          <b>5 takes on F-03 Variance table</b>
+                          <span>Baseline r8 stays accepted</span>
+                        </div>
+                        <span className="step">
+                          <span className="can-flip">
+                            <IconBtn
+                              icon="chevR"
+                              label="Previous take"
+                              sm
+                              does="Shows the previous take; the Left arrow key does the same"
+                              feature="F202"
+                              onClick={() => setTakeIdx((takeIdx - 1 + CANVAS_TAKES.length) % CANVAS_TAKES.length)}
+                            />
+                          </span>
+                          <b>Take {take.n} of {CANVAS_TAKES.length}</b>
+                          <IconBtn
+                            icon="chevR"
+                            label="Next take"
+                            sm
+                            does="Shows the next take; the Right arrow key does the same"
+                            feature="F202"
+                            onClick={() => setTakeIdx((takeIdx + 1) % CANVAS_TAKES.length)}
+                          />
+                        </span>
+                        <span className="ang">{take.angle}</span>
+                        <span className="can-fill" />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>{vhDone}</div>
+                      </div>
+                      <div className="can-vb">
+                        <div className="can-stage">
+                          <div className="can-take" style={{ width: 640, height: 450 }}>
+                            <ScaledCanvasUi kind="base" scale={1} />
+                            <div className="can-cover designing" role="status">
+                              <span className="ci">
+                                <Icon name="spark" size={20} />
+                              </span>
+                              <div className="tt">Designing {take.angle}</div>
+                              <div className="sb">Starts from a copy of F-03 r8 · 0:24. Not finished, so it cannot be kept.</div>
+                              <div className="ac">
+                                <Btn label="Stop this take" sm does="Stops Take 3 only; the other takes continue" feature="F208" onClick={() => { setTakeIdx(3); setViewer('fail'); }} />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="can-hint"><span className="can-kbd">Esc</span> close, the run keeps going</div>
+                        </div>
+                        <aside className="can-side" aria-label="Run status">
+                          <div>
+                            <h4>This run</h4>
+                            <div className="can-run">
+                              <div>
+                                <span>
+                                  <span className="dot ok" />
+                                </span>
+                                <b>{CANVAS_TAKES[0]!.n} {CANVAS_TAKES[0]!.angle}</b>
+                                <span>Done</span>
+                              </div>
+                              <div>
+                                <span>
+                                  <span className="dot ok" />
+                                </span>
+                                <b>{CANVAS_TAKES[1]!.n} {CANVAS_TAKES[1]!.angle}</b>
+                                <span>Done</span>
+                              </div>
+                              <div>
+                                <span>
+                                  <span className="dot warn" />
+                                </span>
+                                <b>{CANVAS_TAKES[2]!.n} {CANVAS_TAKES[2]!.angle}</b>
+                                <span>Designing 0:24</span>
+                              </div>
+                              <div>
+                                <span>
+                                  <span className="dot warn" />
+                                </span>
+                                <b>{CANVAS_TAKES[3]!.n} {CANVAS_TAKES[3]!.angle}</b>
+                                <span>Designing 0:09</span>
+                              </div>
+                              <div>
+                                <span>
+                                  <span className="dot ring" />
+                                </span>
+                                <b>{CANVAS_TAKES[4]!.n} {CANVAS_TAKES[4]!.angle}</b>
+                                <span>Waiting</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <h4>Estimate</h4>
+                            <p>Reserved ≈ 54 cr. 21 cr used so far. Cancel releases what is not used.</p>
+                          </div>
+                          <div data-feature="F213">
+                            <h4>Input for this run</h4>
+                            <div className="can-in">
+                              <span className="can-chatchip">
+                                <Icon name="frame" size={12} />
+                                {CANVAS_STACK.input[0]}
+                              </span>
+                              <span className="can-chatchip">
+                                <Icon name="doc" size={12} />
+                                {CANVAS_STACK.input[1]}
+                              </span>
+                              <span className="can-chatchip">
+                                <Icon name="req" size={12} />
+                                {CANVAS_STACK.input[2]}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="ap-sticky">
+                            <b>Two slots at a time.</b> Copy waits for a free slot and is not charged while it waits.
+                          </div>
+                        </aside>
+                      </div>
+                      {stripFor(['done', 'done', 'designing', 'designing', 'waiting'], 2)}
+                    </>
+                  ) : viewer === 'fail' ? (
+                    <>
+                      <div className="can-vh" data-feature="F214">
+                        <IconBtn
+                          icon="x"
+                          label="Close the stack (Esc)"
+                          sm
+                          does="Closes the viewer; clicking beside it does the same. The board and the baseline stay exactly as they were"
+                          feature="F214"
+                          onClick={() => setViewer('closed')}
+                        />
+                        <div className="ti">
+                          <b>5 takes on F-03 Variance table</b>
+                          <span>Baseline r8 stays accepted</span>
+                        </div>
+                        <span className="step">
+                          <span className="can-flip">
+                            <IconBtn
+                              icon="chevR"
+                              label="Previous take"
+                              sm
+                              does="Shows the previous take; the Left arrow key does the same"
+                              feature="F202"
+                              onClick={() => setTakeIdx((takeIdx - 1 + CANVAS_TAKES.length) % CANVAS_TAKES.length)}
+                            />
+                          </span>
+                          <b>Take {take.n} of {CANVAS_TAKES.length}</b>
+                          <IconBtn
+                            icon="chevR"
+                            label="Next take"
+                            sm
+                            does="Shows the next take; the Right arrow key does the same"
+                            feature="F202"
+                            onClick={() => setTakeIdx((takeIdx + 1) % CANVAS_TAKES.length)}
+                          />
+                        </span>
+                        <span className="ang">{take.angle}</span>
+                        <span className="can-fill" />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>{vhFailed}</div>
+                      </div>
+                      <div className="can-vb">
+                        <div className="can-stage">
+                          <div className="can-take" style={{ width: 640, height: 450 }}>
+                            <ScaledCanvasUi kind="base" scale={1} />
+                            <div className="can-cover failed" role="alert">
+                              <span className="ci">
+                                <Icon name="alert" size={20} />
+                              </span>
+                              <div className="tt">Take 4 (Layout) stopped before finishing</div>
+                              <div className="sb">The model timed out after 90 s. 3.1k tokens were used and show in Usage; the rest of the reservation was released.</div>
+                              <div className="ac"><Btn label="Retry take 4" sm cls="ink" icon="redo" does="Reruns only Take 4 with the same context and revisions; no duplicate charge" feature="F211" onClick={() => recordIntent('F211:retry-take')} /><Btn label="Dismiss take" sm does="Removes the failed attempt; Take 4 stays as an empty draft" feature="F211" onClick={() => recordIntent('F211:dismiss-take')} /></div>
+                            </div>
+                          </div>
+
+                        </div>
+                        <aside className="can-side" aria-label="Run status">
+                          <div>
+                            <h4>This run</h4>
+                            <div className="can-run">
+                              <div>
+                                <span>
+                                  <span className="dot ok" />
+                                </span>
+                                <b>{CANVAS_TAKES[0]!.n} {CANVAS_TAKES[0]!.angle}</b>
+                                <span>Done</span>
+                              </div>
+                              <div>
+                                <span>
+                                  <span className="dot ok" />
+                                </span>
+                                <b>{CANVAS_TAKES[1]!.n} {CANVAS_TAKES[1]!.angle}</b>
+                                <span>Done</span>
+                              </div>
+                              <div>
+                                <span>
+                                  <span className="dot ok" />
+                                </span>
+                                <b>{CANVAS_TAKES[2]!.n} {CANVAS_TAKES[2]!.angle}</b>
+                                <span>Done</span>
+                              </div>
+                              <div>
+                                <span>
+                                  <span className="dot bad" />
+                                </span>
+                                <b>{CANVAS_TAKES[3]!.n} {CANVAS_TAKES[3]!.angle}</b>
+                                <span>Failed</span>
+                              </div>
+                              <div>
+                                <span>
+                                  <span className="dot ok" />
+                                </span>
+                                <b>{CANVAS_TAKES[4]!.n} {CANVAS_TAKES[4]!.angle}</b>
+                                <span>Done</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <p><b>Take 4 failed.</b> Takes 1, 2, 3 and 5 are ready and can be kept. F-03 r8 is unchanged.</p>
+                            <Btn label="See usage" sm does="Opens S36 usage" feature="F211" onClick={() => recordIntent('F211:usage')} />
+                          </div>
+                          <div data-feature="F213">
+                            <h4>Input for this run</h4>
+                            <div className="can-in">
+                              <span className="can-chatchip">
+                                <Icon name="frame" size={12} />
+                                {CANVAS_STACK.input[0]}
+                              </span>
+                              <span className="can-chatchip">
+                                <Icon name="doc" size={12} />
+                                {CANVAS_STACK.input[1]}
+                              </span>
+                              <span className="can-chatchip">
+                                <Icon name="req" size={12} />
+                                {CANVAS_STACK.input[2]}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="ap-sticky">
+                            <b>Retry reruns one take.</b> The other four stay as they are, and F-03 r8 never changed.
+                          </div>
+                        </aside>
+                      </div>
+                      {stripFor(['done', 'done', 'done', 'failed', 'done'], 3)}
+                    </>
+                  ) : null}
+                </section>
+              </div>
+            ) : kept ? (
+              <div className="can-world">
+                <FlowArrows id="can-a1" lines={flowLines} />
+                <BoardFrame frame={CANVAS_FRAMES.f01} x={COL[0]} y={R1} z={Z_BOARD} onMore={(id) => recordIntent('F164:' + id)} />
+                <BoardFrame frame={CANVAS_FRAMES.f02} x={COL[1]} y={R1} z={Z_BOARD} onMore={(id) => recordIntent('F164:' + id)} />
+                <BoardFrame frame={F03bFrame} x={COL[2]} y={R1} z={Z_BOARD} sel handles onMore={(id) => recordIntent('F164:' + id)} />
+                <BoardFrame frame={CANVAS_FRAMES.f04} x={COL[3]} y={R1} z={Z_BOARD} onMore={(id) => recordIntent('F164:' + id)} />
+                <BoardFrame frame={CANVAS_FRAMES.f05} x={COL[0]} y={R2} z={Z_BOARD} onMore={(id) => recordIntent('F164:' + id)} />
+                <BoardFrame frame={CANVAS_FRAMES.ref2} x={COL[1]} y={R2} z={Z_BOARD} onMore={(id) => recordIntent('F164:' + id)} />
+                <StackCard x={COL[2]} y={R2} z={Z_BOARD} n={4} onOpenStack={openStack} />
+                <BoardFrame frame={F06Frame} x={COL[3]} y={R2} z={Z_BOARD} sel handles size onMore={(id) => recordIntent('F164:' + id)} />
+                <FlowArrows id="can-b5" lines={[[COL[2] + CW + 4, 425, COL[3] - 4, 425, true]]} />
+                <div className="can-toast" role="status" data-feature="F212">
+                  <Icon name="check" size={16} />
+                  <span>
+                    <b>Take 3 added to the board as F-06 draft.</b> F-03 is still r8.
+                  </span>
+                  <Btn label="Undo" sm cls="plain" does="Removes F-06 and puts Take 3 back in the stack" feature="F212" onClick={() => setKept(false)} />
+                  <Btn label="Open F-06" sm does="Opens F-06 as a tab in the Design stage" feature="F212" onClick={() => recordIntent('F212:open-f06')} />
+                </div>
+              </div>
+            ) : null}
 
             {viewMenuOpen ? (
               <div className="can-menu" role="menu" aria-label="View" data-feature="F163">

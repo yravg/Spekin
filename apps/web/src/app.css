@@ -14,6 +14,11 @@ body { background: var(--ground); }
 /* App-only: review note callout (design .rev-note values; the bare board-only token "note" cannot ship as an app class name). */
 .ap-callout { margin: 0; padding: 8px 10px; border-radius: 8px; background: var(--canvas); box-shadow: inset 0 0 0 1px var(--line); font: 500 12px/1.4 var(--font); color: var(--ink-dim); }
 .ap-callout b { color: var(--ink); font-weight: 600; }
+.ap-sticky { margin-top: auto; padding: 9px 11px; border-radius: 10px; background: var(--canvas); box-shadow: inset 0 0 0 1px var(--line); font: 500 12px/1.4 var(--font); color: var(--ink-dim); }
+.ap-sticky b { color: var(--ink); font-weight: 600; }
+
 @media (prefers-reduced-motion: reduce) {
   .sp-app * { transition: none !important; animation: none !important; }
 }
+
+.can-cover .ac { gap: 0; }
