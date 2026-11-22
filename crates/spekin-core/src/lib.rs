@@ -5,12 +5,18 @@
 //! Field names follow the sample project (fixtures/meranti-yard.json), so the boards,
 //! the app and the API read the same shapes (canvas-to-app rule 15, R-ARC-3).
 
+pub mod genui;
 pub mod model_source;
 pub mod project;
 pub mod proposal;
 pub mod revision;
 pub mod stage;
 
+pub use genui::{
+    AllowedActionKind, ChecklistItem, ChecklistStatus, ComparisonOption, GenUiAction, GenUiCard,
+    GenUiFamily, GenUiValidation, Provenance, QuestionOption, RejectionReason, validate_genui,
+    validate_genui_json,
+};
 pub use model_source::{
     ApiKeyStatus, CapabilityCheckResult, CapabilityError, CapabilityRegistry, ConnectorStatus,
     JobRequirements, LocalCliSource, ModelAvailability, ModelCapability, ModelSource,
