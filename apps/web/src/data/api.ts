@@ -3,20 +3,27 @@
 // This module only fetches and checks shapes. It decides no rules, and the screens still
 // read apps/web/src/data/source.ts until the lead switches them (IMP-03 note).
 import type {
+  AuditEntry,
+  AuditError,
+  AuditResponse,
   BuildContextRequest,
   BuildManifestRequest,
   CheckSkillUpdateRequest,
+  DeletedProjectView,
   EstimateRunRequest,
   GenUiValidation,
   Manifest,
   ModelCapability,
   Project,
+  ProjectEntry,
   Rejection,
   RequestContext,
   Reservation,
   ReserveRunRequest,
   Revision,
   RunEstimate,
+  Settlement,
+  SettleRunRequest,
   Stage,
   StageId,
   StageTone,
@@ -122,6 +129,82 @@ function isRevision(v: unknown): v is Revision {
 
 function isRejection(v: unknown): v is Rejection {
   return isRecord(v) && isString(v.id) && isNumber(v.base) && isString(v.reason);
+}
+
+// Runtime mirrors of the IMP-30/31 Rust enums. ts-rs exports types, not values.
+const AUDIT_ACTIONS = [
+  'accept',
+  'reject',
+  'revert',
+  'delete',
+  'restore',
+  'reserve',
+  'settle',
+  'skill_update_applied',
+  'skill_update_held',
+] as const;
+const AUDIT_ERROR_KINDS = ['edited', 'broken_chain', 'sequence', 'truncated'] as const;
+
+function isAuditEntry(v: unknown): v is AuditEntry {
+  return (
+    isRecord(v) &&
+    isNumber(v.seq) &&
+    isString(v.actor) &&
+    oneOf(AUDIT_ACTIONS, v.action) &&
+    isString(v.target_id) &&
+    (v.revision === null || isString(v.revision)) &&
+    isString(v.reason) &&
+    isNumber(v.at) &&
+    isString(v.prev_hash) &&
+    isString(v.hash)
+  );
+}
+
+function isAuditError(v: unknown): v is AuditError {
+  return (
+    isRecord(v) &&
+    AUDIT_ERROR_KINDS.some(
+      (kind) => isRecord(v[kind]) && isNumber((v[kind] as Record<string, unknown>).seq),
+    )
+  );
+}
+
+function isAuditResponse(v: unknown): v is AuditResponse {
+  return (
+    isRecord(v) &&
+    Array.isArray(v.entries) &&
+    v.entries.every(isAuditEntry) &&
+    isString(v.head_hash) &&
+    (v.error === null || isAuditError(v.error))
+  );
+}
+
+function isProjectEntry(v: unknown): v is ProjectEntry {
+  return (
+    isRecord(v) &&
+    isString(v.id) &&
+    isProject(v.project) &&
+    Array.isArray(v.revisions) &&
+    v.revisions.every(isString) &&
+    isNumber(v.changed_at) &&
+    (v.deleted_at === null || isNumber(v.deleted_at))
+  );
+}
+
+function isDeletedProjectView(v: unknown): v is DeletedProjectView {
+  return isRecord(v) && isProjectEntry(v.entry) && isNumber(v.days_left);
+}
+
+function isSettlement(v: unknown): v is Settlement {
+  return (
+    isRecord(v) &&
+    isString(v.run_id) &&
+    isString(v.idempotency_key) &&
+    isNumber(v.reserved) &&
+    isNumber(v.charged) &&
+    isNumber(v.refunded) &&
+    isBoolean(v.cancelled)
+  );
 }
 
 function isRunEstimate(v: unknown): v is RunEstimate {
@@ -479,4 +562,86 @@ export async function buildHandoffManifest(
     throw new ApiError('shape', `API manifest body is not a Manifest: ${url}`, { url });
   }
   return value;
+}
+
+/** The hash-chained audit view; the head hash is held by the server apart from the log (IMP-31). */
+export async function fetchAudit(
+  projectId: string,
+  options: ApiOptions = {},
+): Promise<AuditResponse | null> {
+  const url = `${projectUrl(projectId, options)}/audit`;
+  const result = await getJson(url, options.signal);
+  if (!result.found) return null;
+  if (!isAuditResponse(result.value)) {
+    throw new ApiError('shape', `API audit body is not an AuditResponse: ${url}`, { url });
+  }
+  return result.value;
+}
+
+/** Revert an artifact to an earlier revision's content, writing a new revision (IMP-31). */
+export async function revertRevision(
+  projectId: string,
+  artifact: string,
+  to: Revision,
+  options: ApiOptions = {},
+): Promise<Revision> {
+  const url = `${projectUrl(projectId, options)}/revisions/${encodeURIComponent(artifact)}/revert`;
+  const value = await postJson(url, { to }, options.signal);
+  if (!isRevision(value)) {
+    throw new ApiError('shape', `API revert body is not a Revision: ${url}`, { url });
+  }
+  return value;
+}
+
+/** Settle a reserved hosted run at its actual cost (IMP-31). */
+export async function settleRun(
+  projectId: string,
+  req: SettleRunRequest,
+  options: ApiOptions = {},
+): Promise<Settlement> {
+  const url = `${projectUrl(projectId, options)}/runs/settle`;
+  const value = await postJson(url, req, options.signal);
+  if (!isSettlement(value)) {
+    throw new ApiError('shape', `API settle body is not a Settlement: ${url}`, { url });
+  }
+  return value;
+}
+
+/** Mark a project deleted through the 30-day restore window (IMP-29/IMP-31). */
+export async function deleteProject(
+  projectId: string,
+  options: ApiOptions = {},
+): Promise<ProjectEntry> {
+  const url = `${projectUrl(projectId, options)}/delete`;
+  const value = await postJson(url, undefined, options.signal);
+  if (!isProjectEntry(value)) {
+    throw new ApiError('shape', `API delete body is not a ProjectEntry: ${url}`, { url });
+  }
+  return value;
+}
+
+/** Restore a recently deleted project inside the window (IMP-29/IMP-31). */
+export async function restoreProject(
+  projectId: string,
+  options: ApiOptions = {},
+): Promise<ProjectEntry> {
+  const url = `${projectUrl(projectId, options)}/restore`;
+  const value = await postJson(url, undefined, options.signal);
+  if (!isProjectEntry(value)) {
+    throw new ApiError('shape', `API restore body is not a ProjectEntry: ${url}`, { url });
+  }
+  return value;
+}
+
+/** Recently deleted entries with the whole-day countdown S27 shows (IMP-31). */
+export async function fetchDeletedProjects(
+  options: ApiOptions = {},
+): Promise<DeletedProjectView[]> {
+  const url = `${apiBase(options)}/api/projects/deleted`;
+  const result = await getJson(url, options.signal);
+  if (!result.found) return [];
+  if (!Array.isArray(result.value) || !result.value.every(isDeletedProjectView)) {
+    throw new ApiError('shape', `API deleted body is not a DeletedProjectView[]: ${url}`, { url });
+  }
+  return result.value;
 }
