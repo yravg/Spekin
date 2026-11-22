@@ -322,7 +322,7 @@ Builds on IMP-22, IMP-27 and IMP-31 (branch from `origin/imp-33-contracts-eviden
 Branch from `origin/imp-34-skills-api`. Small items from the lead reviews:
 1. A typed 413 for a chunked request body with no Content-Length (from #24), with a test.
 2. A separate audit chain for the skills library (from #27). Skills routes append there, not to a project's chain. `GET /api/skills/audit` returns it with `verify`.
-3. Wire `tools/checks/licences.mjs` (IMP-12) into the root `npm run gate` after `check:rules`. The owner allows this lead-owned edit of the root `package.json` for this card only.
+3. Wire `tools/checks/licences.mjs` (IMP-12) into the root `npm run gate` after `check:rules`. The lead allows this edit of the lead-owned root `package.json` for this card only.
 4. The audit head hash: `AuditLog` serialisation skips `head_hash`, so a stored log can't carry its own anchor (from #21). The server keeps the head apart, as IMP-31 does.
 
 ### UI cards after P1 (written 23 Nov)
