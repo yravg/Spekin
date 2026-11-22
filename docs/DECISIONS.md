@@ -4,6 +4,7 @@ One line per decision, newest first. The owner decides product questions. Agents
 
 | Date | Decision | Where it shows |
 |---|---|---|
+| 23 Nov 2026 | PRD files carry no personal names or Drive links: in inputs/Spekin-PRD-v0.2.2.md, v0.2.3.md and the supplement's PRD snapshot, the owner's name is now 'the owner' and Drive IDs and URLs are now 'owner's Drive'. The supplement's SHA-256 values describe the unredacted files. Earlier commits still hold the old text (git history). | Owner, 23 Nov |
 | 23 Nov 2026 | S27 create is four domain choices plus one idea box, with no name or language step; Bahasa is the default (owner yes to REV-03). | S27, C-01 |
 | 23 Nov 2026 | Repository made **public** (owner: "Yes, go public"). The PRD (`inputs/`), research notes and canvas are public with it. | README |
 | 23 Nov 2026 | **Skills library:** free for everyone, templates from day one, easy user copies, skills from GitHub repos with Auto-update (bounded, visible, roll back). | ADR 0007, S40 |

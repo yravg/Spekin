@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | Product | Spekin. Browser-first living-spec and infinite-canvas revamp of existing yravgHub Studio |
-| Owner | Enrico Marlon (yraveragework / yravg) |
+| Owner | the owner (yravg) |
 | Version | v0.2.3 incremental standards delta, 22 November 2026, Asia/Shanghai UTC+8. Retains all 326 v0.2.2 requirement definitions unchanged and adds R-STD-1–8 (334 total), grounded in the full available interview transcript and pinned official skills documentation. Existing Studio/canvas, combined references, Rust/TS/no Python and browser-first scope remain. Previous snapshots are preserved. |
-| Design source | Design v0.1 [`inputs/design-v0.1-HANDOFF.md`, `inputs/design-v0.1-GAPS.md`, `inputs/design-v0.1-COMPONENT-MAP.md`; Drive folder 1pz544Ku3x-8khIq8xZ6Kk03N5S-FGTHk; updated files 19 Nov 2026: COMPONENT-MAP 1Hc5yEUCMibbOSpR4y1uqtxYCMKTwteV2, HANDOFF 1t1mxeLQ7VwlIvSOsyE30SL9F3moB0ZJQ] |
+| Design source | Design v0.1 [`inputs/design-v0.1-HANDOFF.md`, `inputs/design-v0.1-GAPS.md`, `inputs/design-v0.1-COMPONENT-MAP.md`; owner's Drive; updated files 19 Nov 2026: COMPONENT-MAP owner's Drive, HANDOFF owner's Drive] |
 | Decided in | "Etsy Launch: Build" room, 17 Nov 2026 |
 | Status | Planning document only. No app code in this file. |
 | Language | Bahasa Indonesia first, English second |
@@ -16,9 +16,9 @@
 
 ## Revision brief. Spekin inside yravgHub Studio
 
-Revision v0.2.3 retains the combined living-spec and canvas revamp of **yravgHub Studio**, not a Momo clone. Section 18 adds docs-grounded shaping, context packets, dependency-aware slices, separate review axes and evidence-led checks without restarting the ongoing implementation. Section 17 adds contextual GenUI based on reviewed Momo video evidence, a separate optional CI/CD reference, and annotated reuse of the existing Studio/DPAI baseline. The normative v0.2.1 addendum at the end adds workspace switching, Rust-first/no-Python architecture, accepted TS/JS UI, motion quality, and reuse-first decisions from Enrico at 6:50–6:52 PM Asia/Shanghai. Enrico requested this scope on 22 November 2026 at 12:31 PM Asia/Shanghai, UTC+8. Spekin is the working project name. This document authorizes no implementation, account creation, purchase, repository change, or deployment.
+Revision v0.2.3 retains the combined living-spec and canvas revamp of **yravgHub Studio**, not a Momo clone. Section 18 adds docs-grounded shaping, context packets, dependency-aware slices, separate review axes and evidence-led checks without restarting the ongoing implementation. Section 17 adds contextual GenUI based on reviewed Momo video evidence, a separate optional CI/CD reference, and annotated reuse of the existing Studio/DPAI baseline. The normative v0.2.1 addendum at the end adds workspace switching, Rust-first/no-Python architecture, accepted TS/JS UI, motion quality, and reuse-first decisions from the owner at 6:50–6:52 PM Asia/Shanghai. The owner requested this scope on 22 November 2026 at 12:31 PM Asia/Shanghai, UTC+8. Spekin is the working project name. This document authorizes no implementation, account creation, purchase, repository change, or deployment.
 
-Enrico reports that Studio already has a DesainPakeAI-style infinite canvas. Treat that as the starting capability to audit and preserve. Do not build a second canvas or migrate Studio into Solvarium by assumption. The exact current Studio branch, unpushed work, deployed version, persistence model, and reusable components require an authorized implementation audit.
+The owner reports that Studio already has a DesainPakeAI-style infinite canvas. Treat that as the starting capability to audit and preserve. Do not build a second canvas or migrate Studio into Solvarium by assumption. The exact current Studio branch, unpushed work, deployed version, persistence model, and reusable components require an authorized implementation audit.
 
 The product is a browser-first workspace for an idea, its requirements, visual design, build plan, and delivery evidence. The persistent header has this stage order:
 
@@ -39,35 +39,35 @@ Users can inspect any stage. Progress depends on accepted artifacts and evidence
 
 Read this brief, §7.8, §7.11–7.16, §11.1, and §12 for the consolidated direction. Existing §5–8 pack detail and requirement IDs remain valid unless an explicit delta says otherwise. `TRACEABILITY-v0.2.3.csv` lists every baseline requirement definition and its status. `CHANGELOG-DECISIONS-v0.2.3.md` records scope conflicts. Archive files are evidence, not parallel canonical PRDs.
 
-New detailed behavior is a design specification prepared for review. Enrico's explicit direction is the Studio revamp, named references, infinite canvas, full workflow header, and OpenDesign-inspired model/pricing approach. Exact monetization, routing defaults, implementation architecture details, proposed performance budgets, and expanded drawings need review. The Rust-first/no-Python core, accepted TS/JS UI, motion quality and reuse-first direction are recorded in the v0.2.1 addendum.
+New detailed behavior is a design specification prepared for review. The owner's explicit direction is the Studio revamp, named references, infinite canvas, full workflow header, and OpenDesign-inspired model/pricing approach. Exact monetization, routing defaults, implementation architecture details, proposed performance budgets, and expanded drawings need review. The Rust-first/no-Python core, accepted TS/JS UI, motion quality and reuse-first direction are recorded in the v0.2.1 addendum.
 
 Tags:
 
 - **TO VERIFY**: depends on something not seen first-hand (signed-in NPA/DPAI screens, an undefined internal tool, a missing source).
 - **ASSUMPTION**: a number or rule picked so the document is complete. Product Desk owns the final value.
 - **GAP**: a screen or control this product needs that yravg UI (https://uiux.yraveragehub.io) does not have.
-- **[NPA:file]**, **[DPAI:file]**, **[CG:file]**, **[BG:file]**, **[TM:file]**: grab pack files under `/workspace/grab/ngodingpakeai/`, `desainpakeai/`, `codeguide/`, `braingrid/`, `taskmaster/`. **[CMP]** = PRD-tool comparison v2 (Drive 1oWLYFhaYRXu0kMGm08-gXuDTCq9beJ0K; box copy `inputs/COMPARISON-v2.md`). **[REF]** = `inputs/SPEC-START-FROM-REFERENCE.md`. **[MN]** = method note `inputs/POCOCK-VERCEL.md`. `inputs/` = `/workspace/documentation/prd-studio/inputs/`.
+- **[NPA:file]**, **[DPAI:file]**, **[CG:file]**, **[BG:file]**, **[TM:file]**: grab pack files under `/workspace/grab/ngodingpakeai/`, `desainpakeai/`, `codeguide/`, `braingrid/`, `taskmaster/`. **[CMP]** = PRD-tool comparison v2 (owner's Drive; box copy `inputs/COMPARISON-v2.md`). **[REF]** = `inputs/SPEC-START-FROM-REFERENCE.md`. **[MN]** = method note `inputs/POCOCK-VERCEL.md`. `inputs/` = `/workspace/documentation/prd-studio/inputs/`.
 - Requirement ids use EARS: `WHEN <trigger> THE SYSTEM SHALL <response>` (also `WHILE`, `IF … THEN`, `WHERE`, and plain `THE SYSTEM SHALL` for always-on rules).
 
 ---
 
 ## 0. Historical decisions retained from v0.1
 
-| # | Decision (Enrico, via the room) | Where it lands |
+| # | Decision (the owner, via the room) | Where it lands |
 |---|---|---|
 | S1 | Onboarding as simple as NPA: one path — pick a domain, write one text box. After generation the spec document stays editable at three depths: Simple, Detailed, Expert. Every edit (user or AI) goes propose → diff → accept. No silent overwrites. | §6, R-ONB, R-EDT, entities Proposal / Diff / Revision |
 | S2 | Exactly four domains: Dashboard, Engineering, Project control, Financial analysis. | §5, §8 |
 | S3 | Keep as requirements: poteto pyramid rules, the yravgbuilder ("yrabuilder") plugin, canvas-to-app. v0.1.2: both defined from the repo audit. | §7.7 |
-| S4 | Architecture on hold pending the yravg repo audit. v0.1.2: audit done; §12 is now a PROPOSED architecture, not adopted (pending Enrico decision, audit item 3). | §12 |
+| S4 | Architecture on hold pending the yravg repo audit. v0.1.2: audit done; §12 is now a PROPOSED architecture, not adopted (pending the owner decision, audit item 3). | §12 |
 | S5 | Positioning: lead with (a) start from a site or screen recording → checked clean-room feature list, and (b) design system built into the plan. Per-task acceptance tests + traceability are baseline. Packs = Indonesian project-control and engineering packs. | §2 |
 | S6 | Output is a living spec in three layers mapped to the depths (Spec Kit / Kiro spec–plan–tasks split): Simple = grill interview + decision log + Shape Up pitch; Detailed = EARS behaviour spec + plan + thin vertical-slice tickets whose criteria fail at the starting commit; Expert = ADRs, glossary, traceability matrix, independent review of each diff. | §6 |
 | S7 | Engineering domain detail comes from CAD/BIM Desk. v0.1.2: CAD/BIM Desk's Engineering pack v0.1 merged. | §8.2 |
 | S8 | "Spec" vs "PRD" naming undecided. | Naming note above |
-| S9 | v0.1.1: adopt Template Desk's D-PC additions and REQ-DASH-020/021; hold the D-FIN refocus as a proposal pending Enrico. | §8.1, §8.3, §8.4.1 |
+| S9 | v0.1.1: adopt Template Desk's D-PC additions and REQ-DASH-020/021; hold the D-FIN refocus as a proposal pending the owner. | §8.1, §8.3, §8.4.1 |
 | S10 Reference: gate | `components/definitions-table` + `components/rule-card` | `components/decision-inbox` | PS-SCR-10 | mapped |
-| S11 | 22 Nov 2026: Enrico approved, in a 1:1 reply “Yes I agree”, three living-spec additions to this existing spec (not a new PRD): (D1) project-wide principles; (D2) a repeatable add-feature cycle; (D3) a post-build check that turns unmet requirements into PROPOSED tickets. These use existing screens: principles on S07, increment proposals on S08 (entry may also come from S07 or S15), and the gap check on S18. No new depth layer and no new onboarding wizard. A Design Desk UX mapping (Drive doc 18lecBuedqdXet_P1NuIjc_PTTnXIAAyH, 21 Nov 2026) is an optional alignment reference only; it is not a user-approved replacement of Design v0.1, and canonical design is unchanged. | §6.5–6.7, R-PRI, R-EDT-9/10, R-VER-11, AC-49–54 |
-| S12 | 22 Nov 2026: Enrico, replying to the completed Paraframe grab pack, said “I want this one to be included.” The Paraframe-inspired frame workspace is included in this same Spec SaaS, not as a separate app. Browser-first and deferred local-project integration now apply to this included workspace; they do not approve the whole SaaS architecture, name, domain, or hosting. Open Design (https://github.com/nexu-io/open-design, research note) is a documented method source for repo-to-spec / UI inventory only; this decision does not adopt its code, plugins, brand, or Apache-2.0 license (Q-30). Videos BogcYWf4siM and pA54H1VYlYg are a later study and are not in this revision. | §7.10, R-WS, R-DS-7/8, S27–S34, Q-30, Q-31 |
-| S13 | 22 Nov 2026, ~11:00 Asia/Shanghai: Enrico, in Etsy Launch: Build, replying to Design Desk’s screen-flow widget, said “Approve this screen flow and draw the browser-first wireframes.” The eight-screen browser-first flow (BW-01–BW-08) in Drive `1ni_DhB6mIYthUK0adgQ9Q0jkxrSZ9Hn6` is the approved screen flow for the included workspace (S12). This approval is the screen flow plus a request that Design Desk draw the wireframes; it is not approval to implement code, and local-project integration stays deferred. Design Desk owns the wireframes (offline editable + PDF, because of the room sign-in restriction). This file does not duplicate those drawings. Editable offline wireframes and the 17-page PDF were delivered on 22 Nov 2026. They remain the prior eight-screen baseline and need the v0.2.0 shell revision. Canonical Design v0.1 (S01–S26) is unchanged. | §7.10, S27–S34 |
+| S11 | 22 Nov 2026: the owner approved, in a 1:1 reply “Yes I agree”, three living-spec additions to this existing spec (not a new PRD): (D1) project-wide principles; (D2) a repeatable add-feature cycle; (D3) a post-build check that turns unmet requirements into PROPOSED tickets. These use existing screens: principles on S07, increment proposals on S08 (entry may also come from S07 or S15), and the gap check on S18. No new depth layer and no new onboarding wizard. A Design Desk UX mapping (Drive doc owner's Drive, 21 Nov 2026) is an optional alignment reference only; it is not a user-approved replacement of Design v0.1, and canonical design is unchanged. | §6.5–6.7, R-PRI, R-EDT-9/10, R-VER-11, AC-49–54 |
+| S12 | 22 Nov 2026: the owner, replying to the completed Paraframe grab pack, said “I want this one to be included.” The Paraframe-inspired frame workspace is included in this same Spec SaaS, not as a separate app. Browser-first and deferred local-project integration now apply to this included workspace; they do not approve the whole SaaS architecture, name, domain, or hosting. Open Design (https://github.com/nexu-io/open-design, research note) is a documented method source for repo-to-spec / UI inventory only; this decision does not adopt its code, plugins, brand, or Apache-2.0 license (Q-30). Videos BogcYWf4siM and pA54H1VYlYg are a later study and are not in this revision. | §7.10, R-WS, R-DS-7/8, S27–S34, Q-30, Q-31 |
+| S13 | 22 Nov 2026, ~11:00 Asia/Shanghai: the owner, in Etsy Launch: Build, replying to Design Desk’s screen-flow widget, said “Approve this screen flow and draw the browser-first wireframes.” The eight-screen browser-first flow (BW-01–BW-08) in owner's Drive is the approved screen flow for the included workspace (S12). This approval is the screen flow plus a request that Design Desk draw the wireframes; it is not approval to implement code, and local-project integration stays deferred. Design Desk owns the wireframes (offline editable + PDF, because of the room sign-in restriction). This file does not duplicate those drawings. Editable offline wireframes and the 17-page PDF were delivered on 22 Nov 2026. They remain the prior eight-screen baseline and need the v0.2.0 shell revision. Canonical Design v0.1 (S01–S26) is unchanged. | §7.10, S27–S34 |
 
 ---
 
@@ -81,7 +81,7 @@ Planning tools exist. All four we studied turn a text idea, a repo or a pasted d
 - Nobody stores a **chosen design system and component set in the plan** [CMP §4.3].
 - Nobody shows a **requirement → ticket → test → commit** chain in a UI, though BrainGrid (FR-BG-007, FR-BG-012) and Taskmaster (FR-TM-012, FR-TM-013) cover parts of it [CMP §4.2].
 - Nobody ships **Indonesian project-control or engineering packs** [CMP §4.4].
-- NPA's public sign-in shows Google only, and live `/plan` is not public [NPA:GAPS.md]. Enrico finds live NPA too tight once a PRD exists [inputs/codeguide-PARITY.md "Start simple, go deep"].
+- NPA's public sign-in shows Google only, and live `/plan` is not public [NPA:GAPS.md]. The owner finds live NPA too tight once a PRD exists [inputs/codeguide-PARITY.md "Start simple, go deep"].
 
 ### 1.1 Target users
 
@@ -89,7 +89,7 @@ Planning tools exist. All four we studied turn a text idea, a repo or a pasted d
 |---|---|---|---|
 | U1 Solo builder / vibe coder (ID) | Indonesian indie developer or non-coder using an AI coding agent, pays in IDR, often by QRIS | One text box → PRD and tasks their agent can follow; Bahasa UI; low monthly price | NPA and DPAI audiences [NPA:PRD.md §1; DPAI:PRD.md §1–2, home counter 8,490 users on 17 Nov 2026] |
 | U2 Freelancer / small agency (ID) | Builds client apps, reuses patterns | Reference-to-PRD; one design system per client | DPAI persona "Freelance / agency" [DPAI:PRD.md §2] |
-| U3 Planning / project-control engineer (EPCI) | Planner, cost controller, document controller at an EPCI contractor or owner | Plans for internal tools (registers, schedule views, cost reports) that follow real PE practice, not generic CRUD | Enrico's own work. No market data yet, see §1.2 |
+| U3 Planning / project-control engineer (EPCI) | Planner, cost controller, document controller at an EPCI contractor or owner | Plans for internal tools (registers, schedule views, cost reports) that follow real PE practice, not generic CRUD | The owner's own work. No market data yet, see §1.2 |
 | U4 BIM / engineering coordinator | Works with IFC models, quantities, 4D/5D | Plans for model viewers and model-to-schedule/cost links | CAD/BIM Desk scope [/home/box/agent-data/agents/79da4f08-035c-487c-a4e9-94e3c045b350/profile.json] |
 | U5 Analyst (dashboard / finance) | Builds dashboards or financial models for a business unit | Plans that apply named dashboard methods or a standard financial model | Gus Bavia method set [/workspace/gusbavia/PATTERNS.md] |
 
@@ -99,11 +99,11 @@ Nothing here is validated with paying users. These must be true before Build sta
 
 | # | Must be true | How we test it | Pass mark (ASSUMPTION) | Owner |
 |---|---|---|---|---|
-| V1 | U1 builders lose time because agents build from vague prompts | 8 interviews with Indonesian AI-coding builders (Discord/YouTube communities, Enrico's network). Ask for the last project that went wrong and why | ≥5 of 8 describe rework caused by a missing spec | Product Desk |
+| V1 | U1 builders lose time because agents build from vague prompts | 8 interviews with Indonesian AI-coding builders (Discord/YouTube communities, the owner's network). Ask for the last project that went wrong and why | ≥5 of 8 describe rework caused by a missing spec | Product Desk |
 | V2 | U1 will pay IDR monthly for a planning tool while NPA exists | Same interviews + a pricing-page smoke test (waitlist, no checkout) | ≥3 of 8 pay or would pay for NPA-class tools; ≥40 waitlist sign-ups from one post | Product Desk / Launch Desk |
 | V3 | Acceptance tests per task change outcomes | 3 builders build one feature twice: plain task vs task with ATs + verify | Fewer reopened tasks with ATs for ≥2 of 3 | Build Desk |
 | V4 | Reference-to-PRD is wanted and the clean-room limits are acceptable | Show 3 builders a PRD generated from a public site; ask what they expected that we refused | ≥2 of 3 would use it; refusals are not a deal-breaker | Product Desk |
-| V5 | EPCI users (U3) want generated tool plans, not only templates | 5 interviews with planners / cost controllers / document controllers | ≥3 of 5 name a tool they would plan this week | Product Desk (Enrico as SME) |
+| V5 | EPCI users (U3) want generated tool plans, not only templates | 5 interviews with planners / cost controllers / document controllers | ≥3 of 5 name a tool they would plan this week | Product Desk (the owner as SME) |
 | V6 | Engineering (U4) and finance (U5) domains pull users | 3 interviews per domain | ≥2 of 3 per domain | Product Desk |
 
 Interview outline (Bahasa, 30 min): last project and where it went wrong; tools in use (NPA, ChatGPT, Cursor rules); how they check an agent's work today; what they pay for now and how (QRIS, card, transfer); show v0.1 flow sketches; ask what they would remove.
@@ -136,7 +136,7 @@ Stated plainly: none of NPA, CodeGuide, BrainGrid or Taskmaster offers (a) or (b
 | G2 | A reference (URL or recording) → gated, checked FR inventory → accepted rows in the spec document | ≥ 70% of references reach an accepted inventory without support |
 | G3 | Every plan names a design system and every UI ticket names a component | 100% of UI tickets carry a yravg UI slug or a GAP id |
 | G4 | Baseline: every ticket has criteria that fail at its starting commit and a real test command; a verification report after the agent finishes | 100% of tickets; report for ≥ 80% of tickets marked done in month one |
-| G5 | Four domains with real substance | Each pack signed off by its reviewer (Enrico for Project control; CAD/BIM Desk for Engineering) |
+| G5 | Four domains with real substance | Each pack signed off by its reviewer (the owner for Project control; CAD/BIM Desk for Engineering) |
 | G6 | Pay in IDR with QRIS | Sandbox QRIS payment passes on localhost before deploy |
 
 ### 3.2 Non-goals (v1)
@@ -267,7 +267,7 @@ Approved 22 Nov 2026 (S11). This is not a fourth layer, not a new onboarding wiz
 
 The living spec holds a first-class **project-principles** block (“Prinsip proyek”), visible on the existing S07 Spec document at every depth (a compact form is enough on Simple). Each principle records its accepted revision and decision source. An unaccepted starter is visibly a Proposal; an unanswered principle is an open question, not an accepted default. Edits go through propose → diff → accept (R-EDT) on S08. Acceptance marks affected downstream blocks “perlu ditinjau”; it does not silently repair them or overwrite `AGENTS.md`.
 
-A Design Desk proposal (21 Nov 2026, Drive 18lecBuedqdXet_P1NuIjc_PTTnXIAAyH) maps this onto S07/S08. That mapping is optional alignment only and is not a user-approved design change.
+A Design Desk proposal (21 Nov 2026, owner's Drive) maps this onto S07/S08. That mapping is optional alignment only and is not a user-approved design change.
 
 | ID | Requirement |
 |---|---|
@@ -482,7 +482,7 @@ GAP-18…27 come from CAD/BIM Desk's pack §6.2 (the pack notes its yravgUI chec
 | S23 Settings, billing, usage | `screens/settings-billing` | `components/pill-tabs`, `components/soft-gate` | PS-SCR-23 | mapped |
 | S24 CLI device-code page | `components/otp-input` | `components/permission-request` | PS-SCR-24 | mapped |
 | S25 Export (Markdown / zip / yravgbuilder) | `screens/files` | — | PS-SCR-25 | mapped |
-| S26 Plan control (Expert; Design PROPOSAL): build plan of the user's app — tickets planned vs done, credits budgeted vs spent | `components/schedule-chart` (GAP-26 closed) | `components/milestone-stepper`, `components/kpi-tiles`, GAP-17 | PS-SCR-26 | mapped; Design's scope is the default until Enrico confirms (Q-29) |
+| S26 Plan control (Expert; Design PROPOSAL): build plan of the user's app — tickets planned vs done, credits budgeted vs spent | `components/schedule-chart` (GAP-26 closed) | `components/milestone-stepper`, `components/kpi-tiles`, GAP-17 | PS-SCR-26 | mapped; Design's scope is the default until the owner confirms (Q-29) |
 | S27 Frame workspace: project entry (BW-01) | — | — | — | added v0.1.5 (S12); eight-screen flow approved v0.1.6 (S13); wireframes owned by Design Desk (delivered baseline, not redrawn in this file); not a Design v0.1 screen |
 | S28 Frame workspace: reference intake (BW-02) | — | — | — | added v0.1.5 (S12); flow approved v0.1.6 (S13); import-first; capture/browse not working controls in this slice |
 | S29 Frame workspace: frames canvas (BW-03) | — | — | — | added v0.1.5 (S12); flow approved v0.1.6 (S13). Distinct from S21 canvas-to-app |
@@ -492,7 +492,7 @@ GAP-18…27 come from CAD/BIM Desk's pack §6.2 (the pack notes its yravgUI chec
 | S33 Frame workspace: review and accept (BW-07) | — | — | — | added v0.1.5 (S12); flow approved v0.1.6 (S13); stale items cannot be accepted without re-evaluation |
 | S34 Frame workspace: coding handoff (BW-08) | — | — | — | added v0.1.5 (S12); flow approved v0.1.6 (S13); download of selected accepted revisions; does not replace S25 |
 
-Source: Design v0.1 [`inputs/design-v0.1-HANDOFF.md`, `inputs/design-v0.1-GAPS.md`, `inputs/design-v0.1-COMPONENT-MAP.md`; Drive folder 1pz544Ku3x-8khIq8xZ6Kk03N5S-FGTHk] COMPONENT-MAP §A. Design checked slugs against the catalogue on 17 Nov 2026.
+Source: Design v0.1 [`inputs/design-v0.1-HANDOFF.md`, `inputs/design-v0.1-GAPS.md`, `inputs/design-v0.1-COMPONENT-MAP.md`; owner's Drive] COMPONENT-MAP §A. Design checked slugs against the catalogue on 17 Nov 2026.
 
 S26 traceability: §6.3 Expert layer; tickets and their states (§7.5 R-VER, §11); usage limits (§7.8.1). S26 is a Design PROPOSAL (per Design Desk, relayed by Grok Bot, 19 Nov 2026): it shows the build plan of the user's app (tickets planned vs done, credits budgeted vs spent). The user's own project schedule and cost views stay in the Project control pack (§8.3). No requirement defines S26 yet, and "credits" are not defined in §7.8; both wait on Q-29.
 
@@ -500,7 +500,7 @@ S26 traceability: §6.3 Expert layer; tickets and their states (§7.5 R-VER, §1
 
 | # | Item | Design v0.1 | This spec | Action |
 |---|---|---|---|---|
-| M1 | Plan control screen | PS-SCR-26, a Design PROPOSAL: build plan of the user's app (per Design Desk, relayed by Grok Bot, 19 Nov 2026) | no requirement | S26 added with Design's scope as default; open until Enrico confirms (Q-29) |
+| M1 | Plan control screen | PS-SCR-26, a Design PROPOSAL: build plan of the user's app (per Design Desk, relayed by Grok Bot, 19 Nov 2026) | no requirement | S26 added with Design's scope as default; open until the owner confirms (Q-29) |
 | M2 | Screen canvas GAP id | an earlier Design draft called it GAP-19 | GAP-19 is ModelTree | GAP-29 used |
 | M3 | GAP-04, 05, 09, 26, 28 | closed by existing components | listed as gaps | verdicts recorded in §7.4.2 |
 | M4 | Proposed components | S04 `smart-recommendation` (not `ask-panel`); S10 `definitions-table` + `rule-card` (not `soft-gate`); S15 no `agent-plan`; S16 `prompt-library`; S23 `soft-gate` | v0.1 placeholders | Design's picks adopted in the table |
@@ -518,7 +518,7 @@ Ticket fields: `id` (`T-014`), `title`, `requirements` (`REQ-PC-003`…), `compo
 
 Criterion fields: `id`; observable behaviour in given/when/then; `kind` (`unit`, `e2e`, `api`, `property`, `manual`); `test_ref` (tag such as `@AC-014-1` in a Playwright title or Vitest `describe`); `command` (e.g. `pnpm vitest -t "@AC-014-1"`); `required` (default true). `manual` criteria are counted separately and need a screenshot or note.
 
-Chain: `Requirement (R) → Ticket (T) → Criterion (AC) → test in repo (@AC tag) → commit (trailer "Refs: T-014") → VerificationRun → ReviewRun`. Trailers: `Refs: T-014` and `Evidence: <run url>` (Enrico's decision D2 [/home/box/agent-data/workflows/yravg-trust-ladder/SKILL.md]).
+Chain: `Requirement (R) → Ticket (T) → Criterion (AC) → test in repo (@AC tag) → commit (trailer "Refs: T-014") → VerificationRun → ReviewRun`. Trailers: `Refs: T-014` and `Evidence: <run url>` (the owner's decision D2 [/home/box/agent-data/workflows/yravg-trust-ladder/SKILL.md]).
 
 | ID | Requirement |
 |---|---|
@@ -556,7 +556,7 @@ Sources: `/home/box/agent-data/workflows/yravg-trust-ladder/SKILL.md`; worked ex
 |---|---|
 | R-KEEP-1 | WHEN tickets are generated for a user's plan THE SYSTEM SHALL include, in order, prefactor / domain-core tickets, static-gate tickets (strict TypeScript, rule runner, CI), verification tickets (criteria, domain property tests, a UI property run where there is UI), prose tickets (AGENTS.md "Trust ladder", CLAUDE.md), and one evidence-review ticket. |
 | R-KEEP-2 | WHEN tickets are generated THE SYSTEM SHALL include a benchmark-before ticket first and a benchmark-after ticket last. |
-| R-KEEP-3 | THE SYSTEM SHALL itself be built under Enrico's decisions D1–D4: comment-count ratchet, `Evidence:` trailer, plain-Node rule runner, auto-merge only when every gate passes [same skill file]. |
+| R-KEEP-3 | THE SYSTEM SHALL itself be built under the owner's decisions D1–D4: comment-count ratchet, `Evidence:` trailer, plain-Node rule runner, auto-merge only when every gate passes [same skill file]. |
 
 | R-KEEP-7 | THE SYSTEM's verification and merge gate (for this product and in the gate tickets it generates) SHALL run without GitHub Actions: as a pre-deploy step on the VPS that refuses a ref without a green gate, or by hand with the same commands, and SHALL write the same `Evidence:` trailer either way. Hosted CI MAY be added when available but SHALL NOT be the only route. |
 
@@ -566,9 +566,9 @@ Vertical slices and the pyramid fit together: each slice ticket carries its own 
 
 #### 7.7.2 yravgbuilder plugin ("yrabuilder")
 
-Defined by the repo audit (17 Nov 2026) [`inputs/repo-audit-ARCHITECTURE-REFLECTION.md` §(d), Drive 19i2faPpr_bh5ZcJJj9ofuIiSsfnum_Cf]; also read in `/workspace/repo-audit/clones/yra-skills/yravgbuilder/README.md` and `CHANGELOG.md`. "yrabuilder" appears only in bot profiles; every repo spells it `yravgbuilder`.
+Defined by the repo audit (17 Nov 2026) [`inputs/repo-audit-ARCHITECTURE-REFLECTION.md` §(d), owner's Drive]; also read in `/workspace/repo-audit/clones/yra-skills/yravgbuilder/README.md` and `CHANGELOG.md`. "yrabuilder" appears only in bot profiles; every repo spells it `yravgbuilder`.
 
-- **What:** plugin `yra-skills/yravgbuilder` v0.1.1 (8 Nov 2026), Enrico's house standard for building business apps without slop.
+- **What:** plugin `yra-skills/yravgbuilder` v0.1.1 (8 Nov 2026), the owner's house standard for building business apps without slop.
 - **House stack:** Vite + React (plain JS/TS) on the yravg catalogue (B1 Clean); Rust only for heavy cores with a JS oracle (`engine-rs/`, WASM in a Worker, golden-equal to the JS); Node server for auth, DB and billing; Tauri 2 desktop.
 - **How it runs:** `/yravgbuilder-mode` picks one of 10 playbooks (new app, build screen, feature delivery, canvas first, design review, Rust decision, Rust port, ship desktop, investigation, session pickup) and runs an 11-point QA gate (reuse, tokens only, every state, no invented data, no dead control, slop scan, rendered at 1440/1024/390 + keyboard + dark, failing-first test in CI, Rust golden-equal, changelog and how-to, report what was not run).
 - **Output it expects from a spec:** PRD rows `AREA-NNN` with observable acceptance and status `missing | partial | done`, roadmap and handoff docs, commits ending `PRD: AREA-NNN`.
@@ -580,23 +580,23 @@ Defined by the repo audit (17 Nov 2026) [`inputs/repo-audit-ARCHITECTURE-REFLECT
 
 #### 7.7.3 canvas-to-app
 
-Defined by the repo audit [`inputs/repo-audit-ARCHITECTURE-REFLECTION.md` §(d) "canvas-to-app: what exists", Drive 19i2faPpr_bh5ZcJJj9ofuIiSsfnum_Cf]. **Source location pending Enrico.**
+Defined by the repo audit [`inputs/repo-audit-ARCHITECTURE-REFLECTION.md` §(d) "canvas-to-app: what exists", owner's Drive]. **Source location pending the owner.**
 
 - **What:** a canvas-first plugin made of the skills `canvas-to-app`, `canvas-to-app-html` and `canvas-to-app-nohtml`, plus `scripts/lint_boards.mjs` and `render_boards.mjs`. It draws Before / After boards in the app's real chrome: Before is a real screenshot, After is drawn with the app's own tokens; one sample project runs across all boards; boards are linted and rendered before publishing.
 - **Generator:** Clausarium's checked-in `tools/canvas-to-app/generate.py` (with `dom.py`, `scope_css.py`) turns `.dc.html` boards into React.
-- **Where it lives:** in no GitHub repo, at any commit or branch, including `yra-skills`; the audit infers it is installed only under `~/.claude/plugins` on Enrico's machines. Two sessions already hit its absence. Enrico said it lives in `yra-skills`; the audit did not find it there, and Grok Bot confirmed it is not in `yra-skills` (17 Nov 2026).
-- Also found: Enrico's CPA request "use canvas-to-app before implementation" and the CPA PRD rule that implementation waits for canvas approval [/workspace/research/yravgSolvarium/docs/plans/community-plugins-agent.prd.md §11].
+- **Where it lives:** in no GitHub repo, at any commit or branch, including `yra-skills`; the audit infers it is installed only under `~/.claude/plugins` on the owner's machines. Two sessions already hit its absence. The owner said it lives in `yra-skills`; the audit did not find it there, and Grok Bot confirmed it is not in `yra-skills` (17 Nov 2026).
+- Also found: the owner's CPA request "use canvas-to-app before implementation" and the CPA PRD rule that implementation waits for canvas approval [/workspace/research/yravgSolvarium/docs/plans/community-plugins-agent.prd.md §11].
 
 | ID | Requirement |
 |---|---|
 | R-KEEP-5 | WHEN the Detailed layer is accepted THE SYSTEM SHALL add a Canvas step where the user-app screens are drawn and approved through a Proposal. |
-| R-KEEP-6 | WHILE the Canvas step is not approved THE SYSTEM SHALL keep frontend implementation tickets locked; planning and test-design artifacts remain editable. Default tool: canvas-to-app (source location pending Enrico, Q-11); alternatives Cursor Canvas, DPAI handoff, Figma. |
+| R-KEEP-6 | WHILE the Canvas step is not approved THE SYSTEM SHALL keep frontend implementation tickets locked; planning and test-design artifacts remain editable. Default tool: canvas-to-app (source location pending the owner, Q-11); alternatives Cursor Canvas, DPAI handoff, Figma. |
 
 ### 7.8 Pricing, payment, and limits
 
 #### 7.8.1 Commercial structure under revision
 
-The v0.1.6 Free/Pro table, including Rp99,000/30 days, Rp990,000/year, 15 projects, 60 specs/month, and other numeric quotas, was an assumption. It is preserved in the archived baseline and is **not a current offer or implementation default**. Enrico asked for OpenDesign-inspired model and pricing design. §7.13 replaces that table with explicit model sources, allowance/cost visibility, and undecided commercial terms.
+The v0.1.6 Free/Pro table, including Rp99,000/30 days, Rp990,000/year, 15 projects, 60 specs/month, and other numeric quotas, was an assumption. It is preserved in the archived baseline and is **not a current offer or implementation default**. The owner asked for OpenDesign-inspired model and pricing design. §7.13 replaces that table with explicit model sources, allowance/cost visibility, and undecided commercial terms.
 
 | Proposed access path | Billing source | Decision still needed |
 |---|---|---|
@@ -638,7 +638,7 @@ Paddle, production keys, live payment, automatic top-up, and automatic renewal a
 
 ### 7.10 Included frame workspace (S12; approved eight-screen flow, S13)
 
-Included in this same product on 22 Nov 2026 (S12), from the Paraframe-inspired grab pack (`/workspace/grab/UzwV9bPlAgA/`; Drive `184Chcy8LjWAxxu0TXgQuNU2qVnqTtoC2`). On 22 Nov 2026, ~11:00 Asia/Shanghai (S13), Enrico approved the eight-screen browser-first flow (BW-01–BW-08) in Drive `1ni_DhB6mIYthUK0adgQ9Q0jkxrSZ9Hn6` and asked Design Desk to draw the wireframes. That document is the approved screen flow for this workspace, not merely a proposal. This approval is screen flow and wireframes only: it does not authorize implementation, and it does not lift deferred local-project integration. Design Desk owns the wireframes (offline editable + PDF, because of the room sign-in restriction); this spec does not duplicate those drawings. Editable offline wireframes and the 17-page PDF were delivered on 22 Nov 2026. They remain the prior eight-screen baseline and need the v0.2.0 shell revision. This is not a separate app. Browser-first and deferred local-project integration apply to **this workspace**; they do not approve §12 architecture, the product name, a domain, or hosting.
+Included in this same product on 22 Nov 2026 (S12), from the Paraframe-inspired grab pack (`/workspace/grab/UzwV9bPlAgA/`; owner's Drive). On 22 Nov 2026, ~11:00 Asia/Shanghai (S13), the owner approved the eight-screen browser-first flow (BW-01–BW-08) in owner's Drive and asked Design Desk to draw the wireframes. That document is the approved screen flow for this workspace, not merely a proposal. This approval is screen flow and wireframes only: it does not authorize implementation, and it does not lift deferred local-project integration. Design Desk owns the wireframes (offline editable + PDF, because of the room sign-in restriction); this spec does not duplicate those drawings. Editable offline wireframes and the 17-page PDF were delivered on 22 Nov 2026. They remain the prior eight-screen baseline and need the v0.2.0 shell revision. This is not a separate app. Browser-first and deferred local-project integration apply to **this workspace**; they do not approve §12 architecture, the product name, a domain, or hosting.
 
 The approved frame-workspace slice loop is: import an entitled reference image, inspect its style, request alternatives, compare revisions, review changes, accept a baseline, and download a coding handoff. Supporting parity for all 62 reference FRs and 27 ATs is in `FRAME-WORKSPACE-PARITY.md` (not a separate PRD). Evidence classes (observed / official / narrated / proposed) and the pack's UNKNOWN items (capture-mode completeness; live MCP) are preserved. Do not adopt the reference product's brand, assets, wording, or code.
 
@@ -822,9 +822,9 @@ Components: `blocks/kpi-board`, `components/kpi-tiles`, `components/line-chart`,
 
 ### 8.2 D-ENG Engineering (CAD/BIM) — Engineering pack v0.1
 
-**Owner: CAD/BIM Desk.** Merged in v0.1.2 from CAD/BIM Desk's Engineering pack v0.1 (2026-11-17), Drive file 1-61R50ye1BKIiDxcs002TrEvoOXSew1J, box copy `inputs/engineering-pack-prd-v0.1.md`. All requirement, test, ticket, ADR, spike and performance IDs are CAD/BIM Desk's and are kept unchanged. Replaces the v0.1 placeholder "Owner: CAD/BIM Desk — pending".
+**Owner: CAD/BIM Desk.** Merged in v0.1.2 from CAD/BIM Desk's Engineering pack v0.1 (2026-11-17), owner's Drive, box copy `inputs/engineering-pack-prd-v0.1.md`. All requirement, test, ticket, ADR, spike and performance IDs are CAD/BIM Desk's and are kept unchanged. Replaces the v0.1 placeholder "Owner: CAD/BIM Desk — pending".
 
-**Where the rest lives.** This section holds the pack's scope, hard rules, the 66 EARS requirements, the acceptance index (requirement → ticket → test) and the performance tests. The full pack — scoping interview and starter PRD (Simple), data model, component specs, file formats, implementation plan, spikes, the 36 thin-slice tickets with the 81 failing-first tests in Given/When/Then, and the 7 ADRs (Expert), source notes and the pack's own open questions — is the companion file [ENGINEERING-PACK-v0.1.md](ENGINEERING-PACK-v0.1.md) in the same folder (Drive: https://drive.google.com/file/d/1HFJzDSscZlQ0eqJRBD8LcA_TCKWxq_fi/view). The companion is the pack verbatim plus a header; if requirement text differs, this section wins and the change is logged in CHANGELOG-PRD.md.
+**Where the rest lives.** This section holds the pack's scope, hard rules, the 66 EARS requirements, the acceptance index (requirement → ticket → test) and the performance tests. The full pack — scoping interview and starter PRD (Simple), data model, component specs, file formats, implementation plan, spikes, the 36 thin-slice tickets with the 81 failing-first tests in Given/When/Then, and the 7 ADRs (Expert), source notes and the pack's own open questions — is the companion file [ENGINEERING-PACK-v0.1.md](ENGINEERING-PACK-v0.1.md) in the same folder (Drive: owner's Drive). The companion is the pack verbatim plus a header; if requirement text differs, this section wins and the change is logged in CHANGELOG-PRD.md.
 
 **Pack ID spaces (from its merge note).** FR-ENG-VWR/QTO/4D5D-### (requirements), ENG-T-## (tickets), T-<module>-###-n (tests, e.g. T-VWR-001-1), ENG-ADR-### (decisions), ENG-SP-# (spikes), ENG-PERF-# (performance). Pack references "Q1…Q17" mean the pack's own questions (read as ENG-Q1…ENG-Q17 in this document), "L1…L11" its licence rules, and "S0…S6" its build stages (read as ENG stage S0…S6; not the §0 decisions S1…S10 or the S01…S26 screens). The ID check is in §8.2.7.
 
@@ -1108,7 +1108,7 @@ Performance tests (pack §10; thresholds proposed, to verify in spike, ENG-Q7):
 | ENG-PERF-1 Parse | Given the Superstructure fixture on the CI runner, When web-ifc parses it in a fresh Node process, Then parse time and peak RSS are recorded and compared with the baseline. | Parse ≤ 276 ms × 1.5; fail the build on a larger regression (factor is a proposal) |
 | ENG-PERF-2 Convert | Given the same fixture, When IfcImporter converts it to `.frag`, Then convert time, `.frag` size and peak RSS are recorded. | Convert ≤ 5.2 s × 1.5; peak RSS ≤ 515 MB × 1.2; `.frag` size within ±10 % of 3.731 MB (all proposals) |
 | ENG-PERF-3 Counts | Given each fixture, When parsed, Then IfcElement counts equal 269, 6,421 and 5,466 and `IfcTask` is 0. | Exact |
-| ENG-PERF-4 Browser load (spike) | Given the three `.frag` files served from our origin, When loaded alone and federated in Chromium, Then time to first triangle, JS heap, GPU memory (where measurable) and frame time during orbit are recorded. | No threshold until measured; Enrico sets it from the spike result |
+| ENG-PERF-4 Browser load (spike) | Given the three `.frag` files served from our origin, When loaded alone and federated in Chromium, Then time to first triangle, JS heap, GPU memory (where measurable) and frame time during orbit are recorded. | No threshold until measured; the owner sets it from the spike result |
 | ENG-PERF-5 4D step (spike) | Given the ENG-SP-3 date file, When playback steps once per second, Then frame time per step is recorded. | No threshold until measured |
 
 #### 8.2.9 Phasing (pack §12)
@@ -1126,11 +1126,11 @@ yravg UI gaps from pack §6.2 are GAP-18…GAP-27 in §7.4.2 (ModelViewer is the
 
 Free vs Paid (ASSUMPTION, Product Desk; the pack defines no tiers): in this product, Free includes the Engineering core pack (Module A v1 requirements and the Simple-layer interview); Pro adds Modules B and C, v2/later items, and the companion's tickets, tests and ADRs as generated tickets. The pack's own L1 ("paid, closed-source product") is about the user's planned app, not our tiers. The Bexel sample fixtures cannot be offered as a Free demo until redistribution is cleared (ENG-Q8).
 
-Questions for Enrico promoted to §13: Q-24 (2D takeoff v1 or v2; the draft says v2) and Q-25 (schedule generator overlap with Solvarium). The pack ranks ENG-Q1, Q4, Q7, Q2, Q10 as most important; the rest stay in the companion §18.
+Questions for the owner promoted to §13: Q-24 (2D takeoff v1 or v2; the draft says v2) and Q-25 (schedule generator overlap with Solvarium). The pack ranks ENG-Q1, Q4, Q7, Q2, Q10 as most important; the rest stay in the companion §18.
 
 ### 8.3 D-PC Project control (EPCI)
 
-Basis: Enrico's EPCI planning and project-control practice; common EPCI usage (AACE, PMI, DCMA 14-point assessment). Defaults are reviewed by Enrico before v1 (Q-12). v0.1.1 adds items proposed by Template Desk [/workspace/etsy-launch/prd-studio-packs/PACK-REVIEW-v0.1.md], marked "(TD)". Pack requirements are written in EARS and numbered in blocks of ten per subsection; the old → new id map is in CHANGELOG-PRD.md (v0.1.1).
+Basis: the owner's EPCI planning and project-control practice; common EPCI usage (AACE, PMI, DCMA 14-point assessment). Defaults are reviewed by the owner before v1 (Q-12). v0.1.1 adds items proposed by Template Desk [/workspace/etsy-launch/prd-studio-packs/PACK-REVIEW-v0.1.md], marked "(TD)". Pack requirements are written in EARS and numbered in blocks of ten per subsection; the old → new id map is in CHANGELOG-PRD.md (v0.1.1).
 
 #### 8.3.1 Document register (MDR)
 
@@ -1254,13 +1254,13 @@ Domain property tests seeded into generated plans (from the pyramid skill): an e
 
 Components: `components/schedule-chart`, `components/dcma-bars`, `blocks/schedule-dashboard`, `components/milestone-stepper`, `components/data-table`; Gantt = GAP-14, transmittal composer = GAP-15, CBS tree = GAP-16, bridge = GAP-17.
 
-Localisation for D-PC (Bahasa, local practice): field labels in Bahasa with the English term kept (e.g. "Transmittal / Surat pengantar dokumen", "Daftar punch"); Indonesian national holidays seeded in calendars (REQ-PC-044); IDR as default currency with PPN as a separate cost line; bilingual transmittal cover sheet. Client- or regulator-specific codes (e.g. oil and gas contract numbering) are **TO VERIFY** with Enrico (Q-12).
+Localisation for D-PC (Bahasa, local practice): field labels in Bahasa with the English term kept (e.g. "Transmittal / Surat pengantar dokumen", "Daftar punch"); Indonesian national holidays seeded in calendars (REQ-PC-044); IDR as default currency with PPN as a separate cost line; bilingual transmittal cover sheet. Client- or regulator-specific codes (e.g. oil and gas contract numbering) are **TO VERIFY** with the owner (Q-12).
 
 Not adopted in v0.1.1 (Template Desk review §1.2, outside this bump's scope): a "started / internal check" progress step with weights held in the rule-of-credit set, and moving forecast dates by the review period on a code 3 return. Both are open in Q-12.
 
 ### 8.4 D-FIN Financial analysis
 
-**Decision S10.** Approved by Enrico in the Etsy Launch: Build room, 17 Nov 2026, as reported by Template Desk and Grok Bot. (1) Q-13 approved: D-FIN is refocused on contractor project finance. (2) D-FIN gets a second module: simple stock analysis from public sources only. Source: [/workspace/etsy-launch/prd-studio-packs/PACK-REVIEW-v0.3.md §2, §2A] (rev 3, replaces rev 2). No finance reviewer is named yet; every module 1 item stays TO VERIFY with one (TV-13).
+**Decision S10.** Approved by the owner in the Etsy Launch: Build room, 17 Nov 2026, as reported by Template Desk and Grok Bot. (1) Q-13 approved: D-FIN is refocused on contractor project finance. (2) D-FIN gets a second module: simple stock analysis from public sources only. Source: [/workspace/etsy-launch/prd-studio-packs/PACK-REVIEW-v0.3.md §2, §2A] (rev 3, replaces rev 2). No finance reviewer is named yet; every module 1 item stays TO VERIFY with one (TV-13).
 
 Old v0.1 items REQ-FIN-001…003 (trial-balance import, three linked statements, corporate ratio set) and AC-FIN-1 are removed; see CHANGELOG-PRD.md v0.1.2. Their IDs are retired, not reused.
 
@@ -1514,7 +1514,7 @@ These are test specifications, not executed app results. Every test needs fixtur
 | AC-SPK-15 | Disconnect during save and generation. Show pending/failed state, preserve local draft and accepted baseline, recover without duplicate job/charge, and reauthorize after session expiry. Conflicting saves require review. | R-CAN-6,R-SEC-6,R-MOD-8 | S29,S35,S36 | SPK-T-03,09 |
 | AC-SPK-16 | Generate one fixture project per domain. All baseline requirement IDs and linked pack criteria remain present; financial/stock source/license/reviewer gaps stay visible. Complete one fixture chain through release readiness with recorded build/test evidence. No deployment occurs. | §8,R-EVD-1–6,R-WF-6 | S07,S15,S18,S37 | SPK-T-10 |
 
-## 11. Build tickets (Enrico's ship order)
+## 11. Build tickets (the owner's ship order)
 
 Historical T-ID groups below retain their original labels for traceability. The current stage header and release-readiness order is Planning → Specification → Design → Frontend → Backend → Integration → Testing → Deployment. §11.1 defines the consolidation slices. TestSprite is an optional test tool, not proof of passing tests. Local-execution tickets are later-adapter scope, not browser-MVP commitments.
 
@@ -1554,13 +1554,13 @@ Target scope covers the full lifecycle now as contracts and evidence. M1 is the 
 |---|---|---|
 | T-101 | Run validation interviews V1–V6 (§1.2); write findings | Product Desk |
 | T-102 | Decide Free/Paid limits and IDR prices (§7.8.1) | Product Desk |
-| T-103 | Confirm product name and "Spec" vs "PRD" | Enrico / Launch Desk |
+| T-103 | Confirm product name and "Spec" vs "PRD" | The owner / Launch Desk |
 | T-104 | Repo audit: yravg repos, why yraveragehub and studio stalled; write §12 | Build Desk |
-| T-105 | Define the yravgbuilder export contract (R-KEEP-4) and the canvas-to-app step; needs canvas-to-app source location (Q-11) | Build Desk / Enrico |
+| T-105 | Define the yravgbuilder export contract (R-KEEP-4) and the canvas-to-app step; needs canvas-to-app source location (Q-11) | Build Desk / the owner |
 | T-106 | Design Desk maps §7.4.3 screens; confirm/close GAP-01…29 (done in Design v0.1; S26 scope pending Q-29) | Design Desk |
-| T-107 | Pack reviews: Enrico (D-PC), CAD/BIM Desk owns D-ENG (merged v0.1.2; merge its Activity/Schedule/CostItem with D-PC entities), reviewer TBD (D-FIN modules 1–2), Gus Bavia method mapping check (D-DASH) | Product Desk |
+| T-107 | Pack reviews: the owner (D-PC), CAD/BIM Desk owns D-ENG (merged v0.1.2; merge its Activity/Schedule/CostItem with D-PC entities), reviewer TBD (D-FIN modules 1–2), Gus Bavia method mapping check (D-DASH) | Product Desk |
 | T-108 | Clean-room wording, thresholds, retention; Terms and Privacy in Bahasa | Launch Desk |
-| T-109 | Signed-in NPA/DPAI tour with Enrico's OK in a 1:1 chat, to clear TO VERIFY items | Enrico / Grabber |
+| T-109 | Signed-in NPA/DPAI tour with the owner's OK in a 1:1 chat, to clear TO VERIFY items | The owner / Grabber |
 | T-110 | Write domain question banks for the interview (four domains) | Product Desk + pack owners |
 | T-111 | Benchmark-before plan (interview latency, generation time, page loads) | Build Desk |
 | T-112 | Canvas step for our own screens (canvas-to-app) and approval | Design Desk |
@@ -1645,9 +1645,9 @@ v0.2.0 maps the approved principles, add-feature cycle, post-build checks, desig
 
 ### 12.1 Product location decision
 
-Enrico's 22 Nov 2026 request specifies a **revamp of existing yravgHub Studio**. The old audit's suggestion to build inside Solvarium is no longer the default product-location recommendation. No repository, framework migration, database replacement, or hosting change is approved by this PRD revision.
+The owner's 22 Nov 2026 request specifies a **revamp of existing yravgHub Studio**. The old audit's suggestion to build inside Solvarium is no longer the default product-location recommendation. No repository, framework migration, database replacement, or hosting change is approved by this PRD revision.
 
-The earlier audit recorded Hub Studio/hub-build work only on Enrico's ROG computer. That is a dated finding, not evidence of today's pushed or deployed state. Enrico's current report of a working infinite canvas takes precedence as product context, but does not prove which branch or runtime supplies it. This task made no clone, code audit, repo edits, or registered-computer changes.
+The earlier audit recorded Hub Studio/hub-build work only on the owner's ROG computer. That is a dated finding, not evidence of today's pushed or deployed state. The owner's current report of a working infinite canvas takes precedence as product context, but does not prove which branch or runtime supplies it. This task made no clone, code audit, repo edits, or registered-computer changes.
 
 ### 12.2 Reuse before architecture changes
 
@@ -1678,7 +1678,7 @@ Browser-first MVP uses permitted file upload, browser-hosted generation where co
 | ID | Question | Owner | Needed by |
 |---|---|---|---|
 | Q-01 | Fifth "General app" domain, or do the four cover every idea? | Product Desk | T-102 |
-| Q-02 | Product name; "Spec" vs "PRD" for the artifact | Enrico (Product Desk / Launch Desk) | T-103 |
+| Q-02 | Product name; "Spec" vs "PRD" for the artifact | The owner (Product Desk / Launch Desk) | T-103 |
 | Q-03 | Approve new Free/BYOK/Hosted structure, limits, IDR prices, and credit conversion; old §7.8.1 amounts withdrawn as defaults | Product Desk | T-102 |
 | Q-04 | Auto-renew: 30-day passes only, or tokenised GoPay/card renewals? | Product Desk | T-312 |
 | Q-05 | Midtrans methods beyond QRIS at launch (GoPay, VA, OVO, DANA, ShopeePay) | Product Desk | T-312 |
@@ -1686,31 +1686,31 @@ Browser-first MVP uses permitted file upload, browser-hosted generation where co
 | Q-07 | Confirm/close GAP-01…28; fill §7.4.3 **Closed v0.1.4.** Answered by Design v0.1 (GAPS.md, COMPONENT-MAP.md); the catalogue count is reconciled in M6 (per Design Desk, relayed by Grok Bot, 19 Nov 2026) | Design Desk | closed |
 | Q-08 | Reference input in the onboarding box, or only after the first pitch? | Product Desk | T-203 |
 | Q-09 | Is a token viewer among the 42 Foundations items? | Design Desk | T-208 |
-| Q-10 | yravgbuilder export: transport (file, MCP, CLI) and whether `AREA-NNN` rows replace our ticket ids in the export (definition now known, §7.7.2) | Build Desk / Enrico | T-105 |
-| Q-11 | canvas-to-app: where is the plugin source? Push it into `yra-skills` (audit decision 6)? | Enrico | T-112 |
-| Q-12 | D-PC defaults (progress weights, review codes, review days, vendor document offsets, punch categories) and any client/regulator codes. Also from Template Desk: add a "started / internal check" progress step and hold weights in the rule-of-credit set? Shift forecast dates by the review period on a code 3 return? | Product Desk (Enrico) | T-107 |
-| Q-13 | D-FIN: keep corporate finance, or refocus on contractor project finance? **Closed v0.1.2:** refocus approved (S10: approved by Enrico in the Etsy Launch: Build room, 17 Nov 2026, as reported by Template Desk and Grok Bot). Reviewer still unnamed (T-107) | Enrico (Product Desk) | closed |
+| Q-10 | yravgbuilder export: transport (file, MCP, CLI) and whether `AREA-NNN` rows replace our ticket ids in the export (definition now known, §7.7.2) | Build Desk / the owner | T-105 |
+| Q-11 | canvas-to-app: where is the plugin source? Push it into `yra-skills` (audit decision 6)? | The owner | T-112 |
+| Q-12 | D-PC defaults (progress weights, review codes, review days, vendor document offsets, punch categories) and any client/regulator codes. Also from Template Desk: add a "started / internal check" progress step and hold weights in the rule-of-credit set? Shift forecast dates by the review period on a code 3 return? | Product Desk (the owner) | T-107 |
+| Q-13 | D-FIN: keep corporate finance, or refocus on contractor project finance? **Closed v0.1.2:** refocus approved (S10: approved by the owner in the Etsy Launch: Build room, 17 Nov 2026, as reported by Template Desk and Grok Bot). Reviewer still unnamed (T-107) | The owner (Product Desk) | closed |
 | Q-14 | Bundle with another yravg product? (Do not lead with it [CMP §2]) | Launch Desk | after V2 |
 | Q-15 | Models, BYOK, cost per spec in IDR; review on a different vendor | Build Desk | T-305 |
-| Q-16 | Read NPA's signed-in `/plan` (needs Enrico's OK in a 1:1 chat)? | Enrico | T-109 |
-| Q-17 | Product location resolved to revamp existing yravgHub Studio per 22 Nov request. Exact repo/branch, unpushed state, deployment revision, and reuse map still require audit. Solvarium is not the selected migration target | Enrico / Build Desk | T-104 |
+| Q-16 | Read NPA's signed-in `/plan` (needs the owner's OK in a 1:1 chat)? | The owner | T-109 |
+| Q-17 | Product location resolved to revamp existing yravgHub Studio per 22 Nov request. Exact repo/branch, unpushed state, deployment revision, and reuse map still require audit. Solvarium is not the selected migration target | The owner / Build Desk | T-104 |
 | Q-18 | Launch channels (Indonesian Discord/WhatsApp/YouTube, Etsy listing) | Launch Desk | after V2 |
 | Q-19 | Allow public YouTube / Drive links as recordings? Prefer official `.md` / `llms.txt` twins over screenshots for text facts? [REF §11] | Product Desk | T-308 |
 | Q-20 | Independent review default: server mode (diff sent, opt-in) or local mode (user's key)? | Product Desk / Build Desk | T-310 |
 | Q-21 | v0.2.0 uses eight workflow stages as navigation and labels while retaining dependent vertical slices. Confirm any alternative generated-plan presentation before changing it. | Product Desk / Build Desk | T-305 |
 | Q-22 | Interview stop rule (12 questions) and question-bank size per domain | Product Desk | T-110 |
-| Q-23 | Engineering pack open questions ENG-Q2…ENG-Q17 (companion §18) and the human licence review (pack L11) | CAD/BIM Desk / Enrico | T-107 |
-| Q-24 | 2D PDF takeoff (FR-ENG-QTO-011…019): v1 or v2? The pack draft says v2 (ENG-Q1) | Enrico | T-107 |
-| Q-25 | Schedule generator (FR-ENG-4D5D-025…028): how far does it overlap Solvarium Intelligent Scheduling (SOL-IS)? One shared engine, or does the pack call Solvarium? (ENG-Q4) | Enrico | T-107 |
-| Q-26 | Rust-first core and TS/JS UI are owner directions. Audit exact Studio reuse boundaries, Rust crates, contracts and a non-destructive staged migration; do not rewrite the working frontend | Enrico | T-104 |
-| Q-27 | Fix GitHub Actions billing, or keep the gate on the VPS (R-KEEP-7, RK-01; audit decision 2) | Enrico | T-111 |
-| Q-28 | Accent colour: Design Desk proposes clay `#B4532A`, scoped to Studio; the earlier Solvarium comparison used teal `#0A7473` (Design v0.1 HANDOFF §5 Q-DD-01; the audit also saw navy in places). Spec picks neither; clay stays Design's working default until Enrico decides | Enrico | T-208 |
-| Q-29 | S26 Plan control: confirm or overrule Design's PROPOSAL (per Design Desk, relayed by Grok Bot, 19 Nov 2026): S26 shows the build plan of the user's app (tickets planned vs done, credits budgeted vs spent), and the user's project schedule and cost views stay in the Project control pack. Design's proposal is the default until Enrico decides | Enrico (Product Desk) | T-106 |
-| Q-30 | Which exact OpenDesign units, if any, merit selective compatible-licensed reuse after per-file/transitive review, and whether broader codebase-refresh/plugin architecture is needed. Eligible component reuse is allowed/preferred under R-REU; a whole fork, desktop stack or automatic refresh is not approved. | Enrico | — |
-| Q-31 | Frame-workspace generation provider, storage contract, and any later share-link or cross-device sync behaviour. The eight-screen flow is approved (S13); provider/storage are still required before implementation, which this approval does not authorize. Model vendor names from the reference product are not adopted. | Enrico | — |
+| Q-23 | Engineering pack open questions ENG-Q2…ENG-Q17 (companion §18) and the human licence review (pack L11) | CAD/BIM Desk / the owner | T-107 |
+| Q-24 | 2D PDF takeoff (FR-ENG-QTO-011…019): v1 or v2? The pack draft says v2 (ENG-Q1) | The owner | T-107 |
+| Q-25 | Schedule generator (FR-ENG-4D5D-025…028): how far does it overlap Solvarium Intelligent Scheduling (SOL-IS)? One shared engine, or does the pack call Solvarium? (ENG-Q4) | The owner | T-107 |
+| Q-26 | Rust-first core and TS/JS UI are owner directions. Audit exact Studio reuse boundaries, Rust crates, contracts and a non-destructive staged migration; do not rewrite the working frontend | The owner | T-104 |
+| Q-27 | Fix GitHub Actions billing, or keep the gate on the VPS (R-KEEP-7, RK-01; audit decision 2) | The owner | T-111 |
+| Q-28 | Accent colour: Design Desk proposes clay `#B4532A`, scoped to Studio; the earlier Solvarium comparison used teal `#0A7473` (Design v0.1 HANDOFF §5 Q-DD-01; the audit also saw navy in places). Spec picks neither; clay stays Design's working default until the owner decides | The owner | T-208 |
+| Q-29 | S26 Plan control: confirm or overrule Design's PROPOSAL (per Design Desk, relayed by Grok Bot, 19 Nov 2026): S26 shows the build plan of the user's app (tickets planned vs done, credits budgeted vs spent), and the user's project schedule and cost views stay in the Project control pack. Design's proposal is the default until the owner decides | The owner (Product Desk) | T-106 |
+| Q-30 | Which exact OpenDesign units, if any, merit selective compatible-licensed reuse after per-file/transitive review, and whether broader codebase-refresh/plugin architecture is needed. Eligible component reuse is allowed/preferred under R-REU; a whole fork, desktop stack or automatic refresh is not approved. | The owner | — |
+| Q-31 | Frame-workspace generation provider, storage contract, and any later share-link or cross-device sync behaviour. The eight-screen flow is approved (S13); provider/storage are still required before implementation, which this approval does not authorize. Model vendor names from the reference product are not adopted. | The owner | — |
 
-| Q-32 | Exact hosted/BYOK providers, rate cards, credit conversion, margin, cap defaults, refund policy, renewal, and team billing unit | Enrico | Before paid build |
-| Q-33 | Revised S35–S37 drawings and mapping of existing Studio components and persistence | Enrico / design review | Before implementation |
+| Q-32 | Exact hosted/BYOK providers, rate cards, credit conversion, margin, cap defaults, refund policy, renewal, and team billing unit | The owner | Before paid build |
+| Q-33 | Revised S35–S37 drawings and mapping of existing Studio components and persistence | The owner / design review | Before implementation |
 | Q-34 | Board limits, latency, storage retention, regional data transfer, backups, recovery objectives | Engineering audit / owner | Before implementation acceptance |
 
 ---
@@ -1719,7 +1719,7 @@ Browser-first MVP uses permitted file upload, browser-hosted generation where co
 
 | # | Item | Why |
 |---|---|---|
-| TV-01 | Spekin working name used for this consolidation; final public brand/domain and artifact terminology remain owner decisions | Undecided (Enrico) |
+| TV-01 | Spekin working name used for this consolidation; final public brand/domain and artifact terminology remain owner decisions | Undecided (the owner) |
 | TV-02 | NPA live `/plan` flows (clarifying questions, PRD chapters, versioning, task creation) | Only mocks, npm README, YouTube [NPA:GAPS.md] |
 | TV-03 | NPA live prices and checkout (Midtrans Snap, BSI transfer, QRIS at the till) | Cards did not render [NPA:GAPS.md; CMP §2] |
 | TV-04 | NPA sign-in methods beyond Google | Only Google seen (FR-NPA-037) |
@@ -1729,10 +1729,10 @@ Browser-first MVP uses permitted file upload, browser-hosted generation where co
 | TV-08 | BrainGrid signed-in app and how Verify scores | Signup not opened (FR-BG-028) |
 | TV-09 | yravg UI Foundations coverage of a token viewer (GAP-10) | Not in llms-full.txt |
 | TV-10 | yravgbuilder plugin definition resolved v0.1.2 from the repo audit (§7.7.2) | `yra-skills/yravgbuilder` v0.1.1 [audit §(d)] |
-| TV-11 | canvas-to-app: definition known (§7.7.3); **source location pending Enrico** | In no GitHub repo [audit §(d)] |
+| TV-11 | canvas-to-app: definition known (§7.7.3); **source location pending the owner** | In no GitHub repo [audit §(d)] |
 | TV-12 | D-ENG items the pack marks **assumption** or "proposed, to verify in spike" (IDR default, tolerances, perf thresholds, `Qto_*` in viewer, BCF colour/clip restore) | CAD/BIM Desk pack §19; spikes ENG-SP-1…4 |
 | TV-13 | D-FIN module 1 (REQ-FIN-004…015): PSAK 72 basis, PPN/PPh rates, all depth until a finance reviewer clears it | No source on box; reviewer unnamed |
-| TV-14 | D-PC client/regulator-specific codes | Need Enrico |
+| TV-14 | D-PC client/regulator-specific codes | Need the owner |
 | TV-15 | Clean-room legal wording and thresholds | Launch Desk / legal |
 | TV-16 | D-FIN module 2 sources: IDX reports and announcements, company IR PDFs, end-of-day price feed — terms of use for a paid product | Not checked (§8.4.5) |
 | TV-17 | Whether OJK rules on investment advice / investment content apply to the stock module | Legal check (§8.4.6) |
@@ -1749,14 +1749,14 @@ Browser-first MVP uses permitted file upload, browser-hosted generation where co
 
 | Source | Where |
 |---|---|
-| NPA pack | `/workspace/grab/ngodingpakeai/` (HANDOFF.md, PRD.md, INVENTORY.md, GAPS.md); Drive 1t0w_x2j-Cm5DZ-bZI7nEs7UZ7kxSmpAR |
-| DPAI pack | `/workspace/grab/desainpakeai/` (HANDOFF.md, PRD.md, FEATURE-INVENTORY.md, GAPS.md, research/web/api_api_billing_plans.json); Drive 1kVXWVAVisSW2Tt5PZ4KXM1j4Pkjl_TQa |
-| CodeGuide HANDOFF / PRD / PARITY | Drive 1l6VmJQKyJqa3pJ9ed5BoB_Gzb1mB2N8L, 1CDM8tEnkXhfvD0FPekcISb_5BQkaUQWI, 19jxbrxdx716DsuSHrDQS4Q9aJ2fmGAhH; box `inputs/codeguide-*` and `/workspace/grab/codeguide/` |
+| NPA pack | `/workspace/grab/ngodingpakeai/` (HANDOFF.md, PRD.md, INVENTORY.md, GAPS.md); owner's Drive |
+| DPAI pack | `/workspace/grab/desainpakeai/` (HANDOFF.md, PRD.md, FEATURE-INVENTORY.md, GAPS.md, research/web/api_api_billing_plans.json); owner's Drive |
+| CodeGuide HANDOFF / PRD / PARITY | owner's Drive; box `inputs/codeguide-*` and `/workspace/grab/codeguide/` |
 | BrainGrid inventory | `/workspace/grab/braingrid/INVENTORY.md` (FR-BG-001…028) |
 | Taskmaster inventory | `/workspace/grab/taskmaster/INVENTORY.md` (FR-TM-001…023) |
-| PRD-tool comparison v2 | Drive 1oWLYFhaYRXu0kMGm08-gXuDTCq9beJ0K (PDF 1w6RipeO-oOzI8oefeFoAXJl_r0EDeq8h); box `inputs/COMPARISON-v2.md` |
-| SPEC-START-FROM-REFERENCE | Drive 1ukaKCBp8dtVuC68tRV5mdy21NKwgWHVr; box `inputs/SPEC-START-FROM-REFERENCE.md` |
-| Method note (Pocock, Vercel) | Drive 1V2oFoMAdRiGHJDjF3-7re4uEPpQTBwiX; box `inputs/POCOCK-VERCEL.md` |
+| PRD-tool comparison v2 | owner's Drive; box `inputs/COMPARISON-v2.md` |
+| SPEC-START-FROM-REFERENCE | owner's Drive; box `inputs/SPEC-START-FROM-REFERENCE.md` |
+| Method note (Pocock, Vercel) | owner's Drive; box `inputs/POCOCK-VERCEL.md` |
 | Vercel, "What is spec-driven development?" | https://vercel.com/i/spec-driven-development (published 26 Oct 2026; updated 9 Nov 2026) |
 | Vercel Academy, "Write the Supported Spec" | https://vercel.com/academy/creating-a-software-factory/write-the-supported-spec |
 | Vercel, software factory with eve | https://vercel.com/kb/guide/eve-software-factory |
@@ -1766,33 +1766,33 @@ Browser-first MVP uses permitted file upload, browser-hosted generation where co
 | Poteto pyramid | `/home/box/agent-data/workflows/yravg-trust-ladder/SKILL.md`; `/workspace/grab/nod/repos/yravgSolvarium/docs/POTETO-PYRAMID.md` |
 | canvas-to-app | `/workspace/research/yravgSolvarium/docs/plans/community-plugins-agent.prd.md` §11 |
 | CAD/BIM scope, yrabuilder mention | `/home/box/agent-data/agents/79da4f08-035c-487c-a4e9-94e3c045b350/profile.json` |
-| Engineering pack v0.1 (CAD/BIM Desk) | Drive 1-61R50ye1BKIiDxcs002TrEvoOXSew1J (folder 16GHwQgMrBqobcRvdHeppCkxiL_eU2UtE); box `inputs/engineering-pack-prd-v0.1.md`; companion `ENGINEERING-PACK-v0.1.md` |
-| PRD Studio Design v0.1 (Design Desk) | Drive folder 1pz544Ku3x-8khIq8xZ6Kk03N5S-FGTHk: HANDOFF 1t1mxeLQ7VwlIvSOsyE30SL9F3moB0ZJQ, GAPS 1iFefkwte3wTTxrdqCnK2TBgsHLLaYuMQ, COMPONENT-MAP 1Hc5yEUCMibbOSpR4y1uqtxYCMKTwteV2 (COMPONENT-MAP and HANDOFF updated 19 Nov 2026); box `inputs/design-v0.1-*.md` |
-| Template Desk pack review rev 3 | `/workspace/etsy-launch/prd-studio-packs/PACK-REVIEW-v0.3.md`; Drive 1uD9zhGzcEb3a-29yktBNwmDOFERx9Fuq (replaces rev 2, Drive 1Ar9cu9QIzakWASsiRJVGv-yvXC73TxnE) |
-| yravg repo audit (Grok Bot, 17 Nov 2026) | Drive 19i2faPpr_bh5ZcJJj9ofuIiSsfnum_Cf (folder 1bKCgu10Niptl3z_lWg1n8db0lvNbU2nl); box `inputs/repo-audit-ARCHITECTURE-REFLECTION.md` |
+| Engineering pack v0.1 (CAD/BIM Desk) | owner's Drive; box `inputs/engineering-pack-prd-v0.1.md`; companion `ENGINEERING-PACK-v0.1.md` |
+| PRD Studio Design v0.1 (Design Desk) | owner's Drive: HANDOFF owner's Drive, GAPS owner's Drive, COMPONENT-MAP owner's Drive (COMPONENT-MAP and HANDOFF updated 19 Nov 2026); box `inputs/design-v0.1-*.md` |
+| Template Desk pack review rev 3 | `/workspace/etsy-launch/prd-studio-packs/PACK-REVIEW-v0.3.md`; owner's Drive (replaces rev 2, owner's Drive) |
+| yravg repo audit (Grok Bot, 17 Nov 2026) | owner's Drive; box `inputs/repo-audit-ARCHITECTURE-REFLECTION.md` |
 | yravgbuilder | `/workspace/repo-audit/clones/yra-skills/yravgbuilder/` (README.md, CHANGELOG.md) |
-| Spec Kit learn pack (21–22 Nov 2026; NOTES + approved D1–D3; not D4) | `/workspace/learn/7aUEjRw0yzk/` (`NOTES.md`, `SPEC-DELTA-PROPOSAL.md`); Drive folder 1FTZugadf1wm3RhGu3Q6je90z6A_7jmJv |
-| Paraframe-inspired workspace pack (clean-room reference) | `/workspace/grab/UzwV9bPlAgA/`; Drive folder 184Chcy8LjWAxxu0TXgQuNU2qVnqTtoC2; parity map `FRAME-WORKSPACE-PARITY.md` |
-| Browser-first frame workspace eight-screen flow (approved 22 Nov 2026, S13; originally written 21 Nov 2026; not a Design v0.1 replacement). Prior editable wireframes and PDF delivered 22 Nov 2026; v0.2.0 shell revision pending. Not an implementation approval. | https://docs.google.com/document/d/1ni_DhB6mIYthUK0adgQ9Q0jkxrSZ9Hn6/edit ; box `context/Browser-Frame-Workspace-Design-v0.1.md` |
-| Design Desk Spec Kit UX delta proposal (21 Nov 2026; optional S07/S08/S18 alignment only; canonical design unchanged; D4 not applied) | https://docs.google.com/document/d/18lecBuedqdXet_P1NuIjc_PTTnXIAAyH/edit |
+| Spec Kit learn pack (21–22 Nov 2026; NOTES + approved D1–D3; not D4) | `/workspace/learn/7aUEjRw0yzk/` (`NOTES.md`, `SPEC-DELTA-PROPOSAL.md`); owner's Drive |
+| Paraframe-inspired workspace pack (clean-room reference) | `/workspace/grab/UzwV9bPlAgA/`; owner's Drive; parity map `FRAME-WORKSPACE-PARITY.md` |
+| Browser-first frame workspace eight-screen flow (approved 22 Nov 2026, S13; originally written 21 Nov 2026; not a Design v0.1 replacement). Prior editable wireframes and PDF delivered 22 Nov 2026; v0.2.0 shell revision pending. Not an implementation approval. | owner's Drive ; box `context/Browser-Frame-Workspace-Design-v0.1.md` |
+| Design Desk Spec Kit UX delta proposal (21 Nov 2026; optional S07/S08/S18 alignment only; canonical design unchanged; D4 not applied) | owner's Drive |
 | Open Design documented method (identified public repo; no clone; not runtime-verified; license/architecture not adopted) | https://github.com/nexu-io/open-design (pinned `e033aad1d15a9d4084316e5223f2c6597fd32619`); `OPEN-DESIGN-RESEARCH.md` |
 | Later research reconciled in v0.2.0 | Combined Onlook/UI SDK study informs behavior contracts and actual-state checks. Video frames remain unverified. Local runtime bridges and real-code canvas remain deferred. |
 
 ### 15.1 Consolidation sources checked 22 November 2026
 
-- Latest source PRD v0.1.6: https://drive.google.com/file/d/1hF0u701x-POCnGGvPe0ck3fDmmE-3UwL/view . Newer than the v0.1.4 supplied pointer.
-- OpenDesign identity and prior method research: https://drive.google.com/file/d/1LqHcCfHPgDD8BtLTgCAVcE20xV3_j5P0/view . Identified product is https://open-design.ai and https://github.com/nexu-io/open-design . Prior identification remains indirect from the Raf workflow, not a spoken repository URL.
+- Latest source PRD v0.1.6: owner's Drive . Newer than the v0.1.4 supplied pointer.
+- OpenDesign identity and prior method research: owner's Drive . Identified product is https://open-design.ai and https://github.com/nexu-io/open-design . Prior identification remains indirect from the Raf workflow, not a spoken repository URL.
 - Official pages checked this run: https://open-design.ai/ , https://open-design.ai/pricing , https://raw.githubusercontent.com/nexu-io/open-design/main/README.md . Current-source claims, not runtime tests.
 - Official Studio screenshot inspected: https://raw.githubusercontent.com/nexu-io/open-design/main/docs/screenshots/product-tour/studio-prototype-2026.webp . Static visual evidence for artifact tabs and Preview/Code toolbar only.
 - Onlook official pages checked: https://onlook.com/ and https://docs.onlook.com/ . Official site explicitly describes an infinite canvas, working page frames, visual token/component tools, and variations. Not executed here.
-- Combined Onlook/UI SDK proposal: https://docs.google.com/document/d/1n7KlYkl8EeT9SHxxJge6ngsSnibJA_n9T5SDIpwWsAs/edit . Video frames not verified.
-- DesainPakeAI latest public refresh: https://drive.google.com/file/d/1e8I0j0Y8IJ_Aheezc-6mqfXyh7nVVzBy/view and handoff https://drive.google.com/file/d/1JaWamHUMj_klNWajlUQ7htlu7wnNi_Ex/view . Public/demo/CLI evidence; no signed-in project tour.
-- Browser wireframes delivered: https://drive.google.com/file/d/1wJyGQP-ycDEWhoskWRtpsH49rxH3CsjA/view and PDF https://drive.google.com/file/d/1ICJkM9xBsJ79zhSySrLyR59QllNJGtS8/view . Archived copies in Spekin.
+- Combined Onlook/UI SDK proposal: owner's Drive . Video frames not verified.
+- DesainPakeAI latest public refresh: owner's Drive and handoff owner's Drive . Public/demo/CLI evidence; no signed-in project tour.
+- Browser wireframes delivered: owner's Drive and PDF owner's Drive . Archived copies in Spekin.
 - Full source links and evidence classifications are in REFERENCE-MATRIX-v0.2.2.md. No competitor source code, brand, imagery, or license is adopted.
 
 ## 16. v0.2.1 decisions and evidence
 
-This addendum is normative where it changes earlier v0.2.0 wording. Enrico asked at 6:50 PM Asia/Shanghai on 22 Nov 2026 to add alexandephilia/momo_genui and use mostly Rust without Python. At 6:51 PM he accepted TypeScript/JavaScript for the browser UI and requested animation/interaction quality. At 6:52 PM he required reuse of the existing repo and references instead of reinvention, except Spekin branding/taste and necessary integration/domain gaps. These directions do not authorize implementation in this task.
+This addendum is normative where it changes earlier v0.2.0 wording. The owner asked at 6:50 PM Asia/Shanghai on 22 Nov 2026 to add alexandephilia/momo_genui and use mostly Rust without Python. At 6:51 PM he accepted TypeScript/JavaScript for the browser UI and requested animation/interaction quality. At 6:52 PM he required reuse of the existing repo and references instead of reinvention, except Spekin branding/taste and necessary integration/domain gaps. These directions do not authorize implementation in this task.
 
 Momo is a useful workspace-navigation reference. Its README names three synchronized workspaces: Chat, Explore, and Pinboard. Its official Chat screenshot shows a compact centered Explore/Chat/Pinboard header with Chat active. The official Explore screenshot shows the same header with Explore active and different main content. The Pinboard screenshot shows a spatial board with Kanvas/Grid and zoom controls. This is static evidence of a workspace-selection pattern, not a live verification of navigation, animation, persistence, or browser history.
 
@@ -1912,7 +1912,7 @@ Q-26 now concerns exact Rust boundary/crates, existing service reuse and staged 
 
 ## 17. v0.2.2 synthesis: one Spekin, not a Momo clone
 
-This revision incorporates Enrico's latest GenUI and annotated-wireframe directions. Momo contributes contextual chat/UI patterns, not the whole product. Existing yravgHub Studio, including its owner-reported DesainPakeAI-style infinite canvas and controls, remains the baseline to inventory and preserve. DesainPakeAI is not a forgotten or newly added module. Exact existing buttons, shortcuts, state and behavior are pending inventory, not verified by the owner's description alone.
+This revision incorporates the owner's latest GenUI and annotated-wireframe directions. Momo contributes contextual chat/UI patterns, not the whole product. Existing yravgHub Studio, including its owner-reported DesainPakeAI-style infinite canvas and controls, remains the baseline to inventory and preserve. DesainPakeAI is not a forgotten or newly added module. Exact existing buttons, shortcuts, state and behavior are pending inventory, not verified by the owner's description alone.
 
 The first-value job is to turn a project engineer's brief/references into a reviewed, build-ready slice without losing why a requirement exists. Fixture: a contractor cost-variance dashboard change using fictional data. Inspect extracted requirements/gaps, compare two justified alternatives, edit one proposed criterion, accept a bounded diff in S08, then locate its stable design/task/test links and evidence. Users should not need to understand seven reference products or move between copied apps.
 
@@ -2011,12 +2011,12 @@ D-SPK-10: combined Spekin, not Momo reskinned. D-SPK-11: video-grounded contextu
 Open: actual Studio/yravgUI and local/unpushed/deployed audit; exact unit licenses/schema/limits; active Design Desk reconciliation and final drawings; user task validation; device/fixture performance; provider/API/key custody; OpenDesign-inspired prices/quotas/refunds. Mostly Rust + accepted TS/JS, no Python product dependency, browser first, original yravg branding and no local-agent/deployment execution remain. No app implementation, new account, purchase, sharing expansion, external message or deployment occurred.
 
 
-Design deliverables v0.2.2: editable offline annotated source-to-screen brief (HTML/JSON plus 17 unchanged baseline SVGs and PDF): https://drive.google.com/file/d/130-7jBQGFGDBWAGMBpzqlVZtCWKsVuqi/view ; readable 12-page annotated PDF: https://drive.google.com/file/d/1yhL-87Zncm8WXy6fGGEuNw1-VxQ1LUK1/view . These reuse BW-01–08 and supplementary states; they do not replace the inaccessible current Design Desk revision or constitute final updated product drawings. Existing Studio controls remain pending inventory. Document checks passed; runtime acceptance remains untested.
+Design deliverables v0.2.2: editable offline annotated source-to-screen brief (HTML/JSON plus 17 unchanged baseline SVGs and PDF): owner's Drive ; readable 12-page annotated PDF: owner's Drive . These reuse BW-01–08 and supplementary states; they do not replace the inaccessible current Design Desk revision or constitute final updated product drawings. Existing Studio controls remain pending inventory. Document checks passed; runtime acceptance remains untested.
 
 
 ## 18. v0.2.3 — docs-grounded delivery standard
 
-Enrico requested detailed study of NetworkChuck's *How to Actually Code with AI (ft. Matt Pocock)* at 22:07 Asia/Shanghai and asked to make the useful practices standard for Spekin. This is a standards and PRD revision, not permission for this documentation task to edit, restart, merge, deploy or inspect the ongoing Claude Code checkout. That checkout and its live progress have not been inspected.
+The owner requested detailed study of NetworkChuck's *How to Actually Code with AI (ft. Matt Pocock)* at 22:07 Asia/Shanghai and asked to make the useful practices standard for Spekin. This is a standards and PRD revision, not permission for this documentation task to edit, restart, merge, deploy or inspect the ongoing Claude Code checkout. That checkout and its live progress have not been inspected.
 
 The public description links `mattpocock/skills` and AI Hero's skills page. Research covers the complete available timestamped transcript through 2:02:23 and the official repository's README, complete tree, LICENSE and eleven relevant skill documents at commit `abeeaf95660ba9e8b7c753eb38f441ca707a8823`. The source is MIT, copyright © 2026 Matt Pocock. The transcript describes demos; no video media was obtained or temporally inspected. No visual, animation, runtime, cost-saving or benchmark claim follows from this research.
 
@@ -2094,9 +2094,9 @@ Order: protect/inventory current work → map exact gaps → finish one reviewed
 
 ## 18.7. Research and continuation files
 
-Research: https://drive.google.com/file/d/1xh12THmm7n_3v4ms1_TG31FhSkDF59XB/view
-Full standard and acceptance scenarios: https://drive.google.com/file/d/14HsQKpd6eCCKO4OoALfMLzGlU5pYbYjp/view
-Copy-paste Claude Code continuation (not sent/executed): https://drive.google.com/file/d/1guu6iTXIAI9Y4WvLUtYLEy-jaMqF_u5n/view
-Preserved v0.2.2 readable Doc: https://docs.google.com/document/d/1xze0jPO_W4BUzqEB8sYlFvuJxOYqWSL6837yApw0szI/edit
-Preserved exact v0.2.2 Markdown: https://drive.google.com/file/d/1dz9oXRRuJ_qXVs54LNOIzWIGhNE96_5Y/view
+Research: owner's Drive
+Full standard and acceptance scenarios: owner's Drive
+Copy-paste Claude Code continuation (not sent/executed): owner's Drive
+Preserved v0.2.2 readable Doc: owner's Drive
+Preserved exact v0.2.2 Markdown: owner's Drive
 The folder index links the readable research PDF and downloadable handoff bundle after verification. Existing design brief/vector files remain unchanged.
