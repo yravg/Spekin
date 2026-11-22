@@ -35,6 +35,10 @@ We don't use `--dangerously-skip-permissions` (Antigravity) or `--auto` (OpenCod
 
 ## Merge order for the open pull requests (owner)
 
+**Simplest: merge [#22](https://github.com/yravg/Spekin/pull/22) only, with "Create a merge commit".** It already merges #1 to #21 in the order below, with the conflicts resolved. On that branch the gate passes (207 Rust tests, 48 web tests) and 33 of 33 board states pass. GitHub then shows #1 to #21 as merged; close any it does not. Pull requests opened after #22 (for example IMP-13) are stacked on top of it.
+
+The order used inside #22, if you would rather merge them one by one:
+
 Use **"Create a merge commit"**, not squash, for stacked pull requests. A squash gives the lower branch's commits new ids, so the PR stacked above it then shows conflicts.
 
 1. Core, not stacked: #1 (IMP-03), #4 (IMP-12), #5 (IMP-11), #7 (IMP-10), #12 (IMP-25), #8 (IMP-22).

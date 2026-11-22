@@ -35,7 +35,7 @@ No Python, no new crate without naming its licence in the PR. If unclear, write 
 | Area | Status | Evidence |
 |---|---|---|
 | Canvas: 14 boards, 80 states, 212 features, F00 map, R00 references (S40 Skills library added 23 Nov) | done | `npm run canvas:lint`: 14 boards pass, manifest current |
-| Build: 15 pull requests open (#1 to #15), all reviewed by the lead and waiting for the owner to merge, in the order in [workers.md](workers.md). Core: IMP-03, 04, 09, 10, 11, 12, 22, 24, 25, 26. UI: IMP-01, 02, 05, 07, 23. | done, waiting for owner merge | The status table below. The lead re-ran the state gate on every UI branch: S27 6/6, S29 6/6, S35 3/3, S40 6/6 PASS, pixel differences 0 to 0.09 %. |
+| Build: 21 pull requests (#1 to #21), all reviewed by the lead. [#22](https://github.com/yravg/Spekin/pull/22) merges all of them with the conflicts resolved: gate passes, 207 Rust tests, 48 web tests, 33 of 33 states pass. Waiting for the owner to merge #22, as described in [workers.md](workers.md). Core: IMP-03, 04, 09, 10, 11, 12, 22, 24, 25, 26. UI: IMP-01, 02, 05, 07, 23. | done, waiting for owner merge | The status table below. The lead re-ran the state gate on every UI branch: S27 6/6, S29 6/6, S35 3/3, S40 6/6 PASS, pixel differences 0 to 0.09 %. |
 | DPAI addendum v1.0 | triaged | [incoming/2026-11-23-dpai-addendum-v1.0.md](incoming/2026-11-23-dpai-addendum-v1.0.md). Its checks are in cards IMP-07, 13, 14, 16, 24 and 25. |
 | Review supplement v1.0 and PRD v0.2.3 | triaged | [incoming/2026-11-23-review-supplement-v1.0.md](incoming/2026-11-23-review-supplement-v1.0.md). Canonical PRD is `inputs/Spekin-PRD-v0.2.3.md` (v0.2.2 kept for history). |
 | Repo standards: licence, NOTICE, README, CONTRIBUTING, SECURITY, glossary, ADRs, decisions, roadmap | done | this commit |
@@ -117,7 +117,7 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-26 | core | API routes for the core (all core cards) + web client | IMP-03…IMP-25 | done, waiting for owner merge: PR #15 (merge last) |
 | IMP-27 | core | GitHub skill source adapter: pin to SHA, fetch with limits, update check | IMP-22 | done, waiting for owner merge: PR #17, stacked on #8 |
 | IMP-29 | core | Recently deleted and restore: 30-day window, pure | – | done, waiting for owner merge: PR #20 |
-| IMP-30 | core | Audit log core: append-only, hash-chained, verify | – | open |
+| IMP-30 | core | Audit log core: append-only, hash-chained, verify | – | done, waiting for owner merge: PR #21 (follow-up: store the head hash apart from the log) |
 | IMP-28 | core | GenUI validation fuzzing (never panics, never partial) | IMP-10 | done, waiting for owner merge: PR #18, stacked on #7 (the fuzzer found and fixed a data: URL hole) |
 | IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
 | IMP-06 | ui | S28 Reference intake | IMP-01 | open |
