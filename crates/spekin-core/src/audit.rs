@@ -327,6 +327,50 @@ mod tests {
     }
 
     #[test]
+    fn editing_any_hashed_field_is_detected_at_that_entry() {
+        let log = filled_log(12);
+        for idx in 0..log.entries().len() {
+            let seq = log.entries()[idx].seq;
+
+            let mut edited = log.clone();
+            edited.entries[idx].actor.push('!');
+            assert_eq!(
+                verify(&edited),
+                Err(AuditError::Edited { seq }),
+                "actor {seq}"
+            );
+
+            let mut edited = log.clone();
+            edited.entries[idx].action = AuditAction::Delete;
+            assert_eq!(
+                verify(&edited),
+                Err(AuditError::Edited { seq }),
+                "action {seq}"
+            );
+
+            let mut edited = log.clone();
+            edited.entries[idx].target_id.push('!');
+            assert_eq!(
+                verify(&edited),
+                Err(AuditError::Edited { seq }),
+                "target_id {seq}"
+            );
+
+            let mut edited = log.clone();
+            edited.entries[idx].revision = Some(format!("r-{seq}-tampered"));
+            assert_eq!(
+                verify(&edited),
+                Err(AuditError::Edited { seq }),
+                "revision {seq}"
+            );
+
+            let mut edited = log.clone();
+            edited.entries[idx].at += 1;
+            assert_eq!(verify(&edited), Err(AuditError::Edited { seq }), "at {seq}");
+        }
+    }
+
+    #[test]
     fn verify_names_the_sequence_of_a_removed_or_reordered_entry() {
         let log = filled_log(6);
 
