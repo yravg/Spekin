@@ -36,7 +36,11 @@ fn evidence(check: &str, commit: &str, at: i64, result: EvidenceResult) -> Evide
 
 #[test]
 fn a_check_with_no_evidence_is_not_run_never_met() {
-    let c = contract("R-EDT-3", 1000, vec![check("accept_creates_one_revision", CheckKind::Unit)]);
+    let c = contract(
+        "R-EDT-3",
+        1000,
+        vec![check("accept_creates_one_revision", CheckKind::Unit)],
+    );
     assert_eq!(status(&c, &[]), ContractStatus::NotRun);
     let rows = matrix(std::slice::from_ref(&c), &[]);
     assert_eq!(
@@ -51,37 +55,87 @@ fn a_check_with_no_evidence_is_not_run_never_met() {
 
 #[test]
 fn fresh_passing_evidence_makes_a_contract_met() {
-    let c = contract("R-EDT-3", 1000, vec![check("accept_creates_one_revision", CheckKind::Unit)]);
-    let ev = vec![evidence("accept_creates_one_revision", "abc1234", 1000, EvidenceResult::Passed)];
+    let c = contract(
+        "R-EDT-3",
+        1000,
+        vec![check("accept_creates_one_revision", CheckKind::Unit)],
+    );
+    let ev = vec![evidence(
+        "accept_creates_one_revision",
+        "abc1234",
+        1000,
+        EvidenceResult::Passed,
+    )];
     assert_eq!(status(&c, &ev), ContractStatus::Met);
 }
 
 #[test]
 fn failed_evidence_makes_a_contract_failing() {
-    let c = contract("R-EDT-3", 1000, vec![check("accept_creates_one_revision", CheckKind::Unit)]);
-    let ev = vec![evidence("accept_creates_one_revision", "abc1234", 1200, EvidenceResult::Failed)];
+    let c = contract(
+        "R-EDT-3",
+        1000,
+        vec![check("accept_creates_one_revision", CheckKind::Unit)],
+    );
+    let ev = vec![evidence(
+        "accept_creates_one_revision",
+        "abc1234",
+        1200,
+        EvidenceResult::Failed,
+    )];
     assert_eq!(status(&c, &ev), ContractStatus::Failing);
 }
 
 #[test]
 fn skipped_evidence_is_not_run_never_passed() {
-    let c = contract("R-EDT-3", 1000, vec![check("accept_creates_one_revision", CheckKind::Unit)]);
-    let ev = vec![evidence("accept_creates_one_revision", "abc1234", 1200, EvidenceResult::Skipped)];
+    let c = contract(
+        "R-EDT-3",
+        1000,
+        vec![check("accept_creates_one_revision", CheckKind::Unit)],
+    );
+    let ev = vec![evidence(
+        "accept_creates_one_revision",
+        "abc1234",
+        1200,
+        EvidenceResult::Skipped,
+    )];
     assert_eq!(status(&c, &ev), ContractStatus::NotRun);
 }
 
 #[test]
 fn evidence_older_than_the_contract_change_is_stale() {
-    let c = contract("R-EDT-3", 1000, vec![check("accept_creates_one_revision", CheckKind::Unit)]);
-    let ev = vec![evidence("accept_creates_one_revision", "old1234", 999, EvidenceResult::Passed)];
+    let c = contract(
+        "R-EDT-3",
+        1000,
+        vec![check("accept_creates_one_revision", CheckKind::Unit)],
+    );
+    let ev = vec![evidence(
+        "accept_creates_one_revision",
+        "old1234",
+        999,
+        EvidenceResult::Passed,
+    )];
     assert_eq!(status(&c, &ev), ContractStatus::Stale);
 }
 
 #[test]
 fn the_latest_evidence_for_a_check_wins_regardless_of_input_order() {
-    let c = contract("R-EDT-3", 1000, vec![check("accept_creates_one_revision", CheckKind::Unit)]);
-    let old = evidence("accept_creates_one_revision", "old1234", 999, EvidenceResult::Failed);
-    let new = evidence("accept_creates_one_revision", "new1234", 1100, EvidenceResult::Passed);
+    let c = contract(
+        "R-EDT-3",
+        1000,
+        vec![check("accept_creates_one_revision", CheckKind::Unit)],
+    );
+    let old = evidence(
+        "accept_creates_one_revision",
+        "old1234",
+        999,
+        EvidenceResult::Failed,
+    );
+    let new = evidence(
+        "accept_creates_one_revision",
+        "new1234",
+        1100,
+        EvidenceResult::Passed,
+    );
     assert_eq!(status(&c, &[old.clone(), new.clone()]), ContractStatus::Met);
     assert_eq!(status(&c, &[new, old]), ContractStatus::Met);
 }
@@ -95,7 +149,17 @@ fn a_contract_with_no_checks_is_never_met() {
 
 #[test]
 fn an_evidence_log_over_four_kib_is_refused() {
-    assert!(Evidence::new("c", "abc", 1000, EvidenceResult::Passed, 1, "x".repeat(MAX_LOG_BYTES)).is_ok());
+    assert!(
+        Evidence::new(
+            "c",
+            "abc",
+            1000,
+            EvidenceResult::Passed,
+            1,
+            "x".repeat(MAX_LOG_BYTES)
+        )
+        .is_ok()
+    );
     let too_long = Evidence::new(
         "c",
         "abc",
@@ -113,7 +177,11 @@ fn an_evidence_log_over_four_kib_is_refused() {
 #[test]
 fn matrix_is_requirement_by_check_by_status_in_declared_order() {
     let contracts = vec![
-        contract("R-1", 1000, vec![check("a", CheckKind::Unit), check("b", CheckKind::Property)]),
+        contract(
+            "R-1",
+            1000,
+            vec![check("a", CheckKind::Unit), check("b", CheckKind::Property)],
+        ),
         contract("R-2", 1000, vec![check("c", CheckKind::E2e)]),
     ];
     let ev = vec![
@@ -122,9 +190,30 @@ fn matrix_is_requirement_by_check_by_status_in_declared_order() {
     ];
     let rows = matrix(&contracts, &ev);
     assert_eq!(rows.len(), 3);
-    assert_eq!((rows[0].contract.as_str(), rows[0].check.as_str(), &rows[0].status), ("R-1", "a", &ContractStatus::Met));
-    assert_eq!((rows[1].contract.as_str(), rows[1].check.as_str(), &rows[1].status), ("R-1", "b", &ContractStatus::NotRun));
-    assert_eq!((rows[2].contract.as_str(), rows[2].check.as_str(), &rows[2].status), ("R-2", "c", &ContractStatus::Failing));
+    assert_eq!(
+        (
+            rows[0].contract.as_str(),
+            rows[0].check.as_str(),
+            &rows[0].status
+        ),
+        ("R-1", "a", &ContractStatus::Met)
+    );
+    assert_eq!(
+        (
+            rows[1].contract.as_str(),
+            rows[1].check.as_str(),
+            &rows[1].status
+        ),
+        ("R-1", "b", &ContractStatus::NotRun)
+    );
+    assert_eq!(
+        (
+            rows[2].contract.as_str(),
+            rows[2].check.as_str(),
+            &rows[2].status
+        ),
+        ("R-2", "c", &ContractStatus::Failing)
+    );
 }
 
 // --- gate(contracts, evidence, required) ---
@@ -143,8 +232,16 @@ fn gate_passes_only_when_every_required_contract_is_met() {
     let both: GateResult = gate(&contracts, &ev, &["R-MET".into(), "R-NOT-RUN".into()]);
     assert!(!both.passed);
     assert_eq!(both.reasons.len(), 1);
-    assert!(both.reasons[0].contains("R-NOT-RUN"), "reason: {}", both.reasons[0]);
-    assert!(both.reasons[0].contains("not_run"), "reason: {}", both.reasons[0]);
+    assert!(
+        both.reasons[0].contains("R-NOT-RUN"),
+        "reason: {}",
+        both.reasons[0]
+    );
+    assert!(
+        both.reasons[0].contains("not_run"),
+        "reason: {}",
+        both.reasons[0]
+    );
 
     let unknown = gate(&contracts, &ev, &["R-MISSING".into()]);
     assert!(!unknown.passed);
@@ -160,12 +257,31 @@ fn sample_contracts_are_seeded_from_the_s37_board() {
     assert_eq!(contracts.len(), 8, "DELIVERY_CONTRACTS has eight contracts");
     assert!(contracts.iter().any(|c| c.title == "Variance alerts"));
     assert!(contracts.iter().any(|c| c.id.contains("R-DASH-014")));
-    assert!(contracts.iter().flat_map(|c| c.checks.iter()).any(|c| c.name == "Schema is valid OpenAPI 3.1"));
-    assert!(contracts.iter().flat_map(|c| c.checks.iter()).any(|c| c.name == "Auth and permissions section present"));
+    assert!(
+        contracts
+            .iter()
+            .flat_map(|c| c.checks.iter())
+            .any(|c| c.name == "Schema is valid OpenAPI 3.1")
+    );
+    assert!(
+        contracts
+            .iter()
+            .flat_map(|c| c.checks.iter())
+            .any(|c| c.name == "Auth and permissions section present")
+    );
 
     let statuses: Vec<ContractStatus> = contracts.iter().map(|c| status(c, &ev)).collect();
-    for expected in [ContractStatus::Met, ContractStatus::Failing, ContractStatus::NotRun, ContractStatus::Stale] {
-        assert!(statuses.contains(&expected), "sample must show {expected}: {statuses:?}");
+    for expected in [
+        ContractStatus::Met,
+        ContractStatus::Failing,
+        ContractStatus::NotRun,
+        ContractStatus::Stale,
+    ] {
+        assert!(
+            statuses.contains(&expected),
+            "sample must show {:?}: {statuses:?}",
+            expected
+        );
     }
     assert_eq!(sample_matrix(), matrix(&contracts, &ev));
     assert!(sample_matrix().len() > contracts.len());
@@ -176,7 +292,12 @@ fn sample_contracts_are_seeded_from_the_s37_board() {
 fn check_strategy() -> impl Strategy<Value = Check> {
     (
         "[a-z]{4,10}",
-        prop::sample::select(vec![CheckKind::Unit, CheckKind::Property, CheckKind::E2e, CheckKind::Harness]),
+        prop::sample::select(vec![
+            CheckKind::Unit,
+            CheckKind::Property,
+            CheckKind::E2e,
+            CheckKind::Harness,
+        ]),
         prop::sample::select(vec![OwnerLane::Core, OwnerLane::Ui, OwnerLane::Lead]),
     )
         .prop_map(|(name, kind, owner)| Check { name, kind, owner })
@@ -228,6 +349,6 @@ proptest! {
         with_new.push(evidence(&target.name, "new", extra_at, EvidenceResult::Passed));
         let after = status(&c, &with_new);
         prop_assert_eq!(after, ContractStatus::Met,
-            "newer passing evidence changed met into {}: {:?}", after, target);
+            "newer passing evidence changed met into {:?}: {:?}", after, target);
     }
 }
