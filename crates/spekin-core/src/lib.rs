@@ -19,6 +19,11 @@ pub use genui::{
     AllowedActionKind, ChecklistItem, ChecklistStatus, ComparisonOption, GenUiAction, GenUiCard,
     GenUiFamily, GenUiValidation, Provenance, QuestionOption, RejectionReason, validate_genui,
     validate_genui_json,
+pub mod context;
+
+pub use context::{
+    BoardArtifact, BoardSnapshot, ContextChip, ContextItemStatus, RequestContext,
+    RequestContextItem, build_context, format_token_estimate,
 };
 pub use project::{Fixture, FixtureError, Project};
 pub use stage::{Stage, StageId, StageTone};
