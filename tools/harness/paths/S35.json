@@ -27,7 +27,7 @@
       ]
     },
     "conflict": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         {
           "goto": "/"
@@ -38,8 +38,7 @@
         {
           "wait": "[data-save=\"conflict\"]"
         }
-      ],
-      "note": "Needs IMP-02 (tabs) and the CONFLICT fixture wired to a save from another session."
+      ]
     }
   }
 }
