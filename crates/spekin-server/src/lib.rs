@@ -17,17 +17,27 @@ use axum::{
 };
 use serde_json::Value;
 use spekin_core::{
-    ApiErrorBody, ArtifactRevisionRecord, ArtifactRevisionState, BoardArtifact, BoardSnapshot,
-    BuildContextRequest, BuildManifestRequest, CapabilityRegistry, CheckSkillUpdateRequest,
-    ContextItemStatus, EstimateRunRequest, Fixture, GenUiValidation, Hunk, Ledger, LedgerCaps,
-    LedgerError, Manifest, ManifestError, ModelCapability, Project, Proposal, ProposalError,
-    RejectProposalRequest, Rejection, RejectionReason, RequestContext, RequiredInput, Reservation,
-    ReserveRunRequest, Revision, RunEstimate, Stage, UpdateCheck, UsageSnapshot, accept,
-    build_context, build_manifest, check_update, estimate, reject, validate_genui_json,
+    ApiErrorBody, ArtifactRevisionRecord, ArtifactRevisionState, AuditAction, AuditEntry,
+    AuditError, AuditEvent, AuditLog, AuditResponse, BoardArtifact, BoardSnapshot, BuildContextRequest,
+    BuildManifestRequest, CapabilityRegistry, CheckSkillUpdateRequest, ContextItemStatus,
+    DeletedProjectView, EstimateRunRequest, Fixture, GENESIS_HASH, GenUiValidation, Hunk, Ledger,
+    LedgerCaps, LedgerError, Manifest, ManifestError, ModelCapability, Project, ProjectEntry,
+    Proposal, ProposalError, RejectProposalRequest, Rejection, RejectionReason, RequestContext,
+    RequiredInput, Reservation, ReserveRunRequest, RestoreError, RevertRevisionRequest, Revision,
+    RunEstimate, SECONDS_PER_DAY, Settlement, SettleRunRequest, Stage,
+    UpdateCheck, UsageSnapshot, accept, build_context, build_manifest, check_update, days_left,
+    delete, estimate, reject, restore, revert, validate_genui_json,
 };
 
 /// The project id the sample fixture is served under. The URL uses it: /p/meranti-yard/design.
 pub const SAMPLE_PROJECT_ID: &str = "meranti-yard";
+
+/// Actor recorded on audit entries until authentication exists (IMP-31).
+const SAMPLE_ACTOR: &str = "sample-user";
+
+/// Fixed UTC seconds (2025-01-01T00:00:00Z) used for audit entries and the restore window,
+/// so every route is deterministic. Tests can override it with [`AppState::with_now`].
+pub const DEFAULT_NOW: i64 = 1_735_689_600;
 
 /// Mutable in-memory state for one project, seeded from `fixtures/meranti-yard.json`.
 struct ProjectStore {
@@ -38,6 +48,13 @@ struct ProjectStore {
     board: BoardSnapshot,
     handoff_revisions: Vec<ArtifactRevisionRecord>,
     required_inputs: Vec<RequiredInput>,
+    /// The append-only audit chain (IMP-30).
+    audit: AuditLog,
+    /// The head hash held *apart* from the log, as the lead's follow-up on #21 asks.
+    /// Every append updates this; `GET .../audit` checks verify against it.
+    audit_head: String,
+    /// IMP-29 entries for delete / restore / Recently deleted.
+    project_entries: BTreeMap<String, ProjectEntry>,
 }
 
 #[derive(Clone)]
@@ -45,18 +62,27 @@ pub struct AppState {
     pub sample: Arc<Fixture>,
     models: Arc<CapabilityRegistry>,
     project_store: Arc<Mutex<ProjectStore>>,
+    /// UTC Unix seconds for audit entries and the 30-day restore window.
+    now: i64,
 }
 
 impl AppState {
     pub fn from_fixture_json(text: &str) -> Result<Self, spekin_core::FixtureError> {
         let sample = Fixture::from_json(text)?;
         let raw: Value = serde_json::from_str(text).unwrap_or(Value::Null);
-        let store = seed_project_store(&raw);
+        let store = seed_project_store(&raw, DEFAULT_NOW);
         Ok(Self {
             sample: Arc::new(sample),
             models: Arc::new(CapabilityRegistry::sample_s36()),
             project_store: Arc::new(Mutex::new(store)),
+            now: DEFAULT_NOW,
         })
+    }
+
+    /// Override the clock used by audit and restore routes, for deterministic tests.
+    pub fn with_now(mut self, now: i64) -> Self {
+        self.now = now;
+        self
     }
 }
 
@@ -106,6 +132,47 @@ impl IntoResponse for ServerError {
     }
 }
 
+/// Append one audit entry and move the separately held head to it (IMP-31).
+/// The core computes the sequence, hashes and UTC time; the server only supplies the facts.
+fn append_audit(
+    store: &mut ProjectStore,
+    now: i64,
+    action: AuditAction,
+    target_id: impl Into<String>,
+    revision: Option<String>,
+    reason: impl Into<String>,
+) -> AuditEntry {
+    let entry = store.audit.append(
+        AuditEvent {
+            actor: SAMPLE_ACTOR.to_owned(),
+            action,
+            target_id: target_id.into(),
+            revision,
+            reason: reason.into(),
+        },
+        now.max(0) as u64,
+    );
+    store.audit_head = entry.hash.clone();
+    entry
+}
+
+/// Hash of the last entry, or the genesis anchor when the log is empty.
+fn tail_hash(log: &AuditLog) -> String {
+    log.entries()
+        .last()
+        .map_or_else(|| GENESIS_HASH.to_owned(), |e| e.hash.clone())
+}
+
+fn map_restore_error(err: RestoreError) -> ServerError {
+    let message = err.to_string();
+    match err {
+        RestoreError::NotDeleted => ServerError::conflict("not_deleted", message),
+        RestoreError::AlreadyDeleted => ServerError::conflict("already_deleted", message),
+        RestoreError::WindowClosed { .. } => ServerError::conflict("window_closed", message),
+        RestoreError::ClockBackwards { .. } => ServerError::unprocessable("clock_backwards", message),
+    }
+}
+
 pub fn router(state: AppState) -> Router {
     Router::new()
         .route("/api/health", get(|| async { "ok" }))
@@ -119,9 +186,18 @@ pub fn router(state: AppState) -> Router {
             "/api/projects/{id}/proposals/{pid}/reject",
             post(reject_proposal),
         )
+        .route(
+            "/api/projects/{id}/revisions/{artifact}/revert",
+            post(revert_revision),
+        )
         .route("/api/projects/{id}/runs/estimate", post(estimate_run))
         .route("/api/projects/{id}/runs/reserve", post(reserve_run))
+        .route("/api/projects/{id}/runs/settle", post(settle_run))
         .route("/api/projects/{id}/usage", get(project_usage))
+        .route("/api/projects/{id}/audit", get(project_audit))
+        .route("/api/projects/{id}/delete", post(delete_project))
+        .route("/api/projects/{id}/restore", post(restore_project))
+        .route("/api/projects/deleted", get(deleted_projects))
         .route("/api/models", get(list_models))
         .route("/api/genui/validate", post(validate_genui))
         .route("/api/skills/check-update", post(check_skill_update))
@@ -184,6 +260,14 @@ async fn accept_proposal(
             store
                 .revisions
                 .insert(proposal.artifact.clone(), next_rev.clone());
+            append_audit(
+                &mut store,
+                s.now,
+                AuditAction::Accept,
+                &pid,
+                Some(format!("r{}", next_rev.n)),
+                format!("accepted proposal {pid}"),
+            );
             Ok(Json(next_rev))
         }
         Err(err) => Err(map_proposal_error(err)),
@@ -209,7 +293,43 @@ async fn reject_proposal(
     })?;
     let rejection = reject(&proposal, reason);
     store.rejections.push(rejection.clone());
+    append_audit(
+        &mut store,
+        s.now,
+        AuditAction::Reject,
+        &pid,
+        Some(format!("r{}", proposal.base)),
+        reason,
+    );
     Ok(Json(rejection))
+}
+
+/// Revert one artifact to the content of an earlier revision, writing a new revision
+/// and exactly one audit entry (IMP-31, C-03).
+async fn revert_revision(
+    State(s): State<AppState>,
+    Path((id, artifact)): Path<(String, String)>,
+    Json(req): Json<RevertRevisionRequest>,
+) -> Result<Json<Revision>, ServerError> {
+    ensure_project(&id)?;
+    let mut store = s.project_store.lock().expect("project store lock");
+    let current = store.revisions.get(&artifact).cloned().ok_or_else(|| {
+        ServerError::not_found(
+            "artifact_not_found",
+            format!("unknown artifact: {artifact}"),
+        )
+    })?;
+    let next = revert(&current, &req.to).map_err(map_proposal_error)?;
+    store.revisions.insert(artifact.clone(), next.clone());
+    append_audit(
+        &mut store,
+        s.now,
+        AuditAction::Revert,
+        &artifact,
+        Some(format!("r{}", next.n)),
+        format!("reverted {artifact} to r{}", req.to.n),
+    );
+    Ok(Json(next))
 }
 
 async fn estimate_run(
@@ -231,11 +351,42 @@ async fn reserve_run(
     let est = estimate(req.estimate.min, req.estimate.max, req.estimate.reserve)
         .map_err(map_ledger_error)?;
     let mut store = s.project_store.lock().expect("project store lock");
-    store
+    let reservation = store
         .ledger
         .reserve(req.run_id, req.person_id, req.idempotency_key, &est)
-        .map(Json)
-        .map_err(map_ledger_error)
+        .map_err(map_ledger_error)?;
+    append_audit(
+        &mut store,
+        s.now,
+        AuditAction::Reserve,
+        &reservation.run_id,
+        None,
+        format!("reserved {} cr for run {}", reservation.reserved, reservation.run_id),
+    );
+    Ok(Json(reservation))
+}
+
+/// Settle a reserved run at its actual cost, with one audit entry (IMP-31).
+async fn settle_run(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+    Json(req): Json<SettleRunRequest>,
+) -> Result<Json<Settlement>, ServerError> {
+    ensure_project(&id)?;
+    let mut store = s.project_store.lock().expect("project store lock");
+    let settlement = store
+        .ledger
+        .settle(&req.run_id, req.actual)
+        .map_err(map_ledger_error)?;
+    append_audit(
+        &mut store,
+        s.now,
+        AuditAction::Settle,
+        &req.run_id,
+        None,
+        format!("settled run {} at {} cr", req.run_id, req.actual),
+    );
+    Ok(Json(settlement))
 }
 
 async fn project_usage(
@@ -245,6 +396,90 @@ async fn project_usage(
     ensure_project(&id)?;
     let store = s.project_store.lock().expect("project store lock");
     Ok(Json(store.ledger.project_usage()))
+}
+
+/// The audit chain plus the result of `verify` checked against the head hash the
+/// server holds apart from the log (IMP-31, lead's follow-up on #21).
+async fn project_audit(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<Json<AuditResponse>, ServerError> {
+    ensure_project(&id)?;
+    let store = s.project_store.lock().expect("project store lock");
+    let error = match store.audit.verify() {
+        Err(err) => Some(err),
+        Ok(()) if store.audit_head != tail_hash(&store.audit) => Some(AuditError::Truncated {
+            seq: store.audit.len() as u64 + 1,
+        }),
+        Ok(()) => None,
+    };
+    Ok(Json(AuditResponse {
+        entries: store.audit.entries().to_vec(),
+        head_hash: store.audit_head.clone(),
+        error,
+    }))
+}
+
+/// Mark a live project deleted through the IMP-29 core and audit the action (IMP-31).
+async fn delete_project(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<Json<ProjectEntry>, ServerError> {
+    ensure_project(&id)?;
+    let mut store = s.project_store.lock().expect("project store lock");
+    let entry = store.project_entries.get(&id).cloned().ok_or_else(|| {
+        ServerError::not_found("project_not_found", format!("unknown project: {id}"))
+    })?;
+    let deleted = delete(entry, s.now).map_err(map_restore_error)?;
+    store.project_entries.insert(id.clone(), deleted.clone());
+    append_audit(
+        &mut store,
+        s.now,
+        AuditAction::Delete,
+        &id,
+        None,
+        "project deleted (S27)",
+    );
+    Ok(Json(deleted))
+}
+
+/// Restore a recently deleted project inside the 30-day window and audit it (IMP-31).
+async fn restore_project(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<Json<ProjectEntry>, ServerError> {
+    ensure_project(&id)?;
+    let mut store = s.project_store.lock().expect("project store lock");
+    let entry = store.project_entries.get(&id).cloned().ok_or_else(|| {
+        ServerError::not_found("project_not_found", format!("unknown project: {id}"))
+    })?;
+    let restored = restore(entry, s.now).map_err(map_restore_error)?;
+    store.project_entries.insert(id.clone(), restored.clone());
+    append_audit(
+        &mut store,
+        s.now,
+        AuditAction::Restore,
+        &id,
+        None,
+        "project restored (S27)",
+    );
+    Ok(Json(restored))
+}
+
+/// Recently deleted entries with the whole-day countdown S27 shows (IMP-31).
+async fn deleted_projects(State(s): State<AppState>) -> Json<Vec<DeletedProjectView>> {
+    let store = s.project_store.lock().expect("project store lock");
+    let mut rows: Vec<DeletedProjectView> = store
+        .project_entries
+        .values()
+        .filter(|entry| entry.is_deleted())
+        .map(|entry| DeletedProjectView {
+            entry: entry.clone(),
+            days_left: days_left(entry, s.now),
+        })
+        .collect();
+    rows.sort_by(|a, b| a.entry.id.cmp(&b.entry.id));
+    Json(rows)
 }
 
 async fn list_models(State(s): State<AppState>) -> Json<Vec<ModelCapability>> {
@@ -373,7 +608,7 @@ fn parse_rev_number(label: &str) -> u32 {
 }
 
 /// Seed in-memory state from `fixtures/meranti-yard.json` so every route works out of the box.
-fn seed_project_store(raw: &Value) -> ProjectStore {
+fn seed_project_store(raw: &Value, now: i64) -> ProjectStore {
     // 1. Proposals & spec revision from REVIEW_PROPOSAL.
     let prop_id = raw["REVIEW_PROPOSAL"]["id"]
         .as_str()
@@ -510,6 +745,41 @@ fn seed_project_store(raw: &Value) -> ProjectStore {
         },
     ];
 
+    // 5. Projects for delete / restore (IMP-29) and the audit chain (IMP-30/31).
+    let sample_project: Project = serde_json::from_value(raw["PROJECT"].clone()).unwrap_or(Project {
+        name: "Meranti Yard".to_owned(),
+        product: "Cost variance dashboard".to_owned(),
+        increment: "Inc. 2 · Variance alerts".to_owned(),
+        spec: "r14".to_owned(),
+        user: "Rina (sample)".to_owned(),
+        initials: "RS".to_owned(),
+    });
+    let mut project_entries = BTreeMap::new();
+    project_entries.insert(
+        SAMPLE_PROJECT_ID.to_owned(),
+        ProjectEntry::new(SAMPLE_PROJECT_ID, sample_project.clone(), vec!["r14".to_owned()], now),
+    );
+    // The fixture's Recently deleted row (INTAKE_DELETED) seeds one entry three days into
+    // the 30-day window, so S27's "27 days left" is served without a clock or a database.
+    if let Some(deleted) = raw["INTAKE_DELETED"].as_object() {
+        let id = deleted["id"]
+            .as_str()
+            .unwrap_or("kenari-fleet")
+            .to_owned();
+        let deleted_at = now - 3 * SECONDS_PER_DAY;
+        let mut entry = ProjectEntry::new(
+            id.clone(),
+            Project {
+                name: "Kenari Fleet".to_owned(),
+                ..sample_project
+            },
+            vec!["r1".to_owned(), "r2".to_owned(), "r3".to_owned(), "r4".to_owned()],
+            deleted_at,
+        );
+        entry.deleted_at = Some(deleted_at);
+        project_entries.insert(id, entry);
+    }
+
     ProjectStore {
         revisions,
         proposals,
@@ -518,6 +788,9 @@ fn seed_project_store(raw: &Value) -> ProjectStore {
         board,
         handoff_revisions,
         required_inputs,
+        audit: AuditLog::new(),
+        audit_head: GENESIS_HASH.to_owned(),
+        project_entries,
     }
 }
 
@@ -577,5 +850,45 @@ mod tests {
     async fn unknown_project_is_404() {
         let (status, _) = get_json("/api/projects/nope/stages").await;
         assert_eq!(status, StatusCode::NOT_FOUND);
+    }
+
+    /// IMP-31 / lead's follow-up on #21: the head is held apart from the log, and
+    /// the audit route reports a broken anchor even when the entries are untouched.
+    #[tokio::test]
+    async fn audit_head_is_checked_apart_from_the_log() {
+        let state = AppState::from_fixture_json(SAMPLE).unwrap();
+        {
+            let mut store = state.project_store.lock().expect("project store lock");
+            append_audit(
+                &mut store,
+                state.now,
+                AuditAction::Accept,
+                "P-07",
+                Some("r15".to_owned()),
+                "accepted proposal P-07",
+            );
+        }
+        let Json(view) = project_audit(State(state.clone()), Path(SAMPLE_PROJECT_ID.to_owned()))
+            .await
+            .ok()
+            .expect("audit route");
+        assert_eq!(view.error, None, "a fresh chain verifies");
+        assert_eq!(view.entries.len(), 1);
+        let head = view.head_hash.clone();
+
+        // Tamper only with the separately held head: the log is unchanged.
+        state.project_store.lock().expect("project store lock").audit_head = "deadbeef".to_owned();
+        let Json(broken) = project_audit(State(state), Path(SAMPLE_PROJECT_ID.to_owned()))
+            .await
+            .ok()
+            .expect("audit route");
+        assert_eq!(broken.head_hash, "deadbeef");
+        assert_eq!(broken.entries.len(), 1, "the log itself was not edited");
+        assert!(
+            matches!(broken.error, Some(AuditError::Truncated { seq: 2 })),
+            "the broken separate head is reported at the next sequence: {:?}",
+            broken.error
+        );
+        assert_ne!(head, "deadbeef");
     }
 }

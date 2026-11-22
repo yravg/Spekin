@@ -145,7 +145,7 @@ async fn accept_and_revert_each_append_one_audit_entry() {
         Some(json!({ "to": { "n": 16, "content": "not earlier" } })),
     )
     .await;
-    assert_eq!(bad_status, StatusCode::CONFLICT, "body: {bad_body}");
+    assert_eq!(bad_status, StatusCode::UNPROCESSABLE_ENTITY, "body: {bad_body}");
     assert_eq!(bad_body["code"], "revert_not_earlier");
     assert_eq!(audit_entries(&app).await.len(), 2, "a refused revert adds no entry");
 }
