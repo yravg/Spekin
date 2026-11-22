@@ -101,14 +101,14 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | Card | Lane | Title | Depends on | Status |
 |---|---|---|---|---|
 | IMP-01 | ui | S35 work area: chat, artifact tabs, canvas pane and inspector for the design and backend states | – | done, part open, waiting for owner merge: PR #3. Lead re-ran the gate: design PASS 0.41 %, backend PASS 0.47 %. The conflict state is IMP-02. |
-| IMP-02 | ui | S35 conflict state, save states (F112), per-stage memory across switches | IMP-01 | open |
+| IMP-02 | ui | S35 conflict state, save states (F112), per-stage memory across switches | IMP-01 | done, waiting for owner merge: PR #6, stacked on #3 (lead re-ran: S35 3/3 PASS) |
 | IMP-05 | ui | S27 Projects home (6 states), and "/" becomes S27 | IMP-01, C-01 | open (C-01 done 23 Nov) |
 | IMP-03 | core | API source: typed client for the Rust API, equal to the sample | – | done, waiting for owner merge: PR #1 (lead review: approve) |
 | IMP-04 | core | Proposals and revisions in the core (accept, reject, revert, stale) | – | done, waiting for owner merge: PR #2 (lead review: approve; merge after #1) |
 | IMP-12 | core | No-Python and licence inventory check | – | done, waiting for owner merge: PR #4 (lead review: approve; one small follow-up on workspace links) |
 | IMP-09 | core | Ledger: estimate, reserve, settle, caps | IMP-04 | open |
-| IMP-11 | core | Model sources and capability registry | – | open |
-| IMP-10 | core | GenUI schema validation, fail closed | – | open |
+| IMP-11 | core | Model sources and capability registry | – | done, waiting for owner merge: PR #5 (lead review: approve) |
+| IMP-10 | core | GenUI schema validation, fail closed | – | done, waiting for owner merge: PR #7 (lead review: approve) |
 | IMP-22 | core | Skills core: SkillManifest, versions, update policy and update checks | IMP-04 | open |
 | IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | open |
 | IMP-06 … IMP-08, IMP-13 … IMP-21 | ui | S28 … S38, T01, one card per board, written by the lead when P1 is done | P1 | open |
