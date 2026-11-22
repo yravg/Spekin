@@ -96,7 +96,7 @@ export function ConflictBanner(props: {
 }
 
 // Mirrors boards-shell.mjs Design stage: chat, artifact tabs, canvas with frames, inspector.
-export function DesignWorkArea() {
+export function DesignWorkArea(props: { onOpenCanvas?: () => void } = {}) {
   const view = useWorkspace((s) => s.view('design'));
   const setView = useWorkspace((s) => s.setView);
   const chatWidth = useWorkspace((s) => s.chatWidth);
@@ -248,6 +248,8 @@ export function DesignWorkArea() {
           onSelect={(tab) => {
             if (tab === 'F-04 Alert drawer') {
               triggerConflict();
+            } else if (tab === 'Variance flows' && activeTab === 'Variance flows' && props.onOpenCanvas) {
+              props.onOpenCanvas();
             } else {
               setView('design', { tab });
             }
