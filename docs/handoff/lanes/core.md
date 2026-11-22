@@ -7,6 +7,7 @@ Only this lane edits this file. Write here before you stop working.
 | Card | Branch | Status | Evidence | Not checked |
 |---|---|---|---|---|
 | IMP-03 | – | open | – | – |
+| IMP-25 | imp-25-context-builder | open | In progress (core worker) | – |
 
 ## Requests to lead
 
