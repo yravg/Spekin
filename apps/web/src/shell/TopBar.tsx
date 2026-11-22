@@ -1,4 +1,5 @@
 import type { SampleProject, SampleUsage } from '@spekin/sample';
+import type { SaveState } from '../state/workspace';
 import { Icon } from '../ui/Icon';
 import { IconBtn } from '../ui/Button';
 
@@ -7,7 +8,7 @@ import { IconBtn } from '../ui/Button';
 export function TopBar(props: {
   project: SampleProject;
   usage: SampleUsage;
-  save: { tone: 'ok' | 'warn' | 'bad'; text: string };
+  save: SaveState;
   busy?: string;
   onOpenSwitcher: () => void;
   onOpenIncrement: () => void;
@@ -49,7 +50,7 @@ export function TopBar(props: {
           {busy}
         </button>
       ) : null}
-      <span className={'sp-save' + (save.tone === 'bad' ? ' conflict' : '')} data-feature="F112" role="status">
+      <span className={'sp-save' + (save.tone === 'bad' ? ' conflict' : '')} data-save={save.status} data-feature="F112" role="status">
         <span className={'dot ' + save.tone} />
         {save.text}
       </span>
