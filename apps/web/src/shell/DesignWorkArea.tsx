@@ -96,7 +96,7 @@ export function ConflictBanner(props: {
 }
 
 // Mirrors boards-shell.mjs Design stage: chat, artifact tabs, canvas with frames, inspector.
-export function DesignWorkArea(props: { onOpenCanvas?: () => void; onOpenReview?: () => void } = {}) {
+export function DesignWorkArea(props: { onOpenCanvas?: () => void; onOpenReview?: () => void; onOpenTargeted?: () => void } = {}) {
   const view = useWorkspace((s) => s.view('design'));
   const setView = useWorkspace((s) => s.setView);
   const chatWidth = useWorkspace((s) => s.chatWidth);
@@ -455,7 +455,10 @@ export function DesignWorkArea(props: { onOpenCanvas?: () => void; onOpenReview?
                 icon="spark"
                 does="When on, selecting a frame region opens the part-instruction popover (S32)"
                 feature="F113"
-                onClick={() => recordIntent('F113:ask-on-select')}
+                onClick={() => {
+                  if (props.onOpenTargeted) props.onOpenTargeted();
+                  else recordIntent('F113:ask-on-select');
+                }}
               />
             </div>
             <button
