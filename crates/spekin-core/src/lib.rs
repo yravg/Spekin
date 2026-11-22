@@ -6,7 +6,11 @@
 //! the app and the API read the same shapes (canvas-to-app rule 15, R-ARC-3).
 
 pub mod project;
+pub mod proposal;
+pub mod revision;
 pub mod stage;
 
 pub use project::{Fixture, FixtureError, Project};
+pub use proposal::{Hunk, Proposal, ProposalError, Rejection, accept, reject, revert};
+pub use revision::Revision;
 pub use stage::{Stage, StageId, StageTone};
