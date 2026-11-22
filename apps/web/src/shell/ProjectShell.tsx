@@ -14,6 +14,7 @@ import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/Review
 import { TargetedChangeWorkArea } from '../review/TargetedChangeWorkArea';
 import { StyleReviewWorkArea, type StyleShellOverride } from '../style/StyleReviewWorkArea';
 import { ReferenceIntakeWorkArea, type IntakeShellOverride } from '../intake/ReferenceIntakeWorkArea';
+import { CodingHandoffWorkArea, type HandoffMode, type HandoffShellOverride } from '../delivery/CodingHandoffWorkArea';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -137,11 +138,13 @@ export function ProjectShell() {
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
-  const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style' | 'intake'>('shell');
+  const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style' | 'intake' | 'handoff'>('shell');
+  const [handoffInitialMode, setHandoffInitialMode] = useState<HandoffMode>('select');
   const [canvasOverride, setCanvasOverride] = useState<CanvasShellOverride>({});
   const [reviewOverride, setReviewOverride] = useState<ReviewShellOverride>({});
   const [styleOverride, setStyleOverride] = useState<StyleShellOverride>({});
   const [intakeOverride, setIntakeOverride] = useState<IntakeShellOverride>({});
+  const [handoffOverride, setHandoffOverride] = useState<HandoffShellOverride>({});
   const save = useWorkspace((s) => s.save);
   const conflict = useWorkspace((s) => s.conflict);
   const project = getProject(projectId);
@@ -162,7 +165,9 @@ export function ProjectShell() {
               ? 'S30'
               : stage === 'design' && designSub === 'intake'
                 ? 'S28'
-                : 'S35';
+                : stage === 'design' && designSub === 'handoff'
+                  ? 'S34'
+                  : 'S35';
   const activeSave =
     stage === 'spec' && specOverride.save
       ? specOverride.save
@@ -174,7 +179,9 @@ export function ProjectShell() {
             ? styleOverride.save
             : stage === 'design' && designSub === 'intake' && intakeOverride.save
               ? intakeOverride.save
-              : save;
+              : stage === 'design' && designSub === 'handoff' && handoffOverride.save
+                ? handoffOverride.save
+                : save;
   const activeBusy =
     stage === 'spec'
       ? specOverride.busy
@@ -225,7 +232,13 @@ export function ProjectShell() {
             designSub === 'canvas' ? (
               <FramesCanvasWorkArea onShellOverride={setCanvasOverride} />
             ) : designSub === 'review' ? (
-              <ReviewAcceptWorkArea onShellOverride={setReviewOverride} />
+              <ReviewAcceptWorkArea
+                onShellOverride={setReviewOverride}
+                onOpenHandoff={(stale) => {
+                  setHandoffInitialMode(stale ? 'stale' : 'select');
+                  setDesignSub('handoff');
+                }}
+              />
             ) : designSub === 'targeted' ? (
               <TargetedChangeWorkArea onLeaveTargeted={() => setDesignSub('shell')} />
             ) : designSub === 'style' ? (
@@ -236,6 +249,14 @@ export function ProjectShell() {
                 onOpenShell={() => setDesignSub('shell')}
                 onOpenStyle={() => setDesignSub('style')}
               />
+            ) : designSub === 'handoff' ? (
+              <CodingHandoffWorkArea
+                key={handoffInitialMode}
+                initialMode={handoffInitialMode}
+                onShellOverride={setHandoffOverride}
+                onOpenShell={() => setDesignSub('shell')}
+                onOpenReview={() => setDesignSub('review')}
+              />
             ) : (
               <DesignWorkArea
                 onOpenCanvas={() => setDesignSub('canvas')}
@@ -243,6 +264,10 @@ export function ProjectShell() {
                 onOpenTargeted={() => setDesignSub('targeted')}
                 onOpenStyle={() => setDesignSub('style')}
                 onOpenIntake={() => setDesignSub('intake')}
+                onOpenHandoff={() => {
+                  setHandoffInitialMode('select');
+                  setDesignSub('handoff');
+                }}
               />
             )
           ) : stage === 'backend' ? (

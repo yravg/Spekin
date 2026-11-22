@@ -109,8 +109,9 @@ function DiffSegments({ segments }: { segments: DiffSegment[] }) {
 export function ReviewAcceptWorkArea(props: {
   initialState?: ReviewState;
   onShellOverride?: (o: ReviewShellOverride) => void;
+  onOpenHandoff?: (stale?: boolean) => void;
 }) {
-  const { initialState = 'pins', onShellOverride } = props;
+  const { initialState = 'pins', onShellOverride, onOpenHandoff } = props;
   const recordIntent = useWorkspace((s) => s.recordIntent);
 
   const [state, setState] = useState<ReviewState>(initialState);
@@ -149,7 +150,10 @@ export function ReviewAcceptWorkArea(props: {
         icon="download"
         does="Opens S34: downloads only accepted revisions with a fixed revision manifest"
         feature="F104"
-        onClick={() => recordIntent('F104:handoff')}
+        onClick={() => {
+          if (onOpenHandoff) onOpenHandoff(state === 'accepted');
+          else recordIntent('F104:handoff');
+        }}
       />
     </>
   );

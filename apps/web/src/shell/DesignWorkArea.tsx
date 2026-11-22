@@ -103,6 +103,7 @@ export function DesignWorkArea(
     onOpenTargeted?: () => void;
     onOpenStyle?: () => void;
     onOpenIntake?: () => void;
+    onOpenHandoff?: () => void;
   } = {},
 ) {
   const view = useWorkspace((s) => s.view('design'));
@@ -131,7 +132,10 @@ export function DesignWorkArea(
         icon="download"
         does="Opens S34: downloads only accepted revisions with a fixed revision manifest"
         feature="F104"
-        onClick={() => recordIntent('F104:handoff')}
+        onClick={() => {
+          if (props.onOpenHandoff) props.onOpenHandoff();
+          else recordIntent('F104:handoff');
+        }}
       />
     </>
   );

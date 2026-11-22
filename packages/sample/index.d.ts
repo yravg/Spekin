@@ -346,6 +346,59 @@ export declare const STYLE_NEWREF: SampleStyleRef;
 export declare const STYLE_TOKENS: SampleStyleToken[];
 export declare const STYLE_NEWTOKEN: SampleStyleToken;
 export declare const STYLE_HUNKS: SampleStyleHunk[];
+export interface SampleDeliveryManifest {
+  id: string;
+  next: string;
+  spec: string;
+  sealedAt: string;
+  zip: string;
+  framework: string;
+}
+export interface SampleDeliveryThumb {
+  title: string;
+  chart?: boolean;
+  drawer?: boolean;
+  kpi?: boolean;
+}
+export interface SampleDeliveryItem {
+  id: string;
+  name: string;
+  kind: 'frame' | 'design' | 'takes' | 'ref';
+  rev: string;
+  st: PillTone;
+  stText: string;
+  when: string;
+  size: string;
+  sha?: string;
+  html?: string;
+  png?: string;
+  reason?: string;
+  thumb: SampleDeliveryThumb | null;
+}
+export type SampleDeliveryFile = [string, string, string];
+export interface SampleDeliveryBlockedItem {
+  id: string;
+  rev: string;
+  ok: boolean;
+  kind?: string;
+  text: string;
+}
+export interface SampleDeliveryStale {
+  frame: string;
+  rev: string;
+  at: string;
+  sha: string;
+  html: string;
+  png: string;
+}
+
 export declare const STYLE_CTX: ContextItem[];
 export declare function STYLE_contrast(a: string, b: string): string;
+export declare const DELIVERY_MANIFEST: SampleDeliveryManifest;
+export declare const DELIVERY_FRAMEWORKS: [string, string][];
+export declare const DELIVERY_ITEMS: SampleDeliveryItem[];
+export declare const DELIVERY_FILES: SampleDeliveryFile[];
+export declare const DELIVERY_BLOCKED: SampleDeliveryBlockedItem[];
+export declare const DELIVERY_STALE: SampleDeliveryStale;
+export declare const DELIVERY_PROMPT: string[];
 // Everything else the boards use is exported too; declare it here before use.
