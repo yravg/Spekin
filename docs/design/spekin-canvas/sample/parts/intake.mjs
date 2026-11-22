@@ -13,7 +13,7 @@ export const INTAKE_PROJECTS = [
   { id: 'sagu-field', name: 'Sagu Field Notes', idea: 'Inspection forms', inc: 'Inc. 1 · Offline forms', stages: ['half', 'ring', 'ring', 'ring', 'ring', 'ring', 'ring', 'ring'], now: 'Planning · in progress', at: '11 Nov', ago: '11 Nov', owner: 'Ayu (sample)', ini: 'AY', role: 'Owner', thumb: 'empty' },
 ];
 export const INTAKE_SWITCH_ORDER = ['meranti-yard', 'kenari-fleet', 'bakau-permits', 'pelita-clinic', 'rawa-warehouse', 'tembaga-quote', 'sagu-field'];
-export const INTAKE_NEW = { name: 'Lontar Notices', slug: 'lontar-notices', idea: 'A notice board for a primary school. Teachers post short notices; parents read them in Bahasa Indonesia or English.', ideaLen: 117, max: 4000, min: 20 };
+export const INTAKE_NEW = { name: 'Lontar Notices', slug: 'lontar-notices', idea: 'Weekly progress and cost for a warehouse build. Flag any package more than 3% over budget, in Bahasa Indonesia first.', ideaLen: 117, max: 4000, min: 20 };
 export const INTAKE_DELETED = { id: 'kenari-fleet', by: 'Dimas (sample)', at: '12:43', days: 30 };
 export const INTAKE_COMPOSER = { text: 'A cost variance dashboard for offshore project teams. Flag any work package that is more than 3 percent over budget, and show why.', len: 131 };
 

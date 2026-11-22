@@ -122,15 +122,10 @@ ${rows}
   const createModal = `<div class="int-mod isnew" role="dialog" aria-label="New project" data-feature="F130">${NT}
 <div class="int-mh"><b>New project</b><span>Creating it costs no credits</span><span class="sp-fill"></span>${IB('x', 'Close', { does: 'Closes the dialog without creating anything', f: 'F130' })}</div>
 <div class="int-mb">
-<div class="int-fl"><div class="lb">Project name<span>Shown in the top bar and the link</span></div><div class="int-fi">${nw.name}</div><div class="int-fh"><span>Link: /p/${nw.slug}</span>${pill(['ok', 'Link is free'])}</div></div>
+<div class="int-fl"><div class="lb">What is it for?<span>Picks the questions and the specialist pack</span></div><div class="int-rcs d4" role="radiogroup" aria-label="What is it for"><button type="button" role="radio" aria-checked="false" class="int-rc" data-does="Sets the domain to Dashboard: the interview uses its question bank and pack" data-feature="F130"><b>${ic('grid', 14)}Dashboard</b>Reports and KPIs from your own data</button><button type="button" role="radio" aria-checked="false" class="int-rc" data-does="Sets the domain to Engineering: the interview uses its question bank and pack" data-feature="F130"><b>${ic('layers', 14)}Engineering</b>Drawings, models and IFC (CAD/BIM)</button><button type="button" role="radio" aria-checked="true" class="int-rc" data-does="Sets the domain to Project control: the interview uses its question bank and pack" data-feature="F130"><b>${ic('flag', 14)}Project control</b>Schedule, cost, progress and EAC</button><button type="button" role="radio" aria-checked="false" class="int-rc" data-does="Sets the domain to Finance and stock: the interview uses its question bank and pack" data-feature="F130"><b>${ic('db', 14)}Finance and stock</b>Budgets, invoices and stock levels</button></div></div>
 <div class="int-fl"><div class="lb">What do you want to build?<span>20 to 4,000 characters</span></div><div class="int-fi ta foc">${nw.idea}<i class="int-caret"></i></div><div class="int-fh"><span>${nw.ideaLen} / 4,000</span>${pill(['ok', 'Long enough to start'])}</div></div>
-<div class="int-fl"><div class="lb">UI language<span>The spec follows the language of your idea</span></div><div class="int-seg isnew" role="group" aria-label="UI language" data-feature="F131">${NT}<button type="button" aria-pressed="false" data-does="Shows Spekin in Bahasa Indonesia; typed text is kept" data-feature="F131">Bahasa Indonesia</button><button type="button" aria-pressed="true" data-does="Shows Spekin in English; typed text is kept" data-feature="F131">English</button></div></div>
-<div class="int-fl"><div class="lb">Start from</div><div class="int-rcs" role="radiogroup" aria-label="Start from">
-<button type="button" role="radio" aria-checked="true" class="int-rc" data-does="Starts from the written idea: short questions, then a pitch" data-feature="F130"><b>${ic('spark', 14)}An idea</b>Spekin asks short questions, then writes a pitch.</button>
-<button type="button" role="radio" aria-checked="false" class="int-rc" data-does="Creates the project and opens the Design stage import (S28)" data-feature="F130"><b>${ic('image', 14)}Reference screenshots</b>Drop or paste screenshots first. Opens the import.</button>
-<button type="button" role="radio" aria-checked="false" class="int-rc" data-does="Creates the project from a pasted or uploaded spec, read as revision r1" data-feature="F130"><b>${ic('doc', 14)}An existing spec</b>Paste or upload a spec. Read as revision r1.</button></div></div>
 </div>
-<div class="int-mf"><span class="int-hint">The first model run shows its cost estimate before it starts.</span><span class="sp-fill"></span>${B('Cancel', { cls: 'plain', does: 'Closes the dialog without creating anything', f: 'F130' })}${B('Create project', { cls: 'ink', kbd: '⌘↵', does: 'Creates Lontar Notices and opens it; disabled until the name is set and the idea has 20 characters', f: 'F130' })}</div></div>`;
+<div class="int-mf"><span class="int-hint">The name comes from your pitch; change it any time. Shown in English · <button type="button" class="int-lang" data-does="Switches the UI to Bahasa Indonesia at once; the idea you typed is kept" data-feature="F131">Bahasa Indonesia</button></span><span class="sp-fill"></span>${B('Cancel', { cls: 'plain', does: 'Closes the dialog without creating anything', f: 'F130' })}${B('Create project', { cls: 'ink', kbd: '⌘↵', does: 'Creates the project and asks the first question; disabled until a domain is picked and the idea has 20 characters', f: 'F130' })}</div></div>`;
 
   const firstMain = `<section class="int-main" aria-label="Start"><div class="int-first isnew" data-feature="F132">${NT}
 <h1 class="int-h1">Start your first project</h1>
@@ -161,7 +156,7 @@ ${rows}
   const rtProg = (n, pct) => `<span class="int-bar"><u style="width:${pct}%"></u></span>${IB('x', `Cancel ${n}`, { does: 'Cancels this file only: no job is sent for it and the other files continue', f: 'F144' })}`;
   const rtWait = (n) => pill(['mute', 'Waiting']) + IB('x', `Cancel ${n}`, { does: 'Removes this file from the queue; no job is sent for it', f: 'F144' });
   const rtRetry = (n) => B('Retry', { sm: true, does: `Reads ${n} again once; images already added are kept and nothing is added twice`, f: 'F148' });
-  const consent = `<button type="button" role="checkbox" aria-checked="true" class="int-cons" data-does="Confirms you may use these images in this project; the choice is saved with each reference" data-feature="F146"><span class="bx on">${ic('check', 11, 2.4)}</span><span>I may use these images here. They stay private and are never used to train a model.</span></button>`;
+  const consent = `<button type="button" role="checkbox" aria-checked="true" class="int-cons" data-does="Confirms you may use these images in this project; the choice is saved with each reference" data-feature="F146"><span class="bx on">${ic('check', 11, 2.4)}</span><span>I may use these images here. They stay private and go only to model providers whose terms forbid training on them.</span></button>`;
   const pan = ({ n, lit, files, count }) => `<aside class="int-pan isnew" aria-label="Reference intake" data-feature="F142">${NT}
 <div class="ph"><div class="a"><b>References</b>${pill(['mute', n + (n === 1 ? ' image' : ' images')])}</div><span class="s">Private to this project. Used only when you add them to a run.</span></div>
 <div class="int-pb">
@@ -268,8 +263,8 @@ ${pastedBar}`, '2 references · 1 pasted preview');
     p2: note('<b>Enter</b> saves a rename, <b>Esc</b> puts the old name back. An empty name is refused and the field stays open.', 'left:1058px;top:300px;max-width:300px'),
     p3: note('<b>Hold ⌘ or Ctrl</b>: the numbers 1 to 7 show on the rows; press one to open that project. The number is not remembered.', 'left:1058px;top:430px;max-width:300px'),
     c1: note('<b>Fewer than 20 characters</b> in the idea: Create stays off and the counter says how many are missing.', 'left:1050px;top:150px;max-width:300px'),
-    c2: note('<b>Switch language</b>: the form changes at once and keeps what you typed. Default is Bahasa Indonesia; this review is drawn in English.', 'left:1050px;top:290px;max-width:300px'),
-    c3: note('<b>Pick Reference screenshots</b>, then Create: the project opens on the Design stage with the import panel (S28).', 'left:1050px;top:430px;max-width:300px'),
+    c2: note('<b>Pick a domain</b>: it chooses the question bank and the specialist pack. Screenshots and existing specs are added later, inside the project (S28).', 'left:1050px;top:290px;max-width:300px'),
+    c3: note('<b>Bahasa Indonesia is the default.</b> This review is drawn in English. One click switches; what you typed is kept.', 'left:1050px;top:430px;max-width:300px'),
     f1: note('<b>No project yet</b>: the top bar shows no project, increment or spec revision, and the meter reads 0. Nothing is invented.', 'left:236px;top:660px;max-width:300px'),
     f2: note('<b>Connect a local agent</b> is shown, off and tagged LATER. It cannot be focused into a half-working state.', 'left:560px;top:660px;max-width:300px'),
     f3: note('<b>Click a card</b>: the Create dialog opens with that start already chosen. Open sample is read only.', 'left:884px;top:660px;max-width:300px'),
@@ -349,7 +344,7 @@ ${pastedBar}`, '2 references · 1 pasted preview');
           ['F127', 'new', 'Filters and order: Recently opened, Mine, Shared with me, Archived; filter box and sort; owner and viewer roles shown (R-SEC-1).', 'Onlook'],
           ['F128', 'new', 'Switch palette on Cmd or Ctrl+K: type to filter, ordered by last opened, numbers while Cmd or Ctrl is held, New project pinned at the bottom (BW-01).', 'Paraframe'],
           ['F129', 'new', 'Inline rename: Enter saves, Esc cancels, an empty name is refused, the link keeps working (BW-01).', 'Paraframe'],
-          ['F130', 'new', 'Create project dialog: name, idea (20 to 4,000 characters), UI language, start from idea, screenshots or spec; creating costs nothing (R-ONB-1, R-ONB-2).', 'OpenDesign'],
+          ['F130', 'new', 'Create project: four domain choices and one idea box (20 to 4,000 characters); no name or language step, the name comes from the pitch; creating costs nothing (R-ONB-1, R-ONB-2; review REV-03).', 'OpenDesign'],
           ['F131', 'new', 'UI language EN and ID: default Bahasa Indonesia, typed text and interview state kept on switch, spec in the idea’s language (R-ONB-8, R-LANG-1, R-LANG-2).', 'PRD'],
           ['F132', 'new', 'First run: three start cards, empty rail, top bar without a project, meter at 0 (BW-01, R-ONB-1).', 'OpenDesign'],
           ['F133', 'new', 'Look-around option: open the Meranti Yard sample read only; nothing you do is saved (BW-01).', 'PRD'],
@@ -387,7 +382,7 @@ ${pastedBar}`, '2 references · 1 pasted preview');
         must: [
           'Import comes first: a drop zone, a file picker that works with the keyboard, and paste with Cmd or Ctrl+V. Nothing is read without a choice the user made (R-WS-2).',
           'The accepted types and the size limit are always visible: PNG, JPEG, WebP, 10 MB each, 30 per reference (limits are assumptions until the owner sets them).',
-          'A consent line and a personal-data line sit in the panel, not in a dialog: the user may use these images, they stay private, no model training (R-REF-16, R-SEC-4).',
+          'A consent line and a personal-data line sit in the panel, not in a dialog: the user may use these images, they stay private, and they go only to providers whose terms forbid training; Spekin checks provider terms, it does not promise it (R-REF-16, R-SEC-4).',
           'Every file has its own status: waiting, uploading with a real percentage, added, refused or stopped. Cancel on one file sends no job for it.',
           'A refused file gets a band with the reason and Retry. Images already added are kept, and a retry never adds the same image twice.',
           'Emails, card numbers and passwords found in an image hold it: blur a copy before any model reads it, or remove the image (R-REF-7).',
@@ -408,7 +403,7 @@ ${pastedBar}`, '2 references · 1 pasted preview');
           ['F143', 'new', 'File picker: Choose files, reachable by Tab and Enter, no read before the choice (R-WS-2, FR-02).', 'OpenDesign'],
           ['F144', 'new', 'Drop zone: the board lights up, per-file progress, Cancel on one file sends no job (R-WS-2, FR-02).', 'Onlook'],
           ['F145', 'new', 'Paste on the board with Cmd or Ctrl+V: the image arrives as a preview, never straight to a run (R-WS-2, FR-03).', 'Paraframe'],
-          ['F146', 'new', 'Consent line: the user may use the image, it stays private, never trains a model (R-REF-16, R-SEC-4, R-WS-2).', 'PRD'],
+          ['F146', 'new', 'Consent line: the user may use the image, it stays private, sent only to providers whose terms forbid training (R-REF-16, R-SEC-4, R-WS-2; review REV-11).', 'PRD'],
           ['F147', 'new', 'Reference frames titled by source on the board: ID, file name, kind, size (R-WS-1, FR-11).', 'Onlook'],
           ['F148', 'new', 'Per-file status and Retry: finished uploads are kept, a retry never duplicates (R-WS-2, R-SEC-6).', 'PRD'],
           ['F149', 'new', 'Learning style job chip with estimate and Cancel; it waits when an image is held (R-MOD-3, R-SEC-6).', 'Momo'],

@@ -265,14 +265,14 @@ ${toolRow('Compare', 'Design' + ic('chevR', 12) + '<b>F-03 Variance table</b>')}
 <div class="rev-ln n"><span class="g">r15</span><span>${seg(h.now)}</span></div></section>`;
   };
   const bar08 = {
-    open: `<div class="rev-ab"><div class="tx"><b>4 of 4 hunks included</b><span>Creates r15 from r14 · 3 items need review · 1 ticket · 1 audit entry</span></div><span class="sp-fill"></span>${rb('Reject', 'Rejects the proposal: nothing is written, r14 stays current and one audit entry is added', 'F252')}${rb('Accept and create r15 ' + kbd('⌘↵'), 'Asks to confirm with Cancel as the default, then creates r15 from r14 with the included hunks and one audit entry', 'F251', 'ink')}</div>`,
+    open: `<div class="rev-ab"><div class="tx"><b>4 of 4 hunks included</b><span>Creates r15 from r14 · 3 items need review · 1 ticket · 1 audit entry</span></div><span class="sp-fill"></span>${rb('Reject', 'Rejects the proposal: no new revision, r14 stays current; one audit entry is recorded', 'F252')}${rb('Accept and create r15 ' + kbd('⌘↵'), 'Asks to confirm with Cancel as the default, then creates r15 from r14 with the included hunks and one audit entry', 'F251', 'ink')}</div>`,
     accepted: `<div class="rev-ab"><div class="tx"><b>r15 is the current spec</b><span>Parent r14 · ${PR.accepted.hunks} · snapshot ${PR.accepted.snapshot}</span></div><span class="sp-fill"></span>${rb('Revert as proposal', 'Starts a new proposal that restores r14. Nothing changes until that proposal is accepted', 'F251')}${rb('Open r15', 'Opens the spec document at r15', 'F251', 'ink')}</div>`,
     rejected: `<div class="rev-ab"><div class="tx"><b>r14 is still the current spec</b><span>Proposal P-07 is closed and kept for the record</span></div><span class="sp-fill"></span>${rb('Edit and re-propose', 'Reopens the text of P-07 as a new draft proposal on top of r14', 'F252')}${rb('Back to the spec', 'Opens the spec document at r14', 'F252', 'ink')}</div>`,
   };
   const banner08 = {
     open: `<div class="sp-banner warn" role="status">${ic('alert', 16)}<p><b>Proposal, not accepted.</b> The spec stays r14 until you accept. Base r14 is still the current revision.</p>${btn('Edit proposal', { sm: true, does: 'Edits the proposal text as a draft; the spec is unchanged', f: 'F249' })}</div>`,
     accepted: `<div class="rev-bn ok" role="status">${ic('check', 16)}<p><b>Accepted. r15 created from r14.</b> Audit A-0231 · 12:52 · 3 linked items now need review. r14 stays readable.</p>${btn('Open revisions', { sm: true, does: 'Opens the revision list with r15 on top and r14 below it', f: 'F251' })}</div>`,
-    rejected: `<div class="rev-bn mute" role="status">${ic('x', 16)}<p><b>Rejected. r14 stays current.</b> Nothing was written to the spec. Audit A-0232 · 12:52.</p>${btn('Undo reject', { sm: true, does: 'Reopens P-07 for review if r14 is still the current revision; the audit entry stays', f: 'F252' })}</div>`,
+    rejected: `<div class="rev-bn mute" role="status">${ic('x', 16)}<p><b>Rejected. r14 stays current.</b> No new revision was made. Audit A-0232 · 12:52.</p>${btn('Undo reject', { sm: true, does: 'Reopens P-07 for review if r14 is still the current revision; the audit entry stays', f: 'F252' })}</div>`,
   };
   const diffView = (mode) => `<div class="rev-dv"><div class="rev-dh"><div class="m">${mode === 'accepted' ? pill(['ok', 'Accepted r15']) : mode === 'rejected' ? pill(['mute', 'Rejected']) : pill(['acc', 'Proposal'])}<code>P-07</code><span>r14 to r15 · base r14 ${mode === 'accepted' ? 'accepted 12:52' : 'is the current revision'}</span><span>·</span><span>${PR.by}, ${PR.at}</span><span class="sp-fill"></span>${btn('Show unchanged (3)', { cls: 'plain', sm: true, does: 'Shows the 3 unchanged blocks around the hunks; they are never part of the diff', f: 'F249' })}</div><h2>${PR.title}</h2></div>
 ${PR.hunks.map((h) => hunk(h, mode)).join('')}${bar08[mode]}</div>`;
@@ -307,7 +307,7 @@ ${banner08[mode]}
     + N('<b>Accept</b>: r15 shows in the top bar, the stage header and the revision list. 3 linked items are marked Needs review. r14 and its evidence stay readable (R-EDT-6).', 372, 736, 340)
     + N('<b>Audit</b>: one line records who, when, the parent, the hunks and the snapshot. It cannot be edited. Revert starts a new proposal, never a silent rollback (R-EDT-7).', 728, 736, 340);
   const x3 = mk08('rejected')
-    + N('<b>Reject</b>: nothing is written. r14 stays current and the proposal is kept closed, with an audit line, for the record.', 372, 736, 340)
+    + N('<b>Reject</b>: no revision is made. r14 stays current; the proposal is closed and one audit entry records who rejected it and when.', 372, 736, 340)
     + N('<b>Frames are separate</b>: rejecting P-07 leaves the F-03 r7 draft in S33 as it is. Edit and re-propose reopens the text.', 728, 736, 340);
 
 
@@ -331,7 +331,7 @@ ${banner08[mode]}
         'The footer counts what is left: “7 changes · 1 needs a look”. Accept takes the ready changes; Undo all reverts the whole review in one step.',
         'A stale row (the part changed after the nitpick) cannot be accepted without re-evaluation. It offers Re-check and Dismiss, and dismissing is not a pass (AC-57).',
         'S08 shows the spec proposal r14 to r15 as an exact diff, per hunk, with sources, linked requirements, tests and the scope of the approval.',
-        'Accept creates exactly one revision (r15, parent r14) and an audit entry. Reject keeps r14 and writes nothing. Both stay visible afterwards.',
+        'Accept creates exactly one revision (r15, parent r14) and an audit entry. Reject creates no revision, keeps r14 and records one audit entry. Both stay visible afterwards.',
         'Pinning a proposal in chat leaves it a proposal. Only Accept in S08 writes the spec (R-GUI-4).',
       ],
       motion: [

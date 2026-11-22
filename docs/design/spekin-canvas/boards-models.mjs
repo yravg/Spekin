@@ -334,7 +334,7 @@ export function boards(K) {
   return [
     {
       file: 'S36-models-usage', code: 'S36', tier: 'MODELS', name: 'Models and usage: source, local CLI, API key, estimate, ledger and caps',
-      ext: 'New. Spekin has no built screen yet. Opens from the model chip in the chat composer and from the usage meter in the top bar of S35; extends the existing billing, settings and usage ideas with a per-run ledger (PRD S36, R-MOD-1 to R-MOD-11). Local CLI added by owner decision 22 Nov 2026.',
+      ext: 'New. Spekin has no built screen yet. Opens from the model chip in the chat composer and from the usage meter in the top bar of S35; extends the existing billing, settings and usage ideas with a per-run ledger (PRD S36, R-MOD-1 to R-MOD-11). Local CLI added by owner decision 22 Nov 2026; pairing and runs ship as a later adapter after a security review (ADR 0005, review REV-02).',
       lives: 'Spekin web app · /p/meranti-yard/usage (section in the query: models, run, ledger, limits). Opens as an artifact tab beside the work; keys, key text and pairing codes are never in the URL or in any export.',
       views: [
         { id: 'source', label: 'Source picker', html: v1, entry: 'Projects &gt; Meranti Yard &gt; Design &gt; click the HOSTED Sonnet 5.5 chip in the chat composer &gt; Models.', data: 'sample/parts/models.mjs → MODELS_SOURCES, MODELS_PROVIDERS, MODELS_REGISTRY, MODELS_EFFORT, MODELS_TASKS.' },

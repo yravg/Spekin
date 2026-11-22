@@ -1089,6 +1089,8 @@ button{font:inherit;color:inherit;cursor:default}
 :where(.isnew[class*="int-"]){position:relative}
 .sp-gc.isnew > .newtag{right:4px}
 .int-file .th .tk{padding:5px;gap:3px}
+.int-rcs.d4{grid-template-columns:repeat(4,1fr)}
+.int-lang{border:0;background:transparent;padding:0;font:inherit;color:var(--accent-ink);text-decoration:underline;cursor:pointer}
 
 /* ---- css/models.css */
 /* models board group (S36 Models and usage, T01 Tablet and phone). Tokens from spekin.css only; no raw colours. Prefix classes with .mod- */

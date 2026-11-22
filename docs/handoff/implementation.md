@@ -102,7 +102,7 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 |---|---|---|---|---|
 | IMP-01 | ui | S35 work area: chat, artifact tabs, canvas pane and inspector for the design and backend states | – | open |
 | IMP-02 | ui | S35 conflict state, save states (F112), per-stage memory across switches | IMP-01 | open |
-| IMP-05 | ui | S27 Projects home (6 states), and "/" becomes S27 | IMP-01, C-01 | blocked (waits for C-01, the S27 intake redraw) |
+| IMP-05 | ui | S27 Projects home (6 states), and "/" becomes S27 | IMP-01, C-01 | open (C-01 done 23 Nov) |
 | IMP-03 | core | API source: typed client for the Rust API, equal to the sample | – | open |
 | IMP-04 | core | Proposals and revisions in the core (accept, reject, revert, stale) | – | open |
 | IMP-12 | core | No-Python and licence inventory check | – | open |
@@ -189,11 +189,11 @@ These change boards, so only the lead does them: edit the generator, rebuild, li
 
 | Task | Board | Change | Blocks |
 |---|---|---|---|
-| C-01 | S27 | "Create" becomes four domain choices plus one idea box, Bahasa first, with no name or language wizard (REV-03; owner to confirm) | IMP-05 |
+| C-01 | S27 | **done** 23 Nov (owner yes): create is four domain choices plus one idea box; name comes from the pitch; Bahasa default with a one-click switch. Part open: the first-run start cards and the Home "Start from" chips still show three starts. | – |
 | C-02 | F00 and all boards | Add the PRD R-IDs to every story so features trace to requirements (REV-05) | – |
-| C-03 | S33 | Accept/Reject wording, and an audit row when you reject (REV-08) | S33 card |
-| C-04 | S28 | Say "providers must not train on your files" as a requirement we check, not a guarantee (REV-11) | S28 card |
-| C-05 | S36 | Local CLI stays a source; its run path is marked later (REV-02, ADR 0005) | S36 card |
+| C-03 | S33 | **done, part open**: Reject = no revision plus one audit entry. Still to do: the S30 local accept and S34 re-finalize wording. | S33 card |
+| C-04 | S28 | **done**: the consent line and F146 say files go only to providers whose terms forbid training | – |
+| C-05 | S36 | **done, part open**: the board says pairing and runs ship as a later adapter. Still to do: draw the cli state's pair button as later. | S36 card |
 
 ## Open decisions (owner)
 
