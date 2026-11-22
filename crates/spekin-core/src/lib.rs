@@ -7,6 +7,7 @@
 
 pub mod model_source;
 pub mod github_source;
+pub mod ledger;
 pub mod project;
 pub mod skills;
 pub mod proposal;
@@ -33,6 +34,10 @@ pub use github_source::{
     MAX_FILES, PinnedSource, SkillBundle, assemble_bundle, build_notice, check_bundle_limits,
     is_license_path, join_relative, license_from, listed_files, parse_github_repo, plan_updates,
     skill_md_path,
+pub use ledger::{
+    CRIT_THRESHOLD_PCT, Ledger, LedgerCaps, LedgerEntry, LedgerEntryKind, LedgerError, Reservation,
+    ReservationStatus, RunEstimate, Settlement, UsageSeverity, UsageSnapshot, WARN_THRESHOLD_PCT,
+    estimate, severity_for,
 };
 pub use project::{Fixture, FixtureError, Project};
 pub use skills::{
