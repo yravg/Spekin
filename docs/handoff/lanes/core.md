@@ -12,6 +12,15 @@ Only this lane edits this file. Write here before you stop working.
 
 - 23 Nov 2026 · IMP-03: `apps/web/src/data/source.ts` still serves the screens. When IMP-01 lands, switch it to `fetchProject`/`fetchStages` (or keep it as the offline fallback) — that file is ui-lane owned, so I did not touch it.
 - 23 Nov 2026 · IMP-03: `apps/web/src/data/api.ts` keeps runtime mirrors of the `StageId` and `StageTone` values for its shape check, because ts-rs exports the types but not the enum values. If you want one source, the core could emit a value list (for example a generated `STAGE_IDS` const) — that needs a lead decision on the ts-rs setup.
+| IMP-03 | `imp-03-api-source` (PR #1) | open (in PR #1) | – | – |
+| IMP-04 | `imp-04-proposals` (PR #2) | open (in PR #2) | – | – |
+| IMP-12 | `imp-12-licences` | done | `node --test tools/checks/licences.test.mjs` (11/11 pass, incl. workspace link resolution without `node_modules`); `node tools/checks/licences.mjs --check` (`licences ok (170 npm packages, 62 crates, 0 Python)`); `npm run gate` passes | Not wired into root `package.json` `npm run gate` (lead-owned); Windows/Linux paths not tested (macOS only) |
+| IMP-11 | – | open | – | – |
+| IMP-10 | – | open | – | – |
+| IMP-22 | – | open | – | – |
+
+
+- 2026-11-23 (IMP-12): Please add `node tools/checks/licences.mjs --check` and `node --test tools/checks/licences.test.mjs` to `npm run gate` in root `package.json` (lead-owned).
 
 ## Proposed glossary terms
 
@@ -20,3 +29,5 @@ Only this lane edits this file. Write here before you stop working.
 ## Log
 
 - 23 Nov 2026 · IMP-03 · typed API client `api.ts` (404 → null, `ApiError` with kinds network/http/json/shape), 8 vitest cases against `fixtures/meranti-yard.json`, server test that `/api/projects/:id` equals the fixture `PROJECT` · 740fef8 (test first: 46a603a)
+- 2026-11-23 · IMP-12 · Added `tools/checks/licences.mjs`, `tools/checks/licences.test.mjs`, `tools/checks/licence-allowlist.json`, and generated `docs/licences.md`; fixed false positive on `rules.mjs` `'R1 no-python'` text; `npm run gate` passes.
+- 2026-11-23 · IMP-12 follow-up · Resolved workspace link entries (`link: true`, `resolved`) from `<resolved>/package.json` so `licences.mjs` works without `node_modules`, with fallback to root licence (`Apache-2.0`) for private workspace packages without a `license` field; added regression test.
