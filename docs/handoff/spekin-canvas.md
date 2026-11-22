@@ -61,9 +61,10 @@ Workers, when needed: Antigravity Gemini Neon 4 (medium) or Sonnet 5.5 (high) (o
 - Accent colour Q-28: keep yravgUI clay #B4532A (used on every board).
 - UI language: boards drawn in English for review; ship Bahasa Indonesia first with the EN/ID switch (PRD).
 - Payment for top-ups: Midtrans QRIS behind an adapter, Xendit swappable (drawn as LATER on S36).
-- Upload limits (S28): assumed 10 MB per image, 30 per import, 30-day retention. Owner to confirm.
-- Deleted project restore window (S27): assumed 30 days.
-- T01: portrait only; phone tabs at the bottom (wireframe shows top). Owner to choose.
+- Upload limits (S28): 10 MB per image, 30 per import, 30-day retention. **Accepted by owner, 22 Nov.**
+- Deleted project restore window (S27): 30 days. **Accepted by owner, 22 Nov.**
+- T01: portrait only; phone tabs at the bottom (wireframe shows top). **Accepted by owner, 22 Nov.**
+- Model sources (S36): Hosted, Local CLI (bring your own agent, via a Rust Spekin Connector on 127.0.0.1) and API provider (any compatible base URL), following OpenDesign. **Owner comment on S36, 22 Nov**; this brings local CLI runs forward from the PRD's deferral.
 - Brand mark: placeholder "S".
 
 ## Known failures and cleanups

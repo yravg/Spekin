@@ -11,18 +11,18 @@ export const MODELS_USAGE = {
 export const MODELS_PERIOD = { label: '1–30 Nov', resets: '1 Dec', days: 8, workspaceCap: 20000, workspaceUsed: 8420 };
 export const MODELS_CAPS = { perRun: 60, monthly: 5000, concurrency: 2 };
 
-// Source cards: hosted bills credits, BYOK bills the user's provider, local agent is deferred.
+// Three sources, each saying who bills. Hosted bills Spekin credits; Local CLI runs the user's own agent through the Spekin Connector (the agent's own plan bills, no Spekin credits); API provider is BYOK (the provider bills the user).
 export const MODELS_SOURCES = [
-  { id: 'hosted', name: 'Hosted', icon: 'cloud', bills: 'Spekin credits', sub: 'No key needed. Runs reserve and settle credits.' },
-  { id: 'byok', name: 'Bring your own key', icon: 'plug', bills: 'Your provider', sub: 'Your provider bills you. Spekin adds no model cost.' },
-  { id: 'local', name: 'Local agent', icon: 'cpu', bills: 'Your machine', sub: 'Deferred. No connection flow in the browser version.' },
+  { id: 'hosted', name: 'Hosted', icon: 'cloud', bills: 'Spekin credits', sub: 'No setup. Runs reserve and settle credits.', billsC: 'Spekin credits' },
+  { id: 'cli', name: 'Local CLI', short: 'CLI', icon: 'terminal', bills: "your agent's own plan", billsC: "your agent's plan", sub: 'Bring your own agent. Spekin credits are not used.' },
+  { id: 'api', name: 'API provider', short: 'BYOK', icon: 'plug', bills: 'your provider', billsC: 'your provider', sub: 'Your own key. Spekin adds no model cost.' },
 ];
 export const MODELS_PROVIDERS = [['Anthropic', 3], ['Google', 2], ['OpenAI', 2]];
 // registry rows: [name, id, capabilities, limits, rate card, estimate, state, note]
 export const MODELS_REGISTRY = [
   { name: 'Sonnet 5.5', id: 'claude-sonnet-5-5', caps: ['Text', 'Vision', 'Code', 'Structured'], lim: '200k in · 16k out', rc: 'rc-7', est: '18–30 cr', st: 'sel', note: 'Default for spec drafts and alternatives' },
   { name: 'Haiku 5', id: 'claude-haiku-5', caps: ['Text', 'Vision', 'Structured'], lim: '200k in · 8k out', rc: 'rc-7', est: '4–9 cr', st: 'ok', note: 'Fast and light; summaries and checks' },
-  { name: 'Opus 5', id: 'claude-opus-5', caps: ['Text', 'Vision', 'Code', 'Structured'], lim: '200k in · 32k out', rc: 'rc-7', est: '60–110 cr', st: 'off', note: 'Not in the Hosted sample plan. Use BYOK, or ask the workspace owner.' },
+  { name: 'Opus 5', id: 'claude-opus-5', caps: ['Text', 'Vision', 'Code', 'Structured'], lim: '200k in · 32k out', rc: 'rc-7', est: '60–110 cr', st: 'off', note: 'Not in the Hosted sample plan. Use your own key or agent.' },
 ];
 export const MODELS_EFFORT = [['Low', '≈ 0.6× tokens, fastest'], ['Medium', 'balanced'], ['High', '≈ 1.6× tokens, slower']];
 // routing: [task, model, source, vendor note]
@@ -46,6 +46,41 @@ export const MODELS_KEY = {
   usage: { tokensIn: '412k', tokensOut: '96k', runs: 14 },
 };
 
+// API provider (BYOK) form. Providers [name, base URL, key needed, note]. Only Custom lets the base URL be edited; the others are prefilled.
+export const MODELS_API = {
+  providers: [
+    ['Anthropic', 'https://api.anthropic.com', true, 'Messages API'],
+    ['OpenAI', 'https://api.openai.com/v1', true, 'Chat and responses API'],
+    ['Google Gemini', 'https://generativelanguage.googleapis.com', true, 'Gemini API'],
+    ['Azure OpenAI', 'https://meranti-sample.openai.azure.com', true, 'Your own resource and deployment'],
+    ['Ollama on this computer', 'http://127.0.0.1:11434', false, 'No key; reached through the Connector'],
+    ['Custom OpenAI-compatible', 'https://llm.meranti-sample.test/v1', true, 'Any server with the same API shape'],
+  ],
+  sel: 0,
+  // models fetched from the provider after a passed test: [id, label, state]; 'sel' is the model for new runs
+  fetched: [['claude-sonnet-5-5', 'Sonnet 5.5', 'sel'], ['claude-haiku-5', 'Haiku 5', 'ok'], ['claude-opus-5', 'Opus 5', 'ok']],
+  fetchedCount: 6,
+};
+
+// Local CLI. The Spekin Connector is a small local program the user starts once; the browser reaches it on 127.0.0.1 only.
+export const MODELS_CONNECTOR = { state: 'Running', paired: 'Paired with this browser', since: '12:31', version: '0.4.2', addr: '127.0.0.1:47821', os: 'macOS', code: '6 digits, one use, expires in 2 minutes' };
+// Detected agents. inst: ok | none. sign: ok | no | unknown.
+export const MODELS_AGENTS = [
+  { name: 'Claude Code', ver: '2.4.1', inst: 'ok', sign: 'ok', pick: true, sub: 'Installed, signed in' },
+  { name: 'Codex CLI', ver: '1.8.0', inst: 'ok', sign: 'ok', sub: 'Installed, signed in' },
+  { name: 'OpenCode', ver: '0.9.6', inst: 'ok', sign: 'no', sub: 'Installed, not signed in', hint: 'Sign in' },
+  { name: 'Antigravity (Gemini)', ver: '0.7.2', inst: 'ok', sign: 'unknown', sub: 'Installed, sign-in not checked' },
+  { name: 'Cursor Agent', inst: 'none', sub: 'Not found on this computer', hint: 'Install guide' },
+  { name: 'GitHub Copilot CLI', inst: 'none', sub: 'Not found on this computer', hint: 'Install guide' },
+];
+// What the picked agent offers in this sample. Model names come from the agent, not from Spekin's registry.
+export const MODELS_AGENT_RUN = {
+  agent: 'Claude Code', model: 'Sonnet 5.5', models: ['Sonnet 5.5', 'Opus 5', 'Haiku 5'], effort: 'Medium', efforts: ['Low', 'Medium', 'High'],
+  perm: 0, perms: [['Ask before writing files', 'Each write waits for your click.'], ['Edit files in a work copy only', 'Writes go only to the work copy.']],
+  copy: '~/.spekin/work/meranti-yard/run-0430', branch: 'spekin/run-0430',
+  usage: { runs: 9, tokens: 'not reported', plan: 'not reported' },
+};
+
 // next run (estimate before Send)
 export const MODELS_RUN = {
   id: '0429', task: 'Visual alternatives', target: 'F-04 Alert drawer', model: 'Sonnet 5.5', effort: 'High',
@@ -60,7 +95,7 @@ export const MODELS_RUN = {
   ],
 };
 
-// ledger, newest first. kind: reserve | settle | refund | hold | byok. amt is credits; left is what remains of the cap after the entry.
+// ledger, newest first. kind: reserve | settle | refund | hold | byok | cli. amt is credits; a cli row shows the tokens the agent reported, or 'not reported' (never 0); left is what remains of the cap after the entry.
 export const MODELS_LEDGER = [
   { t: '12:44', run: '0428', kind: 'reserve', task: 'Spec draft · R-DASH-019', model: 'Sonnet 5.5 · Medium', amt: '−24', left: '3,706', st: ['acc', 'Running'] },
   { t: '12:41', run: '0426', kind: 'refund', task: 'Visual alternatives · F-04', model: 'Sonnet 5.5 · High', amt: '+12', left: '3,730', st: ['ok', 'Settled'] },
@@ -72,8 +107,10 @@ export const MODELS_LEDGER = [
   { t: '12:10', run: '0424', kind: 'refund', task: 'Alternatives · F-03 takes', model: 'Sonnet 5.5 · High', amt: '+30', left: '3,775', st: ['bad', 'Cancelled'], sel: true },
   { t: '12:10', run: '0424', kind: 'settle', task: 'Alternatives · F-03 takes', model: 'Sonnet 5.5 · High', amt: '6', left: '3,745', st: ['bad', 'Cancelled'], sel: true },
   { t: '12:08', run: '0424', kind: 'reserve', task: 'Alternatives · F-03 takes', model: 'Sonnet 5.5 · High', amt: '−36', left: '3,745', st: ['bad', 'Cancelled'], sel: true },
-  { t: '11:30', run: '0423', kind: 'byok', task: 'Style summary', model: 'Haiku 5 · BYOK', amt: '0', left: '3,781', st: ['mute', 'Provider-billed'] },
+  { t: '11:30', run: '0423', kind: 'byok', task: 'Style summary', model: 'Haiku 5 · BYOK', amt: '0 cr', left: '3,781', st: ['mute', 'Provider-billed'] },
   { t: '11:05', run: '0422', kind: 'hold', task: 'Independent review', model: 'Google · Pro tier', amt: '30 held', left: '3,781', st: ['warn', 'Pending'] },
+  { t: '10:52', run: '0421', kind: 'cli', task: 'Reference notes · REF-01', model: 'Claude Code · Sonnet 5.5', amt: '18.2k tok', left: '3,781', st: ['mute', 'Agent-billed'] },
+  { t: '10:31', run: '0420', kind: 'cli', task: 'Spec draft · R-DASH-018', model: 'Codex CLI', amt: 'not reported', left: '3,781', st: ['mute', 'Agent-billed'] },
 ];
 export const MODELS_LEDGER_DETAIL = { run: '0424', title: 'Cancelled after partial usage', consumed: '6 cr', released: '30 cr', pending: '0 cr', provider: 'rc-7 · provider cost 5.8 cr · charged 6 cr', key: 'k-2b90de' };
 
