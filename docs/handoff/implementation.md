@@ -119,14 +119,15 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-29 | core | Recently deleted and restore: 30-day window, pure | – | done, waiting for owner merge: PR #20 |
 | IMP-31 | core | Audit and restore in the API (routes, one audit entry per action, head kept apart) | IMP-26, IMP-29, IMP-30 | done, waiting for owner merge: PR #23, stacked on #22 |
 | IMP-32 | core | Server hardening: body limit, JSON only, timeout, CORS, headers, loopback bind | IMP-31 | done, waiting for owner merge: PR #24, stacked on #23 |
-| IMP-33 | core | Build contracts and evidence core (S37): not run is never passed | IMP-32 | open |
+| IMP-33 | core | Build contracts and evidence core (S37): not run is never passed | IMP-32 | done, waiting for owner merge: PR #26, stacked on #24 |
+| IMP-34 | core | Skills library API (S40): copies, versions, GitHub sources, update history and rollback | IMP-22, 27, 31 | open |
 | IMP-30 | core | Audit log core: append-only, hash-chained, verify | – | done, waiting for owner merge: PR #21 (follow-up: store the head hash apart from the log) |
 | IMP-28 | core | GenUI validation fuzzing (never panics, never partial) | IMP-10 | done, waiting for owner merge: PR #18, stacked on #7 (the fuzzer found and fixed a data: URL hole) |
 | IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
 | IMP-06 | ui | S28 Reference intake | IMP-01 | open |
 | IMP-07 | ui | S29 Frames canvas | IMP-01 | done, waiting for owner merge: PR #14, stacked on #11 (lead re-ran: S29 6/6 PASS) |
 | IMP-08 | ui | S30 Style review | IMP-01 | open |
-| IMP-13 | ui | S31 Alternatives | IMP-01 | open |
+| IMP-13 | ui | S31 Alternatives | IMP-01 | part open: PR #25 (5 of 6 states pass; the fail state needs layout fixes) |
 | IMP-14 | ui | S32 Targeted change | IMP-01 | done, waiting for owner merge: PR #19, stacked on #16 (lead re-ran: S32 6/6 PASS) |
 | IMP-15 | ui | S33 Review and accept | IMP-01 | done, waiting for owner merge: PR #16, stacked on #14 (lead re-ran: S33 6/6 PASS) |
 | IMP-16 | ui | S34 Coding handoff | IMP-01 | open |
@@ -303,6 +304,17 @@ Pure Rust in spekin-core for S37 (R-EVD-1, R-EVD-4, AC-SPK-22). Branch from `ori
 - `gate(contracts, evidence, required)` passes only when every required contract is `met`. It lists the reasons otherwise.
 - Property tests: missing evidence is never `met`; any failed required check fails the gate; adding newer passing evidence never turns `met` into `failing`.
 - Seed the S37 sample shapes from `docs/design/spekin-canvas/sample/parts/` (contracts, matrix). Export the types with ts-rs. Add `GET /api/projects/{id}/contracts` with a test.
+
+### IMP-34 · Skills library API (core)
+
+Builds on IMP-22, IMP-27 and IMP-31 (branch from `origin/imp-33-contracts-evidence`). It serves S40 and follows ADR 0007:
+- `GET /api/skills` returns the templates, the user's copies and the GitHub sources, each with its stage, source, licence and update policy (sample from `sample/parts/skills.mjs`, SKL_*).
+- `POST /api/skills/{id}/copy` makes a user copy of a template (`copy_for_user`). The template itself never changes.
+- `PUT /api/skills/{id}` edits a user copy and stores it as a new version. Editing a template or a GitHub skill gives a typed 409.
+- `POST /api/skills/github` adds a source with `{repo, path, ref}`, using the IMP-27 adapter through an injected client (tests use the fixtures) and pinning it to a SHA.
+- `POST /api/skills/{id}/check` runs the update check. An applied update makes a new version and one history entry. A held update stores the diff and the reasons, and nothing changes.
+- `GET /api/skills/{id}/history` and `POST /api/skills/{id}/rollback/{version}`: every version can be rolled back to, and the rollback is itself one history entry and one audit entry.
+- One test per route plus a 4xx test. Add the client functions to `apps/web/src/data/api.ts`, with tests.
 
 ### UI cards after P1 (written 23 Nov)
 
