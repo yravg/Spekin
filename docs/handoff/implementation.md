@@ -112,10 +112,10 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-22 | core | Skills core: SkillManifest, versions, update policy and update checks | IMP-04 | done, waiting for owner merge: PR #8 (lead review: approve) |
 | IMP-24 | core | Handoff manifest core (S34): accepted revisions, hashes, missing inputs, deterministic | IMP-04 | done, waiting for owner merge: PR #13, stacked on #2 |
 | IMP-25 | core | Next-request context builder (S29, S35): only the listed chips, pure | – | done, waiting for owner merge: PR #12 |
-| IMP-26 | core | API routes for the core (all core cards) + web client | IMP-03…IMP-25 | open |
+| IMP-26 | core | API routes for the core (all core cards) + web client | IMP-03…IMP-25 | done, waiting for owner merge: PR #15 (merge last) |
 | IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
 | IMP-06 | ui | S28 Reference intake | IMP-01 | open |
-| IMP-07 | ui | S29 Frames canvas | IMP-01 | open |
+| IMP-07 | ui | S29 Frames canvas | IMP-01 | done, waiting for owner merge: PR #14, stacked on #11 (lead re-ran: S29 6/6 PASS) |
 | IMP-08 | ui | S30 Style review | IMP-01 | open |
 | IMP-13 | ui | S31 Alternatives | IMP-01 | open |
 | IMP-14 | ui | S32 Targeted change | IMP-01 | open |
