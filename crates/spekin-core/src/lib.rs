@@ -8,6 +8,7 @@
 pub mod model_source;
 pub mod github_source;
 pub mod ledger;
+pub mod handoff;
 pub mod project;
 pub mod skills;
 pub mod proposal;
@@ -38,6 +39,10 @@ pub use ledger::{
     CRIT_THRESHOLD_PCT, Ledger, LedgerCaps, LedgerEntry, LedgerEntryKind, LedgerError, Reservation,
     ReservationStatus, RunEstimate, Settlement, UsageSeverity, UsageSnapshot, WARN_THRESHOLD_PCT,
     estimate, severity_for,
+pub use handoff::{
+    ArtifactRevisionRecord, ArtifactRevisionState, Manifest, ManifestArtifact, ManifestError,
+    ManifestExclusion, ManifestInput, ManifestInputStatus, ManifestSelection,
+    ManifestSelectionItem, RequiredInput, build_manifest, sha256_hex,
 };
 pub use project::{Fixture, FixtureError, Project};
 pub use skills::{
