@@ -115,27 +115,71 @@ pub fn window_close(deleted_at: Timestamp) -> Timestamp {
 /// Mark a live project as deleted at `now`. Nothing is removed: the payload and every
 /// revision are kept. Deleting an already-deleted project or moving the clock back is refused.
 pub fn delete(entry: ProjectEntry, now: Timestamp) -> Result<ProjectEntry, RestoreError> {
-    todo!("IMP-29: implement delete")
+    if entry.deleted_at.is_some() {
+        return Err(RestoreError::AlreadyDeleted);
+    }
+    if now < entry.changed_at {
+        return Err(RestoreError::ClockBackwards {
+            now,
+            before: entry.changed_at,
+        });
+    }
+    let mut out = entry;
+    out.deleted_at = Some(now);
+    out.changed_at = now;
+    Ok(out)
 }
 
 /// Restore a deleted project at `now`, only inside the 30-day window. Outside it the typed
 /// `WindowClosed { deleted_at, closed_at }` error is returned. Restore keeps the payload and
 /// revisions and flips the deletion mark back off; it is the exact inverse of delete.
 pub fn restore(entry: ProjectEntry, now: Timestamp) -> Result<ProjectEntry, RestoreError> {
-    todo!("IMP-29: implement restore")
+    let deleted_at = entry.deleted_at.ok_or(RestoreError::NotDeleted)?;
+    let closed_at = window_close(deleted_at);
+    if now < deleted_at {
+        return Err(RestoreError::ClockBackwards {
+            now,
+            before: deleted_at,
+        });
+    }
+    if now >= closed_at {
+        return Err(RestoreError::WindowClosed {
+            deleted_at,
+            closed_at,
+        });
+    }
+    let mut out = entry;
+    out.deleted_at = None;
+    out.changed_at = now;
+    Ok(out)
 }
 
 /// The whole days left S27 shows ("27 days left"). `0` when the project is live or the window
 /// has closed. Ceiling division keeps a second of grace showing as "1", never "0" while still
 /// restorable.
 pub fn days_left(entry: &ProjectEntry, now: Timestamp) -> i64 {
-    todo!("IMP-29: implement days_left")
+    match entry.deleted_at {
+        None => 0,
+        Some(deleted_at) => {
+            let closed_at = window_close(deleted_at);
+            if now >= closed_at {
+                return 0;
+            }
+            // Clamp a backwards clock to the deletion instant: the countdown never exceeds 30.
+            let remaining = closed_at - now.max(deleted_at);
+            (remaining + SECONDS_PER_DAY - 1) / SECONDS_PER_DAY
+        }
+    }
 }
 
 /// Projects past the 30-day window. Returns clones and removes nothing: a later server job
 /// uses this list to purge (ADR 0002 keeps IO out of the core).
 pub fn purge_due(entries: &[ProjectEntry], now: Timestamp) -> Vec<ProjectEntry> {
-    todo!("IMP-29: implement purge_due")
+    entries
+        .iter()
+        .filter(|e| e.deleted_at.is_some_and(|d| now >= window_close(d)))
+        .cloned()
+        .collect()
 }
 
 #[cfg(test)]
@@ -182,9 +226,14 @@ mod tests {
         let live = sample_live(0);
         let hash = live.content_hash();
         let gone = delete(live.clone(), 100).expect("delete");
-        let back = restore(gone, 100 + WINDOW_SECONDS - 1).expect("restore one second before close");
+        let back =
+            restore(gone, 100 + WINDOW_SECONDS - 1).expect("restore one second before close");
         assert!(!back.is_deleted());
-        assert_eq!(back.content_hash(), hash, "restore keeps the exact content hash");
+        assert_eq!(
+            back.content_hash(),
+            hash,
+            "restore keeps the exact content hash"
+        );
         assert_eq!(back.revisions, live.revisions);
         assert_eq!(back.project, live.project);
     }
@@ -194,8 +243,17 @@ mod tests {
         let gone = delete(sample_live(0), 5_000).expect("delete");
         let close = window_close(5_000);
         let err = restore(gone.clone(), close).unwrap_err();
-        assert_eq!(err, RestoreError::WindowClosed { deleted_at: 5_000, closed_at: close });
-        assert!(matches!(restore(gone, close + 1), Err(RestoreError::WindowClosed { .. })));
+        assert_eq!(
+            err,
+            RestoreError::WindowClosed {
+                deleted_at: 5_000,
+                closed_at: close
+            }
+        );
+        assert!(matches!(
+            restore(gone, close + 1),
+            Err(RestoreError::WindowClosed { .. })
+        ));
     }
 
     #[test]
@@ -206,21 +264,31 @@ mod tests {
         assert_eq!(days_left(&gone, 3 * SECONDS_PER_DAY), 27);
         assert_eq!(days_left(&gone, 30 * SECONDS_PER_DAY - 1), 1);
         assert_eq!(days_left(&gone, 30 * SECONDS_PER_DAY), 0);
-        assert_eq!(days_left(&sample_live(0), 100), 0, "a live project has no countdown");
+        assert_eq!(
+            days_left(&sample_live(0), 100),
+            0,
+            "a live project has no countdown"
+        );
     }
 
     #[test]
     fn deleting_twice_or_restoring_a_live_project_is_refused() {
         let gone = delete(sample_live(0), 10).expect("delete");
         assert_eq!(delete(gone, 20).unwrap_err(), RestoreError::AlreadyDeleted);
-        assert_eq!(restore(sample_live(0), 20).unwrap_err(), RestoreError::NotDeleted);
+        assert_eq!(
+            restore(sample_live(0), 20).unwrap_err(),
+            RestoreError::NotDeleted
+        );
     }
 
     #[test]
     fn purge_due_lists_only_projects_past_the_window_and_removes_nothing() {
         let old = delete(sample_live(0), 100).expect("delete");
-        let fresh = delete(ProjectEntry::new("other", old.project.clone(), vec![], 100), 9_000)
-            .expect("delete");
+        let fresh = delete(
+            ProjectEntry::new("other", old.project.clone(), vec![], 100),
+            9_000,
+        )
+        .expect("delete");
         let entries = vec![old.clone(), fresh.clone()];
         let due = purge_due(&entries, 100 + WINDOW_SECONDS);
         assert_eq!(due.len(), 1);
@@ -268,8 +336,14 @@ mod tests {
         ) {
             let gone = delete(sample_live(deleted_at - WINDOW_SECONDS), deleted_at).expect("delete");
             let due = purge_due(&[gone], now);
-            let inside = now >= deleted_at && now < deleted_at + WINDOW_SECONDS;
-            prop_assert_eq!(due.is_empty(), inside);
+            let close = deleted_at + WINDOW_SECONDS;
+            if now >= deleted_at && now < close {
+                prop_assert!(due.is_empty(), "inside the window is never purged");
+            } else if now >= close {
+                prop_assert_eq!(due.len(), 1, "past the window is listed");
+            } else {
+                prop_assert!(due.is_empty(), "before deletion is not purged");
+            }
         }
 
         #[test]

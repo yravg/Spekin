@@ -11,7 +11,7 @@ pub mod stage;
 
 pub use project::{Fixture, FixtureError, Project};
 pub use restore::{
-    ProjectEntry, RestoreError, RESTORE_WINDOW_DAYS, SECONDS_PER_DAY, Timestamp, WINDOW_SECONDS,
+    ProjectEntry, RESTORE_WINDOW_DAYS, RestoreError, SECONDS_PER_DAY, Timestamp, WINDOW_SECONDS,
     days_left, delete, purge_due, restore, window_close,
 };
 pub use stage::{Stage, StageId, StageTone};
