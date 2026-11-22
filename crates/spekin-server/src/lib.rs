@@ -430,7 +430,6 @@ async fn delete_project(
     State(s): State<AppState>,
     Path(id): Path<String>,
 ) -> Result<Json<ProjectEntry>, ServerError> {
-    ensure_project(&id)?;
     let mut store = s.project_store.lock().expect("project store lock");
     let entry = store.project_entries.get(&id).cloned().ok_or_else(|| {
         ServerError::not_found("project_not_found", format!("unknown project: {id}"))
@@ -453,7 +452,6 @@ async fn restore_project(
     State(s): State<AppState>,
     Path(id): Path<String>,
 ) -> Result<Json<ProjectEntry>, ServerError> {
-    ensure_project(&id)?;
     let mut store = s.project_store.lock().expect("project store lock");
     let entry = store.project_entries.get(&id).cloned().ok_or_else(|| {
         ServerError::not_found("project_not_found", format!("unknown project: {id}"))

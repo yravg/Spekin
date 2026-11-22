@@ -9,7 +9,8 @@ use axum::{
 };
 use http_body_util::BodyExt;
 use serde_json::{Value, json};
-use spekin_server::{AppState, router};
+use spekin_core::SECONDS_PER_DAY;
+use spekin_server::{AppState, DEFAULT_NOW, router};
 use tower::ServiceExt;
 
 const SAMPLE: &str = include_str!("../../../fixtures/meranti-yard.json");
@@ -52,12 +53,7 @@ async fn audit_entries(app: &axum::Router) -> Vec<Value> {
         Value::Null,
         "a fresh chain must verify: {body}"
     );
-    body["entries"]
-        .as_array()
-        .expect("entries array")
-        .iter()
-        .cloned()
-        .collect()
+    body["entries"].as_array().expect("entries array").to_vec()
 }
 
 // --- GET /api/projects/{id}/audit ---
@@ -294,6 +290,30 @@ async fn delete_and_restore_audit_and_the_deleted_list_has_days_left() {
     .await;
     assert_eq!(twice_status, StatusCode::CONFLICT, "body: {twice_body}");
     assert_eq!(twice_body["code"], "already_deleted");
+}
+
+#[tokio::test]
+async fn restore_after_the_window_is_409_and_adds_no_audit_entry() {
+    // The seeded kenari-fleet was deleted three days before DEFAULT_NOW; a month later
+    // the IMP-29 window is closed. No audit entry is written for a refused restore.
+    let state = AppState::from_fixture_json(SAMPLE)
+        .expect("sample fixture is valid")
+        .with_now(DEFAULT_NOW + 31 * SECONDS_PER_DAY);
+    let app = router(state);
+
+    let (status, body) = send(
+        &app,
+        Method::POST,
+        "/api/projects/kenari-fleet/restore",
+        None,
+    )
+    .await;
+    assert_eq!(status, StatusCode::CONFLICT, "body: {body}");
+    assert_eq!(body["code"], "window_closed");
+    assert!(
+        audit_entries(&app).await.is_empty(),
+        "a refused restore adds no audit entry"
+    );
 }
 
 #[tokio::test]
