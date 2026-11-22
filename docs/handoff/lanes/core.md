@@ -7,6 +7,12 @@ Only this lane edits this file. Write here before you stop working.
 | Card | Branch | Status | Evidence | Not checked |
 |---|---|---|---|---|
 | IMP-03 | imp-03-api-source | done | `apps/web/src/data/api.test.ts` 8 cases pass (vitest): `fetchProject`/`fetchStages` deep-equal `getProject`/`getStages`; 404 → `null`; non-JSON → `ApiError kind 'json'`; wrong shape → `'shape'`; 500 → `'http'` with status; refused connection → `'network'`; explicit base URL. Rust: `project_matches_the_fixture_exactly`, `unknown_project_is_404_for_the_project_route` (4 server tests pass). Live check on 127.0.0.1:8787: `/api/projects/meranti-yard` 200 and byte-equal to fixture `PROJECT`, `/stages` 200 equal to `STAGES`, `/api/projects/nope` 404. `npm run gate` passes (rules, sync, board lint, typecheck, 10 vitest, build, cargo fmt/clippy/test, contracts current). | The screens still read `source.ts` on purpose (card says not to switch them; that is a lead step after IMP-01). No live test against a browser build, no CORS check (dev proxy covers `/api`). `fetchProject`/`fetchStages` have no timeout of their own; a caller can pass an `AbortSignal`. |
+| IMP-03 | `imp-03-api-source` (PR #1) | open (in PR #1) | – | – |
+| IMP-04 | `imp-04-proposals` (PR #2) | open (in PR #2) | – | – |
+| IMP-12 | `imp-12-licences` (PR #4) | done (in PR #4) | – | – |
+| IMP-11 | `imp-11-model-sources` | done | `cargo test --workspace` (18 unit/ts-rs + 5 `tests/model_source.rs` + 2 server tests pass); `npm run gate` passes | Server endpoints and UI wiring for S36 (later cards) |
+| IMP-10 | – | open | – | – |
+| IMP-22 | – | open | – | – |
 
 ## Requests to lead
 
@@ -31,3 +37,4 @@ Only this lane edits this file. Write here before you stop working.
 - 23 Nov 2026 · IMP-03 · typed API client `api.ts` (404 → null, `ApiError` with kinds network/http/json/shape), 8 vitest cases against `fixtures/meranti-yard.json`, server test that `/api/projects/:id` equals the fixture `PROJECT` · 740fef8 (test first: 46a603a)
 - 2026-11-23 · IMP-12 · Added `tools/checks/licences.mjs`, `tools/checks/licences.test.mjs`, `tools/checks/licence-allowlist.json`, and generated `docs/licences.md`; fixed false positive on `rules.mjs` `'R1 no-python'` text; `npm run gate` passes.
 - 2026-11-23 · IMP-12 follow-up · Resolved workspace link entries (`link: true`, `resolved`) from `<resolved>/package.json` so `licences.mjs` works without `node_modules`, with fallback to root licence (`Apache-2.0`) for private workspace packages without a `license` field; added regression test.
+- 2026-11-23 · IMP-11 · Added `crates/spekin-core/src/model_source.rs` (Hosted, Local CLI with connector status, API provider with key presence/tail only, capability registry with S36 sample, ledger-touch check), exported ts-rs contracts, and added 5 integration tests.
