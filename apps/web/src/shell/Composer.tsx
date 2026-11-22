@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react';
 import type { SampleModel } from '@spekin/sample';
 import { Icon } from '../ui/Icon';
 import { IconBtn } from '../ui/Button';
@@ -8,25 +9,25 @@ export function Composer(props: {
   draft: string;
   model: SampleModel;
   onDraftChange: (value: string) => void;
+  onKeyDown?: (e: KeyboardEvent<HTMLTextAreaElement>) => void;
   onAttach: () => void;
   onMention: () => void;
   onOpenModel: () => void;
   onSend: () => void;
 }) {
-  const { placeholder, draft, model, onDraftChange, onAttach, onMention, onOpenModel, onSend } = props;
+  const { placeholder, draft, model, onDraftChange, onKeyDown, onAttach, onMention, onOpenModel, onSend } = props;
   return (
     <div className="sp-comp">
       <div className="ta ap-ta-wrap">
-        {!draft ? (
-          <span className="ap-ta-ph" aria-hidden="true">
-            {placeholder}
-          </span>
-        ) : null}
+        <span className="ap-ta-ph" aria-hidden="true">
+          {draft || placeholder}
+        </span>
         <textarea
           className="ap-ta-input"
           aria-label="Message composer"
           value={draft}
           onChange={(e) => onDraftChange(e.target.value)}
+          onKeyDown={onKeyDown}
         />
       </div>
       <div className="row">

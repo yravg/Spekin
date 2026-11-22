@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { MODEL, type SampleStage } from '@spekin/sample';
 import { getProject, getStages, getUsage, isStageId } from '../data/source';
-import { useWorkspace } from '../state/workspace';
+import { useWorkspace, type SaveState } from '../state/workspace';
 import { TopBar } from './TopBar';
 import { StageBar } from './StageBar';
 import { NotFound } from './NotFound';
 import { DesignWorkArea } from './DesignWorkArea';
 import { BackendWorkArea } from './BackendWorkArea';
+import { SkillsWorkArea } from '../skills/SkillsWorkArea';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -130,6 +131,7 @@ export function ProjectShell() {
   const navigate = useNavigate();
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
+  const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
   const save = useWorkspace((s) => s.save);
   const conflict = useWorkspace((s) => s.conflict);
   const project = getProject(projectId);
@@ -137,15 +139,23 @@ export function ProjectShell() {
   const stages = getStages(projectId);
   if (!project || !usage || !isStageId(stages, stage)) return <NotFound />;
   const currentStage = stages.find((s) => s.id === stage)!;
+  const screenId = stage === 'spec' ? 'S40' : 'S35';
+  const activeSave = stage === 'spec' && specOverride.save ? specOverride.save : save;
+  const activeBusy =
+    stage === 'spec'
+      ? specOverride.busy
+      : stage === 'design' && !conflict
+        ? '1 designing · 1 waiting'
+        : undefined;
 
   return (
-    <div className="ap-root" data-screen="S35" data-panel={panel ?? undefined}>
+    <div className="ap-root" data-screen={screenId} data-panel={panel ?? undefined}>
       <div className="sp-app">
         <TopBar
           project={project}
           usage={usage}
-          save={save}
-          busy={stage === 'design' && !conflict ? '1 designing · 1 waiting' : undefined}
+          save={activeSave}
+          busy={activeBusy}
           onOpenSwitcher={() => setPanel('switcher')}
           onOpenIncrement={() => setPanel('increment')}
           onOpenSpec={() => setPanel('spec')}
@@ -160,6 +170,8 @@ export function ProjectShell() {
             <DesignWorkArea />
           ) : stage === 'backend' ? (
             <BackendWorkArea />
+          ) : stage === 'spec' ? (
+            <SkillsWorkArea onShellOverride={setSpecOverride} />
           ) : (
             <StagePlaceholderWorkArea stage={currentStage} />
           )}

@@ -29,6 +29,61 @@ export interface SampleBackend {
 }
 export interface SampleConflict { frame: string; rev: string; by: string; at: string }
 
+export interface SampleSkillSource {
+  id: string;
+  name: string;
+  kind: 'template' | 'github' | 'mine';
+  url?: string;
+  count: number;
+  licence: string;
+  notice?: string;
+  commit?: string;
+  policy: string;
+}
+export type SampleSkillRow = [string, string, string, string[], string, string, string, boolean, number];
+export interface SampleSkillDetail {
+  id: string;
+  title: string;
+  version: string;
+  path: string;
+  adapted: string;
+  reads: string[];
+  proposes: string[];
+  tools: string;
+  invoke: string;
+  steps: string[];
+  used: [string, string][];
+}
+export interface SampleSkillEdit {
+  title: string;
+  from: string;
+  desc: string;
+  stages: string[];
+  body: string[];
+  checks: ['ok' | 'warn', string][];
+  dry: [string, string, string, string][];
+}
+export interface SampleSkillGithub {
+  url: string;
+  found: number;
+  licence: string;
+  file: string;
+  notice: string;
+  groups: [string, [string, boolean][]][];
+  checks: ['ok' | 'warn', string][];
+}
+export interface SampleSkillUpdate {
+  when: string;
+  src: string;
+  from: string;
+  to: string;
+  applied: number;
+  held: number;
+  rows: ['ok' | 'warn', string, string, string][];
+}
+export type SampleSkillDiffRow = [string, string];
+export type SampleSkillGlossRow = [string, string, string, 'proposed' | 'accepted'];
+
 export declare const PROJECT: SampleProject;
 export declare const STAGES: SampleStage[];
 export declare const USAGE: SampleUsage;
@@ -41,4 +96,13 @@ export declare const CTX_DESIGN: ContextItem[];
 export declare const CTX_BACKEND: ContextItem[];
 export declare const BACKEND: SampleBackend;
 export declare const CONFLICT: SampleConflict;
+export declare const SKL_SOURCES: SampleSkillSource[];
+export declare const SKL_SKILLS: SampleSkillRow[];
+export declare const SKL_STAGES: [string, number][];
+export declare const SKL_DETAIL: SampleSkillDetail;
+export declare const SKL_EDIT: SampleSkillEdit;
+export declare const SKL_GH: SampleSkillGithub;
+export declare const SKL_UPDATES: SampleSkillUpdate[];
+export declare const SKL_DIFF: SampleSkillDiffRow[];
+export declare const SKL_GLOSS: SampleSkillGlossRow[];
 // Everything else the boards use is exported too; declare it here before use.

@@ -39,7 +39,30 @@ export interface StageView {
   tableMode: boolean;
 }
 
+const FALLBACK_VIEW: StageView = {
+  tab: null,
+  selection: [],
+  zoom: 1,
+  draft: '',
+  viewMode: 'Document',
+  inspTab: 'Links',
+  removedCtx: [],
+  tool: 'pointer',
+  tableMode: false,
+};
+
 const DEFAULT_VIEWS: Partial<Record<StageId, StageView>> = {
+  spec: {
+    tab: 'Skills',
+    selection: [],
+    zoom: 1,
+    draft: '',
+    viewMode: 'Document',
+    inspTab: 'Links',
+    removedCtx: [],
+    tool: 'pointer',
+    tableMode: false,
+  },
   design: {
     tab: 'Variance flows',
     selection: ['F-03'],
@@ -65,19 +88,7 @@ const DEFAULT_VIEWS: Partial<Record<StageId, StageView>> = {
 };
 
 function defaultView(stage: StageId): StageView {
-  return (
-    DEFAULT_VIEWS[stage] ?? {
-      tab: null,
-      selection: [],
-      zoom: 1,
-      draft: '',
-      viewMode: 'Document',
-      inspTab: 'Links',
-      removedCtx: [],
-      tool: 'pointer',
-      tableMode: false,
-    }
-  );
+  return DEFAULT_VIEWS[stage] ?? FALLBACK_VIEW;
 }
 
 interface WorkspaceState {
