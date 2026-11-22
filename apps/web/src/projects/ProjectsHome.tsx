@@ -349,19 +349,19 @@ export function SwitchPalette(props: {
   );
 }
 
-// Mirrors boards-intake.mjs createModal (S27:create).
+// Mirrors boards-intake.mjs createModal (S27:create, C-01).
+export type CreateDomain = 'dashboard' | 'engineering' | 'control' | 'finance';
+
 export function CreateProjectModal(props: {
-  name: string;
-  slug: string;
   idea: string;
+  domain: CreateDomain;
   uiLang: 'id' | 'en';
-  startFrom: 'idea' | 'refs' | 'spec';
+  onDomain: (d: CreateDomain) => void;
   onUiLang: (l: 'id' | 'en') => void;
-  onStartFrom: (s: 'idea' | 'refs' | 'spec') => void;
   onClose: () => void;
   onCreate: () => void;
 }) {
-  const { name, slug, idea, uiLang, startFrom, onUiLang, onStartFrom, onClose, onCreate } = props;
+  const { idea, domain, uiLang, onDomain, onUiLang, onClose, onCreate } = props;
   return (
     <div className="int-mod" role="dialog" aria-label="New project" data-feature="F130">
       <div className="int-mh">
@@ -373,12 +373,69 @@ export function CreateProjectModal(props: {
       <div className="int-mb">
         <div className="int-fl">
           <div className="lb">
-            Project name<span>Shown in the top bar and the link</span>
+            What is it for?<span>Picks the questions and the specialist pack</span>
           </div>
-          <div className="int-fi">{name}</div>
-          <div className="int-fh">
-            <span>Link: /p/{slug}</span>
-            <Pill tone="ok" label="Link is free" />
+          <div className="int-rcs d4" role="radiogroup" aria-label="What is it for">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={domain === 'dashboard'}
+              className="int-rc"
+              data-does="Sets the domain to Dashboard: the interview uses its question bank and pack"
+              data-feature="F130"
+              onClick={() => onDomain('dashboard')}
+            >
+              <b>
+                <Icon name="grid" size={14} />
+                Dashboard
+              </b>
+              Reports and KPIs from your own data
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={domain === 'engineering'}
+              className="int-rc"
+              data-does="Sets the domain to Engineering: the interview uses its question bank and pack"
+              data-feature="F130"
+              onClick={() => onDomain('engineering')}
+            >
+              <b>
+                <Icon name="layers" size={14} />
+                Engineering
+              </b>
+              Drawings, models and IFC (CAD/BIM)
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={domain === 'control'}
+              className="int-rc"
+              data-does="Sets the domain to Project control: the interview uses its question bank and pack"
+              data-feature="F130"
+              onClick={() => onDomain('control')}
+            >
+              <b>
+                <Icon name="flag" size={14} />
+                Project control
+              </b>
+              Schedule, cost, progress and EAC
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={domain === 'finance'}
+              className="int-rc"
+              data-does="Sets the domain to Finance and stock: the interview uses its question bank and pack"
+              data-feature="F130"
+              onClick={() => onDomain('finance')}
+            >
+              <b>
+                <Icon name="db" size={14} />
+                Finance and stock
+              </b>
+              Budgets, invoices and stock levels
+            </button>
           </div>
         </div>
         <div className="int-fl">
@@ -394,91 +451,27 @@ export function CreateProjectModal(props: {
             <Pill tone="ok" label="Long enough to start" />
           </div>
         </div>
-        <div className="int-fl">
-          <div className="lb">
-            UI language<span>The spec follows the language of your idea</span>
-          </div>
-          <div className="int-seg" role="group" aria-label="UI language" data-feature="F131">
-            <button
-              type="button"
-              aria-pressed={uiLang === 'id'}
-              data-does="Shows Spekin in Bahasa Indonesia; typed text is kept"
-              data-feature="F131"
-              onClick={() => onUiLang('id')}
-            >
-              Bahasa Indonesia
-            </button>
-            <button
-              type="button"
-              aria-pressed={uiLang === 'en'}
-              data-does="Shows Spekin in English; typed text is kept"
-              data-feature="F131"
-              onClick={() => onUiLang('en')}
-            >
-              English
-            </button>
-          </div>
-        </div>
-        <div className="int-fl">
-          <div className="lb">Start from</div>
-          <div className="int-rcs" role="radiogroup" aria-label="Start from">
-            <button
-              type="button"
-              role="radio"
-              aria-checked={startFrom === 'idea'}
-              className="int-rc"
-              data-does="Starts from the written idea: short questions, then a pitch"
-              data-feature="F130"
-              onClick={() => onStartFrom('idea')}
-            >
-              <b>
-                <Icon name="spark" size={14} />
-                An idea
-              </b>
-              Spekin asks short questions, then writes a pitch.
-            </button>
-            <button
-              type="button"
-              role="radio"
-              aria-checked={startFrom === 'refs'}
-              className="int-rc"
-              data-does="Creates the project and opens the Design stage import (S28)"
-              data-feature="F130"
-              onClick={() => onStartFrom('refs')}
-            >
-              <b>
-                <Icon name="image" size={14} />
-                Reference screenshots
-              </b>
-              Drop or paste screenshots first. Opens the import.
-            </button>
-            <button
-              type="button"
-              role="radio"
-              aria-checked={startFrom === 'spec'}
-              className="int-rc"
-              data-does="Creates the project from a pasted or uploaded spec, read as revision r1"
-              data-feature="F130"
-              onClick={() => onStartFrom('spec')}
-            >
-              <b>
-                <Icon name="doc" size={14} />
-                An existing spec
-              </b>
-              Paste or upload a spec. Read as revision r1.
-            </button>
-          </div>
-        </div>
       </div>
       <div className="int-mf">
-        <span className="int-hint">The first model run shows its cost estimate before it starts.</span>
+        <span className="int-hint">
+          The name comes from your pitch; change it any time. Shown in {uiLang === 'en' ? 'English' : 'Bahasa Indonesia'} ·{' '}
+          <button
+            type="button"
+            className="int-lang"
+            data-does="Switches the UI to Bahasa Indonesia at once; the idea you typed is kept"
+            data-feature="F131"
+            onClick={() => onUiLang(uiLang === 'en' ? 'id' : 'en')}
+          >
+            {uiLang === 'en' ? 'Bahasa Indonesia' : 'English'}
+          </button>
+        </span>
         <span className="sp-fill" />
         <IntakeBtn label="Cancel" cls="plain" does="Closes the dialog without creating anything" feature="F130" onClick={onClose} />
         <IntakeBtn
           label="Create project"
           cls="ink"
           kbd="⌘↵"
-          does="Creates Lontar Notices and opens it; disabled until the name is set and the idea has 20 characters"
+          does="Creates the project and asks the first question; disabled until a domain is picked and the idea has 20 characters"
           feature="F130"
           onClick={onCreate}
         />
@@ -500,7 +493,7 @@ export function ProjectsHome({ initialView = 'home' }: { initialView?: 'home' | 
   const [activeFilterTab, setActiveFilterTab] = useState('Recently opened');
   const [layout, setLayout] = useState<'cards' | 'list'>('cards');
   const [createUiLang, setCreateUiLang] = useState<'id' | 'en'>('en');
-  const [createStart, setCreateStart] = useState<'idea' | 'refs' | 'spec'>('idea');
+  const [createDomain, setCreateDomain] = useState<CreateDomain>('control');
   const [goneId, setGoneId] = useState<string | null>(initialView === 'restore' ? INTAKE_DELETED.id : null);
   const [showRestoreBanner, setShowRestoreBanner] = useState(initialView === 'restore');
   const [palSel, setPalSel] = useState(1);
@@ -770,7 +763,6 @@ export function ProjectsHome({ initialView = 'home' }: { initialView?: 'home' | 
                     data-does="Opens the Create project dialog on An idea"
                     data-feature="F132"
                     onClick={() => {
-                      setCreateStart('idea');
                       setView('all');
                       setOverlay('create');
                     }}
@@ -791,7 +783,6 @@ export function ProjectsHome({ initialView = 'home' }: { initialView?: 'home' | 
                     data-does="Opens the Create project dialog on Reference screenshots; the project opens on the Design stage import (S28)"
                     data-feature="F132"
                     onClick={() => {
-                      setCreateStart('refs');
                       setView('all');
                       setOverlay('create');
                     }}
@@ -812,7 +803,6 @@ export function ProjectsHome({ initialView = 'home' }: { initialView?: 'home' | 
                     data-does="Opens the Create project dialog on An existing spec"
                     data-feature="F132"
                     onClick={() => {
-                      setCreateStart('spec');
                       setView('all');
                       setOverlay('create');
                     }}
@@ -1161,13 +1151,11 @@ export function ProjectsHome({ initialView = 'home' }: { initialView?: 'home' | 
         ) : null}
         {overlay === 'create' ? (
           <CreateProjectModal
-            name={INTAKE_NEW.name}
-            slug={INTAKE_NEW.slug}
             idea={INTAKE_NEW.idea}
+            domain={createDomain}
             uiLang={createUiLang}
-            startFrom={createStart}
+            onDomain={setCreateDomain}
             onUiLang={setCreateUiLang}
-            onStartFrom={setCreateStart}
             onClose={() => setOverlay('none')}
             onCreate={() => {
               setOverlay('none');

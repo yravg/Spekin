@@ -75,20 +75,24 @@ describe('S27 Projects home (IMP-05)', () => {
 
     const mod = renderToStaticMarkup(
       <CreateProjectModal
-        name={INTAKE_NEW.name}
-        slug={INTAKE_NEW.slug}
         idea={INTAKE_NEW.idea}
+        domain="control"
         uiLang="en"
-        startFrom="idea"
+        onDomain={noop}
         onUiLang={noop}
-        onStartFrom={noop}
         onClose={noop}
         onCreate={noop}
       />,
     );
     expect(mod).toContain('New project');
-    expect(mod).toContain(INTAKE_NEW.name);
-    expect(mod).toContain('/p/' + INTAKE_NEW.slug);
+    expect(mod).toContain('What is it for?');
+    expect(mod).toContain('Dashboard');
+    expect(mod).toContain('Engineering');
+    expect(mod).toContain('Project control');
+    expect(mod).toContain('Finance and stock');
+    expect(mod).toContain(INTAKE_NEW.idea);
+    expect(mod).toContain('The name comes from your pitch; change it any time.');
+    expect(mod).toContain('Bahasa Indonesia');
     expect(mod).toContain('Create project');
   });
 });
