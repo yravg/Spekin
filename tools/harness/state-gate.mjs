@@ -21,6 +21,8 @@ const { PNG } = req('pngjs');
 const pixelmatch = req('pixelmatch').default ?? req('pixelmatch');
 const APP = (process.env.APP_URL || 'http://127.0.0.1:5173').replace(/\/$/, '');
 const ONLY = process.argv[2] || process.env.ONLY || '';
+// GATE=checked runs only the states whose click path is marked "checked" (the required CI job); drafts and missing paths are skipped.
+const CHECKED_ONLY = process.env.GATE === 'checked';
 // The app root on a board and in the app: .sp-app inside a project, .int-app on S27 (outside a project).
 const APP_ROOT = '.sp-app, .int-app';
 const MAX_DIFF = 1.0;
@@ -58,6 +60,7 @@ for (const b of manifest) {
   for (const st of b.states) {
     const id = b.screen + ':' + st.state;
     if (ONLY && !(id === ONLY || b.screen === ONLY || b.board.startsWith(ONLY))) continue;
+    if (CHECKED_ONLY && paths[b.board]?.[st.state]?.status !== 'checked') continue;
     const p = paths[b.board]?.[st.state];
     const r = { board: b.board, screen: b.screen, state: st.state, status: p?.status || 'missing', verdict: 'FAIL', reasons: [] };
     results.push(r);
