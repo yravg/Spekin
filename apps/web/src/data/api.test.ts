@@ -1,14 +1,19 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type {
+  AuditResponse,
+  DeletedProjectView,
   GenUiValidation,
   Manifest,
   ModelCapability,
   Project,
+  ProjectEntry,
   Rejection,
   RequestContext,
   Reservation,
   Revision,
   RunEstimate,
+  Settlement,
+  SettleRunRequest,
   SkillManifest,
   Stage,
   UpdateCheck,
@@ -21,13 +26,19 @@ import {
   buildHandoffManifest,
   buildProjectContext,
   checkSkillUpdate,
+  deleteProject,
   estimateRun,
+  fetchAudit,
+  fetchDeletedProjects,
   fetchModels,
   fetchProject,
   fetchStages,
   fetchUsage,
   rejectProposal,
   reserveRun,
+  restoreProject,
+  revertRevision,
+  settleRun,
   validateGenUi,
 } from './api';
 import { SAMPLE_PROJECT_ID, getProject, getStages } from './source';
@@ -315,5 +326,108 @@ describe('Core API client (IMP-26): typed requests, responses and 4xx errors', (
       }),
     ).resolves.toEqual(manifest);
     expect(String(spy.mock.calls[0]?.[0])).toBe('/api/projects/meranti-yard/handoff/manifest');
+  });
+});
+
+describe('Audit and restore API client (IMP-31)', () => {
+  const entry = {
+    seq: 1,
+    actor: 'sample-user',
+    action: 'reject',
+    target_id: 'P-07',
+    revision: 'r14',
+    reason: 'Too broad',
+    at: 1_735_689_600,
+    prev_hash: '0'.repeat(64),
+    hash: 'a'.repeat(64),
+  };
+  const projectEntry: ProjectEntry = {
+    id: 'meranti-yard',
+    project: PROJECT,
+    revisions: ['r14'],
+    changed_at: 1_735_689_600,
+    deleted_at: 1_735_689_600,
+  } as unknown as ProjectEntry;
+
+  it('fetchAudit returns entries, the separate head hash and a null error when verified', async () => {
+    const audit = { entries: [entry], head_hash: entry.hash, error: null } as unknown as AuditResponse;
+    const spy = mockFetch(json(audit));
+
+    await expect(fetchAudit(SAMPLE_PROJECT_ID)).resolves.toEqual(audit);
+    expect(String(spy.mock.calls[0]?.[0])).toBe('/api/projects/meranti-yard/audit');
+
+    mockFetch(json({ code: 'project_not_found', message: 'unknown' }, 404));
+    await expect(fetchAudit('nope')).resolves.toBeNull();
+  });
+
+  it('fetchAudit keeps a typed verify error, never a partial log', async () => {
+    const audit = {
+      entries: [entry],
+      head_hash: 'b'.repeat(64),
+      error: { edited: { seq: 1 } },
+    } as unknown as AuditResponse;
+    mockFetch(json(audit));
+
+    const out = await fetchAudit(SAMPLE_PROJECT_ID);
+    expect(out?.error).toEqual({ edited: { seq: 1 } });
+    expect(out?.head_hash).toBe('b'.repeat(64));
+  });
+
+  it('revertRevision posts the target revision and parses the new Revision', async () => {
+    const rev: Revision = { n: 16, content: 'r14 content restored' };
+    const spy = mockFetch(json(rev));
+
+    await expect(
+      revertRevision(SAMPLE_PROJECT_ID, 'spec', { n: 14, content: 'r14 content restored' }),
+    ).resolves.toEqual(rev);
+    expect(String(spy.mock.calls[0]?.[0])).toBe('/api/projects/meranti-yard/revisions/spec/revert');
+    expect(spy.mock.calls[0]?.[1]?.body).toBe(
+      JSON.stringify({ to: { n: 14, content: 'r14 content restored' } }),
+    );
+  });
+
+  it('settleRun posts the run id and actual spend and parses Settlement', async () => {
+    const settlement: Settlement = {
+      run_id: 'run-0429',
+      idempotency_key: 'k-1',
+      reserved: 36,
+      charged: 24,
+      refunded: 12,
+      cancelled: false,
+    };
+    const req: SettleRunRequest = { run_id: 'run-0429', actual: 24 };
+    const spy = mockFetch(json(settlement));
+
+    await expect(settleRun(SAMPLE_PROJECT_ID, req)).resolves.toEqual(settlement);
+    expect(String(spy.mock.calls[0]?.[0])).toBe('/api/projects/meranti-yard/runs/settle');
+    expect(spy.mock.calls[0]?.[1]?.body).toBe(JSON.stringify(req));
+  });
+
+  it('deleteProject and restoreProject post to their routes and parse ProjectEntry', async () => {
+    const delSpy = mockFetch(json(projectEntry));
+    await expect(deleteProject(SAMPLE_PROJECT_ID)).resolves.toEqual(projectEntry);
+    expect(String(delSpy.mock.calls[0]?.[0])).toBe('/api/projects/meranti-yard/delete');
+
+    const restored = { ...projectEntry, deleted_at: null } as unknown as ProjectEntry;
+    const resSpy = mockFetch(json(restored));
+    await expect(restoreProject(SAMPLE_PROJECT_ID)).resolves.toEqual(restored);
+    expect(String(resSpy.mock.calls[0]?.[0])).toBe('/api/projects/meranti-yard/restore');
+  });
+
+  it('fetchDeletedProjects lists entries with days_left', async () => {
+    const listed: DeletedProjectView[] = [
+      { entry: projectEntry, days_left: 27 } as unknown as DeletedProjectView,
+    ];
+    const spy = mockFetch(json(listed));
+
+    await expect(fetchDeletedProjects()).resolves.toEqual(listed);
+    expect(String(spy.mock.calls[0]?.[0])).toBe('/api/projects/deleted');
+  });
+
+  it('a wrong audit shape is a typed error, never a crash', async () => {
+    mockFetch(json({ entries: 'not an array', head_hash: 'x', error: null }));
+    const error = await fetchAudit(SAMPLE_PROJECT_ID).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).kind).toBe('shape');
   });
 });
