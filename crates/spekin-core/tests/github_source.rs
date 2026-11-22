@@ -1,8 +1,9 @@
-//! IMP-27: GitHub skill source adapter (ADR 0007, AC-SPK-39). All data is local fixtures: no network.
+//! IMP-27: pure GitHub source rules. All data is local fixtures: no network.
 
 use spekin_core::github_source::{
-    GitHubFile, GitHubRepo, GitHubSnapshot, GitHubSourceError, detect_license,
-    discover_skill_paths, import_repository, parse_github_repo, plan_updates,
+    BundleFile, GitHubSourceError, MAX_BUNDLE_BYTES, MAX_FILES, MAX_FILE_BYTES, PinnedSource,
+    assemble_bundle, check_bundle_limits, is_license_path, join_relative, license_from,
+    listed_files, parse_github_repo, plan_updates, skill_md_path,
 };
 use spekin_core::skills::{HoldReason, SkillSource, UpdateDecision, UpdatePolicy, parse_skill_md};
 
@@ -16,6 +17,7 @@ stages: [planning, spec]
 licence: FRONTMATTER-IS-NOT-AUTHORITATIVE
 notice: Copyright (c) 2026 Example Author
 version: 1.3.0
+files: [reference/one.md]
 reads: [Pitch]
 proposes: [Glossary terms]
 tools: []
@@ -24,34 +26,31 @@ invocation: /grill
 Ask one question at a time. Nothing changes until you accept in review.
 "#;
 
-fn repo() -> GitHubRepo {
-    GitHubRepo {
-        owner: "example".into(),
-        repo: "skills".into(),
+fn pinned() -> PinnedSource {
+    PinnedSource {
+        repo: "example/skills".into(),
+        path: "skills/grill/SKILL.md".into(),
+        git_ref: "main".into(),
+        commit: "abc123".into(),
     }
 }
 
-fn snapshot_with_license() -> GitHubSnapshot {
-    GitHubSnapshot {
-        repo: repo(),
-        commit: "abc123".into(),
-        files: vec![
-            GitHubFile {
-                path: "LICENSE".into(),
-                content: MIT_LICENSE.into(),
-            },
-            GitHubFile {
-                path: "skills/grill/SKILL.md".into(),
-                content: GRILL_V1.into(),
-            },
-        ],
-    }
+fn bundle() -> Result<spekin_core::SkillBundle, GitHubSourceError> {
+    assemble_bundle(
+        &pinned(),
+        GRILL_V1,
+        vec![BundleFile {
+            path: "skills/grill/reference/one.md".into(),
+            content: "Reference text.".into(),
+        }],
+        Some(license_from("LICENSE", MIT_LICENSE)),
+    )
 }
 
 #[test]
 fn parse_github_repo_accepts_slug_and_https_urls_and_rejects_others() {
-    let expected = repo();
-    assert_eq!(parse_github_repo("example/skills").unwrap(), expected);
+    let expected = parse_github_repo("example/skills").unwrap();
+    assert_eq!(expected.slug(), "example/skills");
     assert_eq!(
         parse_github_repo("https://github.com/example/skills.git").unwrap(),
         expected
@@ -60,7 +59,6 @@ fn parse_github_repo_accepts_slug_and_https_urls_and_rejects_others() {
         parse_github_repo("https://github.com/example/skills/tree/main/skills").unwrap(),
         expected
     );
-    assert_eq!(expected.slug(), "example/skills");
 
     assert!(matches!(
         parse_github_repo("https://gitlab.com/example/skills"),
@@ -75,88 +73,72 @@ fn parse_github_repo_accepts_slug_and_https_urls_and_rejects_others() {
         "example/skill/$evil",
     ] {
         assert!(
-            matches!(
-                parse_github_repo(bad),
-                Err(GitHubSourceError::InvalidRepoUrl { .. })
-            ),
+            matches!(parse_github_repo(bad), Err(GitHubSourceError::InvalidRepoUrl { .. })),
             "expected InvalidRepoUrl for {bad}"
         );
     }
 }
 
 #[test]
-fn discover_skill_paths_finds_skill_md_and_ignores_hidden_and_vendor() {
-    let files = vec![
-        "skills/grill/SKILL.md",
-        "SKILL.md",
-        ".github/skills/SKILL.md",
-        "node_modules/pkg/SKILL.md",
-        "docs/readme.md",
-        "skills/test/skill.md",
-        "skills/grill/SKILL.md",
-    ]
-    .into_iter()
-    .map(|path| GitHubFile {
-        path: path.into(),
-        content: String::new(),
-    })
-    .collect::<Vec<_>>();
-
+fn skill_md_path_and_join_relative_reject_traversal() {
+    assert_eq!(skill_md_path("").unwrap(), "SKILL.md");
+    assert_eq!(skill_md_path("skills/grill").unwrap(), "skills/grill/SKILL.md");
     assert_eq!(
-        discover_skill_paths(&files),
-        vec!["SKILL.md", "skills/grill/SKILL.md", "skills/test/skill.md"]
+        skill_md_path("skills/grill/SKILL.md").unwrap(),
+        "skills/grill/SKILL.md"
     );
-}
-
-#[test]
-fn detect_license_prefers_root_file_and_detects_spdx() {
-    let files = vec![
-        GitHubFile {
-            path: "docs/LICENSE".into(),
-            content: "MIT License".into(),
-        },
-        GitHubFile {
-            path: "LICENSE".into(),
-            content: "Apache License\nVersion 2.0, January 2004".into(),
-        },
-    ];
-    let found = detect_license(&files).expect("a licence file must be found");
-    assert_eq!(found.path, "LICENSE");
-    assert_eq!(found.spdx, "Apache-2.0");
-
-    assert_eq!(detect_license(&[]), None);
-}
-
-#[test]
-fn import_repository_refuses_repo_without_a_license() {
-    let mut snapshot = snapshot_with_license();
-    snapshot.files.retain(|f| f.path != "LICENSE");
-
     assert!(matches!(
-        import_repository(&repo(), &snapshot),
-        Err(GitHubSourceError::NoLicense { .. })
+        skill_md_path("../etc"),
+        Err(GitHubSourceError::InvalidPath { .. })
     ));
+    assert_eq!(
+        join_relative("skills/grill/SKILL.md", "reference/one.md").unwrap(),
+        "skills/grill/reference/one.md"
+    );
+    for bad in ["../one.md", "/etc/passwd", "a/../../b"] {
+        assert!(matches!(
+            join_relative("skills/grill/SKILL.md", bad),
+            Err(GitHubSourceError::InvalidPath { .. })
+        ));
+    }
 }
 
 #[test]
-fn import_repository_marks_source_keeps_notice_and_uses_repo_license() {
-    let manifests = import_repository(&repo(), &snapshot_with_license()).unwrap();
-    assert_eq!(manifests.len(), 1);
-    let skill = &manifests[0];
+fn listed_files_reads_inline_and_bullet_lists() {
+    assert_eq!(listed_files(GRILL_V1), vec!["reference/one.md"]);
+    let bullets = "---\nname: x\ndescription: y\nfiles:\n  - a.md\n  - b.md\ntools: []\n---\n";
+    assert_eq!(listed_files(bullets), vec!["a.md", "b.md"]);
+    assert!(listed_files("no frontmatter").is_empty());
+}
+
+#[test]
+fn license_detection_identifies_common_spdx_ids() {
+    assert!(is_license_path("LICENSE"));
+    assert!(is_license_path("docs/LICENCE.md"));
+    assert!(!is_license_path("docs/readme.md"));
+    assert_eq!(license_from("LICENSE", MIT_LICENSE).spdx, "MIT");
+    assert_eq!(
+        license_from("LICENSE", "Apache License\nVersion 2.0, January 2004").spdx,
+        "Apache-2.0"
+    );
+    assert_eq!(license_from("LICENSE", "custom terms").spdx, "UNKNOWN");
+}
+
+#[test]
+fn assemble_bundle_marks_source_keeps_notice_and_uses_repo_license() {
+    let skill = bundle().unwrap();
+    let manifest = &skill.manifest;
 
     assert_eq!(
-        skill.source,
+        manifest.source,
         SkillSource::Github {
             repo: "example/skills".into(),
             path: "skills/grill/SKILL.md".into(),
             commit: "abc123".into(),
         }
     );
-    assert_eq!(
-        skill.licence, "MIT",
-        "the repository LICENSE is authoritative"
-    );
-    let notice = skill.notice.as_deref().unwrap_or_default();
+    assert_eq!(manifest.licence, "MIT", "the repository LICENSE is authoritative");
+    let notice = manifest.notice.as_deref().unwrap_or_default();
     assert!(
         notice.contains("Copyright (c) 2026 Example Author"),
         "upstream notice must survive the import"
@@ -166,18 +148,66 @@ fn import_repository_marks_source_keeps_notice_and_uses_repo_license() {
         "pinned provenance must travel with the skill"
     );
     assert!(notice.contains("MIT"));
-    assert!(skill.body.contains("Ask one question at a time."));
+    assert!(manifest.body.contains("Ask one question at a time."));
+    assert_eq!(skill.files.len(), 3, "SKILL.md, listed file and licence");
 }
 
 #[test]
-fn import_repository_reports_invalid_skill_with_its_path() {
-    let mut snapshot = snapshot_with_license();
-    snapshot.files[1].content = "not a skill".into();
-
+fn assemble_bundle_refuses_missing_license_and_invalid_skill() {
     assert!(matches!(
-        import_repository(&repo(), &snapshot),
+        assemble_bundle(&pinned(), GRILL_V1, vec![], None),
+        Err(GitHubSourceError::NoLicense { .. })
+    ));
+    assert!(matches!(
+        assemble_bundle(
+            &pinned(),
+            "not a skill",
+            vec![],
+            Some(license_from("LICENSE", MIT_LICENSE))
+        ),
         Err(GitHubSourceError::InvalidSkill { path, .. }) if path == "skills/grill/SKILL.md"
     ));
+}
+
+#[test]
+fn check_bundle_limits_refuses_oversized_file_bundle_and_count() {
+    let big = BundleFile {
+        path: "big.md".into(),
+        content: "x".repeat(MAX_FILE_BYTES + 1),
+    };
+    assert!(matches!(
+        check_bundle_limits(&[big]),
+        Err(GitHubSourceError::FileTooLarge { .. })
+    ));
+
+    let mut many = Vec::new();
+    for i in 0..=MAX_FILES {
+        many.push(BundleFile {
+            path: format!("{i}.md"),
+            content: "short".into(),
+        });
+    }
+    assert!(matches!(
+        check_bundle_limits(&many),
+        Err(GitHubSourceError::TooManyFiles { .. })
+    ));
+
+    let mut total = Vec::new();
+    for i in 0..9 {
+        total.push(BundleFile {
+            path: format!("{i}.md"),
+            content: "x".repeat(MAX_FILE_BYTES),
+        });
+    }
+    assert!(matches!(
+        check_bundle_limits(&total),
+        Err(GitHubSourceError::BundleTooLarge { .. })
+    ));
+    assert!(check_bundle_limits(&[BundleFile {
+        path: "ok.md".into(),
+        content: "fine".into(),
+    }])
+    .is_ok());
 }
 
 #[test]
@@ -217,5 +247,5 @@ fn plan_updates_checks_each_stored_skill_with_the_policy() {
 
     let mut new_skill = wording.clone();
     new_skill.id = "brand-new".into();
-    assert!(plan_updates(&[old], &[wording, new_skill], UpdatePolicy::Auto).len() == 1);
+    assert_eq!(plan_updates(&[old], &[wording, new_skill], UpdatePolicy::Auto).len(), 1);
 }

@@ -11,9 +11,10 @@ pub mod skills;
 pub mod stage;
 
 pub use github_source::{
-    GitHubFile, GitHubRepo, GitHubSnapshot, GitHubSourceError, LicenseFile, build_notice,
-    detect_license, discover_skill_paths, import_repository, import_skill, is_license_path,
-    is_skill_path, parse_github_repo, plan_updates,
+    BundleFile, GitHubRepo, GitHubSourceError, LicenseFile, MAX_BUNDLE_BYTES, MAX_FILES,
+    MAX_FILE_BYTES, PinnedSource, SkillBundle, assemble_bundle, build_notice, check_bundle_limits,
+    is_license_path, join_relative, license_from, listed_files, parse_github_repo, plan_updates,
+    skill_md_path,
 };
 pub use project::{Fixture, FixtureError, Project};
 pub use skills::{
