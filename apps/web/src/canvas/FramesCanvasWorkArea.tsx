@@ -1641,6 +1641,11 @@ export function FramesCanvasWorkArea(props: {
                         <span className="can-fill" />
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>{vhFailed}</div>
                       </div>
+                      <div className="can-vbn warn" role="alert">
+                        <Icon name="alert" size={16} />
+                        <p><b>Take 4 failed.</b> Takes 1, 2, 3 and 5 are ready and can be kept. F-03 r8 is unchanged.</p>
+                        <Btn label="See usage" sm cls="ghost" does="Opens S36 usage: 3.1k tokens consumed by the failed take, the rest of the reservation released" feature="F211" onClick={() => recordIntent('F211:usage')} />
+                      </div>
                       <div className="can-vb">
                         <div className="can-stage">
                           <div className="can-take" style={{ width: 640, height: 450 }}>
@@ -1696,10 +1701,6 @@ export function FramesCanvasWorkArea(props: {
                                 <span>Done</span>
                               </div>
                             </div>
-                          </div>
-                          <div>
-                            <p><b>Take 4 failed.</b> Takes 1, 2, 3 and 5 are ready and can be kept. F-03 r8 is unchanged.</p>
-                            <Btn label="See usage" sm does="Opens S36 usage" feature="F211" onClick={() => recordIntent('F211:usage')} />
                           </div>
                           <div data-feature="F213">
                             <h4>Input for this run</h4>
