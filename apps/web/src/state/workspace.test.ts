@@ -1,9 +1,9 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { useWorkspace } from './workspace';
+import { DEFAULT_SAVE, useWorkspace } from './workspace';
 
 describe('per-stage workspace memory (AC-SPK-17, IMP-01)', () => {
   beforeEach(() => {
-    useWorkspace.setState({ views: {}, lastIntent: null });
+    useWorkspace.setState({ views: {}, lastIntent: null, save: DEFAULT_SAVE, conflict: null, dirtyTabs: [] });
   });
 
   it('provides board defaults for design and backend stages', () => {
@@ -48,5 +48,25 @@ describe('per-stage workspace memory (AC-SPK-17, IMP-01)', () => {
   it('records control intents in the store without mutating stage views', () => {
     useWorkspace.getState().recordIntent('F104:handoff');
     expect(useWorkspace.getState().lastIntent).toBe('F104:handoff');
+  });
+
+  it('transitions save state between saved, saving, failed and conflict without silent overwrite (IMP-02)', () => {
+    const store = useWorkspace.getState();
+    expect(store.save.status).toBe('saved');
+
+    store.setSaveStatus('saving');
+    expect(useWorkspace.getState().save.status).toBe('saving');
+    expect(useWorkspace.getState().save.text).toBe('Saving…');
+
+    store.triggerConflict();
+    expect(useWorkspace.getState().save.status).toBe('conflict');
+    expect(useWorkspace.getState().save.text).toBe('Conflict · F-04');
+    expect(useWorkspace.getState().conflict).not.toBeNull();
+    expect(useWorkspace.getState().dirtyTabs).toContain('F-04 Alert drawer');
+
+    store.resolveConflict('discard');
+    expect(useWorkspace.getState().save.status).toBe('saved');
+    expect(useWorkspace.getState().conflict).toBeNull();
+    expect(useWorkspace.getState().dirtyTabs).not.toContain('F-04 Alert drawer');
   });
 });

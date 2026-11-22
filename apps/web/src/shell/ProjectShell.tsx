@@ -130,6 +130,8 @@ export function ProjectShell() {
   const navigate = useNavigate();
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
+  const save = useWorkspace((s) => s.save);
+  const conflict = useWorkspace((s) => s.conflict);
   const project = getProject(projectId);
   const usage = getUsage(projectId);
   const stages = getStages(projectId);
@@ -142,8 +144,8 @@ export function ProjectShell() {
         <TopBar
           project={project}
           usage={usage}
-          save={{ tone: 'ok', text: 'Saved 12:41' }}
-          busy={stage === 'design' ? '1 designing · 1 waiting' : undefined}
+          save={save}
+          busy={stage === 'design' && !conflict ? '1 designing · 1 waiting' : undefined}
           onOpenSwitcher={() => setPanel('switcher')}
           onOpenIncrement={() => setPanel('increment')}
           onOpenSpec={() => setPanel('spec')}

@@ -1,5 +1,5 @@
 import { CTX_DESIGN, FRAMES, MODEL, REQS } from '@spekin/sample';
-import type { PillTuple, SampleFrame } from '@spekin/sample';
+import type { PillTuple, SampleConflict, SampleFrame } from '@spekin/sample';
 import { useWorkspace } from '../state/workspace';
 import { Icon } from '../ui/Icon';
 import { Btn, IconBtn } from '../ui/Button';
@@ -55,6 +55,46 @@ function CanvasFrame(props: {
   );
 }
 
+export function ConflictBanner(props: {
+  conflict: SampleConflict;
+  onCompare: () => void;
+  onKeepProposal: () => void;
+  onDiscard: () => void;
+}) {
+  const { conflict, onCompare, onKeepProposal, onDiscard } = props;
+  return (
+    <div className="sp-banner bad" role="alert" data-feature="F112">
+      <Icon name="alert" size={16} />
+      <p>
+        <b>{conflict.frame} changed elsewhere</b> ({conflict.rev}, {conflict.by}, {conflict.at}). Your edit is kept as a local draft.
+      </p>
+      <Btn
+        label="Compare"
+        sm
+        cls="ink"
+        does="Opens Compare: r8 on the left, your local draft on the right"
+        feature="F112"
+        onClick={onCompare}
+      />
+      <Btn
+        label="Keep as proposal"
+        sm
+        does="Saves your draft as a proposal on top of r8, for review in S08"
+        feature="F112"
+        onClick={onKeepProposal}
+      />
+      <Btn
+        label="Discard draft"
+        sm
+        cls="plain"
+        does="Asks to confirm, then drops the local draft and shows r8"
+        feature="F112"
+        onClick={onDiscard}
+      />
+    </div>
+  );
+}
+
 // Mirrors boards-shell.mjs Design stage: chat, artifact tabs, canvas with frames, inspector.
 export function DesignWorkArea() {
   const view = useWorkspace((s) => s.view('design'));
@@ -64,10 +104,15 @@ export function DesignWorkArea() {
   const setChatWidth = useWorkspace((s) => s.setChatWidth);
   const toggleChatCollapsed = useWorkspace((s) => s.toggleChatCollapsed);
   const recordIntent = useWorkspace((s) => s.recordIntent);
+  const conflict = useWorkspace((s) => s.conflict);
+  const dirtyTabs = useWorkspace((s) => s.dirtyTabs);
+  const triggerConflict = useWorkspace((s) => s.triggerConflict);
+  const resolveConflict = useWorkspace((s) => s.resolveConflict);
 
   const ctxItems = CTX_DESIGN.filter(([, name]) => !view.removedCtx.includes(name));
   const selectedFrame = view.selection[0] ?? 'F-03';
   const activeTab = view.tab ?? 'Variance flows';
+  const tabsWithDirty = DESIGN_TABS.map((t) => ({ ...t, dirty: dirtyTabs.includes(t.name) }));
 
   const right = (
     <>
@@ -198,13 +243,27 @@ export function DesignWorkArea() {
 
       <section className="sp-main" aria-label="Work area">
         <ArtifactTabs
-          tabs={DESIGN_TABS}
+          tabs={tabsWithDirty}
           activeTab={activeTab}
-          onSelect={(tab) => setView('design', { tab })}
+          onSelect={(tab) => {
+            if (tab === 'F-04 Alert drawer') {
+              triggerConflict();
+            } else {
+              setView('design', { tab });
+            }
+          }}
           onClose={(name) => recordIntent('F104:close:' + name)}
           onOpenArtifact={() => recordIntent('F104:open')}
           right={right}
         />
+        {conflict ? (
+          <ConflictBanner
+            conflict={conflict}
+            onCompare={() => resolveConflict('compare')}
+            onKeepProposal={() => resolveConflict('proposal')}
+            onDiscard={() => resolveConflict('discard')}
+          />
+        ) : null}
         <div className="sp-tool">
           <ViewSwitch current={view.viewMode} onChange={(viewMode) => setView('design', { viewMode })} />
           <span className="sp-crumb">
