@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type {
+  AddGithubSkillRequest,
   AuditResponse,
+  CopySkillRequest,
   DeletedProjectView,
+  EditSkillRequest,
   GenUiValidation,
   Manifest,
   ModelCapability,
@@ -10,11 +13,13 @@ import type {
   Rejection,
   RequestContext,
   Reservation,
+  SkillCheckRequest,
   Revision,
   RunEstimate,
   Settlement,
   SettleRunRequest,
   SkillManifest,
+  SkillsResponse,
   Stage,
   UpdateCheck,
   UsageSnapshot,
@@ -23,18 +28,25 @@ import fixture from '../../../../fixtures/meranti-yard.json';
 import {
   ApiError,
   acceptProposal,
+  addGithubSkill,
   buildHandoffManifest,
   buildProjectContext,
+  checkSkillForUpdates,
   checkSkillUpdate,
+  copySkill,
   deleteProject,
+  editSkill,
   estimateRun,
   fetchAudit,
   fetchDeletedProjects,
   fetchModels,
   fetchProject,
+  fetchSkillHistory,
+  fetchSkills,
   fetchStages,
   fetchUsage,
   rejectProposal,
+  rollbackSkill,
   reserveRun,
   restoreProject,
   revertRevision,
@@ -427,6 +439,174 @@ describe('Audit and restore API client (IMP-31)', () => {
   it('a wrong audit shape is a typed error, never a crash', async () => {
     mockFetch(json({ entries: 'not an array', head_hash: 'x', error: null }));
     const error = await fetchAudit(SAMPLE_PROJECT_ID).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).kind).toBe('shape');
+  });
+});
+
+// IMP-34: the skills library API serves S40 (templates, copies, GitHub sources, history).
+const manifest = (id: string): SkillManifest =>
+  ({
+    id,
+    title: id,
+    description: 'A skill.',
+    stages: ['planning'],
+    source: { kind: 'template' },
+    licence: 'Apache-2.0',
+    notice: null,
+    version: '1',
+    reads: ['Pitch'],
+    proposes: ['Glossary terms'],
+    tools: [],
+    scripts: [],
+    invocation: `/${id}`,
+    body: 'Do the thing.',
+  }) as unknown as SkillManifest;
+
+const librarySkill = (id: string, kind = 'template', policy = 'pinned') => ({
+  manifest: manifest(id),
+  policy,
+  kind,
+  uses: 0,
+});
+
+const listed: SkillsResponse = {
+  skills: [
+    librarySkill('ears'),
+    librarySkill('grill', 'github', 'auto'),
+    librarySkill('words', 'user'),
+  ],
+  sources: [
+    {
+      id: 'spekin',
+      name: 'Spekin templates',
+      kind: 'template',
+      licence: 'Apache-2.0',
+      notice: null,
+      commit: null,
+      policy: 'Ships with Spekin',
+      count: 4,
+    },
+  ],
+} as unknown as SkillsResponse;
+
+describe('Skills library API (IMP-34)', () => {
+  it('fetchSkills returns the templates, copies and sources', async () => {
+    const spy = mockFetch(json(listed));
+
+    await expect(fetchSkills()).resolves.toEqual(listed);
+    expect(String(spy.mock.calls[0]?.[0])).toBe('/api/skills');
+  });
+
+  it('copySkill posts to the copy URL and returns a user copy', async () => {
+    const copied = librarySkill('ears-mine', 'user');
+    const req: CopySkillRequest = { new_id: 'ears-mine', new_title: 'EARS mine' };
+    const spy = mockFetch(json(copied));
+
+    await expect(copySkill('ears', req)).resolves.toEqual(copied);
+    expect(String(spy.mock.calls[0]?.[0])).toBe('/api/skills/ears/copy');
+    expect(spy.mock.calls[0]?.[1]?.method).toBe('POST');
+    expect(JSON.parse(String(spy.mock.calls[0]?.[1]?.body))).toEqual(req);
+  });
+
+  it('editSkill sends a PUT and keeps the new version', async () => {
+    const edited = librarySkill('ears-mine', 'user');
+    const req: EditSkillRequest = { title: 'EARS Meranti', body: 'Ask in Bahasa first.' };
+    const spy = mockFetch(json(edited));
+
+    await expect(editSkill('ears-mine', req)).resolves.toEqual(edited);
+    expect(String(spy.mock.calls[0]?.[0])).toBe('/api/skills/ears-mine');
+    expect(spy.mock.calls[0]?.[1]?.method).toBe('PUT');
+  });
+
+  it('addGithubSkill posts the source and returns the pinned skill', async () => {
+    const pinned = librarySkill('grill', 'github', 'auto');
+    const req: AddGithubSkillRequest = {
+      repo: 'example/skills',
+      path: 'skills/grill',
+      git_ref: 'main',
+      policy: 'auto',
+    };
+    const spy = mockFetch(json(pinned));
+
+    await expect(addGithubSkill(req)).resolves.toEqual(pinned);
+    expect(String(spy.mock.calls[0]?.[0])).toBe('/api/skills/github');
+    expect(JSON.parse(String(spy.mock.calls[0]?.[1]?.body))).toEqual(req);
+  });
+
+  it('checkSkillForUpdates returns an applied update', async () => {
+    const outcome = {
+      outcome: 'applied',
+      skill: librarySkill('grill', 'github', 'auto'),
+      version: '2',
+      seq: 2,
+    };
+    const req: SkillCheckRequest = {};
+    const spy = mockFetch(json(outcome));
+
+    await expect(checkSkillForUpdates('grill', req)).resolves.toEqual(outcome);
+    expect(String(spy.mock.calls[0]?.[0])).toBe('/api/skills/grill/check');
+  });
+
+  it('checkSkillForUpdates keeps a held update with reasons and diff', async () => {
+    const outcome = {
+      outcome: 'held',
+      held: {
+        skill_id: 'grill',
+        from_version: '1.3.0',
+        to_version: '1.7.0',
+        reasons: [{ code: 'injection_detected', pattern: 'export secret' }],
+        diff: [{ op: 'add', text: 'export secret' }],
+        at: 100,
+      },
+      seq: 2,
+    };
+    mockFetch(json(outcome));
+
+    await expect(checkSkillForUpdates('grill', {})).resolves.toEqual(outcome);
+  });
+
+  it('fetchSkillHistory lists the version history', async () => {
+    const history = [
+      {
+        seq: 1,
+        skill_id: 'ears-mine',
+        action: 'copied',
+        version: '1',
+        reason: 'copied from ears',
+        at: 100,
+        reasons: [],
+      },
+    ];
+    const spy = mockFetch(json(history));
+
+    await expect(fetchSkillHistory('ears-mine')).resolves.toEqual(history);
+    expect(String(spy.mock.calls[0]?.[0])).toBe('/api/skills/ears-mine/history');
+  });
+
+  it('rollbackSkill posts to the version URL', async () => {
+    const rolled = librarySkill('ears-mine', 'user');
+    const spy = mockFetch(json(rolled));
+
+    await expect(rollbackSkill('ears-mine', '1')).resolves.toEqual(rolled);
+    expect(String(spy.mock.calls[0]?.[0])).toBe('/api/skills/ears-mine/rollback/1');
+    expect(spy.mock.calls[0]?.[1]?.method).toBe('POST');
+  });
+
+  it('a 409 on edit is a typed http error carrying the code', async () => {
+    mockFetch(json({ code: 'not_editable', message: 'templates are immutable' }, 409));
+
+    const error = await editSkill('ears', { title: 'x' }).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).kind).toBe('http');
+    expect((error as ApiError).status).toBe(409);
+    expect((error as ApiError).code).toBe('not_editable');
+  });
+
+  it('a wrong skills shape is a typed error, never a crash', async () => {
+    mockFetch(json({ skills: 'not an array' }));
+    const error = await fetchSkills().catch((e: unknown) => e);
     expect(error).toBeInstanceOf(ApiError);
     expect((error as ApiError).kind).toBe('shape');
   });
