@@ -4,4 +4,4 @@ import type { StageId } from "./StageId";
 /**
  * Request body for `PUT /api/skills/{id}` (IMP-34). Only a user copy can be edited.
  */
-export type EditSkillRequest = { title: string | null, description: string | null, stages: Array<StageId> | null, body: string | null, };
+export type EditSkillRequest = { title?: string, description?: string, stages?: Array<StageId>, body?: string, };

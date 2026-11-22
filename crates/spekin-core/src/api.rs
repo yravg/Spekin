@@ -139,12 +139,16 @@ pub struct CopySkillRequest {
 #[ts(export)]
 pub struct EditSkillRequest {
     #[serde(default)]
+    #[ts(optional)]
     pub title: Option<String>,
     #[serde(default)]
+    #[ts(optional)]
     pub description: Option<String>,
     #[serde(default)]
+    #[ts(optional)]
     pub stages: Option<Vec<StageId>>,
     #[serde(default)]
+    #[ts(optional)]
     pub body: Option<String>,
 }
 
@@ -164,8 +168,10 @@ pub struct AddGithubSkillRequest {
 #[ts(export)]
 pub struct SkillCheckRequest {
     #[serde(default)]
+    #[ts(optional)]
     pub new: Option<SkillManifest>,
     #[serde(default)]
+    #[ts(optional)]
     pub policy: Option<UpdatePolicy>,
 }
 

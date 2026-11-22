@@ -6,4 +6,4 @@ import type { UpdatePolicy } from "./UpdatePolicy";
  * Request body for `POST /api/skills/{id}/check` (IMP-34). A GitHub skill is checked
  * through the injected adapter; other kinds need a candidate `new` manifest.
  */
-export type SkillCheckRequest = { new: SkillManifest | null, policy: UpdatePolicy | null, };
+export type SkillCheckRequest = { new?: SkillManifest, policy?: UpdatePolicy, };
