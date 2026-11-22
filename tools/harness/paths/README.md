@@ -16,6 +16,7 @@ Rules (canvas-to-app rule 16; Clausarium lessons):
 - Steps: {"goto": "/path"} only as the FIRST step (the start page); then {"click": "<css>"}, {"dblclick": "<css>"}, {"press": "Key"}, {"type": ["<css>", "text"]}, {"hover": "<css>"}, {"wait": "<css>"}. End every path with a wait for something only that state shows, so the capture never races the render.
 - No URL shortcuts after the first step: a state reached by goto alone does not count (Clausarium lesson: drafted paths were wrong until tried in the app).
 - status: "draft" = written from the board Entry text, not yet tried; "checked" = the harness reached it in the app and a person saw the screenshot.
+- Device boards (T01): add `"viewport"` for your own runs and `"frame": { "index": n }` per state. The harness then compares the nth device frame on the board at its design size, with the scale removed and the phone status and home bars hidden, and runs the app at that frame's size. On T01 the tablet states use frame 0 and the phone states frame 1 (the right-hand phone shows the state; the left one shows the step before).
 - Selectors: prefer data-stage, data-feature, aria-label, role and visible text (text=Backend). Never a CSS class that only the board has.
 - A state counts only when `status` is `checked`: the harness reached it in the app and a person (or a second agent) looked at the three PNGs in tools/harness/out.
 - When the start page changes (S27 Projects home replaces the redirect), every path's first steps change with it. The S27 card owner updates all files in one commit.

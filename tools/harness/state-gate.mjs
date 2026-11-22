@@ -71,17 +71,34 @@ for (const b of manifest) {
     const sb = bp.locator('.vw button[data-state="' + st.state + '"]');
     if (await sb.count()) await sb.first().click();
     await bp.evaluate(() => document.fonts.ready);
-    const bApp = bp.locator(APP_ROOT.split(',').map((s) => '.spwin ' + s.trim()).join(',')).filter({ visible: true }).first();
+    // Device boards (T01) draw each screen at its design size inside a scaled frame (.mod-dsc). A path state with
+    // "frame": { "index": n } compares the nth frame: scale removed, phone status and home bars hidden, other frames hidden.
+    const frame = p?.frame;
+    let bApp;
+    if (frame) {
+      // Pick the frame inside the visible window by position: hiding the other frames must not change which one this is.
+      bApp = bp.locator('.spwin').filter({ visible: true }).first().locator('.mod-dsc').nth(frame.index || 0);
+      await bApp.evaluate((el) => {
+        const win = el.closest('.spwin');
+        for (const d of win.querySelectorAll('.mod-dv, .mod-spec, .mod-st')) if (!d.contains(el)) d.style.visibility = 'hidden';
+        for (const s of el.querySelectorAll('.mod-sbar, .mod-ph-bar, .mod-hb')) s.style.display = 'none';
+        el.style.transform = 'none';
+        for (let a = el.parentElement; a && a !== win; a = a.parentElement) { a.style.overflow = 'visible'; a.style.width = 'auto'; a.style.height = 'auto'; a.style.transform = 'none'; }
+      });
+    } else bApp = bp.locator(APP_ROOT.split(',').map((s) => '.spwin ' + s.trim()).join(',')).filter({ visible: true }).first();
     // Read the whole window: some boards draw overlays (S27's switcher and create modal) beside the app root.
     // Board notes are hidden by BOARD_ONLY_CSS, so they are not in innerText.
-    const bText = norm(await bApp.evaluate((el) => (el.closest('.spwin') || el).innerText));
+    const bText = norm(await bApp.evaluate((el, f) => (f ? el : el.closest('.spwin') || el).innerText, !!frame));
+    const bBox = frame ? await bApp.boundingBox() : null;
     // Boards stack notes above the window, so the window can sit at a fractional y (e.g. 232.69 px) and every
     // row would be resampled. Shift the window by the fraction so the capture starts on a whole pixel.
     await bApp.evaluate((el) => { const w = el.closest('.spwin') || el; const r = el.getBoundingClientRect(); const dx = Math.round(r.x) - r.x, dy = Math.round(r.y) - r.y; if (dx || dy) { const cs = getComputedStyle(w); w.style.marginTop = parseFloat(cs.marginTop) + dy + 'px'; w.style.marginLeft = parseFloat(cs.marginLeft) + dx + 'px'; } });
     await bApp.screenshot({ path: base + '-board.png', animations: 'disabled' });
     await bp.close();
     // App side: real clicks only after the first goto
-    const ap = await ctx.newPage();
+    // A device state runs the app at the frame's design size.
+    const actx = bBox ? await browser.newContext({ viewport: { width: Math.round(bBox.width), height: Math.round(bBox.height) }, deviceScaleFactor: 1, reducedMotion: 'reduce' }) : ctx;
+    const ap = await actx.newPage();
     const urls = [];
     ap.on('framenavigated', (f) => { if (f === ap.mainFrame()) urls.push(f.url()); });
     try {
@@ -96,14 +113,15 @@ for (const b of manifest) {
         else throw new Error('unknown step ' + JSON.stringify(s));
       }
       await ap.waitForSelector('[data-screen="' + b.screen + '"]', { timeout: 5000 });
-    } catch (e) { r.reasons.push('not reached: ' + e.message.split('\n')[0]); await ap.close(); continue; }
+    } catch (e) { r.reasons.push('not reached: ' + e.message.split('\n')[0]); await ap.close(); if (actx !== ctx) await actx.close(); continue; }
     await ap.evaluate(() => document.fonts.ready);
-    const aApp = ap.locator(APP_ROOT).first();
+    const aApp = frame ? ap.locator('body') : ap.locator(APP_ROOT).first();
     const aText = norm(await aApp.innerText());
     await aApp.screenshot({ path: base + '-app.png', animations: 'disabled' });
     const todo = await ap.locator('[data-todo]').count();
     const later = await ap.locator('[data-later]').count();
     await ap.close();
+    if (actx !== ctx) await actx.close();
     r.reached = true;
     // Text
     const missing = bText.filter((l) => !aText.includes(l));
