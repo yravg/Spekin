@@ -6,6 +6,7 @@
 //! the app and the API read the same shapes (canvas-to-app rule 15, R-ARC-3).
 
 pub mod model_source;
+pub mod github_source;
 pub mod project;
 pub mod skills;
 pub mod stage;
@@ -25,6 +26,11 @@ pub mod context;
 pub use context::{
     BoardArtifact, BoardSnapshot, ContextChip, ContextItemStatus, RequestContext,
     RequestContextItem, build_context, format_token_estimate,
+pub use github_source::{
+    BundleFile, GitHubRepo, GitHubSourceError, LicenseFile, MAX_BUNDLE_BYTES, MAX_FILE_BYTES,
+    MAX_FILES, PinnedSource, SkillBundle, assemble_bundle, build_notice, check_bundle_limits,
+    is_license_path, join_relative, license_from, listed_files, parse_github_repo, plan_updates,
+    skill_md_path,
 };
 pub use project::{Fixture, FixtureError, Project};
 pub use skills::{
