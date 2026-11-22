@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use crate::{
-    ArtifactRevisionRecord, BoardSnapshot, ContextChip, ManifestSelection, RequiredInput,
-    RunEstimate, SkillManifest, UpdatePolicy,
+    ArtifactRevisionRecord, AuditEntry, AuditError, BoardSnapshot, ContextChip, ManifestSelection,
+    ProjectEntry, RequiredInput, Revision, RunEstimate, SkillManifest, UpdatePolicy,
 };
 
 /// Typed error body returned by `spekin-server` on 4xx/5xx responses.
@@ -53,6 +53,22 @@ pub struct CheckSkillUpdateRequest {
     pub policy: UpdatePolicy,
 }
 
+/// Request body for `POST /api/projects/{id}/revisions/{artifact}/revert` (IMP-31).
+/// The earlier revision's content is written as a new revision; history is never rewritten.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct RevertRevisionRequest {
+    pub to: Revision,
+}
+
+/// Request body for `POST /api/projects/{id}/runs/settle` (IMP-31).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct SettleRunRequest {
+    pub run_id: String,
+    pub actual: u32,
+}
+
 /// Request body for `POST /api/projects/{id}/context`.
 /// When `board` is omitted, the server uses the project's seeded board snapshot.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
@@ -73,4 +89,28 @@ pub struct BuildManifestRequest {
     pub revisions: Option<Vec<ArtifactRevisionRecord>>,
     #[serde(default)]
     pub inputs: Option<Vec<RequiredInput>>,
+}
+
+/// The audit view served by `GET /api/projects/{id}/audit` (IMP-31).
+///
+/// The head hash is held by the server *apart* from the log (the lead's follow-up on #21):
+/// `verify` is checked against that separate anchor, and `error` is null only when both the
+/// hash chain and the head are intact. The log itself never carries its own head in this view.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct AuditResponse {
+    pub entries: Vec<AuditEntry>,
+    /// The head hash the server keeps apart from the log.
+    pub head_hash: String,
+    /// Typed verify failure, or null when the chain and the separate head agree.
+    pub error: Option<AuditError>,
+}
+
+/// One row of `GET /api/projects/deleted` (IMP-31): an IMP-29 entry with the
+/// whole-day countdown S27 shows ("27 days left").
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct DeletedProjectView {
+    pub entry: ProjectEntry,
+    pub days_left: i64,
 }
