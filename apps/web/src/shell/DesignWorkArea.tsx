@@ -106,6 +106,7 @@ export function DesignWorkArea(
     onOpenIntake?: () => void;
     onOpenHandoff?: () => void;
     onOpenGenUi?: (mode: GenUiMode) => void;
+    onOpenUsage?: () => void;
   } = {},
 ) {
   const view = useWorkspace((s) => s.view('design'));
@@ -166,7 +167,10 @@ export function DesignWorkArea(
           onDraftChange={(draft) => setView('design', { draft })}
           onAttach={() => recordIntent('F114:attach')}
           onMention={() => recordIntent('F106:mention')}
-          onOpenModel={() => recordIntent('F107:model')}
+          onOpenModel={() => {
+            recordIntent('F107:model');
+            props.onOpenUsage?.();
+          }}
           onSend={() => {
             if (props.onOpenGenUi) {
               const nextMode = routeGenUiPrompt(view.draft);

@@ -1,0 +1,74 @@
+{
+  "board": "S37-build-contracts.dc.html",
+  "states": {
+    "contracts": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-stage:has-text(\"Backend\")" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "button:has-text(\"Release readiness\")" },
+        { "wait": "[data-screen=\"S37\"]" }
+      ]
+    },
+    "detail": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-stage:has-text(\"Backend\")" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "button:has-text(\"Release readiness\")" },
+        { "click": ".del-tb button.del-lnk:has-text(\"Variance alerts\")" },
+        { "wait": ".sp-doc h2" }
+      ]
+    },
+    "matrix": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-stage:has-text(\"Integration\")" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "button:has-text(\"Release readiness\")" },
+        { "wait": "[data-screen=\"S37\"]" }
+      ]
+    },
+    "gate": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-stage:has-text(\"Deployment\")" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "button:has-text(\"Release readiness\")" },
+        { "wait": "[data-screen=\"S37\"]" }
+      ]
+    },
+    "fail": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-stage:has-text(\"Integration\")" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "button:has-text(\"Release readiness\")" },
+        { "click": ".del-tbw button.del-lnk:has-text(\"Integration\")" },
+        { "wait": ".del-err" }
+      ]
+    },
+    "evidence": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-stage:has-text(\"Deployment\")" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "button:has-text(\"Release readiness\")" },
+        { "click": ".sp-seg button:has-text(\"Evidence pack\")" },
+        { "wait": ".del-pins" }
+      ]
+    }
+  }
+}
