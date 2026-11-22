@@ -13,3 +13,8 @@ export type { SkillSource } from './generated/SkillSource';
 export type { UpdateCheck } from './generated/UpdateCheck';
 export type { UpdateDecision } from './generated/UpdateDecision';
 export type { UpdatePolicy } from './generated/UpdatePolicy';
+export type { GitHubFile } from './generated/GitHubFile';
+export type { GitHubRepo } from './generated/GitHubRepo';
+export type { GitHubSnapshot } from './generated/GitHubSnapshot';
+export type { GitHubSourceError } from './generated/GitHubSourceError';
+export type { LicenseFile } from './generated/LicenseFile';

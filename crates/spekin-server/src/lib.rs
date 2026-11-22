@@ -1,5 +1,7 @@
 //! Spekin HTTP API. Routes live here so tests can call them without a socket.
 
+pub mod github_source;
+
 use std::sync::Arc;
 
 use axum::{
