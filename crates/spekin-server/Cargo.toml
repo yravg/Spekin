@@ -14,10 +14,11 @@ serde.workspace = true
 serde_json.workspace = true
 reqwest.workspace = true
 futures-util.workspace = true
+# Buffer the request body under a hard byte cap, including chunked bodies. Licence: MIT.
+http-body-util = "0.1"
 
 [dev-dependencies]
 tower = { version = "0.5", features = ["util"] }
-http-body-util = "0.1"
 
 [lints]
 workspace = true

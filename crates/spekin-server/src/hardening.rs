@@ -11,16 +11,15 @@ use std::time::Duration;
 
 use axum::{
     Json, Router,
+    body::Body,
     extract::{Request, State},
     http::{HeaderMap, HeaderValue, Method, StatusCode, header},
     middleware::{self, Next},
     response::{IntoResponse, Response},
 };
+use http_body_util::LengthLimitError;
 use spekin_core::ApiErrorBody;
-use tower_http::{
-    cors::{AllowOrigin, CorsLayer},
-    limit::RequestBodyLimitLayer,
-};
+use tower_http::cors::{AllowOrigin, CorsLayer};
 
 /// 1 MB request body ceiling.
 pub const BODY_LIMIT_BYTES: usize = 1024 * 1024;
@@ -122,16 +121,41 @@ fn typed_error(status: StatusCode, code: &'static str, message: &'static str) ->
         .into_response()
 }
 
-/// Rewrite tower-http's plain-text 413 into the API's typed error body.
-async fn typed_body_limit_error(res: Response) -> Response {
-    if res.status() == StatusCode::PAYLOAD_TOO_LARGE {
-        return typed_error(
-            StatusCode::PAYLOAD_TOO_LARGE,
-            "payload_too_large",
-            "request body exceeds the 1 MB limit",
-        );
+/// Buffer the whole body under the byte cap, then put it back for the handlers.
+///
+/// IMP-35 follow-up on #24: tower-http's `RequestBodyLimitLayer` rejects an
+/// oversized `Content-Length` up front, but only wraps a chunked body in a
+/// `Limited` stream — if a handler never reads that body, no error is ever
+/// raised. Reading it here makes the typed 413 unconditional, with or without
+/// a `Content-Length`, and keeps the error body free of request data.
+async fn streaming_body_limit(
+    State(cfg): State<HardeningConfig>,
+    req: Request,
+    next: Next,
+) -> Response {
+    let (parts, body) = req.into_parts();
+    match axum::body::to_bytes(body, cfg.body_limit).await {
+        Ok(bytes) => {
+            next.run(Request::from_parts(parts, Body::from(bytes)))
+                .await
+        }
+        Err(err) if std::error::Error::source(&err).is_some_and(|s| s.is::<LengthLimitError>()) => {
+            cfg.log.record("request rejected: body too large");
+            typed_error(
+                StatusCode::PAYLOAD_TOO_LARGE,
+                "payload_too_large",
+                "request body exceeds the 1 MB limit",
+            )
+        }
+        Err(_) => {
+            cfg.log.record("request rejected: body could not be read");
+            typed_error(
+                StatusCode::BAD_REQUEST,
+                "invalid_body",
+                "request body could not be read",
+            )
+        }
     }
-    res
 }
 
 /// POST routes that carry a body accept `application/json` only. A body-less
@@ -217,10 +241,12 @@ pub fn apply_hardening(app: Router, cfg: HardeningConfig) -> Router {
         .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
         .allow_headers([header::CONTENT_TYPE, header::ACCEPT, header::AUTHORIZATION]);
 
-    app.layer(RequestBodyLimitLayer::new(cfg.body_limit))
-        .layer(middleware::map_response(typed_body_limit_error))
-        .layer(middleware::from_fn_with_state(cfg.clone(), json_only))
-        .layer(middleware::from_fn_with_state(cfg, request_timeout))
-        .layer(cors)
-        .layer(middleware::from_fn(security_headers))
+    app.layer(middleware::from_fn_with_state(
+        cfg.clone(),
+        streaming_body_limit,
+    ))
+    .layer(middleware::from_fn_with_state(cfg.clone(), json_only))
+    .layer(middleware::from_fn_with_state(cfg, request_timeout))
+    .layer(cors)
+    .layer(middleware::from_fn(security_headers))
 }

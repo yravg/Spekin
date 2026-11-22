@@ -300,8 +300,14 @@ async fn chunked_body_at_the_limit_is_not_rejected() {
         .body(Body::from_stream(futures_util::stream::iter(vec![Ok::<
             _,
             std::io::Error,
-        >(exact)])))
+        >(
+            exact
+        )])))
         .expect("request");
     let (status, _, _) = call(&app, req).await;
-    assert_ne!(status, StatusCode::PAYLOAD_TOO_LARGE, "exactly 1 MB is allowed");
+    assert_ne!(
+        status,
+        StatusCode::PAYLOAD_TOO_LARGE,
+        "exactly 1 MB is allowed"
+    );
 }
