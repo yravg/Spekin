@@ -9,7 +9,7 @@ use axum::{
     Router,
     body::Body,
     http::{HeaderMap, Method, Request, StatusCode, header},
-    routing::get,
+    routing::{get, post},
 };
 use http_body_util::BodyExt;
 use serde_json::{Value, json};
@@ -239,4 +239,69 @@ fn the_server_binds_loopback_by_default_and_knows_when_it_does_not() {
     assert!(is_loopback("[::1]:8787"));
     assert!(!is_loopback("0.0.0.0:8787"));
     assert!(!is_loopback("192.168.1.10:8787"));
+}
+
+/// IMP-35 follow-up on #24: a chunked body has no `Content-Length`, so a
+/// header-only limit lets it stream past the byte cap.
+#[tokio::test]
+async fn chunked_body_over_the_limit_is_a_typed_413() {
+    let app = router(state());
+    // Two frames whose total crosses the cap, as a real chunked stream arrives.
+    let chunk = "x".repeat(BODY_LIMIT_BYTES / 2 + 1);
+    let chunks = vec![
+        Ok::<_, std::io::Error>(chunk.clone()),
+        Ok::<_, std::io::Error>(chunk),
+    ];
+    let req = Request::post("/api/genui/validate")
+        .header(header::CONTENT_TYPE, "application/json")
+        .header(header::TRANSFER_ENCODING, "chunked")
+        .body(Body::from_stream(futures_util::stream::iter(chunks)))
+        .expect("request");
+    assert!(
+        !req.headers().contains_key(header::CONTENT_LENGTH),
+        "the chunked body declares no Content-Length"
+    );
+    let (status, _, body) = call(&app, req).await;
+    assert_eq!(status, StatusCode::PAYLOAD_TOO_LARGE);
+    assert_eq!(body["code"], json!("payload_too_large"));
+    assert!(body["message"].as_str().is_some_and(|m| !m.is_empty()));
+}
+
+/// tower-http's `Limited` only surfaces the breach when the body is read, so
+/// a body-less POST would otherwise accept an unlimited chunked stream.
+#[tokio::test]
+async fn chunked_oversized_body_is_rejected_even_when_the_handler_ignores_it() {
+    let app = apply_hardening(
+        Router::new().route("/api/nobody", post(|| async { "ok" })),
+        HardeningConfig::from_env(),
+    );
+    let chunk = "x".repeat(BODY_LIMIT_BYTES / 2 + 1);
+    let chunks = vec![
+        Ok::<_, std::io::Error>(chunk.clone()),
+        Ok::<_, std::io::Error>(chunk),
+    ];
+    let req = Request::post("/api/nobody")
+        .header(header::CONTENT_TYPE, "application/json")
+        .header(header::TRANSFER_ENCODING, "chunked")
+        .body(Body::from_stream(futures_util::stream::iter(chunks)))
+        .expect("request");
+    let (status, _, body) = call(&app, req).await;
+    assert_eq!(status, StatusCode::PAYLOAD_TOO_LARGE);
+    assert_eq!(body["code"], json!("payload_too_large"));
+}
+
+#[tokio::test]
+async fn chunked_body_at_the_limit_is_not_rejected() {
+    let app = router(state());
+    let exact = "x".repeat(BODY_LIMIT_BYTES);
+    let req = Request::post("/api/genui/validate")
+        .header(header::CONTENT_TYPE, "application/json")
+        .header(header::TRANSFER_ENCODING, "chunked")
+        .body(Body::from_stream(futures_util::stream::iter(vec![Ok::<
+            _,
+            std::io::Error,
+        >(exact)])))
+        .expect("request");
+    let (status, _, _) = call(&app, req).await;
+    assert_ne!(status, StatusCode::PAYLOAD_TOO_LARGE, "exactly 1 MB is allowed");
 }

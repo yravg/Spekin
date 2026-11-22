@@ -113,14 +113,23 @@ async fn call(app: &Router, method: &str, uri: &str, body: Option<Value>) -> (St
     (status, value)
 }
 
-async fn audit_actions(app: &Router) -> Vec<String> {
-    let (_, body) = call(app, "GET", "/api/projects/meranti-yard/audit", None).await;
+async fn audit_actions(app: &Router, uri: &str) -> Vec<String> {
+    let (status, body) = call(app, "GET", uri, None).await;
+    assert_eq!(status, StatusCode::OK, "audit route {uri}");
     body["entries"]
         .as_array()
         .unwrap()
         .iter()
         .map(|e| e["action"].as_str().unwrap().to_string())
         .collect()
+}
+
+const SKILLS_AUDIT: &str = "/api/skills/audit";
+const PROJECT_AUDIT: &str = "/api/projects/meranti-yard/audit";
+
+/// IMP-35: skills events go to their own chain; a project's chain is untouched.
+async fn assert_project_audit_unchanged(app: &Router, before: Vec<String>) {
+    assert_eq!(audit_actions(app, PROJECT_AUDIT).await, before);
 }
 
 #[tokio::test]
@@ -309,7 +318,8 @@ async fn check_route_applies_a_wording_update_and_appends_one_audit_entry() {
     .await;
     // Move the upstream ref forward: the installed skill is pinned to aaaa1111.
     client.advance_main_to("bbbb2222");
-    let before = audit_actions(&app).await.len();
+    let before = audit_actions(&app, SKILLS_AUDIT).await.len();
+    let project_before = audit_actions(&app, PROJECT_AUDIT).await;
 
     let (status, outcome) = call(&app, "POST", "/api/skills/grill/check", Some(json!({}))).await;
     assert_eq!(status, StatusCode::OK);
@@ -327,9 +337,10 @@ async fn check_route_applies_a_wording_update_and_appends_one_audit_entry() {
         "a new version was stored"
     );
 
-    let actions = audit_actions(&app).await;
+    let actions = audit_actions(&app, SKILLS_AUDIT).await;
     assert_eq!(actions.len(), before + 1);
     assert_eq!(actions.last().unwrap(), "skill_update_applied");
+    assert_project_audit_unchanged(&app, project_before).await;
 }
 
 #[tokio::test]
@@ -349,7 +360,8 @@ async fn check_route_holds_a_hostile_update_storing_diff_and_reasons() {
     )
     .await;
     client.advance_main_to("eeee5555");
-    let before = audit_actions(&app).await.len();
+    let before = audit_actions(&app, SKILLS_AUDIT).await.len();
+    let project_before = audit_actions(&app, PROJECT_AUDIT).await;
 
     let (status, outcome) = call(&app, "POST", "/api/skills/grill/check", Some(json!({}))).await;
     assert_eq!(status, StatusCode::OK);
@@ -368,9 +380,10 @@ async fn check_route_holds_a_hostile_update_storing_diff_and_reasons() {
         "nothing changed on hold"
     );
 
-    let actions = audit_actions(&app).await;
+    let actions = audit_actions(&app, SKILLS_AUDIT).await;
     assert_eq!(actions.len(), before + 1);
     assert_eq!(actions.last().unwrap(), "skill_update_held");
+    assert_project_audit_unchanged(&app, project_before).await;
 }
 
 #[tokio::test]
@@ -427,7 +440,8 @@ async fn rollback_route_creates_a_new_version_one_history_entry_and_one_audit_en
         Some(json!({"title": "EARS Meranti"})),
     )
     .await;
-    let before = audit_actions(&app).await.len();
+    let before = audit_actions(&app, SKILLS_AUDIT).await.len();
+    let project_before = audit_actions(&app, PROJECT_AUDIT).await;
 
     let (status, rolled) = call(&app, "POST", "/api/skills/ears-mine/rollback/1", None).await;
     assert_eq!(status, StatusCode::OK);
@@ -438,9 +452,10 @@ async fn rollback_route_creates_a_new_version_one_history_entry_and_one_audit_en
     assert_eq!(rows.len(), 3);
     assert_eq!(rows[2]["action"], "rolled_back");
 
-    let actions = audit_actions(&app).await;
+    let actions = audit_actions(&app, SKILLS_AUDIT).await;
     assert_eq!(actions.len(), before + 1);
     assert_eq!(actions.last().unwrap(), "revert");
+    assert_project_audit_unchanged(&app, project_before).await;
 }
 
 #[tokio::test]
@@ -449,4 +464,44 @@ async fn rollback_route_404_for_an_unknown_version() {
     let (status, body) = call(&app, "POST", "/api/skills/ears/rollback/99", None).await;
     assert_eq!(status, StatusCode::NOT_FOUND);
     assert_eq!(body["code"], "version_not_found");
+}
+
+/// IMP-35: the skills library has its own append-only chain, verified with a
+/// head that the server keeps apart from the log.
+#[tokio::test]
+async fn skills_audit_route_starts_empty_and_reports_verify() {
+    let app = router(state(FixtureClient::new()));
+    let (status, body) = call(&app, "GET", SKILLS_AUDIT, None).await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(body["entries"].as_array().unwrap().len(), 0);
+    assert_eq!(
+        body["head_hash"],
+        "0000000000000000000000000000000000000000000000000000000000000000"
+    );
+    assert!(body["error"].is_null(), "an empty chain verifies");
+}
+
+#[tokio::test]
+async fn skills_audit_route_hashes_and_verifies_its_own_chain() {
+    let app = router(state(FixtureClient::new()));
+    call(
+        &app,
+        "POST",
+        "/api/skills/ears/copy",
+        Some(json!({"new_id": "ears-mine", "new_title": "EARS mine"})),
+    )
+    .await;
+    call(&app, "POST", "/api/skills/ears-mine/rollback/1", None).await;
+
+    let (status, body) = call(&app, "GET", SKILLS_AUDIT, None).await;
+    assert_eq!(status, StatusCode::OK);
+    let entries = body["entries"].as_array().unwrap();
+    assert_eq!(entries.len(), 1);
+    assert_eq!(entries[0]["seq"], 1);
+    assert_eq!(entries[0]["action"], "revert");
+    assert_eq!(entries[0]["prev_hash"], "0000000000000000000000000000000000000000000000000000000000000000");
+    let hash = entries[0]["hash"].as_str().unwrap();
+    assert_eq!(hash.len(), 64, "an entry carries its sha256 hash");
+    assert_eq!(body["head_hash"], hash, "the head is the last entry's hash");
+    assert!(body["error"].is_null(), "the chain verifies");
 }
