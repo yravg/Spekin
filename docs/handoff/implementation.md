@@ -121,7 +121,7 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-32 | core | Server hardening: body limit, JSON only, timeout, CORS, headers, loopback bind | IMP-31 | done, waiting for owner merge: PR #24, stacked on #23 |
 | IMP-33 | core | Build contracts and evidence core (S37): not run is never passed | IMP-32 | done, waiting for owner merge: PR #26, stacked on #24 |
 | IMP-34 | core | Skills library API (S40): copies, versions, GitHub sources, update history and rollback | IMP-22, 27, 31 | done, waiting for owner merge: PR #27, stacked on #26 |
-| IMP-35 | core | Review follow-ups: chunked 413, skills audit chain, licences in gate, audit head | IMP-34 | part open: PR #28 (the allow-list must stay empty; licence classifier fix in progress) |
+| IMP-35 | core | Review follow-ups: chunked 413, skills audit chain, licences in gate, audit head | IMP-34 | done, waiting for owner merge: PR #28, stacked on #27 (allow-list empty; SPDX classifier) |
 | IMP-30 | core | Audit log core: append-only, hash-chained, verify | – | done, waiting for owner merge: PR #21 (follow-up: store the head hash apart from the log) |
 | IMP-28 | core | GenUI validation fuzzing (never panics, never partial) | IMP-10 | done, waiting for owner merge: PR #18, stacked on #7 (the fuzzer found and fixed a data: URL hole) |
 | IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |

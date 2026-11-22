@@ -41,7 +41,11 @@ We don't use `--dangerously-skip-permissions` (Antigravity) or `--auto` (OpenCod
 
 ## Merge order for the open pull requests (owner)
 
-**Simplest: merge [#22](https://github.com/yravg/Spekin/pull/22) only, with "Create a merge commit".** It already merges #1 to #21 in the order below, with the conflicts resolved. On that branch the gate passes (207 Rust tests, 48 web tests) and 33 of 33 board states pass. GitHub then shows #1 to #21 as merged; close any it does not. Pull requests opened after #22 are stacked on top of it: core #23 (IMP-31) → #24 (IMP-32) → IMP-33, and the ui ones from IMP-13 onwards. Merge them in that order, after #22.
+**Simplest: merge [#22](https://github.com/yravg/Spekin/pull/22) only, with "Create a merge commit".** It already merges #1 to #21 in the order below, with the conflicts resolved. On that branch the gate passes (207 Rust tests, 48 web tests) and 33 of 33 board states pass. GitHub then shows #1 to #21 as merged; close any it does not. Pull requests opened after #22 are stacked on top of it, each on the one before. After #22, merge them in this order:
+- core: #23 (IMP-31) → #24 (IMP-32) → #26 (IMP-33) → #27 (IMP-34) → #28 (IMP-35);
+- ui: #25 (IMP-13, S31) → the IMP-08 (S30) pull request when it opens.
+
+Each is a straight line on the one before, so none of them should conflict.
 
 The order used inside #22, if you would rather merge them one by one:
 
