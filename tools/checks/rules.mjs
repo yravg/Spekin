@@ -31,6 +31,8 @@ for (const f of app) {
   // R10 Build components, don't paste board HTML: no innerHTML except the Icon helper, no imports from the canvas folder.
   if (!f.endsWith('ui/Icon.tsx') && /dangerouslySetInnerHTML|\.innerHTML\s*=/.test(s)) fail('R10 no-pasted-html', f, 'renders raw HTML; write components (ADR 0003)');
   if (/from ['"][^'"]*docs\/design/.test(s)) fail('R10 no-pasted-html', f, 'imports from docs/design; use @spekin/design or @spekin/sample');
+  // R11 Board markup kept as a string (to paste or diff) is the same mistake as R10. JSX writes className, so an HTML tag with class="…" in app source is markup in a string.
+  { const m = /<(?:div|span|button|section|svg|header|aside|nav|ul|li|p|a|table)\b[^>]*\bclass=["']/.exec(s); if (m) fail('R11 no-html-strings', f + ':' + s.slice(0, m.index).split('\n').length, 'board markup inside a string; build it as JSX components'); }
   // R6 Colours and fonts come from the design tokens: no raw hex in app code (tastestack QA gate 4).
   if (/#[0-9a-fA-F]{3,8}\b/.test(s.replace(/\/\/.*$|\/\*[\s\S]*?\*\//gm, ''))) fail('R6 tokens', f, 'raw hex colour; use var(--token) from @spekin/design');
 }
