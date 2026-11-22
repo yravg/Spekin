@@ -117,6 +117,26 @@ export interface SampleIntakeComposer {
   text: string;
   len: number;
 }
+export interface SampleIntakeLimits {
+  types: string;
+  sizeMb: number;
+  perImport: number;
+  keepDays: number;
+}
+export interface SampleIntakeRef {
+  id: string;
+  src: string;
+  kind: string;
+  size: string;
+  dim: string;
+}
+export interface SampleIntakeRefs {
+  r3: SampleIntakeRef;
+  r4: SampleIntakeRef;
+  r5: SampleIntakeRef;
+  r6: SampleIntakeRef;
+}
+export type SampleIntakePiiRow = [string, string, string];
 
 export interface SampleCanvasFrame {
   id: string;
@@ -303,6 +323,9 @@ export declare const INTAKE_SWITCH_ORDER: string[];
 export declare const INTAKE_NEW: SampleIntakeNew;
 export declare const INTAKE_DELETED: SampleIntakeDeleted;
 export declare const INTAKE_COMPOSER: SampleIntakeComposer;
+export declare const INTAKE_LIMITS: SampleIntakeLimits;
+export declare const INTAKE_REFS: SampleIntakeRefs;
+export declare const INTAKE_PII: SampleIntakePiiRow[];
 export declare const CANVAS_FRAMES: SampleCanvasFrames;
 export declare const CANVAS_CHATS: SampleCanvasChat[];
 export declare const CANVAS_VIEWMENU: [string, string][];

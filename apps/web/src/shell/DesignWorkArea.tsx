@@ -97,7 +97,13 @@ export function ConflictBanner(props: {
 
 // Mirrors boards-shell.mjs Design stage: chat, artifact tabs, canvas with frames, inspector.
 export function DesignWorkArea(
-  props: { onOpenCanvas?: () => void; onOpenReview?: () => void; onOpenTargeted?: () => void; onOpenStyle?: () => void } = {},
+  props: {
+    onOpenCanvas?: () => void;
+    onOpenReview?: () => void;
+    onOpenTargeted?: () => void;
+    onOpenStyle?: () => void;
+    onOpenIntake?: () => void;
+  } = {},
 ) {
   const view = useWorkspace((s) => s.view('design'));
   const setView = useWorkspace((s) => s.setView);
@@ -259,7 +265,10 @@ export function DesignWorkArea(
             }
           }}
           onClose={(name) => recordIntent('F104:close:' + name)}
-          onOpenArtifact={() => recordIntent('F104:open')}
+          onOpenArtifact={() => {
+            if (props.onOpenIntake) props.onOpenIntake();
+            else recordIntent('F104:open');
+          }}
           right={right}
         />
         {conflict ? (
@@ -449,7 +458,10 @@ export function DesignWorkArea(
                 does="Imports a PNG, JPEG or WebP the user picks as a reference image (S28)"
                 sm
                 feature="F113"
-                onClick={() => recordIntent('F113:import')}
+                onClick={() => {
+                  if (props.onOpenIntake) props.onOpenIntake();
+                  else recordIntent('F113:import');
+                }}
               />
               <span className="div" />
               <Btn

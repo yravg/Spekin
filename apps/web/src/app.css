@@ -22,3 +22,4 @@ body { background: var(--ground); }
 }
 
 .can-cover .ac { gap: 0; }
+.int-cv:focus:not(:focus-visible) { outline: none; }
