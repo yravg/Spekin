@@ -6,8 +6,9 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use crate::{
-    ArtifactRevisionRecord, AuditEntry, AuditError, BoardSnapshot, ContextChip, ManifestSelection,
-    ProjectEntry, RequiredInput, Revision, RunEstimate, SkillManifest, UpdatePolicy,
+    ArtifactRevisionRecord, AuditEntry, AuditError, BoardSnapshot, ContextChip, Contract, Evidence,
+    ManifestSelection, MatrixRow, ProjectEntry, RequiredInput, Revision, RunEstimate,
+    SkillManifest, UpdatePolicy,
 };
 
 /// Typed error body returned by `spekin-server` on 4xx/5xx responses.
@@ -113,4 +114,14 @@ pub struct AuditResponse {
 pub struct DeletedProjectView {
     pub entry: ProjectEntry,
     pub days_left: i64,
+}
+
+/// Response for `GET /api/projects/{id}/contracts` (IMP-33). The matrix carries
+/// the status of every check, so a missing check is shown as `not_run`, never passed.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct ContractsResponse {
+    pub contracts: Vec<Contract>,
+    pub evidence: Vec<Evidence>,
+    pub matrix: Vec<MatrixRow>,
 }

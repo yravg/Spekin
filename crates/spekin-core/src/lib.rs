@@ -8,6 +8,7 @@
 pub mod api;
 pub mod audit;
 pub mod context;
+pub mod contracts;
 pub mod genui;
 pub mod github_source;
 pub mod handoff;
@@ -22,13 +23,18 @@ pub mod stage;
 
 pub use api::{
     ApiErrorBody, AuditResponse, BuildContextRequest, BuildManifestRequest,
-    CheckSkillUpdateRequest, DeletedProjectView, EstimateRunRequest, RejectProposalRequest,
-    ReserveRunRequest, RevertRevisionRequest, SettleRunRequest,
+    CheckSkillUpdateRequest, ContractsResponse, DeletedProjectView, EstimateRunRequest,
+    RejectProposalRequest, ReserveRunRequest, RevertRevisionRequest, SettleRunRequest,
 };
 pub use audit::{AuditAction, AuditEntry, AuditError, AuditEvent, AuditLog, GENESIS_HASH, verify};
 pub use context::{
     BoardArtifact, BoardSnapshot, ContextChip, ContextItemStatus, RequestContext,
     RequestContextItem, build_context, format_token_estimate,
+};
+pub use contracts::{
+    Check, CheckKind, Contract, ContractStatus, Evidence, EvidenceError, EvidenceResult,
+    GateResult, MAX_LOG_BYTES, MatrixRow, OwnerLane, check_status, gate, matrix, sample_contracts,
+    sample_evidence, sample_matrix, status,
 };
 pub use genui::{
     AllowedActionKind, ChecklistItem, ChecklistStatus, ComparisonOption, GenUiAction, GenUiCard,
