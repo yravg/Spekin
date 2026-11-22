@@ -43,6 +43,7 @@ We don't use `--dangerously-skip-permissions` (Antigravity) or `--auto` (OpenCod
 
 **Simplest: merge [#22](https://github.com/yravg/Spekin/pull/22) only, with "Create a merge commit".** It already merges #1 to #21 in the order below, with the conflicts resolved. On that branch the gate passes (207 Rust tests, 48 web tests) and 33 of 33 board states pass. GitHub then shows #1 to #21 as merged; close any it does not. Pull requests opened after #22 are stacked on top of it, each on the one before. After #22, merge them in this order:
 - core: #23 (IMP-31) → #24 (IMP-32) → #26 (IMP-33) → #27 (IMP-34) → #28 (IMP-35);
+- **Simplest: merge #22, then #37 (integration 2).** #37 already holds #23–#36; after it, close those PRs. The chains below are only for merging one at a time.
 - ui: #25 (IMP-13, S31) → #30 (IMP-08, S30) → #31 (IMP-06, S28) → #32 (IMP-16, S34) → #34 (IMP-19, S38) → #35 (IMP-20, T01). Beside it: #33 (IMP-17, S36) → #36 (IMP-18, S37). The S36 pull request (IMP-17) is also stacked on #30, beside #31: merge it after #31, and if both changed `ProjectShell.tsx` or `DesignWorkArea.tsx`, keep both views;
 - ci: #29 makes the state gate a required check, for states marked checked. Merge it right after #22. From then on, CI fails any built state that drifts from its board.
 
