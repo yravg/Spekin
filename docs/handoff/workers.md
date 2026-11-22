@@ -38,7 +38,7 @@ We don't use `--dangerously-skip-permissions` (Antigravity) or `--auto` (OpenCod
 Use **"Create a merge commit"**, not squash, for stacked pull requests. A squash gives the lower branch's commits new ids, so the PR stacked above it then shows conflicts.
 
 1. Core, not stacked: #1 (IMP-03), #4 (IMP-12), #5 (IMP-11), #7 (IMP-10), #12 (IMP-25), #8 (IMP-22).
-2. Core, stacked on #2: #2 (IMP-04), then #10 (IMP-09) and #13 (IMP-24).
+2. Core, stacked: #2 (IMP-04), then #10 (IMP-09) and #13 (IMP-24). #17 (IMP-27) goes after #8. The IMP-28 PR goes after #7.
 3. Core, stacked on all of the above: the IMP-26 PR (API routes). Merge it last.
 4. UI stack, bottom first: #3 (IMP-01) → #6 (IMP-02) → #9 (IMP-23) → #11 (IMP-05) → IMP-07 → IMP-15 → IMP-14.
 

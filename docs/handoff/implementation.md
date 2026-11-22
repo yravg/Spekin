@@ -115,7 +115,8 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-24 | core | Handoff manifest core (S34): accepted revisions, hashes, missing inputs, deterministic | IMP-04 | done, waiting for owner merge: PR #13, stacked on #2 |
 | IMP-25 | core | Next-request context builder (S29, S35): only the listed chips, pure | – | done, waiting for owner merge: PR #12 |
 | IMP-26 | core | API routes for the core (all core cards) + web client | IMP-03…IMP-25 | done, waiting for owner merge: PR #15 (merge last) |
-| IMP-27 | core | GitHub skill source adapter: pin to SHA, fetch with limits, update check | IMP-22 | open |
+| IMP-27 | core | GitHub skill source adapter: pin to SHA, fetch with limits, update check | IMP-22 | done, waiting for owner merge: PR #17, stacked on #8 |
+| IMP-28 | core | GenUI validation fuzzing (never panics, never partial) | IMP-10 | open |
 | IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
 | IMP-06 | ui | S28 Reference intake | IMP-01 | open |
 | IMP-07 | ui | S29 Frames canvas | IMP-01 | done, waiting for owner merge: PR #14, stacked on #11 (lead re-ran: S29 6/6 PASS) |
@@ -239,6 +240,15 @@ Owner request (23 Nov): skills from public GitHub repositories that can update a
 - The HTTP client sits behind a trait, so tests use recorded fixtures under `crates/spekin-server/tests/fixtures/github/`. No test touches the network. Add tests for: a licence change, an added script and an injection pattern each hold; a wording-only change applies under Auto; Pinned never changes; the size limits are refused.
 - A new dependency is allowed only under MIT or Apache-2.0 (for example reqwest with rustls). Name it in the PR.
 - No token is needed for public repositories. If `GITHUB_TOKEN` is set it is used, but it is never logged or stored.
+
+### IMP-28 · GenUI validation fuzzing (core)
+
+Hardening for IMP-10. Proptest strategies generate arbitrary JSON (deep nesting, long strings, unknown keys, mixed types, unicode, `javascript:` and `data:` URLs, event-handler strings in every field). Properties:
+- `validate_genui` never panics;
+- it either returns a full valid card or a rejection, never a partial card;
+- every accepted card passes the limits again when re-serialised and re-validated (a round trip);
+- no accepted card contains a non-https URL or a script-like string anywhere.
+Run 2,000 cases in CI and 50,000 cases locally with an env var. Fix any bug found, with its failing case first. Stack on IMP-10.
 
 ### UI cards after P1 (written 23 Nov)
 
