@@ -1,0 +1,60 @@
+{
+  "board": "S40-skills-library.dc.html",
+  "states": {
+    "library": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "[data-stage=\"spec\"]" },
+        { "wait": "[data-screen=\"S40\"]" }
+      ]
+    },
+    "detail": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "[data-stage=\"spec\"]" },
+        { "click": ".skl-cn:has-text(\"Grill the idea\")" },
+        { "wait": ".skl-doc" }
+      ]
+    },
+    "edit": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "[data-stage=\"spec\"]" },
+        { "click": ".skl-cn:has-text(\"Grill the idea\")" },
+        { "click": "button:has-text(\"Copy and edit\")" },
+        { "wait": ".skl-form" }
+      ]
+    },
+    "github": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "[data-stage=\"spec\"]" },
+        { "click": "button:has-text(\"Add from GitHub\")" },
+        { "wait": "[role=\"dialog\"][aria-label=\"Add skills from GitHub\"]" }
+      ]
+    },
+    "updates": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "[data-stage=\"spec\"]" },
+        { "click": "button:has-text(\"Updates\")" },
+        { "wait": ".skl-hist" }
+      ]
+    },
+    "use": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "[data-stage=\"spec\"]" },
+        { "click": "role=tab[name=\"GLOSSARY.md\"]" },
+        { "type": [".ap-ta-input", "/gr"] },
+        { "wait": "[role=\"listbox\"][aria-label=\"Skills for Specification\"]" }
+      ]
+    }
+  }
+}
