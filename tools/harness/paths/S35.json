@@ -4,40 +4,27 @@
     "design": {
       "status": "checked",
       "steps": [
-        {
-          "goto": "/"
-        },
-        {
-          "wait": "[data-stage=\"design\"][aria-current=\"page\"]"
-        }
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "wait": "[data-stage=\"design\"][aria-current=\"page\"]" }
       ]
     },
     "backend": {
       "status": "checked",
       "steps": [
-        {
-          "goto": "/"
-        },
-        {
-          "click": "[data-stage=\"backend\"]"
-        },
-        {
-          "wait": "[data-stage=\"backend\"][aria-current=\"page\"]"
-        }
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"backend\"]" },
+        { "wait": "[data-stage=\"backend\"][aria-current=\"page\"]" }
       ]
     },
     "conflict": {
       "status": "checked",
       "steps": [
-        {
-          "goto": "/"
-        },
-        {
-          "click": "role=tab[name=/F-04/]"
-        },
-        {
-          "wait": "[data-save=\"conflict\"]"
-        }
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "role=tab[name=/F-04/]" },
+        { "wait": "[data-save=\"conflict\"]" }
       ]
     }
   }

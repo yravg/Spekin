@@ -5,6 +5,7 @@
       "status": "checked",
       "steps": [
         { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
         { "click": "[data-stage=\"spec\"]" },
         { "wait": "[data-screen=\"S40\"]" }
       ]
@@ -13,6 +14,7 @@
       "status": "checked",
       "steps": [
         { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
         { "click": "[data-stage=\"spec\"]" },
         { "click": ".skl-cn:has-text(\"Grill the idea\")" },
         { "wait": ".skl-doc" }
@@ -22,6 +24,7 @@
       "status": "checked",
       "steps": [
         { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
         { "click": "[data-stage=\"spec\"]" },
         { "click": ".skl-cn:has-text(\"Grill the idea\")" },
         { "click": "button:has-text(\"Copy and edit\")" },
@@ -32,6 +35,7 @@
       "status": "checked",
       "steps": [
         { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
         { "click": "[data-stage=\"spec\"]" },
         { "click": "button:has-text(\"Add from GitHub\")" },
         { "wait": "[role=\"dialog\"][aria-label=\"Add skills from GitHub\"]" }
@@ -41,6 +45,7 @@
       "status": "checked",
       "steps": [
         { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
         { "click": "[data-stage=\"spec\"]" },
         { "click": "button:has-text(\"Updates\")" },
         { "wait": ".skl-hist" }
@@ -50,6 +55,7 @@
       "status": "checked",
       "steps": [
         { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
         { "click": "[data-stage=\"spec\"]" },
         { "click": "role=tab[name=\"GLOSSARY.md\"]" },
         { "type": [".ap-ta-input", "/gr"] },
