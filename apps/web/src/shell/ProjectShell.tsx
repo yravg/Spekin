@@ -10,6 +10,7 @@ import { DesignWorkArea } from './DesignWorkArea';
 import { BackendWorkArea } from './BackendWorkArea';
 import { SkillsWorkArea } from '../skills/SkillsWorkArea';
 import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/FramesCanvasWorkArea';
+import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/ReviewAcceptWorkArea';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -133,8 +134,9 @@ export function ProjectShell() {
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
-  const [designSub, setDesignSub] = useState<'shell' | 'canvas'>('shell');
+  const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review'>('shell');
   const [canvasOverride, setCanvasOverride] = useState<CanvasShellOverride>({});
+  const [reviewOverride, setReviewOverride] = useState<ReviewShellOverride>({});
   const save = useWorkspace((s) => s.save);
   const conflict = useWorkspace((s) => s.conflict);
   const project = getProject(projectId);
@@ -142,13 +144,22 @@ export function ProjectShell() {
   const stages = getStages(projectId);
   if (!project || !usage || !isStageId(stages, stage)) return <NotFound />;
   const currentStage = stages.find((s) => s.id === stage)!;
-  const screenId = stage === 'spec' ? 'S40' : stage === 'design' && designSub === 'canvas' ? 'S29' : 'S35';
+  const screenId =
+    stage === 'spec'
+      ? 'S40'
+      : stage === 'design' && designSub === 'canvas'
+        ? 'S29'
+        : stage === 'design' && designSub === 'review'
+          ? 'S33'
+          : 'S35';
   const activeSave =
     stage === 'spec' && specOverride.save
       ? specOverride.save
       : stage === 'design' && designSub === 'canvas' && canvasOverride.save
         ? canvasOverride.save
-        : save;
+        : stage === 'design' && designSub === 'review' && reviewOverride.save
+          ? reviewOverride.save
+          : save;
   const activeBusy =
     stage === 'spec'
       ? specOverride.busy
@@ -156,12 +167,21 @@ export function ProjectShell() {
         ? '1 designing · 1 waiting'
         : undefined;
   const activeBusyNode = stage === 'design' && designSub === 'canvas' ? canvasOverride.busyNode : undefined;
+  const displayStage = stage === 'design' && designSub === 'review' && reviewOverride.stage ? reviewOverride.stage : stage;
+  const displayProject =
+    stage === 'design' && designSub === 'review' && reviewOverride.specRev
+      ? { ...project, spec: reviewOverride.specRev }
+      : project;
+  const displayStages =
+    stage === 'design' && designSub === 'review' && reviewOverride.specRev === 'r15'
+      ? stages.map((s) => (s.id === 'spec' ? { ...s, text: 'Ready · r15' } : s))
+      : stages;
 
   return (
     <div className="ap-root" data-screen={screenId} data-panel={panel ?? undefined}>
       <div className="sp-app">
         <TopBar
-          project={project}
+          project={displayProject}
           usage={usage}
           save={activeSave}
           busy={activeBusy}
@@ -175,8 +195,8 @@ export function ProjectShell() {
           onLang={setLang}
         />
         <StageBar
-          stages={stages}
-          current={stage}
+          stages={displayStages}
+          current={displayStage}
           onSwitch={(id) => {
             if (id === 'design') setDesignSub('shell');
             navigate('/p/' + projectId + '/' + id);
@@ -187,8 +207,10 @@ export function ProjectShell() {
           {stage === 'design' ? (
             designSub === 'canvas' ? (
               <FramesCanvasWorkArea onShellOverride={setCanvasOverride} />
+            ) : designSub === 'review' ? (
+              <ReviewAcceptWorkArea onShellOverride={setReviewOverride} />
             ) : (
-              <DesignWorkArea onOpenCanvas={() => setDesignSub('canvas')} />
+              <DesignWorkArea onOpenCanvas={() => setDesignSub('canvas')} onOpenReview={() => setDesignSub('review')} />
             )
           ) : stage === 'backend' ? (
             <BackendWorkArea />

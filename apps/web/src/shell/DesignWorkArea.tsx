@@ -96,7 +96,7 @@ export function ConflictBanner(props: {
 }
 
 // Mirrors boards-shell.mjs Design stage: chat, artifact tabs, canvas with frames, inspector.
-export function DesignWorkArea(props: { onOpenCanvas?: () => void } = {}) {
+export function DesignWorkArea(props: { onOpenCanvas?: () => void; onOpenReview?: () => void } = {}) {
   const view = useWorkspace((s) => s.view('design'));
   const setView = useWorkspace((s) => s.setView);
   const chatWidth = useWorkspace((s) => s.chatWidth);
@@ -550,7 +550,10 @@ export function DesignWorkArea(props: { onOpenCanvas?: () => void } = {}) {
                 sm
                 does="Opens S08 review with the 3 pending items for this stage"
                 feature="F108"
-                onClick={() => recordIntent('F108:open-review')}
+                onClick={() => {
+                  if (props.onOpenReview) props.onOpenReview();
+                  else recordIntent('F108:open-review');
+                }}
               />
             </div>
           </Inspector>

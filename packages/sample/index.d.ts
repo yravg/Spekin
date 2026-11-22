@@ -167,6 +167,73 @@ export interface SampleCanvasStack {
   kept: { id: string; from: number };
 }
 
+export interface SampleReviewPart {
+  frame: string;
+  rev: string;
+  draft: string;
+  cell: { name: string; pkg: string; size: string; font: string; before: string; after: string; ask: string };
+  pill: { name: string; pkg: string; size: string; font: string; text: string; ask: string };
+}
+export interface SampleReviewAlso {
+  el: string;
+  where: string;
+  from: string;
+  to: string;
+}
+export interface SampleReviewVariant {
+  id: number;
+  label: string;
+  hint: string;
+  text: string;
+  badge: string;
+}
+export interface SampleReviewNit {
+  n: number;
+  el: string;
+  what: string;
+  tip: string;
+  before?: string;
+  after?: string;
+  key: string;
+  stale?: boolean;
+  seen?: string;
+  now?: string;
+}
+export type DiffSegment = ['eq' | 'add' | 'del', string];
+export interface SampleReviewHunk {
+  id: string;
+  kind: string;
+  ref: string;
+  name: string;
+  src: string;
+  old: DiffSegment[] | null;
+  now: DiffSegment[];
+}
+export interface SampleReviewProposalLink {
+  id: string;
+  t: string;
+  sub: string;
+  p: PillTuple;
+}
+export interface SampleReviewProposal {
+  id: string;
+  from: string;
+  to: string;
+  title: string;
+  by: string;
+  at: string;
+  snapshot: string;
+  hunks: SampleReviewHunk[];
+  links: SampleReviewProposalLink[];
+  affected: SampleReviewProposalLink[];
+  sources: string[];
+  audit: {
+    accepted: { id: string; at: string; text: string };
+    rejected: { id: string; at: string; text: string };
+  };
+  accepted: { hunks: string; parent: string; snapshot: string };
+}
+
 export declare const PROJECT: SampleProject;
 export declare const STAGES: SampleStage[];
 export declare const USAGE: SampleUsage;
@@ -201,4 +268,10 @@ export declare const CANVAS_BASELINE: SampleCanvasBaseline;
 export declare const CANVAS_TAKES: SampleCanvasTake[];
 export declare const CANVAS_REGIONS: [string, number, number, number, number][];
 export declare const CANVAS_STACK: SampleCanvasStack;
+export declare const REVIEW_PART: SampleReviewPart;
+export declare const REVIEW_ALSO: SampleReviewAlso[];
+export declare const REVIEW_OUTSIDE: string;
+export declare const REVIEW_VARIANTS: SampleReviewVariant[];
+export declare const REVIEW_NITS: SampleReviewNit[];
+export declare const REVIEW_PROPOSAL: SampleReviewProposal;
 // Everything else the boards use is exported too; declare it here before use.
