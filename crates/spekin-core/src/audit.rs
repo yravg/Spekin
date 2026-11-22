@@ -126,8 +126,36 @@ impl AuditLog {
 
     /// Append one entry and return it. Sequence, `prev_hash` and `hash` are
     /// computed here; earlier entries are never touched.
-    pub fn append(&mut self, _event: AuditEvent, _now: u64) -> AuditEntry {
-        todo!("IMP-30: implement the hash-chained append")
+    pub fn append(&mut self, event: AuditEvent, now: u64) -> AuditEntry {
+        let seq = self.entries.len() as u64 + 1;
+        let prev_hash = self
+            .entries
+            .last()
+            .map_or_else(|| GENESIS_HASH.to_owned(), |e| e.hash.clone());
+        let hash = compute_hash(
+            seq,
+            &event.actor,
+            &event.action,
+            &event.target_id,
+            event.revision.as_deref(),
+            &event.reason,
+            now,
+            &prev_hash,
+        );
+        let entry = AuditEntry {
+            seq,
+            actor: event.actor,
+            action: event.action,
+            target_id: event.target_id,
+            revision: event.revision,
+            reason: event.reason,
+            at: now,
+            prev_hash,
+            hash: hash.clone(),
+        };
+        self.entries.push(entry.clone());
+        self.head_hash = hash;
+        entry
     }
 
     /// Convenience wrapper around the free [`verify`] function.
@@ -142,9 +170,89 @@ impl Default for AuditLog {
     }
 }
 
+/// sha256 over the canonical JSON of an entry's fields plus `prev_hash`.
+/// The `hash` field itself is deliberately not part of the input.
+fn compute_hash(
+    seq: u64,
+    actor: &str,
+    action: &AuditAction,
+    target_id: &str,
+    revision: Option<&str>,
+    reason: &str,
+    at: u64,
+    prev_hash: &str,
+) -> String {
+    let payload = HashPayload {
+        seq,
+        actor,
+        action,
+        target_id,
+        revision,
+        reason,
+        at,
+        prev_hash,
+    };
+    let bytes = serde_json::to_vec(&payload).expect("hashing plain fields cannot fail");
+    to_hex(&Sha256::digest(bytes))
+}
+
+/// Lowercase hex encoding, without another dependency.
+fn to_hex(bytes: impl AsRef<[u8]>) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let bytes = bytes.as_ref();
+    let mut out = String::with_capacity(bytes.len() * 2);
+    for &b in bytes {
+        out.push(HEX[(b >> 4) as usize] as char);
+        out.push(HEX[(b & 0x0f) as usize] as char);
+    }
+    out
+}
+
 /// Find an edited, removed or reordered entry and name its sequence number.
-pub fn verify(_log: &AuditLog) -> Result<(), AuditError> {
-    todo!("IMP-30: implement chain verification")
+pub fn verify(log: &AuditLog) -> Result<(), AuditError> {
+    for (i, entry) in log.entries.iter().enumerate() {
+        let expected_seq = (i + 1) as u64;
+        if entry.seq != expected_seq {
+            return Err(AuditError::Sequence { seq: entry.seq });
+        }
+
+        let expected_prev = if i == 0 {
+            GENESIS_HASH
+        } else {
+            &log.entries[i - 1].hash
+        };
+        if entry.prev_hash != expected_prev {
+            return Err(AuditError::BrokenChain { seq: entry.seq });
+        }
+
+        let recomputed = compute_hash(
+            entry.seq,
+            &entry.actor,
+            &entry.action,
+            &entry.target_id,
+            entry.revision.as_deref(),
+            &entry.reason,
+            entry.at,
+            &entry.prev_hash,
+        );
+        if recomputed != entry.hash {
+            return Err(AuditError::Edited { seq: entry.seq });
+        }
+    }
+
+    // The head anchor catches a removed tail, which a bare chain cannot see
+    // because no later entry is left to break.
+    let expected_head = log
+        .entries
+        .last()
+        .map_or(GENESIS_HASH, |entry| entry.hash.as_str());
+    if log.head_hash != expected_head {
+        return Err(AuditError::Truncated {
+            seq: log.entries.len() as u64 + 1,
+        });
+    }
+
+    Ok(())
 }
 
 #[cfg(test)]
@@ -239,9 +347,10 @@ mod tests {
         let log = filled_log(6);
 
         let mut removed = log.clone();
-        removed.entries.remove(2); // original seq 3
+        removed.entries.remove(2); // original seq 3 is gone
         let err = verify(&removed).expect_err("a removed middle entry must fail verify");
-        assert_eq!(err_seq(&err), 3);
+        // The gap surfaces at the first surviving entry after the hole (seq 4).
+        assert_eq!(err_seq(&err), 4);
 
         let mut reordered = log.clone();
         reordered.entries.swap(1, 2); // seqs become 1, 3, 2, ...
