@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 18c0382ac8727eb849cfc0bf356067f2d8a806f42dfb5e40275dfb02f52610a9 # shrinks to raw = "{\"actions\":[{\"href\":\"https://example.com/details\",\"kind\":\"expand_details\",\"label\":\"data:text/plain,hello\",\"target_id\":\"CK-1\"}],\"body\":\"Threshold from accepted spec r14.\",\"family\":\"checklist\",\"id\":\"CK-1\",\"items\":[{\"checked\":false,\"id\":\"i1\",\"label\":\"Alert raised\",\"status\":\"untested\"},{\"checked\":true,\"id\":\"i2\",\"label\":\"Threshold read from spec\",\"status\":\"passed_fixture\"}],\"links\":[\"https://example.com/spec/r14\"],\"provenance\":\"imported_observation\",\"schema_version\":1,\"summary\":\"1 of 2 passed.\",\"title\":\"Alert after 2 periods over 3%\"}"
