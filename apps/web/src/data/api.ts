@@ -3,20 +3,37 @@
 // This module only fetches and checks shapes. It decides no rules, and the screens still
 // read apps/web/src/data/source.ts until the lead switches them (IMP-03 note).
 import type {
+  AddGithubSkillRequest,
+  AuditEntry,
+  AuditError,
+  AuditResponse,
   BuildContextRequest,
   BuildManifestRequest,
   CheckSkillUpdateRequest,
+  CopySkillRequest,
+  DeletedProjectView,
+  EditSkillRequest,
   EstimateRunRequest,
   GenUiValidation,
+  HeldUpdate,
+  LibrarySkill,
   Manifest,
   ModelCapability,
   Project,
+  ProjectEntry,
   Rejection,
   RequestContext,
   Reservation,
   ReserveRunRequest,
   Revision,
   RunEstimate,
+  Settlement,
+  SettleRunRequest,
+  SkillCheckRequest,
+  SkillHistoryEntry,
+  SkillManifest,
+  SkillUpdateOutcome,
+  SkillsResponse,
   Stage,
   StageId,
   StageTone,
@@ -124,6 +141,82 @@ function isRejection(v: unknown): v is Rejection {
   return isRecord(v) && isString(v.id) && isNumber(v.base) && isString(v.reason);
 }
 
+// Runtime mirrors of the IMP-30/31 Rust enums. ts-rs exports types, not values.
+const AUDIT_ACTIONS = [
+  'accept',
+  'reject',
+  'revert',
+  'delete',
+  'restore',
+  'reserve',
+  'settle',
+  'skill_update_applied',
+  'skill_update_held',
+] as const;
+const AUDIT_ERROR_KINDS = ['edited', 'broken_chain', 'sequence', 'truncated'] as const;
+
+function isAuditEntry(v: unknown): v is AuditEntry {
+  return (
+    isRecord(v) &&
+    isNumber(v.seq) &&
+    isString(v.actor) &&
+    oneOf(AUDIT_ACTIONS, v.action) &&
+    isString(v.target_id) &&
+    (v.revision === null || isString(v.revision)) &&
+    isString(v.reason) &&
+    isNumber(v.at) &&
+    isString(v.prev_hash) &&
+    isString(v.hash)
+  );
+}
+
+function isAuditError(v: unknown): v is AuditError {
+  return (
+    isRecord(v) &&
+    AUDIT_ERROR_KINDS.some(
+      (kind) => isRecord(v[kind]) && isNumber((v[kind] as Record<string, unknown>).seq),
+    )
+  );
+}
+
+function isAuditResponse(v: unknown): v is AuditResponse {
+  return (
+    isRecord(v) &&
+    Array.isArray(v.entries) &&
+    v.entries.every(isAuditEntry) &&
+    isString(v.head_hash) &&
+    (v.error === null || isAuditError(v.error))
+  );
+}
+
+function isProjectEntry(v: unknown): v is ProjectEntry {
+  return (
+    isRecord(v) &&
+    isString(v.id) &&
+    isProject(v.project) &&
+    Array.isArray(v.revisions) &&
+    v.revisions.every(isString) &&
+    isNumber(v.changed_at) &&
+    (v.deleted_at === null || isNumber(v.deleted_at))
+  );
+}
+
+function isDeletedProjectView(v: unknown): v is DeletedProjectView {
+  return isRecord(v) && isProjectEntry(v.entry) && isNumber(v.days_left);
+}
+
+function isSettlement(v: unknown): v is Settlement {
+  return (
+    isRecord(v) &&
+    isString(v.run_id) &&
+    isString(v.idempotency_key) &&
+    isNumber(v.reserved) &&
+    isNumber(v.charged) &&
+    isNumber(v.refunded) &&
+    isBoolean(v.cancelled)
+  );
+}
+
 function isRunEstimate(v: unknown): v is RunEstimate {
   return isRecord(v) && isNumber(v.min) && isNumber(v.max) && isNumber(v.reserve);
 }
@@ -184,6 +277,111 @@ function isUpdateCheck(v: unknown): v is UpdateCheck {
     oneOf(['auto', 'notify', 'pinned'] as const, v.policy) &&
     isRecord(v.decision) &&
     oneOf(['apply', 'hold'] as const, v.decision.decision)
+  );
+}
+
+const SKILL_SOURCE_KINDS = ['template', 'github', 'user'] as const;
+const SKILL_HISTORY_ACTIONS = [
+  'copied',
+  'edited',
+  'installed',
+  'update_applied',
+  'update_held',
+  'rolled_back',
+] as const;
+const DIFF_OPS = ['context', 'remove', 'add'] as const;
+const HOLD_REASON_CODES = [
+  'licence_changed',
+  'tool_added',
+  'script_added',
+  'injection_detected',
+  'policy_notify',
+  'policy_pinned',
+] as const;
+
+function isSkillManifest(v: unknown): v is SkillManifest {
+  return (
+    isRecord(v) &&
+    isString(v.id) &&
+    isString(v.title) &&
+    isString(v.description) &&
+    Array.isArray(v.stages) &&
+    isRecord(v.source) &&
+    oneOf(SKILL_SOURCE_KINDS, v.source.kind) &&
+    isString(v.licence) &&
+    (v.notice === null || isString(v.notice)) &&
+    isString(v.version) &&
+    Array.isArray(v.reads) &&
+    Array.isArray(v.proposes) &&
+    Array.isArray(v.tools) &&
+    Array.isArray(v.scripts) &&
+    isString(v.invocation) &&
+    isString(v.body)
+  );
+}
+
+function isLibrarySkill(v: unknown): v is LibrarySkill {
+  return (
+    isRecord(v) &&
+    isSkillManifest(v.manifest) &&
+    oneOf(['auto', 'notify', 'pinned'] as const, v.policy) &&
+    oneOf(SKILL_SOURCE_KINDS, v.kind) &&
+    isNumber(v.uses)
+  );
+}
+
+function isSkillsResponse(v: unknown): v is SkillsResponse {
+  return (
+    isRecord(v) &&
+    Array.isArray(v.skills) &&
+    v.skills.every(isLibrarySkill) &&
+    Array.isArray(v.sources) &&
+    v.sources.every(
+      (s) =>
+        isRecord(s) &&
+        isString(s.id) &&
+        isString(s.name) &&
+        isString(s.kind) &&
+        isString(s.licence) &&
+        isString(s.policy) &&
+        isNumber(s.count),
+    )
+  );
+}
+
+function isHeldUpdate(v: unknown): v is HeldUpdate {
+  return (
+    isRecord(v) &&
+    isString(v.skill_id) &&
+    isString(v.from_version) &&
+    isString(v.to_version) &&
+    Array.isArray(v.reasons) &&
+    v.reasons.every((r) => isRecord(r) && oneOf(HOLD_REASON_CODES, r.code)) &&
+    Array.isArray(v.diff) &&
+    v.diff.every((d) => isRecord(d) && oneOf(DIFF_OPS, d.op) && isString(d.text)) &&
+    isNumber(v.at)
+  );
+}
+
+function isSkillUpdateOutcome(v: unknown): v is SkillUpdateOutcome {
+  if (!isRecord(v)) return false;
+  if (v.outcome === 'applied') {
+    return isLibrarySkill(v.skill) && isString(v.version) && isNumber(v.seq);
+  }
+  if (v.outcome === 'held') return isHeldUpdate(v.held) && isNumber(v.seq);
+  return false;
+}
+
+function isSkillHistoryEntry(v: unknown): v is SkillHistoryEntry {
+  return (
+    isRecord(v) &&
+    isNumber(v.seq) &&
+    isString(v.skill_id) &&
+    oneOf(SKILL_HISTORY_ACTIONS, v.action) &&
+    isString(v.version) &&
+    isString(v.reason) &&
+    isNumber(v.at) &&
+    Array.isArray(v.reasons)
   );
 }
 
@@ -273,6 +471,29 @@ async function postJson(
 ): Promise<unknown> {
   const headers: Record<string, string> = { accept: 'application/json' };
   const init: RequestInit = { method: 'POST', headers, signal };
+  if (body !== undefined) {
+    headers['content-type'] = 'application/json';
+    init.body = JSON.stringify(body);
+  }
+  const response = await doFetch(url, init);
+  if (!response.ok) {
+    const err = await readErrorDetails(response);
+    throw new ApiError('http', err.message ?? `API answered ${response.status} for ${url}`, {
+      url,
+      status: response.status,
+      ...(err.code !== undefined ? { code: err.code } : {}),
+    });
+  }
+  return parseJson(response, url);
+}
+
+async function putJson(
+  url: string,
+  body: unknown | undefined,
+  signal: AbortSignal | undefined,
+): Promise<unknown> {
+  const headers: Record<string, string> = { accept: 'application/json' };
+  const init: RequestInit = { method: 'PUT', headers, signal };
   if (body !== undefined) {
     headers['content-type'] = 'application/json';
     init.body = JSON.stringify(body);
@@ -477,6 +698,188 @@ export async function buildHandoffManifest(
   const value = await postJson(url, req, options.signal);
   if (!isManifest(value)) {
     throw new ApiError('shape', `API manifest body is not a Manifest: ${url}`, { url });
+  }
+  return value;
+}
+
+/** The hash-chained audit view; the head hash is held by the server apart from the log (IMP-31). */
+export async function fetchAudit(
+  projectId: string,
+  options: ApiOptions = {},
+): Promise<AuditResponse | null> {
+  const url = `${projectUrl(projectId, options)}/audit`;
+  const result = await getJson(url, options.signal);
+  if (!result.found) return null;
+  if (!isAuditResponse(result.value)) {
+    throw new ApiError('shape', `API audit body is not an AuditResponse: ${url}`, { url });
+  }
+  return result.value;
+}
+
+/** Revert an artifact to an earlier revision's content, writing a new revision (IMP-31). */
+export async function revertRevision(
+  projectId: string,
+  artifact: string,
+  to: Revision,
+  options: ApiOptions = {},
+): Promise<Revision> {
+  const url = `${projectUrl(projectId, options)}/revisions/${encodeURIComponent(artifact)}/revert`;
+  const value = await postJson(url, { to }, options.signal);
+  if (!isRevision(value)) {
+    throw new ApiError('shape', `API revert body is not a Revision: ${url}`, { url });
+  }
+  return value;
+}
+
+/** Settle a reserved hosted run at its actual cost (IMP-31). */
+export async function settleRun(
+  projectId: string,
+  req: SettleRunRequest,
+  options: ApiOptions = {},
+): Promise<Settlement> {
+  const url = `${projectUrl(projectId, options)}/runs/settle`;
+  const value = await postJson(url, req, options.signal);
+  if (!isSettlement(value)) {
+    throw new ApiError('shape', `API settle body is not a Settlement: ${url}`, { url });
+  }
+  return value;
+}
+
+/** Mark a project deleted through the 30-day restore window (IMP-29/IMP-31). */
+export async function deleteProject(
+  projectId: string,
+  options: ApiOptions = {},
+): Promise<ProjectEntry> {
+  const url = `${projectUrl(projectId, options)}/delete`;
+  const value = await postJson(url, undefined, options.signal);
+  if (!isProjectEntry(value)) {
+    throw new ApiError('shape', `API delete body is not a ProjectEntry: ${url}`, { url });
+  }
+  return value;
+}
+
+/** Restore a recently deleted project inside the window (IMP-29/IMP-31). */
+export async function restoreProject(
+  projectId: string,
+  options: ApiOptions = {},
+): Promise<ProjectEntry> {
+  const url = `${projectUrl(projectId, options)}/restore`;
+  const value = await postJson(url, undefined, options.signal);
+  if (!isProjectEntry(value)) {
+    throw new ApiError('shape', `API restore body is not a ProjectEntry: ${url}`, { url });
+  }
+  return value;
+}
+
+/** Recently deleted entries with the whole-day countdown S27 shows (IMP-31). */
+export async function fetchDeletedProjects(
+  options: ApiOptions = {},
+): Promise<DeletedProjectView[]> {
+  const url = `${apiBase(options)}/api/projects/deleted`;
+  const result = await getJson(url, options.signal);
+  if (!result.found) return [];
+  if (!Array.isArray(result.value) || !result.value.every(isDeletedProjectView)) {
+    throw new ApiError('shape', `API deleted body is not a DeletedProjectView[]: ${url}`, { url });
+  }
+  return result.value;
+}
+
+/** The S40 library: templates, the user's copies and GitHub sources (IMP-34). */
+export async function fetchSkills(options: ApiOptions = {}): Promise<SkillsResponse> {
+  const url = `${apiBase(options)}/api/skills`;
+  const result = await getJson(url, options.signal);
+  if (!result.found) {
+    throw new ApiError('http', `API has no skills library: ${url}`, { url, status: 404 });
+  }
+  if (!isSkillsResponse(result.value)) {
+    throw new ApiError('shape', `API skills body is not a SkillsResponse: ${url}`, { url });
+  }
+  return result.value;
+}
+
+/** Make a user-owned copy of a template; the template itself never changes (IMP-34). */
+export async function copySkill(
+  id: string,
+  req: CopySkillRequest,
+  options: ApiOptions = {},
+): Promise<LibrarySkill> {
+  const url = `${apiBase(options)}/api/skills/${encodeURIComponent(id)}/copy`;
+  const value = await postJson(url, req, options.signal);
+  if (!isLibrarySkill(value)) {
+    throw new ApiError('shape', `API skill copy body is not a LibrarySkill: ${url}`, { url });
+  }
+  return value;
+}
+
+/** Edit a user copy, storing a new version; templates and GitHub skills are 409 (IMP-34). */
+export async function editSkill(
+  id: string,
+  req: EditSkillRequest,
+  options: ApiOptions = {},
+): Promise<LibrarySkill> {
+  const url = `${apiBase(options)}/api/skills/${encodeURIComponent(id)}`;
+  const value = await putJson(url, req, options.signal);
+  if (!isLibrarySkill(value)) {
+    throw new ApiError('shape', `API skill edit body is not a LibrarySkill: ${url}`, { url });
+  }
+  return value;
+}
+
+/** Add a public GitHub source, pinned to an exact commit by the server (IMP-34). */
+export async function addGithubSkill(
+  req: AddGithubSkillRequest,
+  options: ApiOptions = {},
+): Promise<LibrarySkill> {
+  const url = `${apiBase(options)}/api/skills/github`;
+  const value = await postJson(url, req, options.signal);
+  if (!isLibrarySkill(value)) {
+    throw new ApiError('shape', `API github skill body is not a LibrarySkill: ${url}`, { url });
+  }
+  return value;
+}
+
+/** Run an update check: applied updates make a version, held updates keep their diff (IMP-34). */
+export async function checkSkillForUpdates(
+  id: string,
+  req: SkillCheckRequest,
+  options: ApiOptions = {},
+): Promise<SkillUpdateOutcome> {
+  const url = `${apiBase(options)}/api/skills/${encodeURIComponent(id)}/check`;
+  const value = await postJson(url, req, options.signal);
+  if (!isSkillUpdateOutcome(value)) {
+    throw new ApiError('shape', `API skills check body is not a SkillUpdateOutcome: ${url}`, {
+      url,
+    });
+  }
+  return value;
+}
+
+/** Every version and update decision for one skill, in sequence (IMP-34). */
+export async function fetchSkillHistory(
+  id: string,
+  options: ApiOptions = {},
+): Promise<SkillHistoryEntry[]> {
+  const url = `${apiBase(options)}/api/skills/${encodeURIComponent(id)}/history`;
+  const result = await getJson(url, options.signal);
+  if (!result.found) return [];
+  if (!Array.isArray(result.value) || !result.value.every(isSkillHistoryEntry)) {
+    throw new ApiError('shape', `API skill history body is not a SkillHistoryEntry[]: ${url}`, {
+      url,
+    });
+  }
+  return result.value;
+}
+
+/** Roll a skill back to any earlier version; the rollback is a new version (IMP-34). */
+export async function rollbackSkill(
+  id: string,
+  version: string,
+  options: ApiOptions = {},
+): Promise<LibrarySkill> {
+  const url = `${apiBase(options)}/api/skills/${encodeURIComponent(id)}/rollback/${encodeURIComponent(version)}`;
+  const value = await postJson(url, undefined, options.signal);
+  if (!isLibrarySkill(value)) {
+    throw new ApiError('shape', `API skill rollback body is not a LibrarySkill: ${url}`, { url });
   }
   return value;
 }

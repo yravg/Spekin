@@ -1,4 +1,4 @@
 {
-  "$comment": "Copyleft (GPL, LGPL, AGPL) and unclassified licences are refused by tools/checks/licences.mjs unless this file names them, with a reason a person wrote. Keep it empty unless the owner has decided the entry (docs/DECISIONS.md). Entries match on package name AND licence.",
+  "$comment": "Copyleft (GPL, LGPL, AGPL) and unclassified licences are refused by tools/checks/licences.mjs unless this file names them, with a reason a person wrote. Keep it empty unless the owner has decided the entry (docs/DECISIONS.md). Entries match on package name AND licence. This list is for owner decisions only: SPDX OR expressions with a permissive option and CDLA-Permissive-2.0 are handled by the classifier, not by entries here.",
   "allowed": []
 }
