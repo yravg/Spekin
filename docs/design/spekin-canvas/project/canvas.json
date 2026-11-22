@@ -1,0 +1,51 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-22T12:00:00Z"
+ },
+ "title": "Spekin: design canvas for review before build",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 300,
+   "w": 1900,
+   "h": 1240,
+   "title": "Cover"
+  },
+  "Index.dc.html": {
+   "x": 2020,
+   "y": 300,
+   "w": 1900,
+   "h": 900,
+   "title": "Coverage matrix"
+  },
+  "S35-project-shell.dc.html": {
+   "x": 0,
+   "y": 1960,
+   "w": 1900,
+   "h": 3554,
+   "title": "S35 · Project shell: eight stages, artifacts, chat and canvas",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "Index.dc.html",
+  "S35-project-shell.dc.html"
+ ],
+ "notes": {
+  "t0": {
+   "x": 0,
+   "y": 1660,
+   "text": "Shell: project context, eight stages, artifacts, chat",
+   "kind": "title1",
+   "maxW": 1600
+  }
+ },
+ "designSystems": []
+}
