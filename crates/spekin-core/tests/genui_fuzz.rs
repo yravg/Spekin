@@ -232,10 +232,21 @@ fn contains_unsafe_string(s: &str) -> bool {
             start = i + scheme.len();
         }
     }
-    // No accepted card may carry a URL with a scheme other than http/https. Relative
-    // paths have no "://" and stay allowed, as in the IMP-10 fixture links.
-    if lower.contains("://") && !(lower.contains("http://") || lower.contains("https://")) {
-        return true;
+    // Every absolute URL (`scheme://...`) in an accepted card must use https.
+    // Relative paths have no "://" and stay allowed, as in the IMP-10 fixture links.
+    let mut start = 0;
+    while let Some(rel) = lower[start..].find("://") {
+        let i = start + rel;
+        let before = &lower[..i];
+        let scheme_start = before
+            .char_indices()
+            .rev()
+            .find(|(_, c)| !matches!(c, 'a'..='z' | '0'..='9' | '+' | '-' | '.'))
+            .map_or(0, |(idx, c)| idx + c.len_utf8());
+        if &lower[scheme_start..i] != "https" {
+            return true;
+        }
+        start = i + 3;
     }
     false
 }

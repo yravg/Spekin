@@ -188,6 +188,43 @@ fn ac_spk_25_rejects_unsafe_urls_scripts_tools_and_privilege_escalation() {
 }
 
 #[test]
+fn imp_28_failing_case_data_url_in_text_field_is_rejected() {
+    // Exact failing case found by the IMP-28 fuzzer: a data: URL in actions[].label.
+    let raw = r#"{"actions":[{"href":"https://example.com/details","kind":"expand_details","label":"data:text/plain,hello","target_id":"CK-1"}],"body":"Threshold from accepted spec r14.","family":"checklist","id":"CK-1","items":[{"checked":false,"id":"i1","label":"Alert raised","status":"untested"},{"checked":true,"id":"i2","label":"Threshold read from spec","status":"passed_fixture"}],"links":["https://example.com/spec/r14"],"provenance":"imported_observation","schema_version":1,"summary":"1 of 2 passed.","title":"Alert after 2 periods over 3%"}"#;
+    assert!(matches!(
+        validate_genui(raw),
+        GenUiValidation::Rejected {
+            reason: RejectionReason::DisallowedScriptOrTool { .. }
+        }
+    ));
+}
+
+#[test]
+fn imp_28_unsafe_urls_are_rejected_in_every_string_field() {
+    // Plain-text fields, not just links/href, must reject dangerous schemes and
+    // absolute non-https URLs (AC-SPK-25, R-GUI-2/8).
+    for payload in [
+        "data:text/plain,hello",
+        "file:///etc/passwd",
+        "http://example.com/insecure",
+        "ftp://example.com/file",
+    ] {
+        let json = valid_checklist_json().replace("1 of 2 passed.", payload);
+        assert!(
+            matches!(
+                validate_genui_json(&json),
+                Err(RejectionReason::UnsafeUrl { .. })
+                    | Err(RejectionReason::DisallowedScriptOrTool { .. })
+            ),
+            "expected rejection for embedded URL {payload}"
+        );
+    }
+    // Word boundaries keep ordinary words legitimate.
+    let ok = valid_checklist_json().replace("1 of 2 passed.", "Metadata and updates: see notes.");
+    assert!(validate_genui_json(&ok).is_ok());
+}
+
+#[test]
 fn rejects_unsupported_schema_version_and_never_returns_partial_render() {
     let v99 = valid_checklist_json().replace("\"schema_version\": 1", "\"schema_version\": 99");
     assert!(matches!(
