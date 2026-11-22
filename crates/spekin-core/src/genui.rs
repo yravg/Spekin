@@ -249,9 +249,8 @@ fn check_safe_url(field: &str, url: &str) -> Result<(), RejectionReason> {
         });
     }
     let lower = trimmed.to_ascii_lowercase();
-    let ok_scheme = lower.starts_with("https://")
-        || lower.starts_with("http://")
-        || (trimmed.starts_with('/') && !trimmed.starts_with("//"));
+    let ok_scheme =
+        lower.starts_with("https://") || (trimmed.starts_with('/') && !trimmed.starts_with("//"));
     if !ok_scheme {
         return Err(RejectionReason::UnsafeUrl {
             field: field.into(),
@@ -259,6 +258,44 @@ fn check_safe_url(field: &str, url: &str) -> Result<(), RejectionReason> {
         });
     }
     Ok(())
+}
+
+/// Dangerous schemes that must never appear in any card string, embedded or whole.
+/// A scheme is detected at a word boundary so `metadata:` / `update:` stay legitimate.
+fn dangerous_scheme(s: &str) -> Option<&'static str> {
+    let lower = s.to_ascii_lowercase();
+    for scheme in ["data:", "file:"] {
+        let mut start = 0;
+        while let Some(rel) = lower[start..].find(scheme) {
+            let i = start + rel;
+            if i == 0 || !lower.as_bytes()[i - 1].is_ascii_alphanumeric() {
+                return Some(scheme);
+            }
+            start = i + scheme.len();
+        }
+    }
+    None
+}
+
+/// An absolute URL (`scheme://...`) is only safe when the scheme is https. Relative
+/// paths have no `://` and are allowed. Scanning is char-boundary safe for unicode.
+fn has_non_https_url(s: &str) -> bool {
+    let lower = s.to_ascii_lowercase();
+    let mut start = 0;
+    while let Some(rel) = lower[start..].find("://") {
+        let i = start + rel;
+        let before = &lower[..i];
+        let scheme_start = before
+            .char_indices()
+            .rev()
+            .find(|(_, c)| !matches!(c, 'a'..='z' | '0'..='9' | '+' | '-' | '.'))
+            .map_or(0, |(idx, c)| idx + c.len_utf8());
+        if &lower[scheme_start..i] != "https" {
+            return true;
+        }
+        start = i + 3;
+    }
+    false
 }
 
 fn scan_strings(field: &str, v: &Value) -> Result<(), RejectionReason> {
@@ -279,6 +316,18 @@ fn scan_strings(field: &str, v: &Value) -> Result<(), RejectionReason> {
                         pattern: (*pat).into(),
                     });
                 }
+            }
+            if let Some(scheme) = dangerous_scheme(s) {
+                return Err(RejectionReason::DisallowedScriptOrTool {
+                    field: field.into(),
+                    pattern: scheme.into(),
+                });
+            }
+            if has_non_https_url(s) {
+                return Err(RejectionReason::UnsafeUrl {
+                    field: field.into(),
+                    url: s.clone(),
+                });
             }
             Ok(())
         }
