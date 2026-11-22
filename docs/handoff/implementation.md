@@ -127,7 +127,7 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-06 | ui | S28 Reference intake | IMP-01 | open |
 | IMP-07 | ui | S29 Frames canvas | IMP-01 | done, waiting for owner merge: PR #14, stacked on #11 (lead re-ran: S29 6/6 PASS) |
 | IMP-08 | ui | S30 Style review | IMP-01 | open |
-| IMP-13 | ui | S31 Alternatives | IMP-01 | part open: PR #25 (5 of 6 states pass; the fail state needs layout fixes) |
+| IMP-13 | ui | S31 Alternatives | IMP-01 | done, waiting for owner merge: PR #25, stacked on #19 (lead re-ran: S31 6/6 PASS) |
 | IMP-14 | ui | S32 Targeted change | IMP-01 | done, waiting for owner merge: PR #19, stacked on #16 (lead re-ran: S32 6/6 PASS) |
 | IMP-15 | ui | S33 Review and accept | IMP-01 | done, waiting for owner merge: PR #16, stacked on #14 (lead re-ran: S33 6/6 PASS) |
 | IMP-16 | ui | S34 Coding handoff | IMP-01 | open |
