@@ -120,7 +120,8 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-31 | core | Audit and restore in the API (routes, one audit entry per action, head kept apart) | IMP-26, IMP-29, IMP-30 | done, waiting for owner merge: PR #23, stacked on #22 |
 | IMP-32 | core | Server hardening: body limit, JSON only, timeout, CORS, headers, loopback bind | IMP-31 | done, waiting for owner merge: PR #24, stacked on #23 |
 | IMP-33 | core | Build contracts and evidence core (S37): not run is never passed | IMP-32 | done, waiting for owner merge: PR #26, stacked on #24 |
-| IMP-34 | core | Skills library API (S40): copies, versions, GitHub sources, update history and rollback | IMP-22, 27, 31 | open |
+| IMP-34 | core | Skills library API (S40): copies, versions, GitHub sources, update history and rollback | IMP-22, 27, 31 | done, waiting for owner merge: PR #27, stacked on #26 |
+| IMP-35 | core | Review follow-ups: chunked 413, skills audit chain, licences in gate, audit head | IMP-34 | open |
 | IMP-30 | core | Audit log core: append-only, hash-chained, verify | – | done, waiting for owner merge: PR #21 (follow-up: store the head hash apart from the log) |
 | IMP-28 | core | GenUI validation fuzzing (never panics, never partial) | IMP-10 | done, waiting for owner merge: PR #18, stacked on #7 (the fuzzer found and fixed a data: URL hole) |
 | IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
@@ -315,6 +316,14 @@ Builds on IMP-22, IMP-27 and IMP-31 (branch from `origin/imp-33-contracts-eviden
 - `POST /api/skills/{id}/check` runs the update check. An applied update makes a new version and one history entry. A held update stores the diff and the reasons, and nothing changes.
 - `GET /api/skills/{id}/history` and `POST /api/skills/{id}/rollback/{version}`: every version can be rolled back to, and the rollback is itself one history entry and one audit entry.
 - One test per route plus a 4xx test. Add the client functions to `apps/web/src/data/api.ts`, with tests.
+
+### IMP-35 · Review follow-ups (core)
+
+Branch from `origin/imp-34-skills-api`. Small items from the lead reviews:
+1. A typed 413 for a chunked request body with no Content-Length (from #24), with a test.
+2. A separate audit chain for the skills library (from #27). Skills routes append there, not to a project's chain. `GET /api/skills/audit` returns it with `verify`.
+3. Wire `tools/checks/licences.mjs` (IMP-12) into the root `npm run gate` after `check:rules`. The owner allows this lead-owned edit of the root `package.json` for this card only.
+4. The audit head hash: `AuditLog` serialisation skips `head_hash`, so a stored log can't carry its own anchor (from #21). The server keeps the head apart, as IMP-31 does.
 
 ### UI cards after P1 (written 23 Nov)
 
