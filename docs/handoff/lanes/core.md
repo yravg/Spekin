@@ -48,6 +48,7 @@ Property tests (proptest, 256 cases each):
 - `property_the_clock_never_goes_backwards_in_an_accepted_operation`
 
 New dependency: `proptest = "1"` (dev only), licence **MIT OR Apache-2.0**; named in the PR body. No new runtime dependency. No Python.
+| IMP-30 | imp-30-audit-log | done | `npm run gate` EXIT 0; 13 audit tests pass (8 behavior + 5 ts-rs export bindings), 19 core tests total. Tests: `append_starts_a_genesis_chain_and_links_each_entry`, `verify_accepts_empty_and_well_formed_logs`, `any_edit_to_any_entry_fails_verify_at_that_entry`, `editing_any_hashed_field_is_detected_at_that_entry`, `verify_names_the_sequence_of_a_removed_or_reordered_entry`, `verify_detects_tail_truncation`, `appending_never_changes_earlier_hashes`, `sequence_numbers_are_gapless`. Generated TS bindings committed; `check:contracts` current. | No harness/PNG check (core card, no board). Not wired into a server route (IMP-26 owns routes). Property tests use deterministic generated inputs, not the `proptest` crate, so sha2 stays the only new dependency (see below). |
 
 ## Requests to lead
 
@@ -72,10 +73,14 @@ New dependency: `proptest = "1"` (dev only), licence **MIT OR Apache-2.0**; name
 
 - 23 Nov 2026: none. The S27 restore state and `INTAKE_DELETED` (`days: 30`) already match the 30-day window in DECISIONS.md.
 
+- 23 Nov 2026: new dependency `sha2` v0.10.9, licence **MIT OR Apache-2.0** (transitive crates `digest`, `block-buffer`, `crypto-common`, `generic-array`, `typenum`, `cpufeatures`, `cfg-if`, `version_check` are all MIT/Apache-2.0). Used for the sha256 content hash in `crates/spekin-core/src/audit.rs`, as the IMP-30 card specifies. No other dependency added.
+
 ## Proposed glossary terms
 
 (none)
 - **Restore window** — the 30 days a deleted project stays restorable; after it, `purge_due` lists the project for a later purge job. (Core calls it `RESTORE_WINDOW_DAYS`.)
+- **Audit entry**: one immutable record in the hash-chained log: a gapless sequence, actor, action, target id and revision, reason, UTC time, `prev_hash` and `hash`.
+- **Audit log**: the append-only chain of audit entries; `verify` detects an edited, removed or reordered entry. No update or delete operation.
 
 ## Log
 
@@ -95,3 +100,5 @@ New dependency: `proptest = "1"` (dev only), licence **MIT OR Apache-2.0**; name
 - 23 Nov 2026 · IMP-04 · `Revision` (content hash), `Hunk`/`Proposal` (exact diff), `accept`/`reject`/`revert`, stale never applied; proptest dev-dependency (MIT OR Apache-2.0); ts-rs bindings committed · 3cda706 (test first: 7390ffc)
 
 - 23 Nov 2026 · IMP-29 · implemented delete/restore/purge_due/days_left, typed `WindowClosed`, content-hash inverse property tests, ts-rs contracts; gate green · f1fbfe0 (+ red-test step ab69297).
+
+- 23 Nov 2026, IMP-30: wrote failing tests first (`todo!()` stubs, 7 red), then implemented `AuditLog::append`, `verify`, canonical-JSON sha256 hashing and a tail head-anchor; all 8 behavior properties pass. Added `sha2` (MIT OR Apache-2.0), exported 5 types with ts-rs, committed generated contracts. Commits: c68bfd2 (test first), c361f9b (impl), 5b5dec2 (fmt/clippy), 101366a (all-field edit test).

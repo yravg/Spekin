@@ -9,6 +9,7 @@ pub mod model_source;
 pub mod github_source;
 pub mod ledger;
 pub mod handoff;
+pub mod audit;
 pub mod project;
 pub mod skills;
 pub mod proposal;
@@ -45,6 +46,7 @@ pub use handoff::{
     ManifestExclusion, ManifestInput, ManifestInputStatus, ManifestSelection,
     ManifestSelectionItem, RequiredInput, build_manifest, sha256_hex,
 };
+pub use audit::{AuditAction, AuditEntry, AuditError, AuditEvent, AuditLog, GENESIS_HASH, verify};
 pub use project::{Fixture, FixtureError, Project};
 pub use skills::{
     AllowedContext, ContextItem, HoldReason, SkillError, SkillManifest, SkillSource, UpdateCheck,
