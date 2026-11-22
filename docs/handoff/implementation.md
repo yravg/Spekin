@@ -9,7 +9,7 @@ Owner: Enrico (lead, with Claude Code). Last updated 23 Nov 2026. Baseline commi
 ```text
 Repo: github.com/yravg/Spekin, branch from origin/main. You are the UI lane.
 Read, in order: AGENTS.md, docs/handoff/implementation.md (all of it), docs/GLOSSARY.md, docs/adr/0003-canvas-is-the-ui-source.md, docs/handoff/lanes/ui.md.
-Your next card is the first "open" ui card in the status table (start with IMP-01).
+Your next card is the first "open" ui card in the status table. While earlier ui pull requests are still open, branch from the top of the open ui stack (see docs/handoff/workers.md), not from main.
 Work in your own worktree: git worktree add ../Spekin-ui -b imp-01-shell-work-area origin/main ; cd ../Spekin-ui ; npm ci
 Only edit files the ui lane owns. Open the board with npm run canvas:serve (http://127.0.0.1:5180/S35-project-shell.dc.html) and build it EXACTLY as drawn: same classes, labels, order, data-feature ids, same sample data. No redesign, no "not built yet", no pasted board HTML.
 Write the failing test first. Done means: npm run gate passes AND npm run harness -- S35 passes for the card's states AND you looked at tools/harness/out/*-board.png, *-app.png, *-diff.png.
@@ -17,12 +17,12 @@ Commit one board per pull request (gh pr create), never push to main, never merg
 If anything is unclear or needs a file you don't own, write it under "Requests to lead" in lanes/ui.md and stop that part. Don't guess.
 ```
 
-**Lane core: OpenCode, DeepSeek V4.1 Flash**
+**Lane core: Antigravity, Gemini Neon 4.** OpenCode with the free DeepSeek V4.1 Flash ran IMP-03 and IMP-04, then hit the free usage limit on 23 Nov. The same prompt works in OpenCode once OpenCode Go is signed in.
 
 ```text
 Repo: github.com/yravg/Spekin, branch from origin/main. You are the core lane (Rust and contracts).
 Read, in order: AGENTS.md, docs/handoff/implementation.md (all of it), docs/GLOSSARY.md, docs/adr/0002-stack.md, docs/handoff/lanes/core.md.
-Your next card is the first "open" core card in the status table (start with IMP-03).
+Your next card is the first "open" core card in the status table. If it depends on a card whose pull request is still open, branch from that card's branch (stacked), as in docs/handoff/workers.md.
 Work in your own worktree: git worktree add ../Spekin-core -b imp-03-api-source origin/main ; cd ../Spekin-core ; npm ci
 Only edit files the core lane owns. Business rules live in crates/spekin-core (pure, no IO, unit and property tests). The server only loads data and calls the core. Every type the UI needs derives ts_rs::TS; run cargo test --workspace and commit packages/contracts/src/generated.
 Write the failing test first. Done means: npm run gate passes (it includes cargo fmt --check, clippy -D warnings, cargo test, contracts current) and the card's acceptance list is met with test names as evidence.
@@ -35,6 +35,8 @@ No Python, no new crate without naming its licence in the PR. If unclear, write 
 | Area | Status | Evidence |
 |---|---|---|
 | Canvas: 14 boards, 80 states, 212 features, F00 map, R00 references (S40 Skills library added 23 Nov) | done | `npm run canvas:lint`: 14 boards pass, manifest current |
+| Build: 15 pull requests open (#1 to #15), all reviewed by the lead and waiting for the owner to merge, in the order in [workers.md](workers.md). Core: IMP-03, 04, 09, 10, 11, 12, 22, 24, 25, 26. UI: IMP-01, 02, 05, 07, 23. | done, waiting for owner merge | The status table below. The lead re-ran the state gate on every UI branch: S27 6/6, S29 6/6, S35 3/3, S40 6/6 PASS, pixel differences 0 to 0.09 %. |
+| DPAI addendum v1.0 | triaged | [incoming/2026-11-23-dpai-addendum-v1.0.md](incoming/2026-11-23-dpai-addendum-v1.0.md). Its checks are in cards IMP-07, 13, 14, 16, 24 and 25. |
 | Review supplement v1.0 and PRD v0.2.3 | triaged | [incoming/2026-11-23-review-supplement-v1.0.md](incoming/2026-11-23-review-supplement-v1.0.md). Canonical PRD is `inputs/Spekin-PRD-v0.2.3.md` (v0.2.2 kept for history). |
 | Repo standards: licence, NOTICE, README, CONTRIBUTING, SECURITY, glossary, ADRs, decisions, roadmap | done | this commit |
 | App skeleton: Vite, React, TS strict, router `/p/:project/:stage`, per-stage view store | done | `npm run build`, `npm test` |
