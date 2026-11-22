@@ -42,7 +42,7 @@ No Python, no new crate without naming its licence in the PR. If unclear, write 
 | Rust core (Project, Stage, fixture check) and Axum server (`/api/health`, `/api/projects/:id`, `/stages`) | done | `cargo test`: 8 tests, including "API stages equal the sample the boards draw" |
 | Contracts: ts-rs to `packages/contracts` | done | `node tools/check-contracts.mjs` |
 | State gate harness | done | `npm run harness -- S35`: 0 / 3 pass. This is the **baseline**: it fails for the right reasons (work area not built, conflict path draft). |
-| CI (rules, sync, board lint, types, tests, build, Rust, contracts; state gate as report) | done, part blocked | `.github/workflows/ci.yml` is written; GitHub Actions blocked by account billing (owner). Local `npm run gate` passes on 03ca600. |
+| CI (rules, sync, board lint, types, tests, build, Rust, contracts; state gate as report) | done | GitHub Actions run since the repo went public (23 Nov). Run 45046818401 on 1750598: web ✓, rust ✓, state gate reports 0 passing as expected. |
 
 ## Lanes and file ownership
 
@@ -209,7 +209,7 @@ See [docs/DECISIONS.md](../DECISIONS.md) → Open. Agents never decide these.
 
 ## Not checked in this baseline
 
-- **CI does not run yet.** GitHub refused to start the jobs on 23 Nov ("recent account payments have failed or your spending limit needs to be increased": an owner billing setting, not a code problem). Until the owner fixes it, `npm run gate` on your machine is the required check, and every pull request pastes its last lines.
+- CI runs on every push and pull request (public repo, free minutes). Still run `npm run gate` locally before you push. The state gate job only reports, and it fails until boards are built.
 - Windows and Linux local setup: only macOS was tried.
 - The app at 390 px and the EN/ID switch: the header switch exists, but no translations are wired yet (part of IMP-01/02).
 
