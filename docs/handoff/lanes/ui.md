@@ -6,7 +6,7 @@ Only this lane edits this file. Write here before you stop working.
 
 | Card | Branch | Status | Evidence | Not checked |
 |---|---|---|---|---|
-| IMP-01 | – | open | – | – |
+| IMP-01 | imp-01-shell-work-area | done, part open | `npm run gate` pass (rules ok 204 files, sync ok, 14 boards lint, typecheck ok, vitest 7/7: `workspace.test.ts` 3 + `shell.test.tsx` 4, vite build ok, Rust fmt/clippy/test 8/8, contracts current). `npm run harness -- S35`: `S35:design` PASS (0.41% pixels, text equal), `S35:backend` PASS (0.47% pixels, text equal), `S35:conflict` FAIL (IMP-02 scope). Viewed all 6 PNGs (`S35-{design,backend}-{board,app,diff}.png`). Playwright verified AC-SPK-17 stage switch memory (`design -> backend -> design`, 0 reloads, tab/selection/draft preserved) and keyboard-only stage switch. | Controls targeting later boards (S08 review/diff, S28 import, S32 ask-on-select, S34 hand off, S36 model picker, chat history/attach/send, undo/redo, revisions, run steps/stop) record intent in `useWorkspace.lastIntent` (part open). `S35:conflict` is IMP-02. EN/ID copy translations not wired yet. Long text truncation not tested. 1024 px and 390 px viewports currently overflow horizontally (desktop shell fixed widths; responsive layout is board T01). |
 
 ## Requests to lead
 
@@ -16,4 +16,4 @@ Only this lane edits this file. Write here before you stop working.
 
 ## Log
 
-(Newest first: date, card, what changed, commit SHA.)
+- 2026-11-23 · IMP-01 · Built S35 design and backend work areas, removed `.ap-todo`, added unit tests (`shell.test.tsx`, `workspace.test.ts`), verified `npm run gate` and `npm run harness -- S35` (2/3 pass: design 0.41%, backend 0.47%; PNGs inspected). Commits: `a2dc76b`, `47b4576`, `7cc1f3d`.

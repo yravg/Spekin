@@ -5,5 +5,12 @@ body { background: var(--ground); }
 /* On a board .sp-app sits in a 1440 x 900 window; in the app it fills the viewport. */
 .ap-root { height: 100vh; background: var(--ground); }
 .ap-grp { display: flex; align-items: center; gap: 8px; position: relative; }
-/* Temporary stand-in for a region a task card has not built yet. The harness reports it as DRAWN (a fail). */
-.ap-todo { display: flex; align-items: center; justify-content: center; flex: 1; margin: 0 0 0 10px; border: 1px dashed var(--line-strong); border-radius: 12px; font: 500 13px/1.4 var(--font); color: var(--ink-dim); }
+/* Interactive composer textarea layered cleanly inside .sp-comp .ta so empty state matches the board text and pixels. */
+.ap-ta-wrap { position: relative; }
+.ap-ta-ph { display: block; pointer-events: none; }
+.ap-ta-input { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; margin: 0; padding: 0; background: transparent; font: inherit; color: var(--ink); resize: none; outline: none; }
+.sp-comp:focus-within { box-shadow: inset 0 0 0 1.5px var(--accent), var(--shadow-1); }
+.sp-app button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+@media (prefers-reduced-motion: reduce) {
+  .sp-app * { transition: none !important; animation: none !important; }
+}
