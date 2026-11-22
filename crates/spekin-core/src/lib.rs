@@ -5,10 +5,16 @@
 //! Field names follow the sample project (fixtures/meranti-yard.json), so the boards,
 //! the app and the API read the same shapes (canvas-to-app rule 15, R-ARC-3).
 
+pub mod github_source;
 pub mod project;
 pub mod skills;
 pub mod stage;
 
+pub use github_source::{
+    GitHubFile, GitHubRepo, GitHubSnapshot, GitHubSourceError, LicenseFile, build_notice,
+    detect_license, discover_skill_paths, import_repository, import_skill, is_license_path,
+    is_skill_path, parse_github_repo, plan_updates,
+};
 pub use project::{Fixture, FixtureError, Project};
 pub use skills::{
     AllowedContext, ContextItem, HoldReason, SkillError, SkillManifest, SkillSource, UpdateCheck,
