@@ -97,7 +97,13 @@ export function ConflictBanner(props: {
 
 // Mirrors boards-shell.mjs Design stage: chat, artifact tabs, canvas with frames, inspector.
 export function DesignWorkArea(
-  props: { onOpenCanvas?: () => void; onOpenReview?: () => void; onOpenTargeted?: () => void; onOpenStyle?: () => void } = {},
+  props: {
+    onOpenCanvas?: () => void;
+    onOpenReview?: () => void;
+    onOpenTargeted?: () => void;
+    onOpenStyle?: () => void;
+    onOpenUsage?: () => void;
+  } = {},
 ) {
   const view = useWorkspace((s) => s.view('design'));
   const setView = useWorkspace((s) => s.setView);
@@ -154,7 +160,10 @@ export function DesignWorkArea(
           onDraftChange={(draft) => setView('design', { draft })}
           onAttach={() => recordIntent('F114:attach')}
           onMention={() => recordIntent('F106:mention')}
-          onOpenModel={() => recordIntent('F107:model')}
+          onOpenModel={() => {
+            recordIntent('F107:model');
+            props.onOpenUsage?.();
+          }}
           onSend={() => recordIntent('F114:send')}
         >
           <div className="sp-ub">Add an alert drawer to the variance table for packages over 3%.</div>

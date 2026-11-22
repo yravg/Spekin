@@ -18,9 +18,12 @@ export function TopBar(props: {
   onOpenInbox: () => void;
   lang: 'en' | 'id';
   onLang: (l: 'en' | 'id') => void;
+  // S36 draws the top bar static (no ⌘K hint, one EN chip, meter open). Copy that markup only for that screen.
+  plain?: boolean;
+  usagePct?: number;
 }) {
   const { project, usage, save, busy } = props;
-  const pct = Math.round((usage.used / usage.cap) * 100);
+  const pct = props.usagePct ?? Math.round((usage.used / usage.cap) * 100);
   const sev = pct >= 90 ? ' crit' : pct >= 70 ? ' warn' : '';
   return (
     <header className="sp-top">
@@ -30,7 +33,7 @@ export function TopBar(props: {
           <b>{project.name}</b>
           <span>/</span>
           <span>{project.product}</span>
-          <kbd className="sp-kbd">⌘K</kbd>
+          {props.plain ? null : <kbd className="sp-kbd">⌘K</kbd>}
         </button>
         <span className="sp-sep" />
         <button type="button" className="sp-chip" data-does="Opens the increment picker: which feature increment the stages describe" data-feature="F103" onClick={props.onOpenIncrement}>
@@ -57,7 +60,18 @@ export function TopBar(props: {
         <span className={'dot ' + save.tone} />
         {save.text}
       </span>
-      <button type="button" className={'sp-meter' + sev} data-does="Opens S36 usage: estimate, reservations, actuals, cap and remaining credits; the bar turns amber at 70% and red at 90% of the cap" data-feature="F111" onClick={props.onOpenUsage}>
+      <button
+        type="button"
+        className={'sp-meter' + (props.plain ? ' mod-on' : '') + sev}
+        aria-pressed={props.plain ? true : undefined}
+        data-does={
+          props.plain
+            ? 'Opens the usage view of this project: used, reserved, pending and the cap. This view is open now'
+            : 'Opens S36 usage: estimate, reservations, actuals, cap and remaining credits; the bar turns amber at 70% and red at 90% of the cap'
+        }
+        data-feature={props.plain ? 'F290' : 'F111'}
+        onClick={props.onOpenUsage}
+      >
         {usage.source}
         <i>
           <u style={{ width: pct + '%' }} />
@@ -67,10 +81,14 @@ export function TopBar(props: {
       <span style={{ position: 'relative', display: 'inline-flex' }} data-feature="F109">
         <IconBtn icon="inbox" label="Agent inbox: 2 jobs need approval" does="Opens the Agent Inbox: running jobs and approvals, beside the work, never over it" feature="F109" badge={2} onClick={props.onOpenInbox} />
       </span>
-      <div className="sp-lang" role="group" aria-label="Language">
-        <button type="button" aria-pressed={props.lang === 'en'} data-does="Shows the UI in English" data-feature="F115" onClick={() => props.onLang('en')}>EN</button>
-        <button type="button" aria-pressed={props.lang === 'id'} data-does="Shows the UI in Bahasa Indonesia" data-feature="F115" onClick={() => props.onLang('id')}>ID</button>
-      </div>
+      {props.plain ? (
+        <span className="sp-chip">EN</span>
+      ) : (
+        <div className="sp-lang" role="group" aria-label="Language">
+          <button type="button" aria-pressed={props.lang === 'en'} data-does="Shows the UI in English" data-feature="F115" onClick={() => props.onLang('en')}>EN</button>
+          <button type="button" aria-pressed={props.lang === 'id'} data-does="Shows the UI in Bahasa Indonesia" data-feature="F115" onClick={() => props.onLang('id')}>ID</button>
+        </div>
+      )}
       <span className="sp-av" aria-label={project.user}>{project.initials}</span>
     </header>
   );

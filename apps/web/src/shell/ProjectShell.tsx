@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
-import { MODEL, type SampleStage } from '@spekin/sample';
+import { useNavigate, useParams, useSearchParams } from 'react-router';
+import { MODEL, MODELS_USAGE, type SampleStage } from '@spekin/sample';
 import { getProject, getStages, getUsage, isStageId } from '../data/source';
 import { useWorkspace, type SaveState } from '../state/workspace';
 import { TopBar } from './TopBar';
@@ -13,6 +13,14 @@ import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/Frames
 import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/ReviewAcceptWorkArea';
 import { TargetedChangeWorkArea } from '../review/TargetedChangeWorkArea';
 import { StyleReviewWorkArea, type StyleShellOverride } from '../style/StyleReviewWorkArea';
+import {
+  ModelsUsageWorkArea,
+  isUsageMoment,
+  isUsageSection,
+  usagePct,
+  type UsageMoment,
+  type UsageSection,
+} from '../models/ModelsUsageWorkArea';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -130,9 +138,13 @@ function StagePlaceholderWorkArea({ stage }: { stage: SampleStage }) {
 }
 
 // S35 Project shell. Board: docs/design/spekin-canvas/project/S35-project-shell.dc.html (data-screen="S35").
-export function ProjectShell() {
-  const { project: projectId = '', stage } = useParams();
+export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}) {
+  const { project: projectId = '', stage: stageParam } = useParams();
+  const stage = stageParam ?? 'design';
   const navigate = useNavigate();
+  const [search, setSearch] = useSearchParams();
+  const section: UsageSection = isUsageSection(search.get('section')) ? (search.get('section') as UsageSection) : 'models';
+  const moment = isUsageMoment(search.get('moment')) ? (search.get('moment') as UsageMoment) : 'calm';
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
@@ -142,13 +154,16 @@ export function ProjectShell() {
   const [styleOverride, setStyleOverride] = useState<StyleShellOverride>({});
   const save = useWorkspace((s) => s.save);
   const conflict = useWorkspace((s) => s.conflict);
+  const setView = useWorkspace((s) => s.setView);
+  const recordIntent = useWorkspace((s) => s.recordIntent);
   const project = getProject(projectId);
   const usage = getUsage(projectId);
   const stages = getStages(projectId);
   if (!project || !usage || !isStageId(stages, stage)) return <NotFound />;
   const currentStage = stages.find((s) => s.id === stage)!;
-  const screenId =
-    stage === 'spec'
+  const screenId = usageView
+    ? 'S36'
+    : stage === 'spec'
       ? 'S40'
       : stage === 'design' && designSub === 'canvas'
         ? (canvasOverride.screen ?? 'S29')
@@ -159,8 +174,11 @@ export function ProjectShell() {
             : stage === 'design' && designSub === 'style'
               ? 'S30'
               : 'S35';
+  const s36Usage = MODELS_USAGE[moment];
   const activeSave =
-    stage === 'spec' && specOverride.save
+    usageView
+      ? save
+      : stage === 'spec' && specOverride.save
       ? specOverride.save
       : stage === 'design' && designSub === 'canvas' && canvasOverride.save
         ? canvasOverride.save
@@ -170,7 +188,9 @@ export function ProjectShell() {
             ? styleOverride.save
             : save;
   const activeBusy =
-    stage === 'spec'
+    usageView
+      ? undefined
+      : stage === 'spec'
       ? specOverride.busy
       : stage === 'design' && designSub === 'shell' && !conflict
         ? '1 designing · 1 waiting'
@@ -193,14 +213,19 @@ export function ProjectShell() {
       <div className="sp-app">
         <TopBar
           project={displayProject}
-          usage={usage}
+          usage={usageView ? { ...usage, used: s36Usage.used, cap: s36Usage.cap } : usage}
           save={activeSave}
           busy={activeBusy}
           busyNode={activeBusyNode}
+          plain={usageView}
+          usagePct={usageView ? usagePct(s36Usage) : undefined}
           onOpenSwitcher={() => setPanel('switcher')}
           onOpenIncrement={() => setPanel('increment')}
           onOpenSpec={() => setPanel('spec')}
-          onOpenUsage={() => setPanel('usage')}
+          onOpenUsage={() => {
+            if (usageView) setSearch({ section: 'limits', moment });
+            else navigate('/p/' + projectId + '/usage?section=models');
+          }}
           onOpenInbox={() => setPanel('inbox')}
           lang={lang}
           onLang={setLang}
@@ -215,7 +240,19 @@ export function ProjectShell() {
           onReadiness={() => setPanel('readiness')}
         />
         <div className="sp-body">
-          {stage === 'design' ? (
+          {usageView ? (
+            <ModelsUsageWorkArea
+              key={section + ':' + moment}
+              section={section}
+              moment={moment}
+              onSection={(next) => setSearch({ section: next, moment })}
+              onExit={(tab) => {
+                setView('design', { tab });
+                navigate('/p/' + projectId + '/design');
+              }}
+              onIntent={recordIntent}
+            />
+          ) : stage === 'design' ? (
             designSub === 'canvas' ? (
               <FramesCanvasWorkArea onShellOverride={setCanvasOverride} />
             ) : designSub === 'review' ? (
@@ -230,6 +267,7 @@ export function ProjectShell() {
                 onOpenReview={() => setDesignSub('review')}
                 onOpenTargeted={() => setDesignSub('targeted')}
                 onOpenStyle={() => setDesignSub('style')}
+                onOpenUsage={() => navigate('/p/' + projectId + '/usage?section=models')}
               />
             )
           ) : stage === 'backend' ? (
