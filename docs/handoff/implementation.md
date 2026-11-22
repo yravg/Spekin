@@ -100,11 +100,11 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 
 | Card | Lane | Title | Depends on | Status |
 |---|---|---|---|---|
-| IMP-01 | ui | S35 work area: chat, artifact tabs, canvas pane and inspector for the design and backend states | – | open |
+| IMP-01 | ui | S35 work area: chat, artifact tabs, canvas pane and inspector for the design and backend states | – | in progress (Antigravity, branch imp-01-shell-work-area) |
 | IMP-02 | ui | S35 conflict state, save states (F112), per-stage memory across switches | IMP-01 | open |
 | IMP-05 | ui | S27 Projects home (6 states), and "/" becomes S27 | IMP-01, C-01 | open (C-01 done 23 Nov) |
-| IMP-03 | core | API source: typed client for the Rust API, equal to the sample | – | open |
-| IMP-04 | core | Proposals and revisions in the core (accept, reject, revert, stale) | – | open |
+| IMP-03 | core | API source: typed client for the Rust API, equal to the sample | – | done, waiting for owner merge: PR #1 (lead review: approve) |
+| IMP-04 | core | Proposals and revisions in the core (accept, reject, revert, stale) | – | done, waiting for owner merge: PR #2 (lead review: approve; merge after #1) |
 | IMP-12 | core | No-Python and licence inventory check | – | open |
 | IMP-09 | core | Ledger: estimate, reserve, settle, caps | IMP-04 | open |
 | IMP-11 | core | Model sources and capability registry | – | open |

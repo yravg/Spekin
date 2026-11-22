@@ -1,0 +1,50 @@
+{
+ "permissions": {
+  "allow": [
+   "command(npm)",
+   "command(npx)",
+   "command(node)",
+   "command(cargo)",
+   "command(rustc)",
+   "command(git)",
+   "command(gh)",
+   "command(ls)",
+   "command(cat)",
+   "command(grep)",
+   "command(rg)",
+   "command(sed)",
+   "command(head)",
+   "command(tail)",
+   "command(wc)",
+   "command(find)",
+   "command(mkdir)",
+   "command(cp)",
+   "command(mv)",
+   "command(touch)",
+   "command(echo)",
+   "command(printf)",
+   "command(sleep)",
+   "command(kill)",
+   "command(lsof)",
+   "command(curl)",
+   "command(sips)",
+   "command(sort)",
+   "command(uniq)",
+   "command(diff)",
+   "command(pwd)",
+   "command(which)",
+   "command(test)",
+   "command(true)"
+  ],
+  "deny": [
+   "command(git push origin main)",
+   "command(git push -f)",
+   "command(git push --force)",
+   "command(gh pr merge)",
+   "command(gh repo)",
+   "command(git reset --hard)",
+   "command(rm)",
+   "command(sudo)"
+  ]
+ }
+}
