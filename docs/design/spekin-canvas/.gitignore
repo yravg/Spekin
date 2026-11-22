@@ -2,3 +2,6 @@ project/ref/
 renders/
 publish/
 node_modules/
+work/
+*.bak
+project/Index.dc.html

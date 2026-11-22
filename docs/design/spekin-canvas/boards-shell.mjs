@@ -22,6 +22,7 @@ ${frame(F.f04, 296, 296, 262, 176, mini({ title: 'Variance table', rows: 4, draw
 <div class="sp-fr" style="left:600px;top:60px;width:160px"><div class="sp-frl"><b>${F.alt.id}</b>${F.alt.name}<span class="r">${F.alt.takes} takes</span></div><div class="sp-stack" style="position:relative;height:104px"><span class="bk" style="transform:translate(10px,10px)"></span><span class="bk" style="transform:translate(5px,5px)"></span><div class="sp-frb" style="height:100px">${mini({ title: 'Take 1 of 3', rows: 3, kpi: false, h: 100 })}</div></div></div>
 <div class="sp-fr" style="left:28px;top:296px;width:230px"><div class="sp-frl"><b>${F.ref.id}</b>${F.ref.name}</div><div class="sp-frb sp-ref" style="height:150px"><div>${ic('image', 22, 1.5)}<span>Reference image · ${F.ref.kind}<br>not an editable frame</span></div></div></div>
 <div class="sp-ftool" role="toolbar" aria-label="Canvas tools">${ib('pointer', 'Select (V)', { does: 'Select and move frames', pressed: true, sm: true, f: 'F113' })}${ib('hand', 'Pan (H)', { does: 'Pans the board; Space-drag does the same', sm: true, f: 'F113' })}${ib('frame', 'New frame (F)', { does: 'Starts an empty frame; asks for a prompt or a reference', sm: true, f: 'F113' })}${ib('type', 'Text (T)', { does: 'Adds a text note to the board', sm: true, f: 'F113' })}${ib('comment', 'Nitpick pin (C)', { does: 'Drops a nitpick pin on a frame region (S33)', sm: true, f: 'F113' })}${ib('image', 'Import reference', { does: 'Imports a PNG, JPEG or WebP the user picks as a reference image (S28)', sm: true, f: 'F113' })}<span class="div"></span>${btn('Ask on select', { cls: 'plain', sm: true, icon: 'spark', does: 'When on, selecting a frame region opens the part-instruction popover (S32)', f: 'F113' })}</div>
+<button type="button" class="sp-offm isnew" style="right:14px;top:262px" data-does="Pans to F-06, which is being designed off screen; the selection does not change" data-feature="F113">${NT}F-06 designing${ic('chevR', 13)}</button>
 <div class="sp-zoom" role="group" aria-label="Zoom">${ib('minus', 'Zoom out', { does: 'Zooms the board out; UI text keeps its size', sm: true, f: 'F113' })}<span>64%</span>${ib('plus', 'Zoom in', { does: 'Zooms the board in', sm: true, f: 'F113' })}${ib('fit', 'Fit selection', { does: 'Fits the selected frames in view', sm: true, f: 'F113' })}</div>
 </div>`;
 
@@ -34,10 +35,10 @@ ${frame(F.f04, 296, 296, 262, 176, mini({ title: 'Variance table', rows: 4, draw
   const genuiDesign = `<div class="sp-gg isnew" data-feature="F110">${NT}<div class="gh"><span>Requirement cards · 1 gap</span><button type="button" data-does="Shows the same cards as a plain table (text fallback)" data-feature="F110">Show as table</button></div>
 <div class="sp-gc"><div class="k">${ic('req', 12)}Requirement<span class="tag">${pill(['ok', 'Accepted r14'])}</span></div><div class="tt">R-DASH-014 · Variance threshold per package</div><div class="bd">Flag a package when forecast exceeds budget by more than 3%.</div><div class="ft"><span class="s">Source: brief §2 · REF-02</span>${btn('Details', { sm: true, does: 'Expands the card in place: criteria, sources and linked frames; focus stays on the card', f: 'F110' })}</div></div>
 <div class="sp-gc prop"><div class="k">${ic('alert', 12)}Gap<span class="tag">${pill(['acc', 'Proposal'])}</span></div><div class="tt">No empty state when no package is over</div><div class="bd">Proposed: show “No package over 3% this period”.</div><div class="ft"><span class="s">Not in spec · needs review</span>${btn('Edit', { sm: true, does: 'Edits the proposed criterion as a draft; the spec is unchanged', f: 'F110' })}${btn('Send to review', { sm: true, cls: 'ink', does: 'Adds this proposal to S08 review with its exact diff', f: 'F110' })}</div></div></div>`;
-  const chatDesign = chatPanel({ title: 'Design chat', sub: 'F-03 selected', ctxItems: S.CTX_DESIGN, ctxFoot: '≈ 9.8k tokens · the whole board is never sent', ph: 'Ask for a change to F-03, or @ another frame…',
+  const chatDesign = chatPanel({ title: 'Design chat', sub: 'F-03 selected', ctxItems: S.CTX_DESIGN, ctxFoot: '≈ 9.8k tokens · the whole board is never sent', ph: 'Ask for a change to F-03, or @ another frame…', run: ['F-06 take 2 of 3', 'Step 3 of 4 · self-check', '1.2k · 14 s'],
     msgs: `<div class="sp-ub">Add an alert drawer to the variance table for packages over 3%.</div>
 <div class="sp-ai"><div class="h"><span class="av">S</span>Spekin<em>Sonnet 5.5 · 34 s · 22 cr</em></div><p>Drew <b>F-04 Alert drawer</b> as a draft. F-03 stays accepted at r6. One gap found.</p>${genuiDesign}</div>
-<div class="sp-sugg">${['Compare F-04 with F-03', 'Try 2 more takes of the drawer'].map((t) => `<button type="button" data-does="Puts this prompt in the composer; nothing runs until Send" data-feature="F114">${ic('spark', 13)}${t}</button>`).join('')}</div>` });
+<div class="sp-sugg">${['Compare F-04 with F-03'].map((t) => `<button type="button" data-does="Puts this prompt in the composer; nothing runs until Send" data-feature="F114">${ic('spark', 13)}${t}</button>`).join('')}</div>` });
 
   const designMain = (banner = '', dirty = false) => `<section class="sp-main" aria-label="Work area">
 ${tabs([['grid', 'Variance flows', true], ['frame', 'F-03 Variance table'], ['frame', 'F-04 Alert drawer', false, dirty], ['doc', 'DESIGN.md'], ['req', 'Spec §3']], right)}
@@ -80,7 +81,7 @@ ${toolRow('Document', `Backend${ic('chevR', 12)}<b>API contract</b>`)}
     conf: note('<b>Conflict</b>: two sessions edited F-04. Nothing is merged silently; you compare, keep yours as a proposal, or discard it.', 'left:922px;top:420px;max-width:196px'),
   };
 
-  const vDesign = app({ stage: 'design', save: ['ok', 'Saved 12:41'], chat: chatDesign, main: designMain() }) + N.stage + N.ctx + N.model + N.save + N.draft;
+  const vDesign = app({ stage: 'design', save: ['ok', 'Saved 12:41'], busy: '1 designing · 1 waiting', chat: chatDesign, main: designMain() }) + N.stage + N.ctx + N.model + N.save + N.draft;
   const vBackend = app({ stage: 'backend', save: ['ok', 'Saved 12:41'], chat: chatBackend, main: backendMain }) + N.back + N.up;
   const vConflict = app({ stage: 'design', save: ['bad', 'Conflict · F-04'], chat: chatDesign, main: designMain(conflictBanner, true) }) + N.conf + N.ctx;
 
@@ -112,22 +113,22 @@ ${toolRow('Document', `Backend${ic('chevR', 12)}<b>API contract</b>`)}
         ['Reduce Motion', 'All swaps are instant. Status changes are still announced.'],
       ],
       stories: [
-        ['F101', 'new', 'Eight-stage header in order with text status and counts; readiness derived from artifacts and evidence (R-WF-1, R-WF-3, R-WF-6, R-WF-8).'],
-        ['F102', 'new', 'Stage click switches the workspace in place and restores per-stage state; never approves (R-WF-2, R-WF-9, R-WF-10, R-MOT-1).'],
-        ['F103', 'new', 'Project context bar: project, increment, accepted spec revision (§7.11).'],
-        ['F104', 'new', 'Artifact tabs separate from stages, with dirty-draft marks and Hand off (§7.11, R-WF-12, R-WS-8).'],
-        ['F105', 'new', 'Canvas, Preview, Document and Compare views (§7.11).'],
-        ['F106', 'new', 'Context list for the next run; whole board never sent (R-CAN-4).'],
-        ['F107', 'new', 'Model source picker with estimate before Send (R-MOD-1, R-MOD-3, R-MOD-5).'],
-        ['F108', 'new', 'Inspector: links, contract, revisions, evidence, stage readiness (§7.11, R-CAN-3).'],
-        ['F109', 'new', 'Agent inbox for jobs and approvals, beside the work (§7.11).'],
-        ['F110', 'new', 'Contextual GenUI families: requirement and gap cards, acceptance checklist, with a table fallback (R-GUI-1, R-GUI-4).'],
-        ['F111', 'new', 'Usage meter: source, used and cap (R-MOD-10).'],
-        ['F112', 'new', 'Save states and conflict recovery; no silent overwrite (R-CAN-6, R-WF-10).'],
-        ['F113', 'new', 'Canvas tools: select, pan, frame, text, nitpick pin, import, zoom, fit, Ask on select; zoom scales frames, not UI text (R-CAN-1, R-CAN-8, R-WS-4).'],
-        ['F114', 'new', 'Chat controls: history, new chat, collapse, attach, suggestions, Send with the listed context only (R-CAN-4, R-WS-2).'],
-        ['F115', 'new', 'UI language switch, English and Bahasa Indonesia (R-LANG).'],
-        ['F116', 'new', 'Undo and redo for draft edits on the board (R-CAN-5).'],
+        ['F101', 'new', 'Eight-stage header in order with text status and counts; readiness derived from artifacts and evidence (R-WF-1, R-WF-3, R-WF-6, R-WF-8).', 'PRD'],
+        ['F102', 'new', 'Stage click switches the workspace in place and restores per-stage state; never approves (R-WF-2, R-WF-9, R-WF-10, R-MOT-1).', 'Momo'],
+        ['F103', 'new', 'Project context bar: project, increment, accepted spec revision (§7.11).', 'PRD'],
+        ['F104', 'new', 'Artifact tabs separate from stages, with dirty-draft marks and Hand off (§7.11, R-WF-12, R-WS-8).', 'OpenDesign'],
+        ['F105', 'new', 'Canvas, Preview, Document and Compare views (§7.11).', 'OpenDesign'],
+        ['F106', 'new', 'Context list for the next run; whole board never sent (R-CAN-4).', 'OpenDesign'],
+        ['F107', 'new', 'Model source picker with estimate before Send (R-MOD-1, R-MOD-3, R-MOD-5).', 'OpenDesign'],
+        ['F108', 'new', 'Inspector: links, contract, revisions, evidence, stage readiness (§7.11, R-CAN-3).', 'PRD'],
+        ['F109', 'new', 'Agent inbox, busy chip and a live run row (step, tokens, time, Stop) for jobs and approvals, beside the work (§7.11).', 'OpenDesign'],
+        ['F110', 'new', 'Contextual GenUI families: requirement and gap cards, acceptance checklist, with a table fallback (R-GUI-1, R-GUI-4).', 'OpenDesign'],
+        ['F111', 'new', 'Usage meter: source, used and cap (R-MOD-10).', 'Onlook'],
+        ['F112', 'new', 'Save states and conflict recovery; no silent overwrite (R-CAN-6, R-WF-10).', 'PRD'],
+        ['F113', 'new', 'Canvas tools: select, pan, frame, text, nitpick pin, import, zoom, fit, Ask on select; zoom scales frames, not UI text (R-CAN-1, R-CAN-8, R-WS-4).', 'OpenDesign'],
+        ['F114', 'new', 'Chat controls: history, new chat, collapse, resize, jump to latest, attach, suggestions, Send with the listed context only (R-CAN-4, R-WS-2).', 'OpenDesign'],
+        ['F115', 'new', 'UI language switch, English and Bahasa Indonesia (R-LANG).', 'PRD'],
+        ['F116', 'new', 'Undo and redo for draft edits on the board (R-CAN-5).', 'Onlook'],
       ],
       where: '<span><b>Route:</b> <code>/p/:project/:stage</code>, artifact in the query. Back and Forward restore state and never start a paid job (R-WF-11).</span><span><b>UI (TS/React):</b> OpenDesign Studio patterns, Apache-2.0 reuse candidates at commit <code>e033aad</code>: <code>ChatPane</code>, <code>FileWorkspace</code>, <code>ContextChipStrip</code>, <code>InlineModelSwitcher</code>, <code>GenUISurfaceRenderer</code>, <code>HandoffButton</code>.</span><span><b>Core (Rust):</b> stage status, readiness, revisions, saves and conflicts (R-ARC-1, R-ARC-3).</span><span><b>Open for Enrico:</b> accent colour (Q-28; yravgUI clay used here) · UI language order (PRD says Bahasa Indonesia first; drawn in English for this review).</span>',
     },

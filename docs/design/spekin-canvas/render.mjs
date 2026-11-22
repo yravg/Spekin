@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
 import http from 'node:http'; import fs from 'node:fs'; import path from 'node:path';
 const HERE = fileURLToPath(new URL('.', import.meta.url));
 const { chromium } = createRequire(process.env.PW_FROM || HERE + 'package.json')('playwright');
-const root = HERE + 'project', out = HERE + 'renders', only = process.argv[2];
+const OUT = process.env.SPK_OUT || 'project';
+const root = HERE + OUT, out = HERE + 'renders' + (OUT === 'project' ? '' : '/' + OUT.replace(/[^a-z0-9-]/gi, '_')), only = process.argv[2];
 fs.mkdirSync(out, { recursive: true });
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.json': 'application/json' };
 const srv = http.createServer((q, r) => { const f = path.join(root, decodeURIComponent(q.url.split('?')[0])); fs.readFile(f, (e, b) => { if (e) { r.writeHead(404); r.end(); } else { r.writeHead(200, { 'content-type': mime[path.extname(f)] || 'text/plain' }); r.end(b); } }); }).listen(0);
@@ -40,6 +41,9 @@ for (const f of fs.readdirSync(root).filter((x) => x.endsWith('.dc.html') && (!o
   heights[n] = hmax;
   if (probs.length || errs.length) { bad++; console.log('FAIL', n, [...probs, ...errs.slice(0, 3)].join(' | ')); } else console.log('ok  ', n, hmax);
 }
-fs.writeFileSync(hfile, JSON.stringify(heights, null, 1));
+// merge into the latest heights.json (other workers may have written since we started)
+const latest = fs.existsSync(hfile) ? JSON.parse(fs.readFileSync(hfile, 'utf8')) : {};
+for (const [k, v] of Object.entries(heights)) if (!only || k.includes(only) || !(k in latest)) latest[k] = v;
+fs.writeFileSync(hfile, JSON.stringify(latest, null, 1));
 await b.close(); srv.close();
 process.exit(bad ? 1 : 0);

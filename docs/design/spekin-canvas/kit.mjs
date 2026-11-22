@@ -13,7 +13,7 @@ export const img = (p) => (blobs[p] ? '/_blob/' + blobs[p] : 'ref/' + p);
 
 // Icons: simple 24px stroke glyphs in the Lucide style (drawn for this canvas).
 const P = {
-  chev: '<path d="M6 9l6 6 6-6"/>', chevR: '<path d="M9 6l6 6-6 6"/>',
+  chev: '<path d="M6 9l6 6 6-6"/>', list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>', stop: '<rect x="6" y="6" width="12" height="12" rx="2"/>', down: '<path d="M12 5v14M5 12l7 7 7-7"/>', chevR: '<path d="M9 6l6 6-6 6"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
   inbox: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
   plus: '<path d="M12 5v14M5 12h14"/>', minus: '<path d="M5 12h14"/>', up: '<path d="M12 19V5M5 12l7-7 7 7"/>',
@@ -62,19 +62,21 @@ export const pill = ([k, t]) => `<span class="pill ${k}">${t}</span>`;
 
 // ---------------------------------------------------------------- the Spekin app shell (1440 x 900)
 const STAGEDOES = (s) => `Switches the main workspace to ${s.name} in place, no reload; restores that stage's tabs, viewport, selection and drafts`;
-export function top({ save = ['ok', 'Saved 12:41'] } = {}) {
+export function top({ save = ['ok', 'Saved 12:41'], busy = null } = {}) {
   const [sk, st] = save;
+  const pct = Math.round(S.USAGE.used / S.USAGE.cap * 100), sev = pct >= 90 ? ' crit' : pct >= 70 ? ' warn' : '';
   return `<header class="sp-top">
 <span class="sp-mark" aria-hidden="true">S</span>
 <div class="isnew" style="display:flex;align-items:center;gap:8px;position:relative" data-feature="F103">${NT}
-<button type="button" class="sp-proj" data-does="Opens the project switcher; switching restores only that project's saved state" data-feature="F103"><b>${S.PROJECT.name}</b><span>/</span><span>${S.PROJECT.product}</span>${ic('chev', 14)}</button>
+<button type="button" class="sp-proj" data-does="Opens the quick project switcher (Cmd/Ctrl+K), most recent first; switching restores only that project's saved state" data-feature="F103"><b>${S.PROJECT.name}</b><span>/</span><span>${S.PROJECT.product}</span><kbd class="sp-kbd">⌘K</kbd></button>
 <span class="sp-sep"></span>
 <button type="button" class="sp-chip" data-does="Opens the increment picker: which feature increment the stages describe" data-feature="F103"><span class="k">Increment</span>${S.PROJECT.increment}${ic('chev', 12)}</button>
 <button type="button" class="sp-chip" data-does="Opens the accepted spec revision and its history (S07); never edits it" data-feature="F103">${ic('lock', 12)}<span class="k">Spec</span><span class="r">${S.PROJECT.spec}</span>accepted</button>
 </div>
 <span class="sp-fill"></span>
+${busy ? `<button type="button" class="sp-busy isnew" data-does="Opens the job list: what is designing, what waits and why; a job never runs without a reserved maximum" data-feature="F109">${NT}<span class="pulse" aria-hidden="true"></span>${busy}</button>` : ''}
 <span class="sp-save${sk === 'bad' ? ' conflict' : ''} isnew" data-feature="F112" role="status">${NT}<span class="dot ${sk}"></span>${st}</span>
-<button type="button" class="sp-meter isnew" data-does="Opens S36 usage: estimate, reservations, actuals, cap and remaining credits" data-feature="F111">${NT}${S.USAGE.source}<i><u style="width:${Math.round(S.USAGE.used / S.USAGE.cap * 100)}%"></u></i><b>${S.USAGE.used.toLocaleString('en-US')}</b>of ${S.USAGE.cap.toLocaleString('en-US')} cr</button>
+<button type="button" class="sp-meter isnew${sev}" data-does="Opens S36 usage: estimate, reservations, actuals, cap and remaining credits; the bar turns amber at 70% and red at 90% of the cap" data-feature="F111">${NT}${S.USAGE.source}<i><u style="width:${Math.round(S.USAGE.used / S.USAGE.cap * 100)}%"></u></i><b>${S.USAGE.used.toLocaleString('en-US')}</b>of ${S.USAGE.cap.toLocaleString('en-US')} cr</button>
 <span class="isnew" style="position:relative;display:inline-flex" data-feature="F109">${NT}${ib('inbox', 'Agent inbox: 2 jobs need approval', { does: 'Opens the Agent Inbox: running jobs and approvals, beside the work, never over it', f: 'F109', badge: 2 })}</span>
 <div class="sp-lang" role="group" aria-label="Language"><button type="button" aria-pressed="true" data-does="Shows the UI in English" data-feature="F115">EN</button><button type="button" data-does="Shows the UI in Bahasa Indonesia" data-feature="F115">ID</button></div>
 <span class="sp-av" aria-label="${S.PROJECT.user}">${S.PROJECT.initials}</span>
@@ -86,7 +88,7 @@ export function stagebar(cur) {
 ${btn('Readiness', { icon: 'flag', does: 'Opens the stage inspector: required artifacts, blockers, evidence and next proposed action for the current stage', f: 'F101' })}
 </nav>`;
 }
-export const app = ({ stage, save, chat, main }) => `<div class="sp-app">${top({ save })}${stagebar(stage)}<div class="sp-body">${chat}${main}</div></div>`;
+export const app = ({ stage, save, busy, chat, main }) => `<div class="sp-app">${top({ save, busy })}${stagebar(stage)}<div class="sp-body">${chat}${main}</div></div>`;
 
 // conversation panel pieces
 const CI = { frame: 'frame', doc: 'doc', req: 'req', image: 'image', server: 'server', db: 'db' };
@@ -101,10 +103,14 @@ ${ib('at', 'Mention an artifact', { does: 'Inserts an artifact reference and add
 <span class="sp-est" title="Estimated cost range for this run">${S.MODEL.est}</span>
 <button type="button" class="sp-send" aria-label="Send" data-does="Sends the message with exactly the listed context; a paid run reserves its maximum first" data-feature="F114">${ic('up', 15, 2)}</button>
 </div></div>`;
-export const chatPanel = ({ title, sub, ctxItems, ctxFoot, msgs, ph }) => `<aside class="sp-chat" aria-label="Conversation">
+// run: optional live run row [label, step text, counters]; jump: show the jump-to-latest button
+export const chatPanel = ({ title, sub, ctxItems, ctxFoot, msgs, ph, run, jump }) => `<aside class="sp-chat" aria-label="Conversation">
+<button type="button" class="sp-rsz" aria-label="Resize chat; arrow keys move 16 px" data-does="Drag to resize the chat column (300 to 520 px); the width is remembered per project" data-feature="F114"></button>
 <div class="sp-chat-h"><b>${title}</b><span>· ${sub}</span><span class="sp-fill"></span>${ib('history', 'Chat history', { does: 'Lists earlier chats of this stage', sm: true, f: 'F114' })}${ib('plus', 'New chat', { does: 'Starts a new chat in this stage; the context list is kept', sm: true, f: 'F114' })}${ib('panel', 'Collapse chat', { does: 'Collapses the chat panel; the board keeps its viewport', sm: true, f: 'F114' })}</div>
 ${ctx(ctxItems, ctxFoot)}
 <div class="sp-msgs">${msgs}</div>
+${jump ? `<button type="button" class="sp-jump" data-does="Scrolls to the newest message and keeps following the stream" data-feature="F114">${ic('down', 12)}Jump to latest</button>` : ''}
+${run ? `<div class="sp-run isnew" role="status" data-feature="F109">${NT}<span class="pulse" aria-hidden="true"></span><span class="t"><b>${run[0]}</b><span>${run[1]}</span></span><span class="c">${run[2]}</span>${ib('list', 'Show steps', { does: 'Expands the run steps: each tool call, file and check, live', sm: true, f: 'F109' })}${ib('stop', 'Stop run', { does: 'Stops this run at its next step; charges settle to what was used', sm: true, f: 'F109' })}</div>` : ''}
 ${composer(ph)}
 </aside>`;
 
@@ -155,15 +161,15 @@ ${logic}
 `;
 export const STAT = { built: 'Built', partial: 'Partial', new: 'New' };
 // stories: [id, status, text, src, exists, missing]
-export const aside = ({ must, motion, stories, where }, views) => `<div class="aside">
+export const aside = ({ must, motion, stories, where }, views, shared = []) => `<div class="aside">
 <div class="card"><span class="lbl">What it must show</span><ul class="must">${must.map((x) => `<li>${x}</li>`).join('')}</ul></div>
 <div class="card"><span class="lbl">Motion</span><div class="motion">${motion.map(([a, b]) => `<div class="m"><span>${a}</span><span>${b}</span></div>`).join('')}</div></div>
-<div class="card"><span class="lbl">Stories</span><div class="stories">${stories.map(([id, st, tx, src, ex, miss]) => `<div class="sto"><div class="sti"><span class="sid">${id}</span><span class="src">${src || 'PRD'}</span><span class="stat ${st}">${STAT[st]}</span></div><span class="stt">${tx}</span>${st === 'partial' ? `<span class="gap"><b>Exists:</b> ${ex} · <b>Missing:</b> ${miss}</span>` : ''}</div>`).join('')}</div></div>
+<div class="card"><span class="lbl">Stories</span><div class="stories">${stories.map(([id, st, tx, src, ex, miss]) => `<div class="sto"><div class="sti"><span class="sid">${id}</span><span class="src">${src || 'PRD'}</span><span class="stat ${st}">${STAT[st]}</span></div><span class="stt">${tx}</span>${st === 'partial' ? `<span class="gap"><b>Exists:</b> ${ex} · <b>Missing:</b> ${miss}</span>` : ''}</div>`).join('')}${shared.length ? `<div class="sto shared"><div class="sti"><span class="stt">Shared shell controls on this board, specified on <a href="S35-project-shell.dc.html">S35</a>:</span></div><div class="shf">${shared.map((id) => `<span class="shc"><span class="sid">${id}</span><span class="stat new">New</span></span>`).join('')}</div></div>` : ''}</div></div>
 <div class="card"><span class="lbl">Where it lives</span><div class="where">${where}</div></div>
 <div class="card"><span class="lbl">States</span><ul class="states">${views.map((v) => `<li class="state" data-state="${v.id}"><b>${v.label}</b> · <b>Entry:</b> ${v.entry} · <b>Data:</b> ${v.data}</li>`).join('')}</ul></div>
 </div>`;
-const header = (code, tier, name, ext, lives, views) => `<div class="hd"><div class="hdt"><span class="ey"><span class="tier">${tier}</span>${code} · ${tier} · SPEKIN</span><h1 class="ttl">${name}</h1><p class="ext"><b>Extends:</b> ${ext}</p><p class="ext"><b>Lives in:</b> ${lives}</p></div>${views.length < 2 ? '' : `<div class="vw vs" role="group" aria-label="States">${views.map((v) => `<button type="button" data-state="${v.id}" aria-pressed="{{is_${v.id}}}" onClick="{{go_${v.id}}}">${v.label}</button>`).join('')}</div>`}</div>`;
-const logicOf = (views, start) => `state = { v: '${start}' };
+export const header = (code, tier, name, ext, lives, views) => `<div class="hd"><div class="hdt"><span class="ey"><span class="tier">${tier}</span>${code} · ${tier} · SPEKIN</span><h1 class="ttl">${name}</h1><p class="ext"><b>Extends:</b> ${ext}</p><p class="ext"><b>Lives in:</b> ${lives}</p></div>${views.length < 2 ? '' : `<div class="vw vs" role="group" aria-label="States">${views.map((v) => `<button type="button" data-state="${v.id}" aria-pressed="{{is_${v.id}}}" onClick="{{go_${v.id}}}">${v.label}</button>`).join('')}</div>`}</div>`;
+export const logicOf = (views, start) => `state = { v: '${start}' };
 renderVals() {
 const v = this.state.v;
 return { ${views.map((x) => `is_${x.id}: v === '${x.id}', go_${x.id}: () => this.setState({ v: '${x.id}' })`).join(', ')} };
@@ -180,7 +186,7 @@ export function board(R, writeFileSync, heights, { file, code, tier = 'CORE', na
   const h = heights[file] || 1500;
   const body = `<div class="board" data-screen="${code}">${header(code, tier, name, ext, lives, views)}<div class="rw"><div class="win">
 ${swaps(views)}
-</div>${aside(side, views)}</div>${refsStrip(refs)}</div>`;
+</div>${aside(side, views, code === 'S35' ? [] : [...new Set([...views.map((v) => v.html).join('').matchAll(/data-feature="(F1(?:0[1-9]|1[0-6]))"/g)].map((m) => m[1]))].filter((id) => !side.stories.some((x) => x[0] === id)).sort())}</div>${refsStrip(refs)}</div>`;
   writeFileSync(`${R}/${file}.dc.html`, page(`${code} ${name}`, body, logicOf(views, s), W, h));
   BOARDS.push({ file: file + '.dc.html', title: `${code} · ${name}`, code, tier, name, h });
 }

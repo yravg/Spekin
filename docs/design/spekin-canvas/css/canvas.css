@@ -1,0 +1,258 @@
+/* canvas board group (S29 Frames canvas, S31 Alternatives). Tokens from spekin.css only; no raw colours. Classes start with .can- */
+@keyframes can-breathe { 0%, 100% { opacity: .5 } 50% { opacity: 1 } }
+@keyframes can-pulse { 0%, 100% { transform: scale(1); opacity: 1 } 50% { transform: scale(1.5); opacity: .45 } }
+@media (prefers-reduced-motion: reduce) { .can-cover::before, .can-busy .dot, .can-live i { animation: none } }
+
+.can-gut { width: 12px; flex: none }
+.can-flip svg { transform: scaleX(-1) }
+.can-kbd { font: 600 11px/1 var(--mono); padding: 3px 5px; border-radius: 5px; background: var(--canvas); box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--ink-dim); white-space: nowrap }
+.sp-btn.ink .can-kbd { background: color-mix(in srgb, var(--on-ink) 16%, transparent); box-shadow: none; color: var(--on-ink) }
+.can-fill { flex: 1; min-width: 0 }
+
+/* top bar busy chip */
+.can-busy { border: 0 }
+.can-busy .dot { background: var(--accent); animation: can-pulse 1.6s var(--spring-ui) infinite }
+.can-busy b { font-weight: 600 }
+.can-busy .sep { color: var(--ink-faint) }
+
+/* board: frames, handles, covers */
+.can-world { position: absolute; inset: 0 }
+.can-fr { position: absolute; display: flex; flex-direction: column; gap: 5px }
+.can-fh { display: flex; align-items: center; gap: 6px; height: 24px; font: 500 11.5px/1 var(--font); color: var(--ink-dim); white-space: nowrap; overflow: hidden }
+.can-fh b { color: var(--ink); font-weight: 600 }
+.can-fh .t { min-width: 0; overflow: hidden; text-overflow: ellipsis }
+.can-fh .r { font: 600 11px/1 var(--mono); color: var(--ink-dim); padding: 3px 5px; border-radius: 5px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); flex: none }
+.can-fh .dt { font: 600 11px/1 var(--font); color: var(--warn-ink); flex: none }
+.can-fh .sp-ibtn { width: 22px; height: 22px; border-radius: 6px; flex: none }
+.can-fr.sel .can-fh b, .can-fr.sel .can-fh .t { color: var(--accent-ink) }
+.can-fbw { position: relative }
+.can-fb { position: relative; border-radius: 6px; background: var(--surface); box-shadow: 0 0 0 1px var(--line), var(--shadow-2); overflow: hidden }
+.can-fr.sel .can-fb { box-shadow: 0 0 0 2px var(--accent), var(--shadow-2) }
+.can-fr.draft .can-fb { outline: 1.5px dashed var(--ink-faint); outline-offset: 4px }
+.can-fr.sel.draft .can-fb { outline-color: var(--accent-line) }
+.can-fr .hdl { position: absolute; width: 8px; height: 8px; background: var(--surface); border: 1.5px solid var(--accent); border-radius: 2px; z-index: 3 }
+.can-size { position: absolute; left: 50%; transform: translateX(-50%); bottom: -28px; font: 600 11px/1 var(--mono); background: var(--accent); color: var(--on-ink); padding: 5px 7px; border-radius: 5px; white-space: nowrap; z-index: 3 }
+.can-sc { position: relative; overflow: hidden; background: var(--surface) }
+.can-sc > .can-ui { position: absolute; left: 0; top: 0; width: 640px; height: 450px; transform: scale(var(--s)); transform-origin: 0 0 }
+.can-refimg { position: absolute; inset: 0; background: var(--track); display: flex; flex-direction: column; gap: 9px; padding: 14px 16px; overflow: hidden }
+.can-refimg u { display: block; height: 7px; border-radius: 3px; background: var(--ink-off) }
+.can-refimg u.h { height: 11px; width: 60%; background: var(--ink-faint) }
+.can-refimg .tag { margin-top: auto; align-self: flex-start; padding: 4px 7px; border-radius: 5px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-strong); font: 600 11px/1 var(--font); color: var(--ink-dim) }
+.can-refimg .bx { display: flex; align-items: flex-end; gap: 5px; height: 64px; padding: 6px; border-radius: 4px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line) }
+.can-refimg .bx s { flex: 1; background: var(--ink-off); border-radius: 1px 1px 0 0; text-decoration: none; display: block }
+.can-arrows { position: absolute; inset: 0; pointer-events: none }
+.can-stk { position: relative }
+.can-stk .bk { position: absolute; inset: 0; background: var(--surface); border-radius: 6px; box-shadow: 0 0 0 1px var(--line), var(--shadow-1) }
+.can-section { position: absolute; border-radius: 10px; box-shadow: inset 0 0 0 1.5px var(--line-strong); background: color-mix(in srgb, var(--surface) 35%, transparent) }
+.can-section > span { position: absolute; left: 10px; top: -9px; padding: 0 6px; background: var(--canvas); font: 600 11.5px/1 var(--font); color: var(--ink-dim) }
+
+/* frame covers (Onlook FrameCover idea, own states) */
+.can-cover { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; padding: 10px; text-align: center; background: color-mix(in srgb, var(--surface) 72%, transparent); backdrop-filter: blur(1.5px) }
+.can-cover::before { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse at 50% 55%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 72%); animation: can-breathe 2.8s ease-in-out infinite }
+.can-cover.waiting { background: color-mix(in srgb, var(--track) 80%, transparent) }
+.can-cover.waiting::before, .can-cover.failed::before { display: none }
+.can-cover.failed { background: color-mix(in srgb, var(--danger-soft) 92%, var(--surface)) }
+.can-cover .tt { font: 600 12.5px/1.25 var(--font); color: var(--ink) }
+.can-cover .sb { font: 500 11.5px/1.35 var(--font); color: var(--ink-dim); max-width: 220px }
+.can-cover .ac { display: flex; gap: 6px }
+.can-cover .ci { color: var(--accent-ink) }
+.can-cover.failed .ci { color: var(--danger) }
+.can-cover.waiting .ci { color: var(--ink-dim) }
+.can-cover.compact { gap: 5px }
+.can-cover.compact .tt { font-size: 12px }
+
+/* tool rail, zoom, menu, edge marks */
+.can-rail { position: absolute; left: 14px; top: 56px; display: flex; flex-direction: column; gap: 2px; padding: 4px; background: var(--surface); border-radius: 11px; box-shadow: 0 0 0 1px var(--line), var(--shadow-2); z-index: 4 }
+.can-rail .sp-ibtn[aria-pressed="true"] { background: var(--ink); color: var(--on-ink) }
+.can-rail .div { height: 1px; width: 18px; margin: 3px auto; background: var(--line) }
+.can-tip { position: absolute; z-index: 5; display: flex; align-items: center; gap: 8px; height: 28px; padding: 0 9px; border-radius: 7px; background: var(--ink); color: var(--on-ink); font: 500 12px/1 var(--font); white-space: nowrap; box-shadow: var(--shadow-2) }
+.can-tip .can-kbd { background: color-mix(in srgb, var(--on-ink) 16%, transparent); box-shadow: none; color: var(--on-ink) }
+.can-zp { display: inline-flex; align-items: center; gap: 4px; height: 26px; min-width: 56px; justify-content: center; padding: 0 7px; border: 0; border-radius: 7px; background: transparent; font: 600 11.5px/1 var(--mono); color: var(--ink) }
+.sp-zoom { z-index: 4 }
+.can-menu { position: absolute; right: 14px; bottom: 58px; width: 244px; padding: 4px; background: var(--surface); border-radius: 10px; box-shadow: 0 0 0 1px var(--line-strong), var(--shadow-2); z-index: 5 }
+.can-menu button { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 30px; padding: 0 10px; border: 0; border-radius: 6px; background: transparent; font: 500 12.5px/1 var(--font); color: var(--ink) }
+.can-menu button[aria-checked="true"] { background: var(--hover) }
+.can-menu .sep { height: 1px; margin: 4px 2px; background: var(--line) }
+.can-edge { position: absolute; z-index: 4; display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border: 0; border-radius: 999px; background: var(--accent); color: var(--on-ink); font: 600 11.5px/1 var(--font); box-shadow: var(--shadow-2) }
+.can-recenter { position: absolute; z-index: 4 }
+
+/* prompt bar with chats stacked behind it (Paraframe behaviour, own wording) */
+.can-pb { position: absolute; left: 50%; bottom: 14px; width: 600px; transform: translateX(-50%); z-index: 4 }
+.can-pb .pk { position: absolute; left: 22px; right: 22px; height: 12px; border-radius: 12px 12px 0 0; background: var(--surface); box-shadow: 0 0 0 1px var(--line) }
+.can-pb .pk.a { top: -7px }
+.can-pb .pk.b { top: -13px; left: 38px; right: 38px; background: var(--hover) }
+.can-pb .pc { position: absolute; top: -34px; right: 20px; z-index: 2; display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 9px; border: 0; border-radius: 999px; background: var(--surface); box-shadow: 0 0 0 1px var(--line-strong), var(--shadow-1); font: 600 11.5px/1 var(--font); color: var(--ink) }
+.can-pb .box { position: relative; display: flex; flex-direction: column; gap: 8px; padding: 10px 10px 8px; background: var(--surface); border-radius: 14px; box-shadow: 0 0 0 1px var(--line-strong), var(--shadow-2) }
+.can-pb .chips { display: flex; flex-wrap: wrap; gap: 5px }
+.can-pb .in { display: flex; align-items: center; min-height: 26px; font: 400 13.5px/1.4 var(--font); color: var(--ink-dim); padding: 0 2px }
+.can-pb .in.typed { color: var(--ink) }
+.can-pb .row { display: flex; align-items: center; gap: 6px }
+.can-pb .row .hint { font: 500 11.5px/1 var(--font); color: var(--ink-faint) }
+.can-fan { position: absolute; left: 50%; bottom: 122px; width: 600px; transform: translateX(-50%); z-index: 4; height: 140px }
+.can-fan .ch { position: absolute; width: 292px; display: flex; flex-direction: column; gap: 4px; padding: 9px 12px; text-align: left; border: 0; border-radius: 10px; background: var(--surface); box-shadow: 0 0 0 1px var(--line), var(--shadow-2) }
+.can-fan .ch b { font: 600 12.5px/1.25 var(--font) }
+.can-fan .ch span { font: 500 11.5px/1.2 var(--font); color: var(--ink-dim) }
+
+/* frame chat extras */
+.can-carry { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 8px 10px; border-radius: 10px; background: var(--canvas); box-shadow: inset 0 0 0 1px var(--line); font: 500 12px/1.35 var(--font); color: var(--ink-dim) }
+.can-carry b { color: var(--ink); font-weight: 600 }
+.can-carry .sp-btn { margin-left: 0 }
+.can-chatchip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border-radius: 6px; background: var(--canvas); box-shadow: inset 0 0 0 1px var(--line); font: 500 11.5px/1 var(--font); color: var(--ink) }
+
+/* empty board */
+.can-empty { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); width: 460px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center }
+.can-empty h3 { margin: 0; font: 600 18px/1.25 var(--font); letter-spacing: -.01em }
+.can-empty p { margin: 0; font: 400 13px/1.5 var(--font); color: var(--ink-dim); max-width: 380px }
+.can-scan { position: relative; width: 240px; height: 150px; margin-bottom: 4px }
+.can-scan i { position: absolute; border-radius: 6px; box-shadow: inset 0 0 0 1.5px var(--line-strong); background: color-mix(in srgb, var(--surface) 60%, transparent) }
+.can-scan i.dash { box-shadow: none; outline: 1.5px dashed var(--ink-faint); outline-offset: -1.5px; background: transparent }
+.can-scan s { position: absolute; left: 0; right: 0; top: 56%; height: 2px; background: var(--accent); opacity: .7; border-radius: 2px; text-decoration: none }
+.can-reqs { display: flex; flex-direction: column; width: 100%; border-radius: 10px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line), var(--shadow-1); text-align: left; margin-top: 4px }
+.can-reqs .h { padding: 9px 12px 7px; font: 600 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-dim) }
+.can-reqs button { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; height: 36px; padding: 0 12px; border: 0; border-top: 1px solid var(--line); background: transparent; text-align: left; font: 500 12.5px/1 var(--font) }
+.can-reqs button .id { font: 600 11px/1 var(--mono) }
+.can-reqs button .go { color: var(--ink-dim); font: 500 11.5px/1 var(--font) }
+
+/* toast */
+.can-toast { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 6; display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 12px; background: var(--ink); color: var(--on-ink); border-radius: 10px; box-shadow: var(--shadow-2); font: 500 12.5px/1.35 var(--font); white-space: nowrap }
+.can-toast b { font-weight: 600 }
+.can-toast .sp-btn { color: var(--on-ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--on-ink) 36%, transparent); background: transparent }
+
+/* S31 takes viewer */
+.can-scrim { position: absolute; inset: 0; z-index: 7; background: color-mix(in srgb, var(--ink) 36%, transparent) }
+.can-vw { position: absolute; left: 28px; right: 28px; top: 14px; bottom: 14px; z-index: 8; display: flex; flex-direction: column; background: var(--surface); border-radius: 14px; box-shadow: var(--shadow-win); overflow: hidden }
+.can-vh { display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 12px; border-bottom: 1px solid var(--line); flex: none }
+.can-vh .ti { display: flex; flex-direction: column; gap: 3px; min-width: 0 }
+.can-vh .ti b { font: 600 13.5px/1.1 var(--font); white-space: nowrap }
+.can-vh .ti span { font: 500 11.5px/1 var(--font); color: var(--ink-dim); white-space: nowrap }
+.can-vh .step { display: inline-flex; align-items: center; gap: 4px; margin-left: 14px }
+.can-vh .step b { font: 600 13px/1 var(--font); min-width: 78px; text-align: center }
+.can-vh .ang { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-ink); font: 600 12px/1 var(--font); box-shadow: inset 0 0 0 1px var(--accent-line) }
+.can-vh .size { font: 600 12px/1 var(--mono); color: var(--ink-dim); white-space: nowrap }
+.can-live { display: inline-flex; align-items: center; gap: 6px; font: 600 11.5px/1 var(--font); color: var(--ok-ink) }
+.can-live i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); animation: can-pulse 1.8s var(--spring-ui) infinite }
+.can-prog { display: inline-flex; align-items: center; gap: 8px; font: 600 12px/1 var(--font) }
+.can-prog i { width: 90px; height: 5px; border-radius: 99px; background: var(--track); overflow: hidden; display: block }
+.can-prog u { display: block; height: 100%; background: var(--ink) }
+.can-vb { flex: 1; min-height: 0; display: flex }
+.can-stage { flex: 1; min-width: 0; position: relative; display: flex; align-items: center; justify-content: center; background-color: var(--ground); background-image: radial-gradient(circle, var(--line-strong) 1px, transparent 1.3px); background-size: 22px 22px }
+.can-take { position: relative; border-radius: 6px; overflow: hidden; box-shadow: 0 0 0 1px var(--line-strong), var(--shadow-2); background: var(--surface) }
+.can-take.act { box-shadow: 0 0 0 2px var(--accent), var(--shadow-2) }
+.can-hint { position: absolute; left: 16px; bottom: 14px; display: inline-flex; align-items: center; gap: 8px; font: 500 12px/1 var(--font); color: var(--ink-dim) }
+.can-side { width: 300px; flex: none; border-left: 1px solid var(--line); padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 12px; overflow: hidden }
+.can-side h4 { margin: 0 0 6px; font: 600 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-dim) }
+.can-side p { margin: 0; font: 400 12.5px/1.5 var(--font); color: var(--ink) }
+.can-chg { display: flex; flex-direction: column; gap: 6px }
+.can-chg div { display: grid; grid-template-columns: 20px 1fr; gap: 8px; align-items: start; font: 400 12px/1.4 var(--font); color: var(--ink-dim) }
+.can-chg div b { color: var(--ink); font-weight: 600 }
+.can-chg i { width: 18px; height: 18px; border-radius: 5px; background: var(--accent); color: var(--on-ink); font: 700 11px/18px var(--font); font-style: normal; text-align: center }
+.can-in { display: flex; flex-wrap: wrap; gap: 5px }
+.can-note { margin-top: auto; padding: 9px 11px; border-radius: 10px; background: var(--canvas); box-shadow: inset 0 0 0 1px var(--line); font: 500 12px/1.4 var(--font); color: var(--ink-dim) }
+.can-note b { color: var(--ink); font-weight: 600 }
+.can-vf { display: flex; align-items: flex-start; gap: 10px; height: 126px; padding: 12px 14px 0; border-top: 1px solid var(--line); background: var(--canvas); flex: none }
+.can-th { display: flex; flex-direction: column; gap: 6px; padding: 0; border: 0; background: transparent; text-align: left; position: relative; flex: none }
+.can-th .pic { position: relative; border-radius: 6px; overflow: hidden; background: var(--surface); box-shadow: 0 0 0 1px var(--line-strong) }
+.can-th.act .pic { box-shadow: 0 0 0 2px var(--accent) }
+.can-th .can-cp { display: flex; align-items: center; gap: 6px; font: 500 12px/1 var(--font); color: var(--ink-dim); white-space: nowrap }
+.can-th.act .cap { color: var(--ink) }
+.can-th .can-cp b { font: 600 11px/1 var(--mono); color: var(--ink) }
+.can-th .st { position: absolute; left: 5px; top: 5px; z-index: 3; font: 600 11px/1 var(--font); padding: 3px 6px; border-radius: 5px; background: var(--surface); box-shadow: 0 0 0 1px var(--line-strong); color: var(--ink) }
+.can-th .st.bad { background: var(--danger-soft); color: var(--danger) }
+.can-vsep { width: 1px; align-self: stretch; margin: 0 4px 6px; background: var(--line-strong); flex: none }
+.can-grid { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(3, auto); justify-content: center; align-content: center; gap: 18px 36px; background-color: var(--ground); background-image: radial-gradient(circle, var(--line-strong) 1px, transparent 1.3px); background-size: 22px 22px }
+.can-cell { display: flex; flex-direction: column; gap: 7px; position: relative; border: 0; padding: 0; background: transparent; text-align: left }
+.can-cell .lb { display: flex; align-items: center; gap: 8px; font: 500 12px/1 var(--font); color: var(--ink-dim); height: 20px }
+.can-cell .lb b { color: var(--ink); font-weight: 600 }
+.can-cell .keep { position: absolute; right: 8px; bottom: 8px; z-index: 3 }
+.can-cmp { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 14px 20px; background-color: var(--ground); background-image: radial-gradient(circle, var(--line-strong) 1px, transparent 1.3px); background-size: 22px 22px }
+.can-panes { display: flex; justify-content: center; gap: 34px }
+.can-pane { display: flex; flex-direction: column; gap: 8px }
+.can-pane .lb { display: flex; align-items: center; gap: 8px; height: 22px; font: 500 12px/1 var(--font); color: var(--ink-dim) }
+.can-pane .lb b { color: var(--ink); font-weight: 600; font-size: 13px }
+.can-rg { position: absolute; border-radius: 5px; outline: 2px dashed var(--accent); outline-offset: 1px; z-index: 2; pointer-events: none }
+.can-rg i { position: absolute; left: -2px; top: -22px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 5px; background: var(--accent); color: var(--on-ink); font: 700 11px/18px var(--font); font-style: normal; text-align: center }
+.can-cl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 0 4px }
+.can-cl div { display: grid; grid-template-columns: 20px 1fr; gap: 8px; align-items: start; padding: 9px 11px; border-radius: 10px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); font: 400 12px/1.4 var(--font); color: var(--ink-dim) }
+.can-cl div b { display: block; color: var(--ink); font-weight: 600 }
+.can-cl i { width: 18px; height: 18px; border-radius: 5px; background: var(--accent); color: var(--on-ink); font: 700 11px/18px var(--font); font-style: normal; text-align: center }
+.can-vbn { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--line); font: 500 12.5px/1.35 var(--font); flex: none }
+.can-vbn.bad { background: var(--danger-soft) }
+.can-vbn.warn { background: var(--warn-soft) }
+.can-vbn p { margin: 0; flex: 1 }
+.can-run { display: flex; flex-direction: column; gap: 2px }
+.can-run div { display: grid; grid-template-columns: 16px auto 1fr; gap: 8px; align-items: center; height: 28px; font: 500 12px/1 var(--font); color: var(--ink-dim) }
+.can-run div b { color: var(--ink); font-weight: 600 }
+.can-run div span:last-child { text-align: right }
+
+/* the miniature product UI drawn inside frames and takes: a 640 x 450 preview scaled by --s (1280 x 900 design at 50%) */
+.can-ui { display: flex; flex-direction: column; font: 500 11px/1.3 var(--font); color: var(--ink); background: var(--surface); overflow: hidden }
+.can-ui .ut { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-bottom: 1px solid var(--line); flex: none }
+.can-ui .ut i { width: 12px; height: 12px; border-radius: 3px; background: var(--ink); display: block }
+.can-ui .ut b { font-weight: 700; font-size: 12px }
+.can-ui .ut span { color: var(--ink-dim) }
+.can-ui .ut em { margin-left: auto; font: 600 11px/1 var(--mono); font-style: normal; color: var(--ink-dim) }
+.can-ui .uk { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 12px 14px 0; height: 58px; flex: none }
+.can-ui .uk div { display: flex; flex-direction: column; justify-content: space-between; padding: 8px 10px; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--line) }
+.can-ui .uk span { color: var(--ink-dim) }
+.can-ui .uk b { font: 700 17px/1 var(--mono) }
+.can-ui .uk b.neg { color: var(--danger) }
+.can-ui .tb { margin: 14px 14px 0; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; flex: none }
+.can-ui .tr { display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr 1.2fr; align-items: center; height: 38px; padding: 0 10px; border-top: 1px solid var(--line); box-sizing: border-box }
+.can-ui .tr.th { height: 28px; background: var(--canvas); color: var(--ink-dim); font-weight: 700; border-top: 0 }
+.can-ui .tr em { font: 500 11px/1 var(--mono); font-style: normal }
+.can-ui .tr .v { font: 600 11px/1 var(--mono) }
+.can-ui .tr.o .v { color: var(--danger) }
+.can-ui .tr .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.can-ui .pl { justify-self: start; display: inline-flex; align-items: center; gap: 4px; padding: 3px 7px; border-radius: 99px; font: 600 11px/1 var(--font); white-space: nowrap }
+.can-ui .pl.wn { background: var(--danger-soft); color: var(--danger) }
+.can-ui .pl.ok { background: var(--ok-soft); color: var(--ok-ink) }
+.can-ui .pl.hi { background: var(--danger); color: var(--on-ink) }
+.can-ui .pl.no { background: var(--canvas); color: var(--ink-dim); box-shadow: inset 0 0 0 1px var(--line) }
+.can-ui .ch { margin: 14px 14px 14px; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 6px }
+.can-ui .ch > span { color: var(--ink-dim); font-weight: 600 }
+.can-ui .bars { flex: 1; min-height: 0; display: flex; align-items: flex-end; gap: 22px; padding: 0 10px; border-bottom: 1px solid var(--line-strong) }
+.can-ui .bars div { flex: 1; display: flex; align-items: flex-end; gap: 4px; height: 100% }
+.can-ui .bars u { flex: 1; background: var(--ink-off); border-radius: 2px 2px 0 0; display: block }
+.can-ui .bars u.f { background: var(--ink) }
+.can-ui .bars u.f.o { background: var(--accent) }
+.can-ui .big { flex: 1; margin: 14px 14px 14px; display: flex; align-items: flex-end; gap: 9px; padding: 10px; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--line) }
+.can-ui .big u { flex: 1; background: var(--ink-off); border-radius: 2px 2px 0 0; display: block }
+.can-ui .big u.hi { background: var(--accent) }
+.can-ui .em { flex: 1; margin: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--line) }
+.can-ui .em b { font: 600 14px/1.3 var(--font) }
+.can-ui .em span { color: var(--ink-dim); font-size: 12px }
+.can-ui .dr { position: absolute; top: 36px; right: 0; bottom: 0; width: 210px; background: var(--surface); border-left: 1px solid var(--line); box-shadow: var(--shadow-drawer); padding: 12px; display: flex; flex-direction: column; gap: 8px }
+.can-ui .dr b.h { font: 700 12px/1 var(--font) }
+.can-ui .dr .it { border-radius: 6px; box-shadow: inset 0 0 0 1px var(--line); padding: 8px 10px; display: flex; flex-direction: column; gap: 4px }
+.can-ui .dr .it span { color: var(--ink-dim) }
+.can-ui.k-drawer .tb { margin-right: 224px }
+.can-ui.k-drawer .uk { margin-right: 224px }
+/* take variants */
+.can-ui.k-hierarchy .uk { grid-template-columns: 2fr 1fr 1fr }
+.can-ui.k-hierarchy .uk div:first-child b { font-size: 26px; color: var(--danger) }
+.can-ui.k-density .uk { height: 46px; margin-top: 10px }
+.can-ui.k-density .uk b { font-size: 15px }
+.can-ui.k-density .tb { margin-top: 10px }
+.can-ui.k-density .tr { height: 28px }
+.can-ui.k-density .tr.th { height: 24px }
+.can-ui.k-contrast .tr { color: var(--ink) }
+.can-ui.k-contrast .tr.o { background: var(--danger-soft); box-shadow: inset 4px 0 0 var(--danger); font-weight: 700 }
+.can-ui.k-contrast .tr.o .v { font-weight: 800 }
+.can-ui.k-contrast .tr .v { color: var(--ink) }
+.can-ui.k-contrast .tr.o .v { color: var(--danger) }
+.can-ui.k-layout .uf { display: flex; align-items: center; gap: 8px; margin: 12px 14px 0; height: 32px; flex: none }
+.can-ui.k-layout .uf span { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 7px; box-shadow: inset 0 0 0 1px var(--line-strong) }
+.can-ui.k-layout .uf span.on { background: var(--ink); color: var(--on-ink); box-shadow: none }
+.can-ui.k-layout .tr.tot { background: var(--canvas); font-weight: 700 }
+.can-ui .ut .kp { display: inline-flex; gap: 14px; margin-left: 12px; font-weight: 600 }
+
+.can-lin { position: absolute; z-index: 3; display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px; border: 0; border-radius: 999px; background: var(--surface); box-shadow: 0 0 0 1px var(--line-strong), var(--shadow-1); font: 500 11.5px/1 var(--font); color: var(--ink) }
+.can-cap { position: absolute; right: 16px; top: 10px; z-index: 4; display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 8px 0 12px; border-radius: 10px; background: var(--warn-soft); box-shadow: inset 0 0 0 1px var(--line-strong); font: 500 12.5px/1 var(--font); color: var(--ink) }
+.can-cap b { font-weight: 600 }
+.can-gen { display: flex; align-items: center; justify-content: center; gap: 8px; font: 500 12px/1 var(--font); color: var(--ink-dim) }
+.can-fh .sp-btn { height: 22px; padding: 0 8px; font-size: 11.5px; border-radius: 6px }
+.can-arrows { color: var(--ink-faint) }
+.can-ui.k-drawer .ch { margin-right: 224px }
+.can-small { margin-top: 8px; font: 12px/1.45 var(--font); color: var(--ink-dim) }
+.can-side p.can-small { font-size: 12px; color: var(--ink-dim) }
+.can-cellb { width: 294px; height: 207px; padding: 0; border: 0; display: block }

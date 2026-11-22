@@ -47,3 +47,11 @@ export const BACKEND = {
   checks: [['off', 'Alert raised over 3% for 2 periods', ['mute', 'Untested']], ['on', 'Threshold read from accepted spec r14', ['ok', 'Passed · fixture']], ['off', 'No alert for P-04 at −3.4%', ['bad', 'No evidence']]],
 };
 export const CONFLICT = { frame: 'F-04 Alert drawer', rev: 'r8', by: 'Dimas (sample)', at: '12:43' };
+
+// Board-group data (one file per board group; names are prefixed by the group so they never clash).
+export * from './parts/intake.mjs';
+export * from './parts/canvas.mjs';
+export * from './parts/style.mjs';
+export * from './parts/review.mjs';
+export * from './parts/delivery.mjs';
+export * from './parts/models.mjs';
