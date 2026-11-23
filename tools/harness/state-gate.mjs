@@ -126,6 +126,10 @@ for (const b of manifest) {
     await aApp.screenshot({ path: base + '-app.png', animations: 'disabled' });
     const todo = await ap.locator('[data-todo]').count();
     const later = await ap.locator('[data-later]').count();
+    // Feature ids the app really renders in this state, reached by the click path (live parity evidence:
+    // an id that only sits in the source behind an unset prop is never seen here).
+    r.features = await ap.evaluate(() => [...new Set([...document.querySelectorAll('[data-feature]')]
+      .flatMap((e) => (e.getAttribute('data-feature') || '').split(/[\s,]+/).filter(Boolean)))].sort());
     await ap.close();
     if (actx !== ctx) await actx.close();
     r.reached = true;

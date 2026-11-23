@@ -6,8 +6,10 @@
 //                   proven  = the last harness run (tools/harness/out/report.json) says PASS on a checked path
 //                   partial = the state was reached but failed;  open = not reached or not in the report
 //   kind "feature"  every data-feature id a board draws (canvas-states.json "features")
-//                   proven  = the id is in apps/web/src and every state of every board that draws it passes
-//                   renders = in apps/web/src, but a state of its board fails;  open = not in apps/web/src
+//                   proven  = the harness saw the id rendered in the app (report.json "features") in a PASS state
+//                             of a board that draws it: reached by a real click path, not just present in the source
+//                   partial = in apps/web/src but never seen on a click path (e.g. behind a prop the app never sets)
+//                   open    = not in apps/web/src
 //   kind "req"      every R-XXX-n in the canonical PRD (inputs/Spekin-PRD-v0.2.3.md)
 //                   proven  = a feature mapped to it (docs/design/spekin-canvas/maps-reqs.mjs REQS) is proven
 //                   partial = mapped features exist, none proven;  unmapped = no feature maps to it
@@ -65,12 +67,21 @@ const boardsOf = {};
 for (const b of boards) for (const f of b.features) (boardsOf[f] ??= new Set()).add(b.screen);
 
 const featureState = {};
+// Where the harness saw each id rendered, in PASS states only.
+const seenIn = {};
+for (const r of report.results) {
+  if (r.verdict !== 'PASS' || r.status !== 'checked') continue;
+  for (const f of r.features ?? []) (seenIn[f] ??= []).push(`${r.screen}:${r.state}`);
+}
+const harnessHasFeatures = report.results.some((r) => Array.isArray(r.features));
 const featureCell = (f) => {
   const on = [...(boardsOf[f] ?? [])];
+  const seen = (seenIn[f] ?? []).filter((x) => on.includes(x.split(':')[0]));
   let s, why;
   if (!inApp.has(f)) { s = 'open'; why = `not in apps/web/src; drawn on ${on.join(', ')}`; }
-  else if (on.every((x) => boardPass[x])) { s = 'proven'; why = `in apps/web/src; every state of ${on.join(', ')} passes the harness`; }
-  else { s = 'renders'; why = `in apps/web/src; a state of ${on.filter((x) => !boardPass[x]).join(', ')} fails the harness`; }
+  else if (!harnessHasFeatures) { s = 'partial'; why = 'in apps/web/src; the harness report predates feature tracking: run npm run harness'; }
+  else if (seen.length) { s = 'proven'; why = `rendered by the app on a passing click path: ${seen.slice(0, 4).join(', ')}${seen.length > 4 ? ' …' : ''}`; }
+  else { s = 'partial'; why = `in apps/web/src but never rendered on a click path of ${on.join(', ')} (wire it or add a harness state)`; }
   featureState[f] = s;
   return { k: `${f} ${(fdesc[f] ?? '').slice(0, 70)}`.trim(), kind: 'feature', w: 2, s, why };
 };
