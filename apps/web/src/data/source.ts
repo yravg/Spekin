@@ -30,7 +30,6 @@ import type {
 } from '@spekin/contracts';
 import type {
   SampleDeliveryContract,
-  SampleGenUiCard,
   SampleGenUiVerdict,
   SampleModelRegistryRow,
   SampleProject,
@@ -161,69 +160,18 @@ function skillRow(
   ];
 }
 
-
-// Recorded from the Rust validator (crates/spekin-core/src/genui.rs). IMP-36 will keep them equal to
-// genui::validate; the lead moves this list into sample/parts and exports GENUI_CARDS (see lanes/ui.md).
-export const SAMPLE_GENUI_CARDS: readonly SampleGenUiCard[] = [
-  {
-    id: 'AC-DASH-019',
-    title: 'AC-DASH-019 · Alert after 2 periods over 3%',
-    family: 'checklist',
-    payload: {
-      schema_version: 1,
-      id: 'AC-DASH-019',
-      title: 'AC-DASH-019 · Alert after 2 periods over 3%',
-      provenance: 'imported_observation',
-      body: null,
-      links: ['R-DASH-014'],
-      actions: [
-        { kind: 'expand_details', label: 'Details', target_id: 'AC-DASH-019', href: null },
-        { kind: 'pin', label: 'Pin', target_id: 'AC-DASH-019', href: null },
-      ],
-      family: 'checklist',
-      items: [
-        { id: 'c1', label: 'Alert raised after 2 periods over 3%', checked: false, status: 'untested' },
-        { id: 'c2', label: 'Threshold read from accepted spec r14', checked: true, status: 'passed_fixture' },
-        { id: 'c3', label: 'No alert for P-04 at −3.4%', checked: false, status: 'no_evidence' },
-      ],
-      summary: '1 of 3 passed. Nothing else is shown as passed.',
-    },
-    verdict: { status: 'valid' },
-  },
-  {
-    id: 'P-04-variance',
-    title: 'P-04 variance comparison',
-    family: 'comparison',
-    payload: {
-      schema_version: 1,
-      id: 'P-04-variance',
-      title: 'P-04 variance comparison',
-      provenance: 'model_proposal',
-      body: null,
-      links: ['R-DASH-014'],
-      actions: [{ kind: 'pin', label: 'Pin', target_id: 'P-04-variance', href: null }],
-      family: 'comparison',
-      options: [
-        { id: 'P-01', label: 'P-01 Mooring', badge: 'ok', summary: 'On track', recommended: false },
-        { id: 'P-04', label: 'P-04 Marine spread', badge: 'bad', summary: null, recommended: false },
-      ],
-      baseline_id: 'P-01',
-    },
-    verdict: { status: 'rejected', reason: 'missing_required_field: forecast (P-04)' },
-  },
-];
-
 function cardId(card: unknown): string | null {
   if (typeof card !== 'object' || card === null) return null;
   const id = (card as { id?: unknown }).id;
   return typeof id === 'string' ? id : null;
 }
 
+/** The S38 cards the sample records, each with the verdict `genui::validate` reached (IMP-36).
+ *  `fixtures/genui-cards.json` is the same list; a Rust test keeps the verdicts equal. */
 function recordedVerdict(card: unknown): CardVerdict | null {
   const id = cardId(card);
   if (!id) return null;
-  const cards = sampleModule.GENUI_CARDS ?? SAMPLE_GENUI_CARDS;
-  const found = cards.find((c) => c.id === id);
+  const found = sampleModule.GENUI_CARDS.find((c) => c.id === id);
   return found ? found.verdict : null;
 }
 
@@ -381,3 +329,4 @@ export function getUsage(id: string): SampleUsage | null {
 export function isStageId(stages: SampleStage[], s: string | undefined): s is StageId {
   return !!s && stages.some((x) => x.id === s);
 }
+

@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import fixture from '../../../../fixtures/meranti-yard.json';
+import cards from '../../../../fixtures/genui-cards.json';
 import {
   SAMPLE_PROJECT_ID,
   apiSource,
+  sampleData,
   sampleSource,
   type SampleDeliveryContract,
   type SampleModelRegistryRow,
@@ -320,5 +322,23 @@ describe('data source (IMP-37): the remaining reads', () => {
     // is the whole-day countdown. They are different numbers by design.
     expect(fromSample.daysLeft['kenari-fleet']).toBe(30);
     expect(fromApi.daysLeft['kenari-fleet']).toBe(27);
+  });
+});
+
+describe('data source (IMP-36): the S38 cards and their recorded verdicts come from @spekin/sample', () => {
+  it('the sample package, the fixture and the door carry the same cards and verdicts', () => {
+    // fixtures/genui-cards.json is written by `npm run sync:fixtures` from sample/parts/genui.mjs.
+    // crates/spekin-core/tests/genui_cards.rs keeps each recorded verdict equal to genui::validate.
+    expect(sampleData.GENUI_CARDS).toEqual(cards);
+    for (const card of sampleData.GENUI_CARDS) {
+      expect(sampleSource.knownCardVerdict(card.payload)).toEqual(card.verdict);
+    }
+    expect(sampleData.GENUI_CARDS.some((c) => c.verdict.status === 'valid')).toBe(true);
+    expect(sampleData.GENUI_CARDS.some((c) => c.verdict.status === 'rejected')).toBe(true);
+  });
+
+  it('a card the sample does not hold has no recorded verdict', () => {
+    expect(sampleSource.knownCardVerdict({ id: 'not-in-the-sample' })).toBeNull();
+    expect(sampleSource.knownCardVerdict({})).toBeNull();
   });
 });
