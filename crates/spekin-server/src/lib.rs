@@ -89,6 +89,26 @@ impl Store for Backend {
         }
     }
 
+    async fn update_revision_and_state(
+        &self,
+        id: &str,
+        artifact: &str,
+        base: u32,
+        next: &Revision,
+        state: &ProjectState,
+    ) -> Result<(), StoreError> {
+        match self {
+            Backend::Memory(m) => {
+                m.update_revision_and_state(id, artifact, base, next, state)
+                    .await
+            }
+            Backend::Pg(p) => {
+                p.update_revision_and_state(id, artifact, base, next, state)
+                    .await
+            }
+        }
+    }
+
     async fn load_state(&self, id: &str) -> Result<Option<ProjectState>, StoreError> {
         match self {
             Backend::Memory(m) => m.load_state(id).await,
@@ -338,6 +358,7 @@ fn map_store_error(err: StoreError) -> ServerError {
     match err {
         StoreError::NotFound(_) => ServerError::not_found("not_found", message),
         StoreError::StaleRevision { .. } => ServerError::conflict("proposal_stale", message),
+        StoreError::StaleState { .. } => ServerError::conflict("proposal_stale", message),
         StoreError::Backend(_) => {
             ServerError::new(StatusCode::INTERNAL_SERVER_ERROR, "store_error", message)
         }
@@ -454,10 +475,6 @@ async fn accept_proposal(
 
     match accept(&current, &proposal) {
         Ok(next_rev) => {
-            s.store
-                .update_revision(&id, &proposal.artifact, current.n, &next_rev)
-                .await
-                .map_err(map_store_error)?;
             audit_event(
                 &mut state,
                 s.now,
@@ -466,8 +483,10 @@ async fn accept_proposal(
                 Some(format!("r{}", next_rev.n)),
                 format!("accepted proposal {pid}"),
             );
+            // IMP-40: the revision and the state (carrying the audit entry) commit
+            // atomically, so a revision can never advance without its entry.
             s.store
-                .save_state(&id, &state)
+                .update_revision_and_state(&id, &proposal.artifact, current.n, &next_rev, &state)
                 .await
                 .map_err(map_store_error)?;
             Ok(Json(next_rev))
@@ -516,10 +535,26 @@ async fn revert_revision(
     Path((id, artifact)): Path<(String, String)>,
     Json(req): Json<RevertRevisionRequest>,
 ) -> Result<Json<Revision>, ServerError> {
-    let mut state = load_state(&s, &id).await?;
-    let current = s
-        .store
-        .revision(&id, &artifact)
+    revert_revision_store(&s.store, s.now, &id, &artifact, req).await
+}
+
+/// The revert operation against any [`Store`], shared by the route and the tests.
+async fn revert_revision_store(
+    store: &impl Store,
+    now: i64,
+    id: &str,
+    artifact: &str,
+    req: RevertRevisionRequest,
+) -> Result<Json<Revision>, ServerError> {
+    let mut state = store
+        .load_state(id)
+        .await
+        .map_err(map_store_error)?
+        .ok_or_else(|| {
+            ServerError::not_found("project_not_found", format!("unknown project: {id}"))
+        })?;
+    let current = store
+        .revision(id, artifact)
         .await
         .map_err(map_store_error)?
         .ok_or_else(|| {
@@ -529,20 +564,18 @@ async fn revert_revision(
             )
         })?;
     let next = revert(&current, &req.to).map_err(map_proposal_error)?;
-    s.store
-        .update_revision(&id, &artifact, current.n, &next)
-        .await
-        .map_err(map_store_error)?;
     audit_event(
         &mut state,
-        s.now,
+        now,
         AuditAction::Revert,
-        &artifact,
+        artifact,
         Some(format!("r{}", next.n)),
         format!("reverted {artifact} to r{}", req.to.n),
     );
-    s.store
-        .save_state(&id, &state)
+    // IMP-40: the revision and the state (carrying the audit entry) commit
+    // atomically, so a revert can never advance without its entry.
+    store
+        .update_revision_and_state(id, artifact, current.n, &next, &state)
         .await
         .map_err(map_store_error)?;
     Ok(Json(next))
@@ -1069,6 +1102,7 @@ fn map_github_error(err: GitHubSourceError) -> ServerError {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use async_trait::async_trait;
     use axum::body::Body;
     use axum::http::Request;
     use http_body_util::BodyExt;
@@ -1215,5 +1249,123 @@ mod tests {
             Some(AuditError::Truncated { seq: 2 })
         ));
         assert_ne!(head, "deadbeef");
+    }
+
+    /// IMP-40 test double: every `revision` read first advances the project-state
+    /// version, simulating a concurrent writer that wins the state between the
+    /// handler's `load_state` and its write.
+    struct StaleStateOnRevision {
+        inner: Backend,
+    }
+
+    #[async_trait]
+    impl Store for StaleStateOnRevision {
+        async fn revision(&self, id: &str, artifact: &str) -> Result<Option<Revision>, StoreError> {
+            if let Some(state) = self.inner.load_state(id).await? {
+                self.inner.save_state(id, &state).await?;
+            }
+            self.inner.revision(id, artifact).await
+        }
+
+        async fn project(&self, id: &str) -> Result<Option<Project>, StoreError> {
+            self.inner.project(id).await
+        }
+        async fn stages(&self, id: &str) -> Result<Option<Vec<Stage>>, StoreError> {
+            self.inner.stages(id).await
+        }
+        async fn update_revision(
+            &self,
+            id: &str,
+            artifact: &str,
+            base: u32,
+            next: &Revision,
+        ) -> Result<(), StoreError> {
+            self.inner.update_revision(id, artifact, base, next).await
+        }
+        async fn update_revision_and_state(
+            &self,
+            id: &str,
+            artifact: &str,
+            base: u32,
+            next: &Revision,
+            state: &ProjectState,
+        ) -> Result<(), StoreError> {
+            self.inner
+                .update_revision_and_state(id, artifact, base, next, state)
+                .await
+        }
+        async fn load_state(&self, id: &str) -> Result<Option<ProjectState>, StoreError> {
+            self.inner.load_state(id).await
+        }
+        async fn save_state(&self, id: &str, state: &ProjectState) -> Result<(), StoreError> {
+            self.inner.save_state(id, state).await
+        }
+        async fn entries(
+            &self,
+        ) -> Result<std::collections::BTreeMap<String, ProjectEntry>, StoreError> {
+            self.inner.entries().await
+        }
+        async fn put_entry(&self, entry: &ProjectEntry) -> Result<(), StoreError> {
+            self.inner.put_entry(entry).await
+        }
+        async fn library(&self) -> Result<SkillLibrary, StoreError> {
+            self.inner.library().await
+        }
+        async fn save_library(&self, library: &SkillLibrary) -> Result<(), StoreError> {
+            self.inner.save_library(library).await
+        }
+        async fn skills_audit(&self) -> Result<(AuditLog, String), StoreError> {
+            self.inner.skills_audit().await
+        }
+        async fn save_skills_audit(&self, log: &AuditLog, head: &str) -> Result<(), StoreError> {
+            self.inner.save_skills_audit(log, head).await
+        }
+    }
+
+    /// IMP-40: a revert whose state write is stale must not advance the revision.
+    /// The wrapper bumps the state version on every `revision` read, so the state
+    /// the handler loaded is stale by the time it writes. The atomic write refuses
+    /// the whole operation and leaves the revision unchanged.
+    #[tokio::test]
+    async fn revert_with_a_stale_state_leaves_the_revision_unchanged() {
+        let (project_id, seed) = spekin_core::store::test_support::seed();
+        let memory = MemoryStore::from_seed(project_id.clone(), seed);
+        let store = StaleStateOnRevision {
+            inner: Backend::Memory(memory.clone()),
+        };
+
+        let before = memory
+            .revision(&project_id, "spec")
+            .await
+            .unwrap()
+            .expect("seeded spec revision");
+        assert_eq!(before.n, 1);
+
+        let req = RevertRevisionRequest {
+            to: Revision {
+                n: 0,
+                content: "R-DASH-000: the beginning.".to_owned(),
+            },
+        };
+
+        let result = revert_revision_store(&store, DEFAULT_NOW, &project_id, "spec", req).await;
+
+        match result {
+            Ok(_) => panic!("a revert against a stale state must be refused"),
+            Err(err) => assert_eq!(
+                err.code, "proposal_stale",
+                "the stale revert maps to proposal_stale"
+            ),
+        }
+        assert_eq!(
+            memory
+                .revision(&project_id, "spec")
+                .await
+                .unwrap()
+                .unwrap()
+                .n,
+            1,
+            "the stale revert must leave the revision unchanged"
+        );
     }
 }

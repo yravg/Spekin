@@ -18,6 +18,12 @@ use sqlx::Row;
 /// The plain SQL migrations (ADR 0008), applied directly on connect.
 const MIGRATIONS: &str = include_str!("../migrations/0001_init.sql");
 
+/// A transaction-scoped advisory lock key ("SPEKIN"), so concurrent `connect`
+/// calls (for example several test binaries, or a multi-instance deploy)
+/// serialise on the migrations instead of racing on `CREATE TABLE`'s implicit
+/// composite types in `pg_type`.
+const MIGRATION_LOCK_KEY: i64 = 0x5350_454B_494E;
+
 fn backend(e: sqlx::Error) -> StoreError {
     StoreError::Backend(e.to_string())
 }
@@ -36,14 +42,28 @@ impl PgStore {
     /// Connect and run the migrations. This is the entry point the server uses
     /// when `DATABASE_URL` is set.
     pub async fn connect(url: &str) -> Result<Self, StoreError> {
+        // IMP-40: two concurrent writers each hold one transaction while the
+        // loser blocks on the winner's row lock; reads also need a free
+        // connection. Ten is ample and well above sqlx's need here, but explicit
+        // so the pool can never be the thing that deadlocks a race.
         let pool = sqlx::postgres::PgPoolOptions::new()
+            .max_connections(10)
             .connect(url)
             .await
             .map_err(backend)?;
-        sqlx::raw_sql(MIGRATIONS)
-            .execute(&pool)
+        // Run the migrations inside one transaction, guarded by an advisory lock,
+        // so concurrent connects can't race on the DDL (IMP-40).
+        let mut tx = pool.begin().await.map_err(backend)?;
+        sqlx::query("SELECT pg_advisory_xact_lock($1)")
+            .bind(MIGRATION_LOCK_KEY)
+            .execute(&mut *tx)
             .await
             .map_err(backend)?;
+        sqlx::raw_sql(MIGRATIONS)
+            .execute(&mut *tx)
+            .await
+            .map_err(backend)?;
+        tx.commit().await.map_err(backend)?;
         Ok(Self { pool })
     }
 
@@ -128,6 +148,51 @@ impl PgStore {
 
 fn decode<T: for<'de> Deserialize<'de>>(text: &str) -> Result<T, StoreError> {
     serde_json::from_str(text).map_err(backend_json)
+}
+
+/// Insert or update one project's state under an already-open transaction,
+/// refusing a stale version and bumping it on success (IMP-40).
+async fn upsert_state(
+    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    id: &str,
+    state: &ProjectState,
+) -> Result<(), StoreError> {
+    let row = sqlx::query("SELECT state FROM spekin_states WHERE project_id = $1 FOR UPDATE")
+        .bind(id)
+        .fetch_optional(&mut **tx)
+        .await
+        .map_err(backend)?;
+    match row {
+        None => {
+            let text = serde_json::to_string(state).map_err(backend_json)?;
+            sqlx::query("INSERT INTO spekin_states (project_id, state) VALUES ($1, $2)")
+                .bind(id)
+                .bind(&text)
+                .execute(&mut **tx)
+                .await
+                .map_err(backend)?;
+        }
+        Some(row) => {
+            let text: String = row.try_get("state").map_err(backend)?;
+            let current: ProjectState = decode(&text)?;
+            if current.version != state.version {
+                return Err(StoreError::StaleState {
+                    base: state.version,
+                    current: current.version,
+                });
+            }
+            let mut next = state.clone();
+            next.version = state.version.saturating_add(1);
+            let next_text = serde_json::to_string(&next).map_err(backend_json)?;
+            sqlx::query("UPDATE spekin_states SET state = $1 WHERE project_id = $2")
+                .bind(&next_text)
+                .bind(id)
+                .execute(&mut **tx)
+                .await
+                .map_err(backend)?;
+        }
+    }
+    Ok(())
 }
 
 #[async_trait]
@@ -242,16 +307,58 @@ impl Store for PgStore {
     }
 
     async fn save_state(&self, id: &str, state: &ProjectState) -> Result<(), StoreError> {
-        let text = serde_json::to_string(state).map_err(backend_json)?;
-        sqlx::query(
-            "INSERT INTO spekin_states (project_id, state) VALUES ($1, $2) \
-             ON CONFLICT (project_id) DO UPDATE SET state = EXCLUDED.state",
+        let mut tx = self.pool.begin().await.map_err(backend)?;
+        upsert_state(&mut tx, id, state).await?;
+        tx.commit().await.map_err(backend)?;
+        Ok(())
+    }
+
+    async fn update_revision_and_state(
+        &self,
+        id: &str,
+        artifact: &str,
+        base: u32,
+        next: &Revision,
+        state: &ProjectState,
+    ) -> Result<(), StoreError> {
+        // One transaction (IMP-40): lock the revision row, refuse a stale base,
+        // write the new revision, then upsert the state under the same lock scope.
+        // Either check failing rolls the whole transaction back, so a revision can
+        // never advance without the state that carries its audit entry.
+        let mut tx = self.pool.begin().await.map_err(backend)?;
+        let row = sqlx::query(
+            "SELECT n FROM spekin_revisions WHERE project_id = $1 AND artifact = $2 FOR UPDATE",
         )
         .bind(id)
-        .bind(&text)
-        .execute(&self.pool)
+        .bind(artifact)
+        .fetch_optional(&mut *tx)
         .await
         .map_err(backend)?;
+
+        let Some(row) = row else {
+            return Err(StoreError::NotFound(format!("artifact: {artifact}")));
+        };
+        let current: i32 = row.try_get("n").map_err(backend)?;
+        let current = current as u32;
+        if current != base {
+            return Err(StoreError::StaleRevision { base, current });
+        }
+
+        sqlx::query(
+            "UPDATE spekin_revisions SET n = $1, content = $2 \
+             WHERE project_id = $3 AND artifact = $4",
+        )
+        .bind(next.n as i32)
+        .bind(&next.content)
+        .bind(id)
+        .bind(artifact)
+        .execute(&mut *tx)
+        .await
+        .map_err(backend)?;
+
+        upsert_state(&mut tx, id, state).await?;
+
+        tx.commit().await.map_err(backend)?;
         Ok(())
     }
 

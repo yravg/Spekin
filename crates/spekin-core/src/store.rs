@@ -27,6 +27,8 @@ pub enum StoreError {
     NotFound(String),
     #[error("revision is against r{base} but the artifact is at r{current}")]
     StaleRevision { base: u32, current: u32 },
+    #[error("project state changed (loaded v{base}, now v{current}); re-read and retry")]
+    StaleState { base: u64, current: u64 },
     #[error("store backend error: {0}")]
     Backend(String),
 }
@@ -38,6 +40,11 @@ pub enum StoreError {
 /// delete/restore are also kept apart, in [`Store::entries`]/[`Store::put_entry`].
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectState {
+    /// Optimistic-concurrency version, bumped on every [`Store::save_state`]. Two
+    /// writers that read the same version race; the second save is refused as
+    /// [`StoreError::StaleState`] (IMP-40).
+    #[serde(default = "initial_version")]
+    pub version: u64,
     pub proposals: BTreeMap<String, Proposal>,
     pub rejections: Vec<Rejection>,
     pub ledger: Ledger,
@@ -47,6 +54,11 @@ pub struct ProjectState {
     /// The append-only audit chain, with its head held apart from the stored log.
     pub audit: AuditLog,
     pub audit_head: String,
+}
+
+/// The first version a fresh state starts at.
+fn initial_version() -> u64 {
+    1
 }
 
 /// The full seed for one project: everything a store needs to serve the sample
@@ -79,6 +91,22 @@ pub trait Store: Send + Sync {
         artifact: &str,
         base: u32,
         next: &Revision,
+    ) -> Result<(), StoreError>;
+
+    /// Atomically advance one artifact's revision and persist the accompanying
+    /// project state (IMP-40). The revision is written only if the artifact is
+    /// still at `base`; the state is written only if its [`ProjectState::version`]
+    /// still matches what the caller loaded. If either check fails, nothing is
+    /// written, so a revision can never advance without the audit entry carried in
+    /// `state`. Implementations must perform both writes in one transaction (Postgres)
+    /// or under one lock (memory).
+    async fn update_revision_and_state(
+        &self,
+        id: &str,
+        artifact: &str,
+        base: u32,
+        next: &Revision,
+        state: &ProjectState,
     ) -> Result<(), StoreError>;
 
     // --- per-project mutable state ---
@@ -145,6 +173,51 @@ impl MemoryStore {
     }
 }
 
+/// Write a revision under an already-held lock, refusing a stale base (IMP-40).
+fn write_revision(
+    inner: &mut MemoryInner,
+    id: &str,
+    artifact: &str,
+    base: u32,
+    next: &Revision,
+) -> Result<(), StoreError> {
+    let current_n = inner
+        .revisions
+        .get(id)
+        .and_then(|m| m.get(artifact))
+        .map(|r| r.n)
+        .ok_or_else(|| StoreError::NotFound(format!("artifact: {artifact}")))?;
+    if current_n != base {
+        return Err(StoreError::StaleRevision {
+            base,
+            current: current_n,
+        });
+    }
+    inner
+        .revisions
+        .get_mut(id)
+        .expect("revision map present")
+        .insert(artifact.to_owned(), next.clone());
+    Ok(())
+}
+
+/// Write a project state under an already-held lock, refusing a stale version
+/// and bumping it on success (IMP-40).
+fn write_state(inner: &mut MemoryInner, id: &str, state: &ProjectState) -> Result<(), StoreError> {
+    if let Some(current) = inner.states.get(id)
+        && current.version != state.version
+    {
+        return Err(StoreError::StaleState {
+            base: state.version,
+            current: current.version,
+        });
+    }
+    let mut next = state.clone();
+    next.version = state.version.saturating_add(1);
+    inner.states.insert(id.to_owned(), next);
+    Ok(())
+}
+
 #[async_trait]
 impl Store for MemoryStore {
     async fn project(&self, id: &str) -> Result<Option<Project>, StoreError> {
@@ -182,15 +255,39 @@ impl Store for MemoryStore {
         next: &Revision,
     ) -> Result<(), StoreError> {
         let mut inner = self.inner.lock().expect("memory store lock");
-        let current = inner
+        write_revision(&mut inner, id, artifact, base, next)
+    }
+
+    async fn update_revision_and_state(
+        &self,
+        id: &str,
+        artifact: &str,
+        base: u32,
+        next: &Revision,
+        state: &ProjectState,
+    ) -> Result<(), StoreError> {
+        // One lock acquisition for both writes (IMP-40). Validate both first, so
+        // a stale revision or stale state refuses the whole write without leaving
+        // either half applied — the revision and its audit entry land together.
+        let mut inner = self.inner.lock().expect("memory store lock");
+        let current_n = inner
             .revisions
             .get(id)
             .and_then(|m| m.get(artifact))
+            .map(|r| r.n)
             .ok_or_else(|| StoreError::NotFound(format!("artifact: {artifact}")))?;
-        if current.n != base {
+        if current_n != base {
             return Err(StoreError::StaleRevision {
                 base,
-                current: current.n,
+                current: current_n,
+            });
+        }
+        if let Some(current) = inner.states.get(id)
+            && current.version != state.version
+        {
+            return Err(StoreError::StaleState {
+                base: state.version,
+                current: current.version,
             });
         }
         inner
@@ -198,6 +295,9 @@ impl Store for MemoryStore {
             .get_mut(id)
             .expect("revision map present")
             .insert(artifact.to_owned(), next.clone());
+        let mut next_state = state.clone();
+        next_state.version = state.version.saturating_add(1);
+        inner.states.insert(id.to_owned(), next_state);
         Ok(())
     }
 
@@ -208,8 +308,7 @@ impl Store for MemoryStore {
 
     async fn save_state(&self, id: &str, state: &ProjectState) -> Result<(), StoreError> {
         let mut inner = self.inner.lock().expect("memory store lock");
-        inner.states.insert(id.to_owned(), state.clone());
-        Ok(())
+        write_state(&mut inner, id, state)
     }
 
     async fn entries(&self) -> Result<BTreeMap<String, ProjectEntry>, StoreError> {
@@ -306,6 +405,7 @@ pub mod test_support {
             concurrency: 2,
         });
         let state = ProjectState {
+            version: 1,
             proposals,
             rejections: vec![],
             ledger,
@@ -383,9 +483,90 @@ pub mod test_support {
             base: 1,
             reason: "no".to_owned(),
         });
+        let stale_state = state.clone();
         store.save_state(&id, &state).await.unwrap();
-        assert_eq!(store.load_state(&id).await.unwrap().unwrap(), state);
+        let mut expected = state;
+        expected.version += 1;
+        assert_eq!(store.load_state(&id).await.unwrap().unwrap(), expected);
         assert_eq!(store.load_state("nope").await.unwrap(), None);
+
+        // a stale state save is refused on both backends (IMP-40): the version
+        // moved since the caller loaded it, so the write must not overwrite it.
+        let stale_save = store.save_state(&id, &stale_state).await;
+        assert!(matches!(
+            stale_save,
+            Err(StoreError::StaleState {
+                base: 1,
+                current: 2
+            })
+        ));
+
+        // an atomic revision + state write lands both or neither (IMP-40): the
+        // revision advances only together with the state that carries its audit entry.
+        let r3 = r2.next("R-DASH-020: second alert rule.".to_owned());
+        let mut atomic_state = store.load_state(&id).await.unwrap().unwrap();
+        assert_eq!(atomic_state.version, 2);
+        let entry = atomic_state.audit.append(
+            AuditEvent {
+                actor: "sample-user".to_owned(),
+                action: AuditAction::Accept,
+                target_id: "P-1".to_owned(),
+                revision: Some(r3.label()),
+                reason: "accepted".to_owned(),
+            },
+            1_735_689_600,
+        );
+        atomic_state.audit_head = entry.hash.clone();
+        store
+            .update_revision_and_state(&id, "spec", 2, &r3, &atomic_state)
+            .await
+            .unwrap();
+        assert_eq!(store.revision(&id, "spec").await.unwrap().unwrap().n, 3);
+        let after_atomic = store.load_state(&id).await.unwrap().unwrap();
+        assert_eq!(after_atomic.version, 3);
+        assert_eq!(after_atomic.audit.len(), 1);
+        assert_eq!(after_atomic.audit_head, entry.hash);
+
+        // a stale state version refuses the whole write — the revision must not move.
+        let r4 = r3.next("R-DASH-021".to_owned());
+        let stale_atomic = store
+            .update_revision_and_state(&id, "spec", 3, &r4, &atomic_state)
+            .await;
+        assert!(matches!(
+            stale_atomic,
+            Err(StoreError::StaleState {
+                base: 2,
+                current: 3
+            })
+        ));
+        assert_eq!(
+            store.revision(&id, "spec").await.unwrap().unwrap().n,
+            3,
+            "a stale state must not advance the revision"
+        );
+
+        // a stale revision base refuses the whole write — the state must not move.
+        let mut rev_stale_state = store.load_state(&id).await.unwrap().unwrap();
+        rev_stale_state.rejections.push(crate::Rejection {
+            id: "P-1".to_owned(),
+            base: 1,
+            reason: "again".to_owned(),
+        });
+        let stale_rev = store
+            .update_revision_and_state(&id, "spec", 2, &r4, &rev_stale_state)
+            .await;
+        assert!(matches!(
+            stale_rev,
+            Err(StoreError::StaleRevision {
+                base: 2,
+                current: 3
+            })
+        ));
+        assert_eq!(
+            store.load_state(&id).await.unwrap().unwrap().version,
+            3,
+            "a stale revision base must not move the state"
+        );
 
         // project entries: put a second, deleted project, then list both.
         let mut deleted = ProjectEntry::new(
