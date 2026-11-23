@@ -58,6 +58,8 @@ jobs:
         run: |
           npm run dev -w @spekin/web &
           npx --yes wait-on@8 http://127.0.0.1:5173/ --timeout 60000
+          # Warm the dev server: compile every screen's modules once before the timed click paths run.
+          for r in / /p/meranti-yard/design; do curl -s -o /dev/null http://127.0.0.1:5173$r; done
           GATE=checked npm run harness
       - uses: actions/upload-artifact@v4
         if: always()
