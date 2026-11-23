@@ -61,6 +61,26 @@ export function rejectProposal(proposal: SampleReviewProposal, currentRev: strin
   };
 }
 
+// ---- S33 parity helpers (IMP-49) ----
+
+/** F244: the footer counts what is left, derived from the nitpicks, never a hardcoded literal. */
+export function reviewCounts(nits: readonly { stale?: boolean }[]) {
+  return { changes: nits.length, needsLook: nits.filter((n) => n.stale === true).length };
+}
+
+/** F248: applying the F-03 change to other frames is its own reviewed change set, with every target listed. */
+export const APPLY_OTHER_TARGETS = [
+  { id: 'F-04', name: 'Alert drawer', what: 'Apply the F-03 header fix as its own reviewed change' },
+];
+
+export function applyOtherChangeSet() {
+  return {
+    separateReview: true,
+    source: 'F-03 Variance table',
+    targets: APPLY_OTHER_TARGETS.map((t) => t.id),
+  };
+}
+
 export interface ReviewShellOverride {
   save?: SaveState;
   stage?: StageId;
@@ -104,10 +124,21 @@ export function ReviewAcceptWorkArea(props: {
   initialState?: ReviewState;
   onShellOverride?: (o: ReviewShellOverride) => void;
   onOpenHandoff?: (stale?: boolean) => void;
+  showApplyOther?: boolean;
+  currentSpecRev?: string;
 }) {
-  const { initialState = 'pins', onShellOverride, onOpenHandoff } = props;
+  const {
+    initialState = 'pins',
+    onShellOverride,
+    onOpenHandoff,
+    showApplyOther = false,
+    currentSpecRev = REVIEW_PROPOSAL.from,
+  } = props;
   const recordIntent = useWorkspace((s) => s.recordIntent);
   const data = useData();
+
+  // F253: a proposal whose base is no longer current cannot be accepted (R-EDT-4).
+  const proposalStale = currentSpecRev !== REVIEW_PROPOSAL.from;
 
   const [state, setState] = useState<ReviewState>(initialState);
   const [includedHunks, setIncludedHunks] = useState<string[]>(REVIEW_PROPOSAL.hunks.map((h) => h.id));
@@ -116,11 +147,14 @@ export function ReviewAcceptWorkArea(props: {
   const [writeError, setWriteError] = useState<string | null>(null);
   // The save chip the write answered with; the state effect must not overwrite it with "saved".
   const [saveOverride, setSaveOverride] = useState<SaveState | null>(null);
+  // F248: the separate reviewed change set for other frames, opened by the "Apply" suggestion.
+  const [applyOtherOpen, setApplyOtherOpen] = useState(showApplyOther);
 
   // IMP-41: Accept and Reject write through the data door, then draw the board's next state.
   // A 409 (stale) draws the S35 conflict save chip; nothing is saved until the source says so.
   async function writeAccept() {
-    if (writing || includedHunks.length === 0) return;
+    // F253: a stale proposal is blocked in the screen as well as in the core (R-EDT-4).
+    if (proposalStale || writing || includedHunks.length === 0) return;
     setWriting('accept');
     setWriteError(null);
     onShellOverride?.({ save: { status: 'saving', tone: 'warn', text: 'Saving…' } });
@@ -323,19 +357,28 @@ export function ReviewAcceptWorkArea(props: {
           </div>
 
           {mode === 'open' ? (
-            <div className="sp-banner warn" role="status">
-              <Icon name="alert" size={16} />
-              <p>
-                <b>Proposal, not accepted.</b> The spec stays r14 until you accept. Base r14 is still the current revision.
-              </p>
-              <Btn
-                label="Edit proposal"
-                sm
-                does="Edits the proposal text as a draft; the spec is unchanged"
-                feature="F249"
-                onClick={() => recordIntent('F249:edit')}
-              />
-            </div>
+            proposalStale ? (
+              <div className="sp-banner warn" role="status" data-feature="F253">
+                <Icon name="alert" size={16} />
+                <p>
+                  <b>Proposal is stale.</b> Base r14 is no longer the current revision ({currentSpecRev}). Accept is blocked until this proposal is rebased (R-EDT-4).
+                </p>
+              </div>
+            ) : (
+              <div className="sp-banner warn" role="status">
+                <Icon name="alert" size={16} />
+                <p>
+                  <b>Proposal, not accepted.</b> The spec stays r14 until you accept. Base r14 is still the current revision.
+                </p>
+                <Btn
+                  label="Edit proposal"
+                  sm
+                  does="Edits the proposal text as a draft; the spec is unchanged"
+                  feature="F249"
+                  onClick={() => recordIntent('F249:edit')}
+                />
+              </div>
+            )
           ) : mode === 'accepted' ? (
             <div className="rev-bn ok" role="status">
               <Icon name="check" size={16} />
@@ -395,7 +438,12 @@ export function ReviewAcceptWorkArea(props: {
               {REVIEW_PROPOSAL.hunks.map((h) => {
                 const checked = includedHunks.includes(h.id);
                 return (
-                  <section key={h.id} className={'rev-hk' + (mode === 'rejected' ? ' off' : '')} aria-label={'Hunk ' + h.id}>
+                  <section
+                    key={h.id}
+                    className={'rev-hk' + (mode === 'rejected' ? ' off' : '')}
+                    aria-label={'Hunk ' + h.id}
+                    data-feature={h.kind === 'Added ticket' ? 'F255' : undefined}
+                  >
                     <div className="hh">
                       {mode === 'open' ? (
                         <button
@@ -420,7 +468,7 @@ export function ReviewAcceptWorkArea(props: {
                       <code>{h.ref}</code>
                       <span>{h.name}</span>
                       <span className="sp-fill" />
-                      <span>{h.src}</span>
+                      <span data-feature="F250">{h.src}</span>
                       {mode === 'accepted' ? <Pill tone="ok" label="Accepted" /> : null}
                       {mode === 'rejected' ? <Pill tone="mute" label="Rejected" /> : null}
                     </div>
@@ -456,7 +504,7 @@ export function ReviewAcceptWorkArea(props: {
                   </RevBtn>
                   <RevBtn
                     cls="ink"
-                    disabled={includedHunks.length === 0 || writing !== null}
+                    disabled={includedHunks.length === 0 || writing !== null || proposalStale}
                     does="Asks to confirm with Cancel as the default, then creates r15 from r14 with the included hunks and one audit entry"
                     feature="F251"
                     onClick={() => void writeAccept()}
@@ -532,7 +580,7 @@ export function ReviewAcceptWorkArea(props: {
             >
               {mode === 'open' ? (
                 <>
-                  <div className="sp-sec">
+                  <div className="sp-sec" data-feature="F250">
                     <h4>
                       Requirements<span>3</span>
                     </h4>
@@ -540,7 +588,7 @@ export function ReviewAcceptWorkArea(props: {
                       <InspectorRow key={l.id} id={l.id} name={l.t} sub={l.sub} pill={l.p} />
                     ))}
                   </div>
-                  <div className="sp-sec">
+                  <div className="sp-sec" data-feature="F255">
                     <h4>
                       Tests, tasks and tickets<span>5</span>
                     </h4>
@@ -548,7 +596,7 @@ export function ReviewAcceptWorkArea(props: {
                       <InspectorRow key={l.id} id={l.id} name={l.t} sub={l.sub} pill={l.p} />
                     ))}
                   </div>
-                  <div className="sp-ready">
+                  <div className="sp-ready" data-feature="F250">
                     <div className="t">
                       If you accept<span className="pill acc">Scope: spec</span>
                     </div>
@@ -584,7 +632,7 @@ export function ReviewAcceptWorkArea(props: {
                       </div>
                     </div>
                   </div>
-                  <div className="sp-sec">
+                  <div className="sp-sec" data-feature="F255">
                     <h4>
                       Linked items<span>5</span>
                     </h4>
@@ -628,6 +676,8 @@ export function ReviewAcceptWorkArea(props: {
 
   // ---- Frame review states: pins, hover, stale
   const hov = state === 'hover' ? 4 : state === 'stale' ? 'open' : 0;
+  const counts = reviewCounts(REVIEW_NITS);
+  const otherCS = applyOtherChangeSet();
   const nit4 = REVIEW_NITS[3]!;
   const extras: Partial<Record<string, React.ReactNode>> = {};
   if (state === 'hover') {
@@ -765,8 +815,8 @@ export function ReviewAcceptWorkArea(props: {
               </div>
             ))}
             <div className="rev-rf">
-              <div className="c">
-                <b>{REVIEW_NITS.length} changes</b> · <em>1 needs a look</em>
+              <div className="c" data-feature="F244">
+                <b>{counts.changes} changes</b> · <em>{counts.needsLook} needs a look</em>
               </div>
               <div className="acts">
                 <RevBtn
@@ -797,17 +847,44 @@ export function ReviewAcceptWorkArea(props: {
           </div>
         </div>
         {state !== 'stale' ? (
-          <div className="sp-sugg">
-            <button
-              type="button"
-              data-does="Puts this prompt in the composer; nothing runs until Send"
-              data-feature="F114"
-              onClick={() => setDraft('Apply the header fix to F-04 (separate review)')}
-            >
-              <Icon name="spark" size={13} />
-              Apply the header fix to F-04 (separate review)
-            </button>
-          </div>
+          <>
+            <div className="sp-sugg" data-feature="F248">
+              <button
+                type="button"
+                data-does="Puts this prompt in the composer; nothing runs until Send"
+                data-feature="F114"
+                onClick={() => {
+                  setDraft('Apply the header fix to F-04 (separate review)');
+                  setApplyOtherOpen(true);
+                }}
+              >
+                <Icon name="spark" size={13} />
+                Apply the header fix to F-04 (separate review)
+              </button>
+            </div>
+            {applyOtherOpen ? (
+              <div className="sp-gc" data-feature="F248" role="group" aria-label="Apply to other frames">
+                <div className="k">Separate review · apply header fix to other frames</div>
+                <div className="tt">
+                  {otherCS.source} → {otherCS.targets.length} target frame
+                </div>
+                <div className="bd">
+                  {APPLY_OTHER_TARGETS.map((t) => (
+                    <div className="sp-row" key={t.id}>
+                      <span className="id">{t.id}</span>
+                      <span className="nm">
+                        {t.name}
+                        <small>{t.what}</small>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="ft">
+                  <span className="s">Separate change set · reviewed apart from F-03; nothing is accepted here</span>
+                </div>
+              </div>
+            ) : null}
+          </>
         ) : null}
       </ChatPanel>
 

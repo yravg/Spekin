@@ -1,43 +1,12 @@
 {
-  "title": "Spekin live workers · IMP-43 to IMP-46",
+  "title": "Spekin live workers · parity round (IMP-47 to IMP-52)",
+  "lead": { "name": "Lead", "model": "Claude Code", "task": "Reviews each PR; merges only on green CI; loops until every parity cell is proven" },
   "workers": [
-    {
-      "id": "A",
-      "title": "Spekin A",
-      "model": "opencode-go/hy4",
-      "cards": "IMP-43 → IMP-45",
-      "worktree": "../Spekin-core",
-      "log": "../worker-A.log",
-      "branches": [
-        "imp-43-skills-audit",
-        "imp-45-door-and-offline"
-      ]
-    },
-    {
-      "id": "B",
-      "title": "Spekin B",
-      "model": "opencode-go/hy4",
-      "cards": "IMP-44",
-      "worktree": "../Spekin-ui",
-      "log": "../worker-B.log",
-      "branches": [
-        "imp-44-stage-values"
-      ]
-    },
-    {
-      "id": "C",
-      "title": "Spekin C",
-      "model": "opencode-go/hy4",
-      "cards": "IMP-46",
-      "worktree": "../Spekin-w3",
-      "log": "../worker-C.log",
-      "branches": [
-        "imp-46-sweep"
-      ]
-    }
+    { "id": "W1", "title": "Spekin W1", "model": "opencode-go/hy4", "cards": "IMP-47 S28", "worktree": "../Spekin-core", "log": "../worker-W1.log", "branches": ["imp-47-s28-parity"] },
+    { "id": "W2", "title": "Spekin W2", "model": "opencode-go/hy4", "cards": "IMP-48 S29+S32", "worktree": "../Spekin-ui", "log": "../worker-W2.log", "branches": ["imp-48-s29-s32-parity"] },
+    { "id": "W3", "title": "Spekin W3", "model": "opencode-go/hy4", "cards": "IMP-49 S33", "worktree": "../Spekin-w3", "log": "../worker-W3.log", "branches": ["imp-49-s33-parity"] },
+    { "id": "W4", "title": "Spekin W4", "model": "opencode-go/hy4", "cards": "IMP-50 S34-S38+T01", "worktree": "../Spekin-w4", "log": "../worker-W4.log", "branches": ["imp-50-s34-s38-parity"] },
+    { "id": "W5", "title": "Spekin W5", "model": "opencode-go/hy4", "cards": "IMP-51 1024 band → IMP-52 req map", "worktree": "../Spekin-w5", "log": "../worker-W5.log", "branches": ["imp-51-band-1024", "imp-52-req-map"] }
   ],
-  "parity": {
-    "command": "node tools/live/parity-export.mjs",
-    "every": 60
-  }
+  "parity": { "command": "node tools/live/parity-export.mjs", "every": 60 }
 }

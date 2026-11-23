@@ -177,6 +177,7 @@ function RefFrame(props: {
   return (
     <div
       className={'sp-fr' + (cls ? ' ' + cls : '')}
+      data-feature="F147"
       style={{ left: x + 'px', top: y + 'px', width: w + 'px' }}
       data-ref={id || undefined}
       onClick={onClick}
@@ -722,6 +723,7 @@ export function ReferenceIntakeWorkArea(props: {
             </div>
             <button
               type="button"
+              data-feature="F153"
               className="int-s2"
               data-later="Capture from a live page needs an in-app browser; deferred (FR-04 to FR-09)"
               disabled
@@ -734,6 +736,7 @@ export function ReferenceIntakeWorkArea(props: {
             </button>
             <button
               type="button"
+              data-feature="F154"
               className="int-s2"
               data-later="Sending frames from an editor over MCP is deferred (FR-47)"
               disabled
@@ -1032,6 +1035,7 @@ export function ReferenceIntakeWorkArea(props: {
         <div className="sp-work">
           <div
             className="sp-cv int-cv"
+            data-feature="F145"
             aria-label="Board: Alert ideas"
             tabIndex={0}
             onKeyDown={handleBoardKeyDown}
@@ -1108,6 +1112,7 @@ export function ReferenceIntakeWorkArea(props: {
               </div>
               <button
                 type="button"
+                data-feature="F153"
                 className="int-later"
                 data-later="Capture from a live page needs an in-app browser; deferred (FR-04 to FR-09)"
                 disabled
@@ -1117,6 +1122,7 @@ export function ReferenceIntakeWorkArea(props: {
               </button>
               <button
                 type="button"
+                data-feature="F154"
                 className="int-later"
                 data-later="Connecting an editor over MCP is deferred (FR-47)"
                 disabled

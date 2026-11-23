@@ -28,7 +28,9 @@
     "preview": "npm run preview -w @spekin/web",
     "canvas:states": "node tools/canvas/lint-all.mjs --write",
     "server": "cargo run -p spekin-server",
-    "canvas:serve": "node tools/canvas/serve.mjs"
+    "canvas:serve": "node tools/canvas/serve.mjs",
+    "e2e:sweep": "node tools/e2e/sweep.mjs",
+    "e2e:offline": "node tools/e2e/offline-real-server.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
