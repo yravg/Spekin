@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { sampleData, type ModelsLedgerKind, type ModelsSourceId, type ModelsUsageMoment, type PillTuple, type SampleModelsCaps, type SampleModelsUsage } from '../data/source';
+import { sampleData, SAMPLE_PROJECT_ID, type ModelsLedgerKind, type ModelsSourceId, type ModelsUsageMoment, type PillTuple, type SampleModelsCaps, type SampleModelsUsage } from '../data/source';
 import { useData, useDataRead } from '../data/provider';
 const { CTX_DESIGN, MODELS_AGENT_RUN, MODELS_AGENTS, MODELS_API, MODELS_CAPS, MODELS_CONNECTOR, MODELS_EFFORT, MODELS_KEY, MODELS_LEDGER, MODELS_LEDGER_DETAIL, MODELS_PERIOD, MODELS_PROVIDERS, MODELS_RUN, MODELS_SOURCES, MODELS_TASKS, MODELS_USAGE } = sampleData;
 import { Icon, type IconName } from '../ui/Icon';
@@ -97,6 +97,61 @@ export function ModelsUsageWorkArea(props: {
   const [draft, setDraft] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState('');
   const [sourceKey, setSourceKey] = useState(MODELS_API.sel);
+  // IMP-41: Send estimates, reserves and settles through the data door. The words below appear
+  // only after the source answered; a refused reserve never reads as "reserved".
+  const [runWrite, setRunWrite] = useState<'idle' | 'saving' | 'done' | 'failed'>('idle');
+  const [runMessage, setRunMessage] = useState<string | null>(null);
+
+  async function sendRun() {
+    if (runWrite === 'saving') return;
+    if (source !== 'hosted') {
+      intent(source === 'cli' ? 'F287:send-cli' : 'F287:send-api');
+      return;
+    }
+    setRunWrite('saving');
+    setRunMessage('Estimating…');
+    const estimate = await data.estimateRun(SAMPLE_PROJECT_ID, {
+      min: MODELS_RUN.est[0],
+      max: MODELS_RUN.est[1],
+      reserve: MODELS_RUN.reserve,
+    });
+    if (!estimate.ok) {
+      setRunWrite('failed');
+      setRunMessage(estimate.message);
+      return;
+    }
+    const reserved = await data.reserveRun(SAMPLE_PROJECT_ID, {
+      run_id: 'run-' + MODELS_RUN.id,
+      person_id: 'rina',
+      idempotency_key: 'k-' + MODELS_RUN.key,
+      estimate: estimate.value,
+    });
+    if (!reserved.ok) {
+      setRunWrite('failed');
+      setRunMessage(reserved.message);
+      return;
+    }
+    // The browser never settles a real run: the server settles it when the run ends. Only the
+    // sample, whose run finishes at once, settles here so the drawn ledger shows the outcome.
+    if (data.mode !== 'sample') {
+      setRunWrite('done');
+      setRunMessage('Reserved ' + reserved.value.reserved + ' cr · settles when the run finishes');
+      return;
+    }
+    const settled = await data.settleRun(SAMPLE_PROJECT_ID, {
+      run_id: reserved.value.run_id,
+      actual: MODELS_RUN.expect,
+    });
+    if (!settled.ok) {
+      setRunWrite('failed');
+      setRunMessage(settled.message);
+      return;
+    }
+    setRunWrite('done');
+    setRunMessage(
+      'Reserved ' + reserved.value.reserved + ' cr · settled ' + settled.value.charged + ' cr · ' + settled.value.refunded + ' cr released',
+    );
+  }
 
   useEffect(() => {
     setDraft(null);
@@ -221,9 +276,10 @@ export function ModelsUsageWorkArea(props: {
             type="button"
             className="sp-send"
             aria-label="Send"
+            disabled={runWrite === 'saving'}
             data-does="Sends with exactly the listed context after reserving the maximum estimate"
             data-feature="F287"
-            onClick={() => intent('F287:send')}
+            onClick={() => void sendRun()}
           >
             <Icon name="up" size={15} stroke={2} />
           </button>
@@ -1232,7 +1288,7 @@ export function ModelsUsageWorkArea(props: {
           icon="up"
           does="Reserves 36 credits atomically, then starts the run with exactly this context"
           feature="F287"
-          onClick={() => intent('F287:send-reserve')}
+          onClick={() => void sendRun()}
         />
         <Btn
           label="Trim context"
@@ -1241,6 +1297,11 @@ export function ModelsUsageWorkArea(props: {
           onClick={() => intent('F287:trim')}
         />
         <span className="mod-fine">Nothing is charged until the run ends.</span>
+        {runMessage ? (
+          <span className="mod-fine" role="status" data-feature="F287">
+            {runMessage}
+          </span>
+        ) : null}
       </div>
     </Card>
   );

@@ -6,7 +6,7 @@ It lists every npm package (from `package-lock.json`) and every crate (from `car
 
 | | Count |
 |---|---|
-| npm packages | 170 |
+| npm packages | 198 |
 | crates | 246 |
 | copyleft, allowed | 0 |
 | copyleft, not allowed | 0 |
@@ -62,6 +62,7 @@ It lists every npm package (from `package-lock.json`) and every crate (from `car
 | @esbuild/win32-arm64 | 0.28.2 | dev | MIT |
 | @esbuild/win32-ia32 | 0.28.2 | dev | MIT |
 | @esbuild/win32-x64 | 0.28.2 | dev | MIT |
+| @exodus/bytes | 1.16.0 | dev | MIT |
 | @jridgewell/gen-mapping | 0.3.13 | dev | MIT |
 | @jridgewell/remapping | 2.3.5 | dev | MIT |
 | @jridgewell/resolve-uri | 3.1.3 | dev | MIT |
@@ -122,6 +123,8 @@ It lists every npm package (from `package-lock.json`) and every crate (from `car
 | @vitest/utils | 3.2.7 | dev | MIT |
 | assertion-error | 2.0.1 | dev | MIT |
 | baseline-browser-mapping | 2.11.39 | dev | Apache-2.0 |
+| bcp-47 | 2.1.2 | dev | MIT |
+| bcp-47-match | 2.0.3 | dev | MIT |
 | browserslist | 4.29.6 | dev | MIT |
 | cac | 6.7.14 | dev | MIT |
 | caniuse-lite | 1.0.30001826 | dev | CC-BY-4.0 |
@@ -130,9 +133,12 @@ It lists every npm package (from `package-lock.json`) and every crate (from `car
 | convert-source-map | 2.0.0 | dev | MIT |
 | cookie | 1.1.1 | runtime | MIT |
 | csstype | 3.2.4 | dev | MIT |
+| data-urls | 8.0.0 | dev | MIT |
 | debug | 4.4.3 | dev | MIT |
+| decimal.js | 10.6.0 | dev | MIT |
 | deep-eql | 5.0.2 | dev | MIT |
 | electron-to-chromium | 1.5.492 | dev | ISC |
+| entities | 9.0.0 | dev | BSD-2-Clause |
 | es-module-lexer | 1.7.0 | dev | MIT |
 | esbuild | 0.28.2 | dev | MIT |
 | escalade | 3.2.0 | dev | MIT |
@@ -141,16 +147,25 @@ It lists every npm package (from `package-lock.json`) and every crate (from `car
 | fdir | 6.5.0 | dev | MIT |
 | fsevents | 2.3.3 | dev | MIT |
 | gensync | 1.0.0-beta.2 | dev | MIT |
+| html-encoding-sniffer | 7.0.0 | dev | MIT |
+| is-alphabetical | 2.0.1 | dev | MIT |
+| is-alphanumerical | 2.0.1 | dev | MIT |
+| is-decimal | 2.0.1 | dev | MIT |
+| is-potential-custom-element-name | 1.0.1 | dev | MIT |
 | js-tokens | 4.0.0 | dev | MIT |
 | js-tokens | 9.0.1 | dev | MIT |
+| jsdom | 31.0.1 | dev | MIT |
 | jsesc | 3.1.0 | dev | MIT |
 | json5 | 2.2.3 | dev | MIT |
 | loupe | 3.2.1 | dev | MIT |
+| lru-cache | 11.5.3 | dev | BlueOak-1.0.0 |
 | lru-cache | 5.1.1 | dev | ISC |
 | magic-string | 0.30.21 | dev | MIT |
 | ms | 2.1.3 | dev | MIT |
 | nanoid | 3.3.20 | dev | MIT |
 | node-releases | 2.0.65 | dev | MIT |
+| parse5 | 8.1.1 | dev | MIT |
+| parse5-parser-stream | 8.1.1 | dev | MIT |
 | pathe | 2.0.3 | dev | MIT |
 | pathval | 2.0.1 | dev | MIT |
 | picocolors | 1.1.1 | dev | ISC |
@@ -160,11 +175,13 @@ It lists every npm package (from `package-lock.json`) and every crate (from `car
 | playwright-core | 1.65.1 | dev | Apache-2.0 |
 | pngjs | 7.0.0 | dev | MIT |
 | postcss | 8.5.33 | dev | MIT |
+| punycode | 2.3.1 | dev | MIT |
 | react | 19.3.1 | runtime | MIT |
 | react-dom | 19.3.1 | runtime | MIT |
 | react-refresh | 0.18.0 | dev | MIT |
 | react-router | 7.18.6 | runtime | MIT |
 | rollup | 4.68.8 | dev | MIT |
+| saxes | 6.0.0 | dev | ISC |
 | scheduler | 0.28.0 | runtime | MIT |
 | semver | 6.3.2 | dev | ISC |
 | set-cookie-parser | 2.7.3 | runtime | MIT |
@@ -179,12 +196,23 @@ It lists every npm package (from `package-lock.json`) and every crate (from `car
 | tinypool | 1.1.1 | dev | MIT |
 | tinyrainbow | 2.0.0 | dev | MIT |
 | tinyspy | 4.0.6 | dev | MIT |
+| tldts | 7.5.5 | dev | MIT |
+| tldts-core | 7.5.5 | dev | MIT |
+| tough-cookie | 6.1.0 | dev | BSD-3-Clause |
+| tr46 | 7.0.0 | dev | MIT |
 | typescript | 5.9.3 | dev | Apache-2.0 |
+| undici | 8.13.1 | dev | MIT |
 | update-browserslist-db | 1.4.0 | dev | MIT |
 | vite | 7.3.8 | dev | MIT |
 | vite-node | 3.2.4 | dev | MIT |
 | vitest | 3.2.7 | dev | MIT |
+| w3c-xmlserializer | 6.0.0 | dev | MIT |
+| webidl-conversions | 8.0.1 | dev | BSD-2-Clause |
+| whatwg-mimetype | 5.0.0 | dev | MIT |
+| whatwg-url | 17.3.0 | dev | MIT |
 | why-is-node-running | 2.3.0 | dev | MIT |
+| xml-name-validator | 5.0.0 | dev | Apache-2.0 |
+| xmlchars | 2.2.0 | dev | MIT |
 | yallist | 3.1.1 | dev | ISC |
 | zustand | 5.1.0 | runtime | MIT |
 

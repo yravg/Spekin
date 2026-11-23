@@ -68,6 +68,21 @@ export function markReadFailed(key: string, retry: () => Promise<unknown>): void
   notify();
 }
 
+/**
+ * A write that failed with the server unreachable (IMP-41). The banner rises and "Try again"
+ * re-runs the write; until it answers the screen keeps the input and shows no saved state.
+ */
+export function markWriteFailed(key: string, retry: () => Promise<unknown>): void {
+  retries.set('write:' + key, retry);
+  notify();
+}
+
+/** A write that answered (2xx or a typed 409) clears the write's offline marker. */
+export function markWriteSucceeded(key: string): void {
+  if (retries.delete('write:' + key)) notify();
+}
+
+
 /** Run one API read: a success is remembered as the last copy, a failure raises the offline state. */
 export async function readThrough<T>(key: string, read: () => Promise<T>): Promise<T> {
   try {
