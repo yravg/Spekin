@@ -141,7 +141,8 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-37 | ui + core | API mode for models, skills and history, contracts, audit, deleted projects | IMP-21 | done, part open: PR #39, stacked on #38 (lead re-ran 80/80 sample mode; worker: API mode S27, S35, S36, S37, S40 pass; some fields still sample-only) |
 | IMP-39 | ui | Build the S35 offline state (F378, drawn 23 Nov): in API mode a failed read keeps the last loaded copy with the banner and the Offline save chip; never sample data. Harness path S35 offline | IMP-37 | done, part open: PR #42, stacked on #40 (lead re-ran 81/81; real-server stop test and banners on other boards open) |
 | IMP-38 | core | Store trait, memory store, Postgres store (ADR 0008) | PR #37 | done, part open: PR #41, stacked on #37 (lead ran the Postgres stage on Postgres 16 in Docker: shared suite passes; concurrent writers not tested) |
-| IMP-40 | core | PgStore under concurrency: two connections race one revision, exactly one wins, the other gets the stale error; audit chain stays valid | IMP-38 | open, part done: WIP commit 1d50f30 on branch imp-40-pg-concurrency (not verified; its race test hung 2 h with no open DB connections, so look at the test barrier first). Worker stopped at the OpenCode Go usage limit |
+| IMP-40 | core | PgStore under concurrency: two connections race one revision, exactly one wins, the other gets the stale error; audit chain stays valid | IMP-38 | done, waiting for owner merge: PR #44, stacked on #41. The hang was test isolation (two race tests truncating one database). Memory and Postgres stores now refuse a stale state; accept and revert write the revision and the audit entry in one transaction. The lead re-ran the Postgres stage (3 races × 50 rounds plus the shared suite), two mutation checks and the gate. Follow-up: StaleState maps to proposal_stale for reserve and reject too |
+| IMP-42 | core | The API on Postgres end to end: route tests on both backends, a live server smoke over HTTP, concurrent HTTP accepts | IMP-40 | open: worker started 23 Nov (OpenCode Go) |
 | IMP-41 | ui | Screens write through the data door (accept, revert, reserve and settle, skill copy, edit and rollback, delete and restore) | IMP-39 | done, part open: PR #43, stacked on #42 (lead re-ran 81/81; lead fix: browser never settles; revert, delete and source rollback have no drawn control yet) |
 | IMP-36 | core | GenUI sample verdicts equal the Rust validator | IMP-21 | done: PR #40, stacked on #39 (lead re-ran 80/80; Rust test pins verdicts) |
 
@@ -178,6 +179,16 @@ Read docs/adr/0008-persistence.md (short). Base: `origin/integration-2-2026-11-2
 4. The server picks `PgStore` when `DATABASE_URL` is set. A command `cargo run -p spekin-server -- seed-sample` seeds Meranti Yard; it refuses unless `--yes` is given.
 5. Tests: one shared test suite run against `MemoryStore` always, and against `PgStore` only when `TEST_DATABASE_URL` is set; without it print "postgres stage skipped" (never claim it passed). Licence check (`node tools/checks/licences.mjs --check`) must pass with the new crates.
 6. Checks: `npm run gate` passes. Say in the PR whether the Postgres stage ran.
+
+### IMP-42 · The API on Postgres, end to end (core)
+
+Base: `imp-40-pg-concurrency` (PR #44). Branch `imp-42-api-on-pg`.
+1. The server's route tests run against both backends. Run the existing route tests in `crates/spekin-server` (or a shared helper they call) on `Backend::Memory` always and on `Backend::Pg` only when `TEST_DATABASE_URL` is set (seed Meranti Yard first with the same seed `seed-sample` uses). Without the variable, print "postgres stage skipped" and never claim it passed.
+2. One live smoke test: start the real server binary with `DATABASE_URL` on a free loopback port, then over HTTP: health, project, stages, accept (then the same accept again gives 409 `proposal_stale`), reject, revert, reserve and settle, audit (the chain verifies), deleted projects and restore. Stop the server at the end, even if the test fails.
+3. Two concurrent HTTP accepts on the same revision give exactly one 200 and one 409. Repeat 20 times.
+4. Fix what this exposes in the core lane. Do not change the UI or the boards.
+5. Throwaway Postgres: `docker run -d --name spekin-pg-imp42 -e POSTGRES_PASSWORD=spekin -e POSTGRES_DB=spekin_test -p 127.0.0.1:55435:5432 postgres:16-alpine`. Remove only that container when done.
+6. Checks: `npm run gate` passes. The PR says the Postgres stage ran, with the counts.
 
 ### IMP-41 · Screens write through the data door (ui)
 
