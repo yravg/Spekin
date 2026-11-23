@@ -1,20 +1,6 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
-import {
-  MODEL,
-  STYLE_CTX,
-  STYLE_HUNKS,
-  STYLE_NEWREF,
-  STYLE_NEWTOKEN,
-  STYLE_REFS,
-  STYLE_STEPS,
-  STYLE_TOKENS,
-  STYLE_contrast,
-  type PillTuple,
-  type SampleStyleHunk,
-  type SampleStyleRef,
-  type SampleStyleToken,
-  type StyleTokenState,
-} from '@spekin/sample';
+import { sampleData, type PillTuple, type SampleStyleHunk, type SampleStyleRef, type SampleStyleToken, type StyleTokenState } from '../data/source';
+const { MODEL, STYLE_CTX, STYLE_HUNKS, STYLE_NEWREF, STYLE_NEWTOKEN, STYLE_REFS, STYLE_STEPS, STYLE_TOKENS, STYLE_contrast } = sampleData;
 import { useWorkspace, type SaveState } from '../state/workspace';
 import { Icon, type IconName } from '../ui/Icon';
 import { Btn, IconBtn } from '../ui/Button';

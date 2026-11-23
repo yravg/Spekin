@@ -1,14 +1,6 @@
 import { useEffect, useState, type KeyboardEvent, type ReactNode } from 'react';
-import {
-  INTAKE_LIMITS,
-  INTAKE_PII,
-  INTAKE_REFS,
-  MODEL,
-  type ContextItem,
-  type PillTuple,
-  type SampleIntakeLimits,
-  type SampleIntakeRef,
-} from '@spekin/sample';
+import { sampleData, type ContextItem, type PillTuple, type SampleIntakeLimits, type SampleIntakeRef } from '../data/source';
+const { INTAKE_LIMITS, INTAKE_PII, INTAKE_REFS, MODEL } = sampleData;
 import { useWorkspace, type SaveState } from '../state/workspace';
 import { Icon } from '../ui/Icon';
 import { Btn, IconBtn } from '../ui/Button';

@@ -1,16 +1,6 @@
 import { useState, type KeyboardEvent } from 'react';
-import {
-  MODEL,
-  SKL_DETAIL,
-  SKL_DIFF,
-  SKL_EDIT,
-  SKL_GH,
-  SKL_GLOSS,
-  SKL_SKILLS,
-  SKL_UPDATES,
-  type ContextItem,
-  type SampleSkillRow,
-} from '@spekin/sample';
+import { sampleData, type ContextItem, type SampleSkillRow } from '../data/source';
+const { MODEL, SKL_DETAIL, SKL_DIFF, SKL_EDIT, SKL_GH, SKL_GLOSS, SKL_SKILLS, SKL_UPDATES } = sampleData;
 import { useWorkspace, type SaveState } from '../state/workspace';
 import { ChatPanel } from '../shell/ChatPanel';
 import { ArtifactTabs, type ArtifactTabItem } from '../shell/ArtifactTabs';

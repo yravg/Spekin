@@ -1,4 +1,4 @@
-import type { SampleProject, SampleUsage } from '@spekin/sample';
+import type { SampleProject, SampleUsage } from '../data/source';
 import type { SaveState } from '../state/workspace';
 import { Icon } from '../ui/Icon';
 import { IconBtn } from '../ui/Button';

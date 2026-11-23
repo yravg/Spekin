@@ -1,5 +1,5 @@
 import type { KeyboardEvent } from 'react';
-import type { SampleModel } from '@spekin/sample';
+import type { SampleModel } from '../data/source';
 import { Icon } from '../ui/Icon';
 import { IconBtn } from '../ui/Button';
 

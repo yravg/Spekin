@@ -1,19 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import {
-  INTAKE_COMPOSER,
-  INTAKE_DELETED,
-  INTAKE_NEW,
-  INTAKE_PROJECTS,
-  INTAKE_SWITCH_ORDER,
-  MODEL,
-  PROJECT,
-  STAGES,
-  USAGE,
-  type IntakeThumb,
-  type SampleIntakeProject,
-  type StageTone,
-} from '@spekin/sample';
+import { sampleData, type IntakeThumb, type SampleIntakeProject, type StageTone } from '../data/source';
+const { INTAKE_COMPOSER, INTAKE_DELETED, INTAKE_NEW, INTAKE_PROJECTS, INTAKE_SWITCH_ORDER, MODEL, PROJECT, STAGES, USAGE } = sampleData;
 import { useWorkspace } from '../state/workspace';
 import { Icon } from '../ui/Icon';
 import { IconBtn } from '../ui/Button';

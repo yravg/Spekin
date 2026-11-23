@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { PillTuple } from '@spekin/sample';
+import type { PillTuple } from '../data/source';
 import { IconBtn } from '../ui/Button';
 import { Pill } from '../ui/Pill';
 

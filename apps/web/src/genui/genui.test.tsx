@@ -1,116 +1,88 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { PACKAGES } from '@spekin/sample';
-import {
-  validateGenUiCard,
-  type GenUiCard,
-  ALLOWED_ACTION_KINDS,
-  GENUI_FAMILIES,
-} from './validate';
-import {
-  createConfirmState,
-  executeConfirmedAction,
-  GenUiWorkArea,
-} from './GenUiWorkArea';
+import { SAMPLE_GENUI_CARDS, apiSource, sampleData, sampleSource } from '../data/source';
+import { createConfirmState, executeConfirmedAction, GenUiWorkArea } from './GenUiWorkArea';
 
-const VALID_CHECKLIST_CARD: GenUiCard = {
+const { PACKAGES } = sampleData;
+
+// A card the Rust validator refuses: it carries text that must never reach the screen.
+const REFUSED_CARD = {
   schema_version: 1,
-  id: 'AC-DASH-019',
-  title: 'AC-DASH-019 · Alert after 2 periods over 3%',
-  provenance: 'imported_observation',
+  id: 'PARTIAL-LEAK-99',
+  title: 'SECRET_PARTIAL_TITLE_MUST_NOT_RENDER',
+  provenance: 'model_proposal',
   body: null,
-  links: ['R-DASH-014'],
-  actions: [
-    { kind: 'expand_details', label: 'Details', target_id: 'AC-DASH-019', href: null },
-    { kind: 'pin', label: 'Pin', target_id: 'AC-DASH-019', href: null },
-  ],
-  family: 'checklist',
-  items: [
-    { id: 'c1', label: 'Alert raised after 2 periods over 3%', checked: false, status: 'untested' },
-    { id: 'c2', label: 'Threshold read from accepted spec r14', checked: true, status: 'passed_fixture' },
-    { id: 'c3', label: 'No alert for P-04 at −3.4%', checked: false, status: 'no_evidence' },
-  ],
-  summary: '1 of 3 passed. Nothing else is shown as passed.',
+  links: [] as string[],
+  actions: [] as { kind: string; label: string; target_id: string | null; href: string | null }[],
+  family: 'unknown_widget',
+  items: [{ id: 'x', label: 'LEAKED_ROW_TEXT', checked: false, status: 'untested' }],
 };
 
-describe('S38 GenUI panel (IMP-19)', () => {
-  it('validates the IMP-10 card families and allowlisted actions, and rejects invalid/unsafe payloads fail-closed', () => {
-    expect(GENUI_FAMILIES).toEqual(['checklist', 'comparison', 'question']);
-    expect(ALLOWED_ACTION_KINDS).toEqual([
-      'pin',
-      'unpin',
-      'expand_details',
-      'open_review',
-      'compare',
-      'edit_draft',
-      'select_option',
-      'skip_question',
-      'export_json',
-    ]);
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 
-    const ok = validateGenUiCard(VALID_CHECKLIST_CARD);
-    expect(ok.status).toBe('ok');
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
-    // Unknown component family
-    const badFamily = validateGenUiCard({ ...VALID_CHECKLIST_CARD, family: 'raw_html' });
-    expect(badFamily.status).toBe('rejected');
+describe('S38 GenUI panel (IMP-19, IMP-21)', () => {
+  it('a mocked API refusal shows the fallback card and no part of the card', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        json({ status: 'rejected', reason: { code: 'unknown_component', family: 'unknown_widget' } }, 422),
+      ),
+    );
 
-    // Privilege-escalating action
-    const badAction = validateGenUiCard({
-      ...VALID_CHECKLIST_CARD,
-      actions: [{ kind: 'accept_spec', label: 'Accept now', target_id: null, href: null }],
-    });
-    expect(badAction.status).toBe('rejected');
-
-    // Unsafe URL (javascript: / data:)
-    const badUrl = validateGenUiCard({
-      ...VALID_CHECKLIST_CARD,
-      actions: [{ kind: 'open_review', label: 'Open', target_id: null, href: 'javascript:alert(1)' }],
-    });
-    expect(badUrl.status).toBe('rejected');
-
-    const badDataUrl = validateGenUiCard({
-      ...VALID_CHECKLIST_CARD,
-      actions: [{ kind: 'open_review', label: 'Open', target_id: null, href: 'data:text/html,<svg>' }],
-    });
-    expect(badDataUrl.status).toBe('rejected');
-
-    // Script/tool pattern in text
-    const badScript = validateGenUiCard({
-      ...VALID_CHECKLIST_CARD,
-      title: 'Run <script>alert(1)</script>',
-    });
-    expect(badScript.status).toBe('rejected');
-
-    // Missing required field
-    const missingField = validateGenUiCard({
-      schema_version: 1,
-      id: 'BAD-1',
-      provenance: 'model_proposal',
-      family: 'checklist',
-      items: [],
-    });
-    expect(missingField.status).toBe('rejected');
-  });
-
-  it('shows the fallback state for an invalid card and never renders it partly', () => {
-    const invalidPayload = {
-      schema_version: 1,
-      id: 'PARTIAL-LEAK-99',
-      title: 'SECRET_PARTIAL_TITLE_MUST_NOT_RENDER',
-      provenance: 'model_proposal',
-      family: 'unknown_widget',
-      items: [{ id: 'x', label: 'LEAKED_ROW_TEXT', checked: false, status: 'untested' }],
-    };
+    const verdict = await apiSource.validateGenUi(REFUSED_CARD);
+    expect(verdict.status).toBe('rejected');
 
     const html = renderToStaticMarkup(
-      <GenUiWorkArea initialMode="cards" customPayload={invalidPayload} />,
+      <GenUiWorkArea initialMode="cards" customPayload={REFUSED_CARD} validation={verdict} />,
     );
     expect(html).toContain('Plain table · fallback');
     expect(html).toContain('Shown as a table.');
     expect(html).not.toContain('SECRET_PARTIAL_TITLE_MUST_NOT_RENDER');
     expect(html).not.toContain('LEAKED_ROW_TEXT');
     expect(html).not.toContain('PARTIAL-LEAK-99');
+  });
+
+  it('a network error is a refusal, never a partly drawn card', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        throw new TypeError('offline');
+      }),
+    );
+
+    const verdict = await apiSource.validateGenUi(REFUSED_CARD);
+    expect(verdict.status).toBe('rejected');
+    expect(verdict.status === 'rejected' ? verdict.reason : '').toMatch(/network/i);
+
+    const html = renderToStaticMarkup(
+      <GenUiWorkArea initialMode="cards" customPayload={REFUSED_CARD} validation={verdict} />,
+    );
+    expect(html).toContain('Plain table · fallback');
+    expect(html).not.toContain('SECRET_PARTIAL_TITLE_MUST_NOT_RENDER');
+  });
+
+  it('in sample mode the recorded Rust verdict decides, with no request', async () => {
+    const valid = SAMPLE_GENUI_CARDS.find((c) => c.verdict.status === 'valid')!;
+    const refused = SAMPLE_GENUI_CARDS.find((c) => c.verdict.status === 'rejected')!;
+
+    expect(sampleSource.knownCardVerdict(valid.payload)?.status).toBe('valid');
+    expect(sampleSource.knownCardVerdict(refused.payload)?.status).toBe('rejected');
+    expect(sampleSource.knownCardVerdict({ id: 'not-a-sample-card' })).toBeNull();
+    expect(await sampleSource.validateGenUi(refused.payload)).toEqual({
+      status: 'rejected',
+      reason: expect.stringMatching(/forecast|missing/),
+    });
+
+    const html = renderToStaticMarkup(
+      <GenUiWorkArea initialMode="cards" customPayload={refused.payload} />,
+    );
+    expect(html).toContain('Plain table · fallback');
+    expect(html).not.toContain(refused.title);
   });
 
   it('never runs a confirm action before the user confirms, and blocks stale or over-cap confirms', () => {

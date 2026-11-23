@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { PACKAGES, type PillTuple } from '@spekin/sample';
+import { sampleData, type PillTuple } from '../data/source';
+const { PACKAGES } = sampleData;
 import { Icon, type IconName } from '../ui/Icon';
 import { IconBtn } from '../ui/Button';
 import { Pill } from '../ui/Pill';

@@ -1,22 +1,6 @@
 import { useState } from 'react';
-import {
-  BACKEND,
-  DELIVERY_BUILD,
-  DELIVERY_CHECKS,
-  DELIVERY_CONTRACTS,
-  DELIVERY_GATE,
-  DELIVERY_MATRIX,
-  DELIVERY_RUN,
-  DELIVERY_TIMELINE,
-  MODEL,
-  STAGES,
-  type ContextItem,
-  type PillTuple,
-  type PillTone,
-  type SampleDeliveryCheck,
-  type SampleDeliveryTimelineRow,
-  type StageId,
-} from '@spekin/sample';
+import { sampleData, type ContextItem, type PillTuple, type PillTone, type SampleDeliveryCheck, type SampleDeliveryTimelineRow, type StageId } from '../data/source';
+const { BACKEND, DELIVERY_BUILD, DELIVERY_CHECKS, DELIVERY_CONTRACTS, DELIVERY_GATE, DELIVERY_MATRIX, DELIVERY_RUN, DELIVERY_TIMELINE, MODEL, STAGES } = sampleData;
 import { useWorkspace } from '../state/workspace';
 import { Icon, type IconName } from '../ui/Icon';
 import { Btn, IconBtn } from '../ui/Button';
@@ -25,7 +9,7 @@ import { ChatPanel } from '../shell/ChatPanel';
 import { ArtifactTabs, type ArtifactTabItem } from '../shell/ArtifactTabs';
 
 // S37 Build contracts and release readiness. Board: docs/design/spekin-canvas/project/S37-build-contracts.dc.html
-// Six drawn views: contracts, detail, matrix, gate, fail, evidence. Data comes from @spekin/sample (DELIVERY_*).
+// Six drawn views: contracts, detail, matrix, gate, fail, evidence. Data comes from the sample surface (DELIVERY_*).
 export type DeliveryView = 'contracts' | 'detail' | 'matrix' | 'gate' | 'fail' | 'evidence';
 
 export const DELIVERY_VIEWS: { id: DeliveryView; label: string; icon: IconName }[] = [

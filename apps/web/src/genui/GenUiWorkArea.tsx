@@ -1,5 +1,7 @@
-import { useLayoutEffect, useState, type ReactNode } from 'react';
-import { FRAMES, MODEL, PACKAGES, USAGE, type ContextItem, type PillTuple, type SampleFrame } from '@spekin/sample';
+import { useEffect, useLayoutEffect, useState, type ReactNode } from 'react';
+import { sampleData, type CardVerdict, type ContextItem, type PillTuple, type SampleFrame } from '../data/source';
+const { FRAMES, MODEL, PACKAGES, USAGE } = sampleData;
+import { useData } from '../data/provider';
 import { useWorkspace, type SaveState } from '../state/workspace';
 import { Icon } from '../ui/Icon';
 import { Btn, IconBtn } from '../ui/Button';
@@ -8,7 +10,6 @@ import { ChatPanel } from '../shell/ChatPanel';
 import { ArtifactTabs, type ArtifactTabItem } from '../shell/ArtifactTabs';
 import { ViewSwitch } from '../shell/ViewSwitch';
 import { MiniDashboard } from '../shell/MiniDashboard';
-import { validateGenUiCard } from './validate';
 
 export type GenUiMode = 'stream' | 'cards' | 'question' | 'fallback' | 'confirm' | 'pinned';
 
@@ -184,6 +185,8 @@ function GenUiFrame(props: {
 export function GenUiWorkArea(props: {
   initialMode?: GenUiMode;
   customPayload?: unknown;
+  /** A verdict already obtained from a DataSource (tests, or a caller that validated before mounting). */
+  validation?: CardVerdict;
   onShellOverride?: (next: GenUiShellOverride) => void;
   onOpenReview?: () => void;
   onOpenStyle?: () => void;
@@ -193,6 +196,7 @@ export function GenUiWorkArea(props: {
   const {
     initialMode = 'stream',
     customPayload,
+    validation,
     onShellOverride,
     onOpenReview,
     onOpenStyle,
@@ -200,10 +204,28 @@ export function GenUiWorkArea(props: {
     onExecuteConfirm,
   } = props;
 
-  // Fail-closed validation when a dynamic GenUI payload is supplied: invalid cards never render partly.
-  const payloadValidation = customPayload !== undefined ? validateGenUiCard(customPayload) : null;
-  const effectiveInitialMode: GenUiMode =
-    payloadValidation && payloadValidation.status === 'rejected' ? 'fallback' : initialMode;
+  // The browser never validates: a card renders only on the verdict the Rust validator gave (or the
+  // sample recorded). A refusal or a network error reaches the fallback, never part of the card.
+  const dataSource = useData();
+  const localVerdict = customPayload !== undefined ? (validation ?? dataSource.knownCardVerdict(customPayload)) : null;
+  const [fetchedVerdict, setFetchedVerdict] = useState<CardVerdict | null>(null);
+
+  useEffect(() => {
+    if (customPayload === undefined || localVerdict !== null) return;
+    let alive = true;
+    dataSource.validateGenUi(customPayload).then((verdict) => {
+      if (alive) setFetchedVerdict(verdict);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [customPayload, localVerdict, dataSource]);
+
+  const cardVerdict = customPayload !== undefined ? (localVerdict ?? fetchedVerdict) : null;
+  const refused = cardVerdict?.status === 'rejected';
+  const pendingCard = customPayload !== undefined && cardVerdict === null;
+
+  const effectiveInitialMode: GenUiMode = refused ? 'fallback' : initialMode;
 
   const [mode, setMode] = useState<GenUiMode>(effectiveInitialMode);
   const [selectedTake, setSelectedTake] = useState<string>('take-1');
@@ -220,8 +242,7 @@ export function GenUiWorkArea(props: {
   const toggleChatCollapsed = useWorkspace((s) => s.toggleChatCollapsed);
   const recordIntent = useWorkspace((s) => s.recordIntent);
 
-  const activeMode: GenUiMode =
-    payloadValidation && payloadValidation.status === 'rejected' ? 'fallback' : mode;
+  const activeMode: GenUiMode = refused ? 'fallback' : mode;
 
   useLayoutEffect(() => {
     onShellOverride?.({
@@ -938,6 +959,9 @@ export function GenUiWorkArea(props: {
       />
     </>
   );
+
+  // A card without a verdict yet (api mode, request in flight) draws nothing, never a spinner.
+  if (pendingCard) return null;
 
   return (
     <>

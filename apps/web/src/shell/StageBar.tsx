@@ -1,4 +1,4 @@
-import type { SampleStage, StageId } from '@spekin/sample';
+import type { SampleStage, StageId } from '../data/source';
 import { Btn } from '../ui/Button';
 
 // S35 stage header (F101, F102). Mirrors kit.mjs stagebar(). The current stage is shown by position, weight and underline
