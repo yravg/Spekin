@@ -131,7 +131,13 @@ export function ModelsUsageWorkArea(props: {
       setRunMessage(reserved.message);
       return;
     }
-    // The sample run finishes at once, so it settles to its expected cost and releases the rest.
+    // The browser never settles a real run: the server settles it when the run ends. Only the
+    // sample, whose run finishes at once, settles here so the drawn ledger shows the outcome.
+    if (data.mode !== 'sample') {
+      setRunWrite('done');
+      setRunMessage('Reserved ' + reserved.value.reserved + ' cr · settles when the run finishes');
+      return;
+    }
     const settled = await data.settleRun(SAMPLE_PROJECT_ID, {
       run_id: reserved.value.run_id,
       actual: MODELS_RUN.expect,

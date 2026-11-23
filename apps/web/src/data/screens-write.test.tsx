@@ -120,6 +120,25 @@ describe('The screen a write reaches (IMP-41)', () => {
     expect(container.textContent).toContain('the reserve does not fit the monthly cap');
   });
 
+  it('in API mode Send estimates and reserves once and never settles from the browser', async () => {
+    const calls: string[] = [];
+    const api: DataSource = {
+      ...sampleSource,
+      mode: 'api',
+      estimateRun: async (...a) => { calls.push('estimate'); return sampleSource.estimateRun(...a); },
+      reserveRun: async (...a) => { calls.push('reserve'); return sampleSource.reserveRun(...a); },
+      settleRun: async () => { calls.push('settle'); throw new Error('the browser must not settle'); },
+    };
+    await draw(<ModelsUsageWorkArea section="next" moment="calm" onSection={() => {}} onExit={() => {}} />, api);
+
+    await click('Send and reserve');
+
+    expect(calls).toEqual(['estimate', 'reserve']);
+    const status = container.querySelector('[role="status"]');
+    expect(status?.textContent).toContain('settles when the run finishes');
+    expect(status?.textContent).not.toContain('settled');
+  });
+
   it('a reserve that answers draws the reserved and settled amounts', async () => {
     await draw(
       <ModelsUsageWorkArea section="next" moment="calm" onSection={() => {}} onExit={() => {}} />,
