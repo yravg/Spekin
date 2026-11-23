@@ -23,6 +23,8 @@ git worktree add ../Spekin-core -b imp-03-api-source origin/main && (cd ../Speki
 
 ## Launch
 
+**Live worker page (24 Nov 2026).** `node tools/live/live-workers.mjs tools/live/team.json` serves http://127.0.0.1:33107/ (reloads every 5 s): each worker's status, branch, commits ahead of main, pull request with CI per job, and the last log lines. Edit `tools/live/team.json` when workers change. On the owner's Mac it is also on the tailnet: `tailscale serve --bg --https=8444 http://127.0.0.1:33107` → https://enricos-mac-mini.tail314bf8.ts.net:8444/. Workers are launched headless (`opencode run ... > ../worker-<id>.log &`), so they have no Orca tab; this page or `tail -f ../worker-<id>.log` is how to watch them.
+
 The prompts are in `tools/workers/`. Replace `<repo>` with this repo's path and `<parent>` with its parent folder.
 
 ```sh
