@@ -2,6 +2,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type {
   AddGithubSkillRequest,
   AuditResponse,
+  Check,
+  Contract,
+  ContractsResponse,
   CopySkillRequest,
   DeletedProjectView,
   EditSkillRequest,
@@ -38,6 +41,7 @@ import {
   editSkill,
   estimateRun,
   fetchAudit,
+  fetchContracts,
   fetchDeletedProjects,
   fetchModels,
   fetchProject,
@@ -609,5 +613,60 @@ describe('Skills library API (IMP-34)', () => {
     const error = await fetchSkills().catch((e: unknown) => e);
     expect(error).toBeInstanceOf(ApiError);
     expect((error as ApiError).kind).toBe('shape');
+  });
+});
+
+// IMP-37: GET /api/projects/{id}/contracts serves S37's build contracts.
+const check = (name: string): Check => ({ name, kind: 'unit', owner: 'core' });
+const contract = (id: string, title: string): Contract =>
+  ({ id, title, changed_at: 1 as unknown as bigint, checks: [check(`${title} test`)] }) as unknown as Contract;
+
+const contractsBody: ContractsResponse = {
+  contracts: [contract('R-DASH-014', 'Variance table behaviour')],
+  evidence: [
+    {
+      check: 'Variance table behaviour test',
+      commit: 'b4a1f9c',
+      at: 1 as unknown as bigint,
+      result: 'passed',
+      duration_ms: 1200 as unknown as bigint,
+      log: 'fixture log excerpt',
+    },
+  ],
+  matrix: [
+    { contract: 'R-DASH-014', check: 'Variance table behaviour test', status: 'met' },
+  ],
+} as unknown as ContractsResponse;
+
+describe('Build contracts API (IMP-37)', () => {
+  it('fetchContracts returns the contracts, evidence and matrix', async () => {
+    const spy = mockFetch(json(contractsBody));
+
+    await expect(fetchContracts(SAMPLE_PROJECT_ID)).resolves.toEqual(contractsBody);
+    expect(String(spy.mock.calls[0]?.[0])).toBe('/api/projects/meranti-yard/contracts');
+  });
+
+  it('an unknown project is null, not an empty list (404)', async () => {
+    mockFetch(new Response('not found', { status: 404 }));
+
+    await expect(fetchContracts('nope')).resolves.toBeNull();
+  });
+
+  it('a wrong contracts shape is a typed error, never a crash', async () => {
+    mockFetch(json({ contracts: 'not an array', evidence: [], matrix: [] }));
+
+    const error = await fetchContracts(SAMPLE_PROJECT_ID).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).kind).toBe('shape');
+  });
+
+  it('bad JSON is a typed error, never a crash', async () => {
+    mockFetch(new Response('<html>oops</html>', { status: 200 }));
+
+    const error = await fetchContracts(SAMPLE_PROJECT_ID).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).kind).toBe('json');
   });
 });
