@@ -66,12 +66,21 @@ describe('The screen a write reaches (IMP-41)', () => {
       ...sampleSource,
       acceptProposal: async () => ({ ok: false, kind: 'stale', message: 'proposal is against r14' }),
     };
-    await draw(<ReviewAcceptWorkArea initialState="diff" />, staleSource);
+    const overrides: { save?: { status: string } }[] = [];
+    await draw(
+      <ReviewAcceptWorkArea
+        initialState="diff"
+        onShellOverride={(o) => overrides.push(o as { save?: { status: string } })}
+      />,
+      staleSource,
+    );
 
     await click('Accept and create r15');
 
     expect(container.textContent).not.toContain('Accepted. r15 created from r14.');
     expect(container.textContent).toContain('Shown as the part was before it changed.');
+    // The shell's S35 conflict save chip is raised by the 409, never "saved".
+    expect(overrides.at(-1)?.save?.status).toBe('conflict');
   });
 
   it('Restore on S27 writes through the door and closes the deleted banner', async () => {

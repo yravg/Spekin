@@ -114,6 +114,8 @@ export function ReviewAcceptWorkArea(props: {
   const [draft, setDraft] = useState('');
   const [writing, setWriting] = useState<'accept' | 'reject' | null>(null);
   const [writeError, setWriteError] = useState<string | null>(null);
+  // The save chip the write answered with; the state effect must not overwrite it with "saved".
+  const [saveOverride, setSaveOverride] = useState<SaveState | null>(null);
 
   // IMP-41: Accept and Reject write through the data door, then draw the board's next state.
   // A 409 (stale) draws the S35 conflict save chip; nothing is saved until the source says so.
@@ -125,14 +127,14 @@ export function ReviewAcceptWorkArea(props: {
     const out = await data.acceptProposal(SAMPLE_PROJECT_ID, REVIEW_PROPOSAL.id);
     setWriting(null);
     if (out.ok) {
+      setSaveOverride({ status: 'saved', tone: 'ok', text: 'Saved 12:52' });
       setState('accepted');
-      onShellOverride?.({ save: { status: 'saved', tone: 'ok', text: 'Saved 12:52' } });
     } else if (out.kind === 'stale') {
+      setSaveOverride({ status: 'conflict', tone: 'bad', text: 'Conflict · proposal changed' });
       setState('stale');
-      onShellOverride?.({ save: { status: 'conflict', tone: 'bad', text: 'Conflict · proposal changed' } });
     } else {
       setWriteError(out.message);
-      onShellOverride?.({ save: { status: 'failed', tone: 'bad', text: 'Failed (kept on this device)' } });
+      setSaveOverride({ status: 'failed', tone: 'bad', text: 'Failed (kept on this device)' });
     }
   }
 
@@ -144,14 +146,14 @@ export function ReviewAcceptWorkArea(props: {
     const out = await data.rejectProposal(SAMPLE_PROJECT_ID, REVIEW_PROPOSAL.id, 'Not this increment');
     setWriting(null);
     if (out.ok) {
+      setSaveOverride({ status: 'saved', tone: 'ok', text: 'Saved 12:52' });
       setState('rejected');
-      onShellOverride?.({ save: { status: 'saved', tone: 'ok', text: 'Saved 12:52' } });
     } else if (out.kind === 'stale') {
+      setSaveOverride({ status: 'conflict', tone: 'bad', text: 'Conflict · proposal changed' });
       setState('stale');
-      onShellOverride?.({ save: { status: 'conflict', tone: 'bad', text: 'Conflict · proposal changed' } });
     } else {
       setWriteError(out.message);
-      onShellOverride?.({ save: { status: 'failed', tone: 'bad', text: 'Failed (kept on this device)' } });
+      setSaveOverride({ status: 'failed', tone: 'bad', text: 'Failed (kept on this device)' });
     }
   }
 
@@ -159,24 +161,24 @@ export function ReviewAcceptWorkArea(props: {
     if (!onShellOverride) return;
     if (state === 'diff' || state === 'rejected') {
       onShellOverride({
-        save: { status: 'saved', tone: 'ok', text: 'Saved 12:52' },
+        save: saveOverride ?? { status: 'saved', tone: 'ok', text: 'Saved 12:52' },
         stage: 'spec',
         specRev: 'r14',
       });
     } else if (state === 'accepted') {
       onShellOverride({
-        save: { status: 'saved', tone: 'ok', text: 'Saved 12:52' },
+        save: saveOverride ?? { status: 'saved', tone: 'ok', text: 'Saved 12:52' },
         stage: 'spec',
         specRev: 'r15',
       });
     } else {
       onShellOverride({
-        save: { status: 'saved', tone: 'ok', text: 'Saved 12:51' },
+        save: saveOverride ?? { status: 'saved', tone: 'ok', text: 'Saved 12:51' },
         stage: 'design',
         specRev: 'r14',
       });
     }
-  }, [state, onShellOverride]);
+  }, [state, saveOverride, onShellOverride]);
 
   const right = (
     <>
