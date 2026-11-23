@@ -400,11 +400,20 @@ pub mod test_support {
             base: 1,
             reason: "no".to_owned(),
         });
+        let stale_state = state.clone();
         store.save_state(&id, &state).await.unwrap();
         let mut expected = state;
         expected.version += 1;
         assert_eq!(store.load_state(&id).await.unwrap().unwrap(), expected);
         assert_eq!(store.load_state("nope").await.unwrap(), None);
+
+        // a stale state save is refused on both backends (IMP-40): the version
+        // moved since the caller loaded it, so the write must not overwrite it.
+        let stale_save = store.save_state(&id, &stale_state).await;
+        assert!(matches!(
+            stale_save,
+            Err(StoreError::StaleState { base: 1, current: 2 })
+        ));
 
         // project entries: put a second, deleted project, then list both.
         let mut deleted = ProjectEntry::new(
