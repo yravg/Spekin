@@ -1,14 +1,17 @@
 //! Spekin HTTP API. Routes live here so tests can call them without a socket.
 //!
-//! The server holds in-memory state seeded from `fixtures/meranti-yard.json` and calls
-//! `spekin-core` for all business rules (ADR 0002).
+//! The server reads and writes everything through the [`spekin_core::Store`] trait
+//! (ADR 0008): [`Backend::Memory`] by default, [`Backend::Pg`] when `DATABASE_URL`
+//! is set. All business rules stay in `spekin-core`; the server only loads data and
+//! calls the core.
 
 pub mod hardening;
+pub mod seed;
 pub mod skills;
 
-use std::collections::BTreeMap;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
+use async_trait::async_trait;
 use axum::{
     Json, Router,
     extract::{Path, State},
@@ -17,26 +20,23 @@ use axum::{
     routing::{get, post, put},
 };
 use hardening::{HardeningConfig, apply_hardening};
-use serde_json::Value;
+use seed::{SAMPLE_PROJECT_ID, seed_from_fixture};
 use skills::github::{DynGitHubSkillSource, HttpGitHubClient, injected_source};
 use spekin_core::{
-    AddGithubSkillRequest, ApiErrorBody, ArtifactRevisionRecord, ArtifactRevisionState,
-    AuditAction, AuditEntry, AuditEvent, AuditLog, AuditResponse, BoardArtifact, BoardSnapshot,
+    AddGithubSkillRequest, ApiErrorBody, AuditAction, AuditEvent, AuditLog, AuditResponse,
     BuildContextRequest, BuildManifestRequest, CapabilityRegistry, CheckSkillUpdateRequest,
-    ContextItemStatus, ContractsResponse, CopySkillRequest, DeletedProjectView, EditSkillRequest,
-    EstimateRunRequest, Fixture, GENESIS_HASH, GenUiValidation, GitHubSourceError, Hunk, Ledger,
-    LedgerCaps, LedgerError, LibrarySkill, Manifest, ManifestError, ModelCapability, Project,
-    ProjectEntry, Proposal, ProposalError, RejectProposalRequest, Rejection, RejectionReason,
-    RequestContext, RequiredInput, Reservation, ReserveRunRequest, RestoreError,
-    RevertRevisionRequest, Revision, RunEstimate, SECONDS_PER_DAY, SettleRunRequest, Settlement,
-    SkillCheckRequest, SkillHistoryEntry, SkillLibrary, SkillLibraryError, SkillSourceKind,
-    SkillUpdateOutcome, SkillsResponse, Stage, UpdateCheck, UsageSnapshot, accept, build_context,
-    build_manifest, check_update, days_left, delete, estimate, reject, restore, revert,
-    sample_contracts, sample_evidence, sample_matrix, validate_genui_json, verify_with_head,
+    ContractsResponse, CopySkillRequest, DeletedProjectView, EditSkillRequest, EstimateRunRequest,
+    GenUiValidation, GitHubSourceError, LedgerError, LibrarySkill, Manifest, ManifestError,
+    MemoryStore, ModelCapability, Project, ProjectEntry, ProjectState, ProposalError,
+    RejectProposalRequest, Rejection, RejectionReason, RequestContext, Reservation,
+    ReserveRunRequest, RestoreError, RevertRevisionRequest, Revision, RunEstimate,
+    SettleRunRequest, Settlement, SkillCheckRequest, SkillHistoryEntry, SkillLibrary,
+    SkillLibraryError, SkillSourceKind, SkillUpdateOutcome, SkillsResponse, Stage, Store,
+    StoreError, UpdateCheck, UsageSnapshot, accept, build_context, build_manifest, check_update,
+    days_left, delete, estimate, reject, restore, revert, sample_contracts, sample_evidence,
+    sample_matrix, validate_genui_json, verify_with_head,
 };
-
-/// The project id the sample fixture is served under. The URL uses it: /p/meranti-yard/design.
-pub const SAMPLE_PROJECT_ID: &str = "meranti-yard";
+use spekin_store_pg::PgStore;
 
 /// Actor recorded on audit entries until authentication exists (IMP-31).
 const SAMPLE_ACTOR: &str = "sample-user";
@@ -45,41 +45,113 @@ const SAMPLE_ACTOR: &str = "sample-user";
 /// so every route is deterministic. Tests can override it with [`AppState::with_now`].
 pub const DEFAULT_NOW: i64 = 1_735_689_600;
 
-/// Mutable in-memory state for one project, seeded from `fixtures/meranti-yard.json`.
-struct ProjectStore {
-    revisions: BTreeMap<String, Revision>,
-    proposals: BTreeMap<String, Proposal>,
-    rejections: Vec<Rejection>,
-    ledger: Ledger,
-    board: BoardSnapshot,
-    handoff_revisions: Vec<ArtifactRevisionRecord>,
-    required_inputs: Vec<RequiredInput>,
-    /// The append-only audit chain (IMP-30).
-    audit: AuditLog,
-    /// The head hash held *apart* from the log, as the lead's follow-up on #21 asks.
-    /// Every append updates this; `GET .../audit` checks verify against it.
-    audit_head: String,
-    /// IMP-29 entries for delete / restore / Recently deleted.
-    project_entries: BTreeMap<String, ProjectEntry>,
+/// The active store. The server picks [`Backend::Pg`] when `DATABASE_URL` is set,
+/// otherwise [`Backend::Memory`] seeded from the sample fixture (ADR 0008).
+#[derive(Clone)]
+pub enum Backend {
+    Memory(MemoryStore),
+    Pg(PgStore),
 }
 
-/// The skills library's own append-only chain, with its head held apart from
-/// the stored log (IMP-35, lead's follow-up on #27 and #21). Skills routes are
-/// global, so they must never append to a project's chain.
-struct SkillsAudit {
-    log: AuditLog,
-    head: String,
+#[async_trait]
+impl Store for Backend {
+    async fn project(&self, id: &str) -> Result<Option<Project>, StoreError> {
+        match self {
+            Backend::Memory(m) => m.project(id).await,
+            Backend::Pg(p) => p.project(id).await,
+        }
+    }
+
+    async fn stages(&self, id: &str) -> Result<Option<Vec<Stage>>, StoreError> {
+        match self {
+            Backend::Memory(m) => m.stages(id).await,
+            Backend::Pg(p) => p.stages(id).await,
+        }
+    }
+
+    async fn revision(&self, id: &str, artifact: &str) -> Result<Option<Revision>, StoreError> {
+        match self {
+            Backend::Memory(m) => m.revision(id, artifact).await,
+            Backend::Pg(p) => p.revision(id, artifact).await,
+        }
+    }
+
+    async fn update_revision(
+        &self,
+        id: &str,
+        artifact: &str,
+        base: u32,
+        next: &Revision,
+    ) -> Result<(), StoreError> {
+        match self {
+            Backend::Memory(m) => m.update_revision(id, artifact, base, next).await,
+            Backend::Pg(p) => p.update_revision(id, artifact, base, next).await,
+        }
+    }
+
+    async fn load_state(&self, id: &str) -> Result<Option<ProjectState>, StoreError> {
+        match self {
+            Backend::Memory(m) => m.load_state(id).await,
+            Backend::Pg(p) => p.load_state(id).await,
+        }
+    }
+
+    async fn save_state(&self, id: &str, state: &ProjectState) -> Result<(), StoreError> {
+        match self {
+            Backend::Memory(m) => m.save_state(id, state).await,
+            Backend::Pg(p) => p.save_state(id, state).await,
+        }
+    }
+
+    async fn entries(
+        &self,
+    ) -> Result<std::collections::BTreeMap<String, ProjectEntry>, StoreError> {
+        match self {
+            Backend::Memory(m) => m.entries().await,
+            Backend::Pg(p) => p.entries().await,
+        }
+    }
+
+    async fn put_entry(&self, entry: &ProjectEntry) -> Result<(), StoreError> {
+        match self {
+            Backend::Memory(m) => m.put_entry(entry).await,
+            Backend::Pg(p) => p.put_entry(entry).await,
+        }
+    }
+
+    async fn library(&self) -> Result<SkillLibrary, StoreError> {
+        match self {
+            Backend::Memory(m) => m.library().await,
+            Backend::Pg(p) => p.library().await,
+        }
+    }
+
+    async fn save_library(&self, library: &SkillLibrary) -> Result<(), StoreError> {
+        match self {
+            Backend::Memory(m) => m.save_library(library).await,
+            Backend::Pg(p) => p.save_library(library).await,
+        }
+    }
+
+    async fn skills_audit(&self) -> Result<(AuditLog, String), StoreError> {
+        match self {
+            Backend::Memory(m) => m.skills_audit().await,
+            Backend::Pg(p) => p.skills_audit().await,
+        }
+    }
+
+    async fn save_skills_audit(&self, log: &AuditLog, head: &str) -> Result<(), StoreError> {
+        match self {
+            Backend::Memory(m) => m.save_skills_audit(log, head).await,
+            Backend::Pg(p) => p.save_skills_audit(log, head).await,
+        }
+    }
 }
 
 #[derive(Clone)]
 pub struct AppState {
-    pub sample: Arc<Fixture>,
+    pub store: Backend,
     models: Arc<CapabilityRegistry>,
-    project_store: Arc<Mutex<ProjectStore>>,
-    /// IMP-34: the in-memory skills library (templates, copies, GitHub skills).
-    library: Arc<Mutex<SkillLibrary>>,
-    /// IMP-35: the skills library's own audit chain and its separate head.
-    skills_audit: Arc<Mutex<SkillsAudit>>,
     /// IMP-34: the GitHub adapter with an injected client (fixtures in tests).
     github: Arc<DynGitHubSkillSource>,
     /// UTC Unix seconds for audit entries and the 30-day restore window.
@@ -89,23 +161,23 @@ pub struct AppState {
 }
 
 impl AppState {
+    /// The in-memory default: seed Meranti Yard and serve it through `MemoryStore`.
     pub fn from_fixture_json(text: &str) -> Result<Self, spekin_core::FixtureError> {
-        let sample = Fixture::from_json(text)?;
-        let raw: Value = serde_json::from_str(text).unwrap_or(Value::Null);
-        let store = seed_project_store(&raw, DEFAULT_NOW);
-        Ok(Self {
-            sample: Arc::new(sample),
+        let (project_id, seed) = seed_from_fixture(text, DEFAULT_NOW)?;
+        Ok(Self::with_store(Backend::Memory(MemoryStore::from_seed(
+            project_id, seed,
+        ))))
+    }
+
+    /// Build an `AppState` around an already-constructed store (e.g. `PgStore`).
+    pub fn with_store(store: Backend) -> Self {
+        Self {
+            store,
             models: Arc::new(CapabilityRegistry::sample_s36()),
-            project_store: Arc::new(Mutex::new(store)),
-            library: Arc::new(Mutex::new(SkillLibrary::from_fixture(&raw))),
-            skills_audit: Arc::new(Mutex::new(SkillsAudit {
-                log: AuditLog::new(),
-                head: GENESIS_HASH.to_owned(),
-            })),
             github: Arc::new(injected_source(HttpGitHubClient::new())),
             now: DEFAULT_NOW,
             config: HardeningConfig::from_env(),
-        })
+        }
     }
 
     /// Inject a GitHub client (recorded fixtures in tests, never the network).
@@ -118,8 +190,11 @@ impl AppState {
     }
 
     /// Start from an empty skills library (tests that install GitHub skills cleanly).
-    pub fn with_library(mut self, library: SkillLibrary) -> Self {
-        self.library = Arc::new(Mutex::new(library));
+    /// Only meaningful for the in-memory store used in tests.
+    pub fn with_library(self, library: SkillLibrary) -> Self {
+        if let Backend::Memory(store) = &self.store {
+            store.set_library(library);
+        }
         self
     }
 
@@ -137,6 +212,7 @@ impl AppState {
 }
 
 /// Typed server error that always serialises as `ApiErrorBody`.
+#[derive(Debug)]
 struct ServerError {
     status: StatusCode,
     code: String,
@@ -182,17 +258,18 @@ impl IntoResponse for ServerError {
     }
 }
 
-/// Append one audit entry and move the separately held head to it (IMP-31).
-/// The core computes the sequence, hashes and UTC time; the server only supplies the facts.
-fn append_audit(
-    store: &mut ProjectStore,
+/// Append one audit entry to the sample project's chain and move its separately
+/// held head to the entry (IMP-31). The core computes the sequence, hashes and
+/// UTC time; the server only supplies the facts.
+fn audit_event(
+    state: &mut ProjectState,
     now: i64,
     action: AuditAction,
     target_id: impl Into<String>,
     revision: Option<String>,
     reason: impl Into<String>,
-) -> AuditEntry {
-    let entry = store.audit.append(
+) {
+    let entry = state.audit.append(
         AuditEvent {
             actor: SAMPLE_ACTOR.to_owned(),
             action,
@@ -202,21 +279,20 @@ fn append_audit(
         },
         now.max(0) as u64,
     );
-    store.audit_head = entry.hash.clone();
-    entry
+    state.audit_head = entry.hash.clone();
 }
 
 /// Append one entry to the skills library's own chain and move its separately
 /// held head. A skills route never touches a project's chain (IMP-35).
-fn append_skills_audit(
+async fn append_skills_audit(
     state: &AppState,
     action: AuditAction,
     target_id: impl Into<String>,
     revision: Option<String>,
     reason: impl Into<String>,
-) {
-    let mut audit = state.skills_audit.lock().expect("skills audit lock");
-    let entry = audit.log.append(
+) -> Result<(), ServerError> {
+    let (mut log, _head) = state.store.skills_audit().await.map_err(map_store_error)?;
+    let entry = log.append(
         AuditEvent {
             actor: SAMPLE_ACTOR.to_owned(),
             action,
@@ -226,7 +302,13 @@ fn append_skills_audit(
         },
         state.now.max(0) as u64,
     );
-    audit.head = entry.hash;
+    let head = entry.hash.clone();
+    state
+        .store
+        .save_skills_audit(&log, &head)
+        .await
+        .map_err(map_store_error)?;
+    Ok(())
 }
 
 /// The view both audit routes return: the entries, the head held apart from the
@@ -247,6 +329,17 @@ fn map_restore_error(err: RestoreError) -> ServerError {
         RestoreError::WindowClosed { .. } => ServerError::conflict("window_closed", message),
         RestoreError::ClockBackwards { .. } => {
             ServerError::unprocessable("clock_backwards", message)
+        }
+    }
+}
+
+fn map_store_error(err: StoreError) -> ServerError {
+    let message = err.to_string();
+    match err {
+        StoreError::NotFound(_) => ServerError::not_found("not_found", message),
+        StoreError::StaleRevision { .. } => ServerError::conflict("proposal_stale", message),
+        StoreError::Backend(_) => {
+            ServerError::new(StatusCode::INTERNAL_SERVER_ERROR, "store_error", message)
         }
     }
 }
@@ -298,65 +391,85 @@ pub fn router(state: AppState) -> Router {
     apply_hardening(app, hardening)
 }
 
-fn ensure_project(id: &str) -> Result<(), ServerError> {
-    if id == SAMPLE_PROJECT_ID {
-        Ok(())
-    } else {
-        Err(ServerError::not_found(
-            "project_not_found",
-            format!("unknown project: {id}"),
-        ))
-    }
-}
-
-fn find(state: &AppState, id: &str) -> Result<Arc<Fixture>, ServerError> {
-    ensure_project(id)?;
-    Ok(state.sample.clone())
+/// Load a project's mutable state, or a 404 for an unknown project.
+async fn load_state(s: &AppState, id: &str) -> Result<ProjectState, ServerError> {
+    s.store
+        .load_state(id)
+        .await
+        .map_err(map_store_error)?
+        .ok_or_else(|| {
+            ServerError::not_found("project_not_found", format!("unknown project: {id}"))
+        })
 }
 
 async fn project(
     State(s): State<AppState>,
     Path(id): Path<String>,
 ) -> Result<Json<Project>, ServerError> {
-    Ok(Json(find(&s, &id)?.project.clone()))
+    let project = s
+        .store
+        .project(&id)
+        .await
+        .map_err(map_store_error)?
+        .ok_or_else(|| {
+            ServerError::not_found("project_not_found", format!("unknown project: {id}"))
+        })?;
+    Ok(Json(project))
 }
 
 async fn stages(
     State(s): State<AppState>,
     Path(id): Path<String>,
 ) -> Result<Json<Vec<Stage>>, ServerError> {
-    Ok(Json(find(&s, &id)?.stages.clone()))
+    let stages = s
+        .store
+        .stages(&id)
+        .await
+        .map_err(map_store_error)?
+        .ok_or_else(|| {
+            ServerError::not_found("project_not_found", format!("unknown project: {id}"))
+        })?;
+    Ok(Json(stages))
 }
 
 async fn accept_proposal(
     State(s): State<AppState>,
     Path((id, pid)): Path<(String, String)>,
 ) -> Result<Json<Revision>, ServerError> {
-    ensure_project(&id)?;
-    let mut store = s.project_store.lock().expect("project store lock");
-    let proposal = store.proposals.get(&pid).cloned().ok_or_else(|| {
+    let mut state = load_state(&s, &id).await?;
+    let proposal = state.proposals.get(&pid).cloned().ok_or_else(|| {
         ServerError::not_found("proposal_not_found", format!("unknown proposal: {pid}"))
     })?;
-    let current = store.revisions.get(&proposal.artifact).ok_or_else(|| {
-        ServerError::not_found(
-            "artifact_not_found",
-            format!("unknown artifact: {}", proposal.artifact),
-        )
-    })?;
+    let current = s
+        .store
+        .revision(&id, &proposal.artifact)
+        .await
+        .map_err(map_store_error)?
+        .ok_or_else(|| {
+            ServerError::not_found(
+                "artifact_not_found",
+                format!("unknown artifact: {}", proposal.artifact),
+            )
+        })?;
 
-    match accept(current, &proposal) {
+    match accept(&current, &proposal) {
         Ok(next_rev) => {
-            store
-                .revisions
-                .insert(proposal.artifact.clone(), next_rev.clone());
-            append_audit(
-                &mut store,
+            s.store
+                .update_revision(&id, &proposal.artifact, current.n, &next_rev)
+                .await
+                .map_err(map_store_error)?;
+            audit_event(
+                &mut state,
                 s.now,
                 AuditAction::Accept,
                 &pid,
                 Some(format!("r{}", next_rev.n)),
                 format!("accepted proposal {pid}"),
             );
+            s.store
+                .save_state(&id, &state)
+                .await
+                .map_err(map_store_error)?;
             Ok(Json(next_rev))
         }
         Err(err) => Err(map_proposal_error(err)),
@@ -368,7 +481,6 @@ async fn reject_proposal(
     Path((id, pid)): Path<(String, String)>,
     Json(req): Json<RejectProposalRequest>,
 ) -> Result<Json<Rejection>, ServerError> {
-    ensure_project(&id)?;
     let reason = req.reason.trim();
     if reason.is_empty() {
         return Err(ServerError::bad_request(
@@ -376,20 +488,24 @@ async fn reject_proposal(
             "rejection reason must not be empty",
         ));
     }
-    let mut store = s.project_store.lock().expect("project store lock");
-    let proposal = store.proposals.get(&pid).cloned().ok_or_else(|| {
+    let mut state = load_state(&s, &id).await?;
+    let proposal = state.proposals.get(&pid).cloned().ok_or_else(|| {
         ServerError::not_found("proposal_not_found", format!("unknown proposal: {pid}"))
     })?;
     let rejection = reject(&proposal, reason);
-    store.rejections.push(rejection.clone());
-    append_audit(
-        &mut store,
+    state.rejections.push(rejection.clone());
+    audit_event(
+        &mut state,
         s.now,
         AuditAction::Reject,
         &pid,
         Some(format!("r{}", proposal.base)),
         reason,
     );
+    s.store
+        .save_state(&id, &state)
+        .await
+        .map_err(map_store_error)?;
     Ok(Json(rejection))
 }
 
@@ -400,32 +516,44 @@ async fn revert_revision(
     Path((id, artifact)): Path<(String, String)>,
     Json(req): Json<RevertRevisionRequest>,
 ) -> Result<Json<Revision>, ServerError> {
-    ensure_project(&id)?;
-    let mut store = s.project_store.lock().expect("project store lock");
-    let current = store.revisions.get(&artifact).cloned().ok_or_else(|| {
-        ServerError::not_found(
-            "artifact_not_found",
-            format!("unknown artifact: {artifact}"),
-        )
-    })?;
+    let mut state = load_state(&s, &id).await?;
+    let current = s
+        .store
+        .revision(&id, &artifact)
+        .await
+        .map_err(map_store_error)?
+        .ok_or_else(|| {
+            ServerError::not_found(
+                "artifact_not_found",
+                format!("unknown artifact: {artifact}"),
+            )
+        })?;
     let next = revert(&current, &req.to).map_err(map_proposal_error)?;
-    store.revisions.insert(artifact.clone(), next.clone());
-    append_audit(
-        &mut store,
+    s.store
+        .update_revision(&id, &artifact, current.n, &next)
+        .await
+        .map_err(map_store_error)?;
+    audit_event(
+        &mut state,
         s.now,
         AuditAction::Revert,
         &artifact,
         Some(format!("r{}", next.n)),
         format!("reverted {artifact} to r{}", req.to.n),
     );
+    s.store
+        .save_state(&id, &state)
+        .await
+        .map_err(map_store_error)?;
     Ok(Json(next))
 }
 
 async fn estimate_run(
+    State(s): State<AppState>,
     Path(id): Path<String>,
     Json(req): Json<EstimateRunRequest>,
 ) -> Result<Json<RunEstimate>, ServerError> {
-    ensure_project(&id)?;
+    load_state(&s, &id).await?;
     estimate(req.min, req.max, req.reserve)
         .map(Json)
         .map_err(map_ledger_error)
@@ -436,16 +564,15 @@ async fn reserve_run(
     Path(id): Path<String>,
     Json(req): Json<ReserveRunRequest>,
 ) -> Result<Json<Reservation>, ServerError> {
-    ensure_project(&id)?;
     let est = estimate(req.estimate.min, req.estimate.max, req.estimate.reserve)
         .map_err(map_ledger_error)?;
-    let mut store = s.project_store.lock().expect("project store lock");
-    let reservation = store
+    let mut state = load_state(&s, &id).await?;
+    let reservation = state
         .ledger
         .reserve(req.run_id, req.person_id, req.idempotency_key, &est)
         .map_err(map_ledger_error)?;
-    append_audit(
-        &mut store,
+    audit_event(
+        &mut state,
         s.now,
         AuditAction::Reserve,
         &reservation.run_id,
@@ -455,6 +582,10 @@ async fn reserve_run(
             reservation.reserved, reservation.run_id
         ),
     );
+    s.store
+        .save_state(&id, &state)
+        .await
+        .map_err(map_store_error)?;
     Ok(Json(reservation))
 }
 
@@ -464,20 +595,23 @@ async fn settle_run(
     Path(id): Path<String>,
     Json(req): Json<SettleRunRequest>,
 ) -> Result<Json<Settlement>, ServerError> {
-    ensure_project(&id)?;
-    let mut store = s.project_store.lock().expect("project store lock");
-    let settlement = store
+    let mut state = load_state(&s, &id).await?;
+    let settlement = state
         .ledger
         .settle(&req.run_id, req.actual)
         .map_err(map_ledger_error)?;
-    append_audit(
-        &mut store,
+    audit_event(
+        &mut state,
         s.now,
         AuditAction::Settle,
         &req.run_id,
         None,
         format!("settled run {} at {} cr", req.run_id, req.actual),
     );
+    s.store
+        .save_state(&id, &state)
+        .await
+        .map_err(map_store_error)?;
     Ok(Json(settlement))
 }
 
@@ -485,9 +619,8 @@ async fn project_usage(
     State(s): State<AppState>,
     Path(id): Path<String>,
 ) -> Result<Json<UsageSnapshot>, ServerError> {
-    ensure_project(&id)?;
-    let store = s.project_store.lock().expect("project store lock");
-    Ok(Json(store.ledger.project_usage()))
+    let state = load_state(&s, &id).await?;
+    Ok(Json(state.ledger.project_usage()))
 }
 
 /// The audit chain plus the result of `verify` checked against the head hash the
@@ -496,15 +629,17 @@ async fn project_audit(
     State(s): State<AppState>,
     Path(id): Path<String>,
 ) -> Result<Json<AuditResponse>, ServerError> {
-    ensure_project(&id)?;
-    let store = s.project_store.lock().expect("project store lock");
-    Ok(Json(audit_response(&store.audit, &store.audit_head)))
+    let state = load_state(&s, &id).await?;
+    Ok(Json(audit_response(&state.audit, &state.audit_head)))
 }
 
 /// S37 build contracts, evidence and matrix (IMP-33). The core seeds the sample
 /// shapes from the board; the server only loads them and returns typed JSON.
-async fn project_contracts(Path(id): Path<String>) -> Result<Json<ContractsResponse>, ServerError> {
-    ensure_project(&id)?;
+async fn project_contracts(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<Json<ContractsResponse>, ServerError> {
+    load_state(&s, &id).await?;
     Ok(Json(ContractsResponse {
         contracts: sample_contracts(),
         evidence: sample_evidence(),
@@ -517,20 +652,25 @@ async fn delete_project(
     State(s): State<AppState>,
     Path(id): Path<String>,
 ) -> Result<Json<ProjectEntry>, ServerError> {
-    let mut store = s.project_store.lock().expect("project store lock");
-    let entry = store.project_entries.get(&id).cloned().ok_or_else(|| {
+    let entries = s.store.entries().await.map_err(map_store_error)?;
+    let entry = entries.get(&id).cloned().ok_or_else(|| {
         ServerError::not_found("project_not_found", format!("unknown project: {id}"))
     })?;
     let deleted = delete(entry, s.now).map_err(map_restore_error)?;
-    store.project_entries.insert(id.clone(), deleted.clone());
-    append_audit(
-        &mut store,
+    s.store.put_entry(&deleted).await.map_err(map_store_error)?;
+    let mut state = load_state(&s, SAMPLE_PROJECT_ID).await?;
+    audit_event(
+        &mut state,
         s.now,
         AuditAction::Delete,
         &id,
         None,
         "project deleted (S27)",
     );
+    s.store
+        .save_state(SAMPLE_PROJECT_ID, &state)
+        .await
+        .map_err(map_store_error)?;
     Ok(Json(deleted))
 }
 
@@ -539,28 +679,38 @@ async fn restore_project(
     State(s): State<AppState>,
     Path(id): Path<String>,
 ) -> Result<Json<ProjectEntry>, ServerError> {
-    let mut store = s.project_store.lock().expect("project store lock");
-    let entry = store.project_entries.get(&id).cloned().ok_or_else(|| {
+    let entries = s.store.entries().await.map_err(map_store_error)?;
+    let entry = entries.get(&id).cloned().ok_or_else(|| {
         ServerError::not_found("project_not_found", format!("unknown project: {id}"))
     })?;
     let restored = restore(entry, s.now).map_err(map_restore_error)?;
-    store.project_entries.insert(id.clone(), restored.clone());
-    append_audit(
-        &mut store,
+    s.store
+        .put_entry(&restored)
+        .await
+        .map_err(map_store_error)?;
+    let mut state = load_state(&s, SAMPLE_PROJECT_ID).await?;
+    audit_event(
+        &mut state,
         s.now,
         AuditAction::Restore,
         &id,
         None,
         "project restored (S27)",
     );
+    s.store
+        .save_state(SAMPLE_PROJECT_ID, &state)
+        .await
+        .map_err(map_store_error)?;
     Ok(Json(restored))
 }
 
 /// Recently deleted entries with the whole-day countdown S27 shows (IMP-31).
 async fn deleted_projects(State(s): State<AppState>) -> Json<Vec<DeletedProjectView>> {
-    let store = s.project_store.lock().expect("project store lock");
-    let mut rows: Vec<DeletedProjectView> = store
-        .project_entries
+    let entries = match s.store.entries().await {
+        Ok(entries) => entries,
+        Err(_) => return Json(Vec::new()),
+    };
+    let mut rows: Vec<DeletedProjectView> = entries
         .values()
         .filter(|entry| entry.is_deleted())
         .map(|entry| DeletedProjectView {
@@ -606,15 +756,15 @@ async fn check_skill_update(
 
 /// `GET /api/skills/audit`: the skills library's own chain with `verify` checked
 /// against the head the server keeps apart from the log (IMP-35).
-async fn skills_audit(State(s): State<AppState>) -> Json<AuditResponse> {
-    let audit = s.skills_audit.lock().expect("skills audit lock");
-    Json(audit_response(&audit.log, &audit.head))
+async fn skills_audit(State(s): State<AppState>) -> Result<Json<AuditResponse>, ServerError> {
+    let (log, head) = s.store.skills_audit().await.map_err(map_store_error)?;
+    Ok(Json(audit_response(&log, &head)))
 }
 
 /// `GET /api/skills`: templates, user copies and GitHub sources with their policy (IMP-34).
-async fn list_skills(State(s): State<AppState>) -> Json<SkillsResponse> {
-    let library = s.library.lock().expect("skills library lock");
-    Json(library.response())
+async fn list_skills(State(s): State<AppState>) -> Result<Json<SkillsResponse>, ServerError> {
+    let library = s.store.library().await.map_err(map_store_error)?;
+    Ok(Json(library.response()))
 }
 
 /// `POST /api/skills/{id}/copy`: a template becomes the user's own version 1 (IMP-34).
@@ -623,11 +773,15 @@ async fn copy_skill(
     Path(id): Path<String>,
     Json(req): Json<CopySkillRequest>,
 ) -> Result<Json<LibrarySkill>, ServerError> {
-    let mut library = s.library.lock().expect("skills library lock");
-    library
+    let mut library = s.store.library().await.map_err(map_store_error)?;
+    let skill = library
         .copy_template(&id, req.new_id, req.new_title, s.now)
-        .map(Json)
-        .map_err(map_library_error)
+        .map_err(map_library_error)?;
+    s.store
+        .save_library(&library)
+        .await
+        .map_err(map_store_error)?;
+    Ok(Json(skill))
 }
 
 /// `PUT /api/skills/{id}`: edit a user copy, storing a new version (IMP-34).
@@ -636,11 +790,15 @@ async fn edit_skill(
     Path(id): Path<String>,
     Json(req): Json<EditSkillRequest>,
 ) -> Result<Json<LibrarySkill>, ServerError> {
-    let mut library = s.library.lock().expect("skills library lock");
-    library
+    let mut library = s.store.library().await.map_err(map_store_error)?;
+    let skill = library
         .edit(&id, req.into(), s.now)
-        .map(Json)
-        .map_err(map_library_error)
+        .map_err(map_library_error)?;
+    s.store
+        .save_library(&library)
+        .await
+        .map_err(map_store_error)?;
+    Ok(Json(skill))
 }
 
 /// `POST /api/skills/github`: resolve a ref to a SHA and store the fetched bundle (IMP-34).
@@ -654,11 +812,15 @@ async fn add_github_skill(
         .await
         .map_err(map_github_error)?;
     let bundle = s.github.fetch(&pinned).await.map_err(map_github_error)?;
-    let mut library = s.library.lock().expect("skills library lock");
-    library
+    let mut library = s.store.library().await.map_err(map_store_error)?;
+    let skill = library
         .add_github(bundle, req.policy, s.now)
-        .map(Json)
-        .map_err(map_library_error)
+        .map_err(map_library_error)?;
+    s.store
+        .save_library(&library)
+        .await
+        .map_err(map_store_error)?;
+    Ok(Json(skill))
 }
 
 /// `POST /api/skills/{id}/check`: run the update check. An applied update makes a new
@@ -668,10 +830,9 @@ async fn check_skill(
     Path(id): Path<String>,
     Json(req): Json<SkillCheckRequest>,
 ) -> Result<Json<SkillUpdateOutcome>, ServerError> {
-    // Read what we need, then drop the guard: the adapter awaits IO and a MutexGuard
-    // cannot be held across an await in an Axum handler.
+    // Read what we need, then drop the store's data: the adapter awaits IO.
     let (skill, bundle, policy) = {
-        let library = s.library.lock().expect("skills library lock");
+        let library = s.store.library().await.map_err(map_store_error)?;
         let skill = library.get(&id).ok_or_else(|| {
             ServerError::not_found("skill_not_found", format!("unknown skill: {id}"))
         })?;
@@ -715,10 +876,15 @@ async fn check_skill(
     };
 
     let diff = SkillLibrary::diff_text(&skill.manifest.body, &new_manifest.body);
-    let mut library = s.library.lock().expect("skills library lock");
+    let mut library = s.store.library().await.map_err(map_store_error)?;
     let outcome = library
         .record_update(&id, &check, new_manifest, diff, s.now)
         .map_err(map_library_error)?;
+    s.store
+        .save_library(&library)
+        .await
+        .map_err(map_store_error)?;
+
     let (action, reason) = match &outcome {
         SkillUpdateOutcome::Applied { version, .. } => (
             AuditAction::SkillUpdateApplied,
@@ -732,7 +898,7 @@ async fn check_skill(
             ),
         ),
     };
-    append_skills_audit(&s, action, &id, None, reason);
+    append_skills_audit(&s, action, &id, None, reason).await?;
     Ok(Json(outcome))
 }
 
@@ -741,7 +907,7 @@ async fn skill_history(
     State(s): State<AppState>,
     Path(id): Path<String>,
 ) -> Result<Json<Vec<SkillHistoryEntry>>, ServerError> {
-    let library = s.library.lock().expect("skills library lock");
+    let library = s.store.library().await.map_err(map_store_error)?;
     if library.get(&id).is_none() {
         return Err(ServerError::not_found(
             "skill_not_found",
@@ -756,17 +922,22 @@ async fn rollback_skill(
     State(s): State<AppState>,
     Path((id, version)): Path<(String, String)>,
 ) -> Result<Json<LibrarySkill>, ServerError> {
-    let mut library = s.library.lock().expect("skills library lock");
+    let mut library = s.store.library().await.map_err(map_store_error)?;
     let skill = library
         .rollback(&id, &version, s.now)
         .map_err(map_library_error)?;
+    s.store
+        .save_library(&library)
+        .await
+        .map_err(map_store_error)?;
     append_skills_audit(
         &s,
         AuditAction::Revert,
         &id,
         Some(format!("v{}", skill.manifest.version)),
         format!("rolled back skill {id} to version {version}"),
-    );
+    )
+    .await?;
     Ok(Json(skill))
 }
 
@@ -775,9 +946,8 @@ async fn project_context(
     Path(id): Path<String>,
     Json(req): Json<BuildContextRequest>,
 ) -> Result<Json<RequestContext>, ServerError> {
-    ensure_project(&id)?;
-    let store = s.project_store.lock().expect("project store lock");
-    let board = req.board.as_ref().unwrap_or(&store.board);
+    let state = load_state(&s, &id).await?;
+    let board = req.board.as_ref().unwrap_or(&state.board);
     Ok(Json(build_context(&req.chips, board)))
 }
 
@@ -786,10 +956,9 @@ async fn project_handoff_manifest(
     Path(id): Path<String>,
     Json(req): Json<BuildManifestRequest>,
 ) -> Result<Json<Manifest>, ServerError> {
-    ensure_project(&id)?;
-    let store = s.project_store.lock().expect("project store lock");
-    let revisions = req.revisions.as_deref().unwrap_or(&store.handoff_revisions);
-    let inputs = req.inputs.as_deref().unwrap_or(&store.required_inputs);
+    let state = load_state(&s, &id).await?;
+    let revisions = req.revisions.as_deref().unwrap_or(&state.handoff_revisions);
+    let inputs = req.inputs.as_deref().unwrap_or(&state.required_inputs);
     build_manifest(&req.selection, revisions, inputs)
         .map(Json)
         .map_err(map_manifest_error)
@@ -897,208 +1066,6 @@ fn map_github_error(err: GitHubSourceError) -> ServerError {
     }
 }
 
-fn parse_rev_number(label: &str) -> u32 {
-    label
-        .strip_prefix('r')
-        .and_then(|s| s.parse::<u32>().ok())
-        .unwrap_or(1)
-}
-
-/// Seed in-memory state from `fixtures/meranti-yard.json` so every route works out of the box.
-fn seed_project_store(raw: &Value, now: i64) -> ProjectStore {
-    // 1. Proposals & spec revision from REVIEW_PROPOSAL.
-    let prop_id = raw["REVIEW_PROPOSAL"]["id"]
-        .as_str()
-        .unwrap_or("P-07")
-        .to_string();
-    let prop_base = parse_rev_number(raw["REVIEW_PROPOSAL"]["from"].as_str().unwrap_or("r14"));
-    let prop_title = raw["REVIEW_PROPOSAL"]["title"]
-        .as_str()
-        .unwrap_or("Add the 2-period alert rule and the variance display rule")
-        .to_string();
-
-    let mut revisions = BTreeMap::new();
-    revisions.insert(
-        "spec".to_string(),
-        Revision {
-            n: prop_base,
-            content: "R-DASH-014: Flag packages with variance above 3%.\nAC-014.2: Highlight rows over 3% in red."
-                .to_string(),
-        },
-    );
-
-    let mut proposals = BTreeMap::new();
-    proposals.insert(
-        prop_id.clone(),
-        Proposal {
-            id: prop_id,
-            artifact: "spec".to_string(),
-            title: prop_title,
-            base: prop_base,
-            hunks: vec![Hunk {
-                at: 1,
-                remove: vec!["AC-014.2: Highlight rows over 3% in red.".to_string()],
-                add: vec![
-                    "R-DASH-019: Raise an alert for a package when its variance stays above 3% for 2 consecutive periods."
-                        .to_string(),
-                    "AC-014.2: Flag rows over 3% with text badge and colour.".to_string(),
-                ],
-            }],
-        },
-    );
-
-    // 2. Ledger caps & starting usage from MODELS_CAPS and MODELS_USAGE.calm.
-    let caps = LedgerCaps {
-        per_run: raw["MODELS_CAPS"]["perRun"].as_u64().unwrap_or(60) as u32,
-        project: raw["MODELS_CAPS"]["monthly"].as_u64().unwrap_or(5000) as u32,
-        person: raw["MODELS_CAPS"]["monthly"].as_u64().unwrap_or(5000) as u32,
-        concurrency: raw["MODELS_CAPS"]["concurrency"].as_u64().unwrap_or(2) as u32,
-    };
-    let used = raw["MODELS_USAGE"]["calm"]["used"].as_u64().unwrap_or(1240) as u32;
-    let pending = raw["MODELS_USAGE"]["calm"]["pending"]
-        .as_u64()
-        .unwrap_or(30) as u32;
-    let ledger = Ledger::with_starting_usage(caps, used, pending);
-
-    // 3. Board snapshot seeded from CANVAS_FRAMES.
-    let mut board_items = Vec::new();
-    if let Some(frames) = raw["CANVAS_FRAMES"].as_object() {
-        for frame in frames.values() {
-            let Some(artifact_id) = frame["id"].as_str() else {
-                continue;
-            };
-            let rev = frame["rev"].as_str().unwrap_or("r1").to_string();
-            let status = match frame["st"].as_str().unwrap_or("draft") {
-                "accepted" => ContextItemStatus::Accepted,
-                "proposal" => ContextItemStatus::Proposal,
-                "reference" => ContextItemStatus::Reference,
-                "needs_review" => ContextItemStatus::NeedsReview,
-                _ => ContextItemStatus::Draft,
-            };
-            let name = frame["name"].as_str().unwrap_or(artifact_id);
-            board_items.push(BoardArtifact {
-                artifact_id: artifact_id.to_string(),
-                revision: rev,
-                status,
-                hidden: false,
-                content: format!("{artifact_id} {name}"),
-                estimated_tokens: 2400,
-            });
-        }
-    }
-    let board = BoardSnapshot {
-        board_id: "design".to_string(),
-        items: board_items,
-    };
-
-    // 4. Handoff artifact revisions seeded from DELIVERY_ITEMS.
-    let mut handoff_revisions = Vec::new();
-    if let Some(items) = raw["DELIVERY_ITEMS"].as_array() {
-        for item in items {
-            let Some(artifact_id) = item["id"].as_str() else {
-                continue;
-            };
-            let name = item["name"].as_str().unwrap_or(artifact_id).to_string();
-            let kind = item["kind"].as_str().unwrap_or("frame").to_string();
-            let rev_str = item["rev"].as_str().unwrap_or("r1");
-            let rev_n = parse_rev_number(rev_str);
-            let st = item["st"].as_str().unwrap_or("warn");
-            let state = match (kind.as_str(), st) {
-                (_, "ok") => ArtifactRevisionState::Accepted,
-                ("takes", _) => ArtifactRevisionState::Pending,
-                ("ref", _) => ArtifactRevisionState::Reference,
-                _ => ArtifactRevisionState::Draft,
-            };
-            let latest_accepted_rev = if state == ArtifactRevisionState::Accepted {
-                Some(rev_n)
-            } else {
-                None
-            };
-            handoff_revisions.push(ArtifactRevisionRecord {
-                artifact_id: artifact_id.to_string(),
-                name: name.clone(),
-                kind,
-                revision: Revision {
-                    n: rev_n,
-                    content: format!("{artifact_id} {name} {rev_str}"),
-                },
-                state,
-                latest_accepted_rev,
-                exclusion_reason: None,
-            });
-        }
-    }
-
-    let required_inputs = vec![
-        RequiredInput {
-            name: "DESIGN.md".to_string(),
-            present: true,
-            revision: Some("r3".to_string()),
-        },
-        RequiredInput {
-            name: "PRD".to_string(),
-            present: false,
-            revision: None,
-        },
-    ];
-
-    // 5. Projects for delete / restore (IMP-29) and the audit chain (IMP-30/31).
-    let sample_project: Project =
-        serde_json::from_value(raw["PROJECT"].clone()).unwrap_or(Project {
-            name: "Meranti Yard".to_owned(),
-            product: "Cost variance dashboard".to_owned(),
-            increment: "Inc. 2 · Variance alerts".to_owned(),
-            spec: "r14".to_owned(),
-            user: "Rina (sample)".to_owned(),
-            initials: "RS".to_owned(),
-        });
-    let mut project_entries = BTreeMap::new();
-    project_entries.insert(
-        SAMPLE_PROJECT_ID.to_owned(),
-        ProjectEntry::new(
-            SAMPLE_PROJECT_ID,
-            sample_project.clone(),
-            vec!["r14".to_owned()],
-            now,
-        ),
-    );
-    // The fixture's Recently deleted row (INTAKE_DELETED) seeds one entry three days into
-    // the 30-day window, so S27's "27 days left" is served without a clock or a database.
-    if let Some(deleted) = raw["INTAKE_DELETED"].as_object() {
-        let id = deleted["id"].as_str().unwrap_or("kenari-fleet").to_owned();
-        let deleted_at = now - 3 * SECONDS_PER_DAY;
-        let mut entry = ProjectEntry::new(
-            id.clone(),
-            Project {
-                name: "Kenari Fleet".to_owned(),
-                ..sample_project
-            },
-            vec![
-                "r1".to_owned(),
-                "r2".to_owned(),
-                "r3".to_owned(),
-                "r4".to_owned(),
-            ],
-            deleted_at,
-        );
-        entry.deleted_at = Some(deleted_at);
-        project_entries.insert(id, entry);
-    }
-
-    ProjectStore {
-        revisions,
-        proposals,
-        rejections: Vec::new(),
-        ledger,
-        board,
-        handoff_revisions,
-        required_inputs,
-        audit: AuditLog::new(),
-        audit_head: GENESIS_HASH.to_owned(),
-        project_entries,
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1163,34 +1130,48 @@ mod tests {
     #[tokio::test]
     async fn audit_head_is_checked_apart_from_the_log() {
         let state = AppState::from_fixture_json(SAMPLE).unwrap();
-        {
-            let mut store = state.project_store.lock().expect("project store lock");
-            append_audit(
-                &mut store,
-                state.now,
-                AuditAction::Accept,
-                "P-07",
-                Some("r15".to_owned()),
-                "accepted proposal P-07",
-            );
-        }
+        let mut store_state = state
+            .store
+            .load_state(SAMPLE_PROJECT_ID)
+            .await
+            .unwrap()
+            .unwrap();
+        audit_event(
+            &mut store_state,
+            state.now,
+            AuditAction::Accept,
+            "P-07",
+            Some("r15".to_owned()),
+            "accepted proposal P-07",
+        );
+        state
+            .store
+            .save_state(SAMPLE_PROJECT_ID, &store_state)
+            .await
+            .unwrap();
+
         let Json(view) = project_audit(State(state.clone()), Path(SAMPLE_PROJECT_ID.to_owned()))
             .await
-            .ok()
             .expect("audit route");
         assert_eq!(view.error, None, "a fresh chain verifies");
         assert_eq!(view.entries.len(), 1);
         let head = view.head_hash.clone();
 
         // Tamper only with the separately held head: the log is unchanged.
+        let mut tampered = state
+            .store
+            .load_state(SAMPLE_PROJECT_ID)
+            .await
+            .unwrap()
+            .unwrap();
+        tampered.audit_head = "deadbeef".to_owned();
         state
-            .project_store
-            .lock()
-            .expect("project store lock")
-            .audit_head = "deadbeef".to_owned();
+            .store
+            .save_state(SAMPLE_PROJECT_ID, &tampered)
+            .await
+            .unwrap();
         let Json(broken) = project_audit(State(state), Path(SAMPLE_PROJECT_ID.to_owned()))
             .await
-            .ok()
             .expect("audit route");
         assert_eq!(broken.head_hash, "deadbeef");
         assert_eq!(broken.entries.len(), 1, "the log itself was not edited");
@@ -1213,13 +1194,20 @@ mod tests {
             "grill",
             Some("v2".to_owned()),
             "rolled back skill grill",
-        );
-        let Json(view) = skills_audit(State(state.clone())).await;
+        )
+        .await
+        .unwrap();
+        let Json(view) = skills_audit(State(state.clone())).await.unwrap();
         assert_eq!(view.error, None, "a fresh chain verifies");
         let head = view.head_hash.clone();
 
-        state.skills_audit.lock().expect("skills audit lock").head = "deadbeef".to_owned();
-        let Json(broken) = skills_audit(State(state)).await;
+        let (log, _head) = state.store.skills_audit().await.unwrap();
+        state
+            .store
+            .save_skills_audit(&log, "deadbeef")
+            .await
+            .unwrap();
+        let Json(broken) = skills_audit(State(state)).await.unwrap();
         assert_eq!(broken.head_hash, "deadbeef");
         assert_eq!(broken.entries.len(), 1, "the log itself was not edited");
         assert!(matches!(

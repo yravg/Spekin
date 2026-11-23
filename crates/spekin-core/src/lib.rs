@@ -21,6 +21,7 @@ pub mod revision;
 pub mod skill_library;
 pub mod skills;
 pub mod stage;
+pub mod store;
 
 pub use api::{
     AddGithubSkillRequest, ApiErrorBody, AuditResponse, BuildContextRequest, BuildManifestRequest,
@@ -84,3 +85,4 @@ pub use skills::{
     UpdateDecision, UpdatePolicy, check_update, classify_update, enforce, parse_skill_md,
 };
 pub use stage::{Stage, StageId, StageTone};
+pub use store::{MemoryStore, ProjectState, Store, StoreError, StoreSeed};
