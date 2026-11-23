@@ -89,6 +89,26 @@ impl Store for Backend {
         }
     }
 
+    async fn update_revision_and_state(
+        &self,
+        id: &str,
+        artifact: &str,
+        base: u32,
+        next: &Revision,
+        state: &ProjectState,
+    ) -> Result<(), StoreError> {
+        match self {
+            Backend::Memory(m) => {
+                m.update_revision_and_state(id, artifact, base, next, state)
+                    .await
+            }
+            Backend::Pg(p) => {
+                p.update_revision_and_state(id, artifact, base, next, state)
+                    .await
+            }
+        }
+    }
+
     async fn load_state(&self, id: &str) -> Result<Option<ProjectState>, StoreError> {
         match self {
             Backend::Memory(m) => m.load_state(id).await,
@@ -455,10 +475,6 @@ async fn accept_proposal(
 
     match accept(&current, &proposal) {
         Ok(next_rev) => {
-            s.store
-                .update_revision(&id, &proposal.artifact, current.n, &next_rev)
-                .await
-                .map_err(map_store_error)?;
             audit_event(
                 &mut state,
                 s.now,
@@ -467,8 +483,10 @@ async fn accept_proposal(
                 Some(format!("r{}", next_rev.n)),
                 format!("accepted proposal {pid}"),
             );
+            // IMP-40: the revision and the state (carrying the audit entry) commit
+            // atomically, so a revision can never advance without its entry.
             s.store
-                .save_state(&id, &state)
+                .update_revision_and_state(&id, &proposal.artifact, current.n, &next_rev, &state)
                 .await
                 .map_err(map_store_error)?;
             Ok(Json(next_rev))

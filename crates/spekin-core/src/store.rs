@@ -93,6 +93,22 @@ pub trait Store: Send + Sync {
         next: &Revision,
     ) -> Result<(), StoreError>;
 
+    /// Atomically advance one artifact's revision and persist the accompanying
+    /// project state (IMP-40). The revision is written only if the artifact is
+    /// still at `base`; the state is written only if its [`ProjectState::version`]
+    /// still matches what the caller loaded. If either check fails, nothing is
+    /// written, so a revision can never advance without the audit entry carried in
+    /// `state`. Implementations must perform both writes in one transaction (Postgres)
+    /// or under one lock (memory).
+    async fn update_revision_and_state(
+        &self,
+        id: &str,
+        artifact: &str,
+        base: u32,
+        next: &Revision,
+        state: &ProjectState,
+    ) -> Result<(), StoreError>;
+
     // --- per-project mutable state ---
     async fn load_state(&self, id: &str) -> Result<Option<ProjectState>, StoreError>;
     async fn save_state(&self, id: &str, state: &ProjectState) -> Result<(), StoreError>;
@@ -157,6 +173,55 @@ impl MemoryStore {
     }
 }
 
+/// Write a revision under an already-held lock, refusing a stale base (IMP-40).
+fn write_revision(
+    inner: &mut MemoryInner,
+    id: &str,
+    artifact: &str,
+    base: u32,
+    next: &Revision,
+) -> Result<(), StoreError> {
+    let current_n = inner
+        .revisions
+        .get(id)
+        .and_then(|m| m.get(artifact))
+        .map(|r| r.n)
+        .ok_or_else(|| StoreError::NotFound(format!("artifact: {artifact}")))?;
+    if current_n != base {
+        return Err(StoreError::StaleRevision {
+            base,
+            current: current_n,
+        });
+    }
+    inner
+        .revisions
+        .get_mut(id)
+        .expect("revision map present")
+        .insert(artifact.to_owned(), next.clone());
+    Ok(())
+}
+
+/// Write a project state under an already-held lock, refusing a stale version
+/// and bumping it on success (IMP-40).
+fn write_state(
+    inner: &mut MemoryInner,
+    id: &str,
+    state: &ProjectState,
+) -> Result<(), StoreError> {
+    if let Some(current) = inner.states.get(id) {
+        if current.version != state.version {
+            return Err(StoreError::StaleState {
+                base: state.version,
+                current: current.version,
+            });
+        }
+    }
+    let mut next = state.clone();
+    next.version = state.version.saturating_add(1);
+    inner.states.insert(id.to_owned(), next);
+    Ok(())
+}
+
 #[async_trait]
 impl Store for MemoryStore {
     async fn project(&self, id: &str) -> Result<Option<Project>, StoreError> {
@@ -194,22 +259,49 @@ impl Store for MemoryStore {
         next: &Revision,
     ) -> Result<(), StoreError> {
         let mut inner = self.inner.lock().expect("memory store lock");
-        let current = inner
+        write_revision(&mut inner, id, artifact, base, next)
+    }
+
+    async fn update_revision_and_state(
+        &self,
+        id: &str,
+        artifact: &str,
+        base: u32,
+        next: &Revision,
+        state: &ProjectState,
+    ) -> Result<(), StoreError> {
+        // One lock acquisition for both writes (IMP-40). Validate both first, so
+        // a stale revision or stale state refuses the whole write without leaving
+        // either half applied — the revision and its audit entry land together.
+        let mut inner = self.inner.lock().expect("memory store lock");
+        let current_n = inner
             .revisions
             .get(id)
             .and_then(|m| m.get(artifact))
+            .map(|r| r.n)
             .ok_or_else(|| StoreError::NotFound(format!("artifact: {artifact}")))?;
-        if current.n != base {
+        if current_n != base {
             return Err(StoreError::StaleRevision {
                 base,
-                current: current.n,
+                current: current_n,
             });
+        }
+        if let Some(current) = inner.states.get(id) {
+            if current.version != state.version {
+                return Err(StoreError::StaleState {
+                    base: state.version,
+                    current: current.version,
+                });
+            }
         }
         inner
             .revisions
             .get_mut(id)
             .expect("revision map present")
             .insert(artifact.to_owned(), next.clone());
+        let mut next_state = state.clone();
+        next_state.version = state.version.saturating_add(1);
+        inner.states.insert(id.to_owned(), next_state);
         Ok(())
     }
 
@@ -220,21 +312,7 @@ impl Store for MemoryStore {
 
     async fn save_state(&self, id: &str, state: &ProjectState) -> Result<(), StoreError> {
         let mut inner = self.inner.lock().expect("memory store lock");
-        // Optimistic concurrency (IMP-40): refuse a write whose version moved
-        // since the caller loaded it, then bump on success — the same typed
-        // conflict the Postgres store returns.
-        if let Some(current) = inner.states.get(id) {
-            if current.version != state.version {
-                return Err(StoreError::StaleState {
-                    base: state.version,
-                    current: current.version,
-                });
-            }
-        }
-        let mut next = state.clone();
-        next.version = state.version.saturating_add(1);
-        inner.states.insert(id.to_owned(), next);
-        Ok(())
+        write_state(&mut inner, id, state)
     }
 
     async fn entries(&self) -> Result<BTreeMap<String, ProjectEntry>, StoreError> {
