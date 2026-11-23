@@ -85,3 +85,27 @@ describe('S29 Frames canvas (IMP-07)', () => {
     expect(emptyHtml).toContain('Spec r14 has no frame for these yet');
   });
 });
+
+describe('S29 parity (IMP-48): F165 selection and F173 zoomed-out overview', () => {
+  it('F165: the selection ring and 8 fixed-size handles are tagged; multi-select shows rings only', () => {
+    const boardHtml = renderToStaticMarkup(<FramesCanvasWorkArea initialState="board" />);
+    expect(boardHtml).toContain('data-feature="F165"');
+    // one selected frame draws a counter-scaled ring and all 8 handles at 8 px, at every zoom
+    expect((boardHtml.match(/class="hdl"/g) ?? []).length).toBe(8);
+
+    const multiHtml = renderToStaticMarkup(<FramesCanvasWorkArea initialState="multi" />);
+    // three frames selected: a ring on each, handles on none (a group is never resized by accident)
+    expect((multiHtml.match(/data-feature="F165"/g) ?? []).length).toBe(3);
+    expect(multiHtml).not.toContain('class="hdl"');
+    expect(multiHtml).toContain('3 of 6 frames selected');
+  });
+
+  it('F173: the zoomed-out overview groups rounded frames with fixed-size titles and a collapsed stack', () => {
+    const overHtml = renderToStaticMarkup(<FramesCanvasWorkArea initialState="over" />);
+    expect(overHtml).toContain('data-feature="F173"');
+    expect(overHtml).toContain('Variance flows · 7 items');
+    // takes collapse into one stack card: no per-take Open stack action in the overview
+    expect(overHtml).toContain('5 takes');
+    expect(overHtml).not.toContain('Open stack');
+  });
+});
