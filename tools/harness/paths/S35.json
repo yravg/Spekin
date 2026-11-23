@@ -4,27 +4,64 @@
     "design": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "wait": "[data-stage=\"design\"][aria-current=\"page\"]" }
+        {
+          "goto": "/"
+        },
+        {
+          "click": "button.int-cn:has-text(\"Meranti Yard\")"
+        },
+        {
+          "wait": "[data-stage=\"design\"][aria-current=\"page\"]"
+        }
       ]
     },
     "backend": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "[data-stage=\"backend\"]" },
-        { "wait": "[data-stage=\"backend\"][aria-current=\"page\"]" }
+        {
+          "goto": "/"
+        },
+        {
+          "click": "button.int-cn:has-text(\"Meranti Yard\")"
+        },
+        {
+          "click": "[data-stage=\"backend\"]"
+        },
+        {
+          "wait": "[data-stage=\"backend\"][aria-current=\"page\"]"
+        }
       ]
     },
     "conflict": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "role=tab[name=/F-04/]" },
-        { "wait": "[data-save=\"conflict\"]" }
+        {
+          "goto": "/"
+        },
+        {
+          "click": "button.int-cn:has-text(\"Meranti Yard\")"
+        },
+        {
+          "click": "role=tab[name=/F-04/]"
+        },
+        {
+          "wait": "[data-save=\"conflict\"]"
+        }
+      ]
+    },
+    "offline": {
+      "status": "checked",
+      "note": "Simulation: ?sim=offline (development builds only) has the API source answer with the last copy loaded at 12:41 and then refuse every read, so the design stage draws the board's offline state. No production code path does this.",
+      "steps": [
+        {
+          "goto": "/?sim=offline"
+        },
+        {
+          "click": "button.int-cn:has-text(\"Meranti Yard\")"
+        },
+        {
+          "wait": "[data-feature=\"F378\"]"
+        }
       ]
     }
   }

@@ -89,7 +89,7 @@ export function ModelsUsageWorkArea(props: {
   const intent = props.onIntent ?? (() => {});
   // IMP-37: the registry comes through the data door; sample mode is the drawn row.
   const data = useData();
-  const registry = useDataRead(data.sample.MODELS_REGISTRY, (s) => s.models(), []).value;
+  const registry = useDataRead('models', data.sample.MODELS_REGISTRY, (s) => s.models(), []).value ?? [];
   const [source, setSource] = useState<ModelsSourceId>(initialSource);
   const [filter, setFilter] = useState<LedgerFilter>(initialFilter);
   const [caps, setCaps] = useState<SampleModelsCaps>({ ...MODELS_CAPS });

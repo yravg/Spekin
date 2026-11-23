@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { sampleData, isStageId, type SampleStage, type StageId } from '../data/source';
 const { MODEL, MODELS_USAGE } = sampleData;
-import { useProjectData } from '../data/provider';
+import { useProjectData, useConnection } from '../data/provider';
 import { useWorkspace, type SaveState } from '../state/workspace';
 import { TopBar } from './TopBar';
 import { StageBar } from './StageBar';
@@ -177,6 +177,7 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   const setView = useWorkspace((s) => s.setView);
   const recordIntent = useWorkspace((s) => s.recordIntent);
   const { project, stages, usage, loading } = useProjectData(projectId);
+  const connection = useConnection();
   // Loading draws nothing: the boards draw no spinner. In api mode the fetch resolves within the harness wait.
   if (loading) return null;
   if (!project || !usage || !isStageId(stages, stage)) return <NotFound />;
@@ -230,6 +231,12 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
         ? '1 designing · 1 waiting'
         : undefined;
   const activeBusyNode = stage === 'design' && designSub === 'canvas' ? canvasOverride.busyNode : undefined;
+  // IMP-39: with the server offline the shell says so in the save chip and draws no busy chip.
+  const offline = connection.offline;
+  const shownSave: SaveState = offline
+    ? { status: 'conflict', tone: 'bad', text: 'Offline · kept on this device' }
+    : activeSave;
+  const shownBusy = offline ? undefined : activeBusy;
   const displayStage = stage === 'design' && designSub === 'review' && reviewOverride.stage ? reviewOverride.stage : stage;
   const displayProject =
     stage === 'design' && designSub === 'review' && reviewOverride.specRev
@@ -265,8 +272,8 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
         <TopBar
           project={displayProject}
           usage={usageView ? { ...usage, used: s36Usage.used, cap: s36Usage.cap } : usage}
-          save={activeSave}
-          busy={activeBusy}
+          save={shownSave}
+          busy={shownBusy}
           busyNode={activeBusyNode}
           plain={usageView}
           usagePct={usageView ? usagePct(s36Usage) : undefined}

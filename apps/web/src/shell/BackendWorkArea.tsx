@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import { sampleData } from '../data/source';
 const { BACKEND, CTX_BACKEND, MODEL } = sampleData;
+import { useConnection } from '../data/provider';
 import { useWorkspace } from '../state/workspace';
 import { Icon } from '../ui/Icon';
 import { Btn, IconBtn } from '../ui/Button';
@@ -9,6 +10,7 @@ import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs, type ArtifactTabItem } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
 import { Inspector } from './Inspector';
+import { OfflineBanner } from './OfflineBanner';
 
 const BACKEND_TABS: ArtifactTabItem[] = [
   { icon: 'server', name: 'API contract · variance alerts' },
@@ -25,6 +27,7 @@ export function BackendWorkArea(props: { onOpenDelivery?: () => void } = {}) {
   const setChatWidth = useWorkspace((s) => s.setChatWidth);
   const toggleChatCollapsed = useWorkspace((s) => s.toggleChatCollapsed);
   const recordIntent = useWorkspace((s) => s.recordIntent);
+  const connection = useConnection();
 
   const ctxItems = CTX_BACKEND.filter(([, name]) => !view.removedCtx.includes(name));
   const activeTab = view.tab ?? 'API contract · variance alerts';
@@ -137,6 +140,7 @@ export function BackendWorkArea(props: { onOpenDelivery?: () => void } = {}) {
           ]}
           right={right}
         />
+        {connection.offline ? <OfflineBanner lastLoadedAt={connection.lastLoadedAt} /> : null}
         <div className="sp-banner warn" role="status">
           <Icon name="alert" size={16} />
           <p>

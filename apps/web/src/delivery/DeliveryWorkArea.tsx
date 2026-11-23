@@ -218,11 +218,13 @@ export function DeliveryWorkArea(props: {
   const { view, onView, onIntent } = props;
   // IMP-37: the contracts table comes through the data door; sample mode is the drawn rows.
   const data = useData();
-  const contracts = useDataRead(
-    data.sample.DELIVERY_CONTRACTS,
-    (source) => source.contracts(SAMPLE_PROJECT_ID),
-    [],
-  ).value;
+  const contracts =
+    useDataRead(
+      'contracts:' + SAMPLE_PROJECT_ID,
+      data.sample.DELIVERY_CONTRACTS,
+      (source) => source.contracts(SAMPLE_PROJECT_ID),
+      [],
+    ).value ?? [];
   const stage = deliveryViewStage(view);
   const stageRow = STAGES.find((s) => s.id === stage)!;
   const chat = CHAT[view];
