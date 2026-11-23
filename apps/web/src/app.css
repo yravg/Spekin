@@ -46,8 +46,25 @@ body { background: var(--ground); }
 .ap-steps-first { border-top: 1px solid var(--line); }
 .del-steps div.ap-steps-first { border-top: 1px solid var(--line); }
 
+/* Reduced motion must stop every running animation and transition, including ones on
+   pseudo-elements: the design CSS's own guard is declared before its animation rules,
+   so .can-cover::before kept animating (can-breathe) under reduced motion. Only `none`
+   is used here, so no raw colour or font value is introduced (tokens stay the source). */
 @media (prefers-reduced-motion: reduce) {
-  .sp-app * { transition: none !important; animation: none !important; }
+  .ap-root *, .ap-root *::before, .ap-root *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* IMP-46: the desktop boards are drawn at 1440 px and the T01 responsive layout starts
+   below 1024 px. In the 1024-1439 band the fixed-width chrome would scroll sideways, so
+   let its flexible parts shrink and clip the leftover horizontal overflow on the root.
+   This band never applies at 1440 x 900 (the board/state-gate view) or on T01 frames. */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .sp-top > .ap-grp { min-width: 0; }
+  .int-app, .int-body { min-width: 0; }
+  .ap-root { overflow-x: clip; }
 }
 
 .can-cover .ac { gap: 0; }
