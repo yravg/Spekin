@@ -367,7 +367,7 @@ export function DeliveryWorkArea(props: {
             <Icon name="lock" size={14} />
             Build <b>{DELIVERY_BUILD.commit}</b> · {DELIVERY_BUILD.env} · {DELIVERY_BUILD.at}
           </span>
-          <span className="del-chip">
+          <span className="del-chip" data-feature="F314">
             <Icon name="eye" size={14} />
             Read-only view
           </span>
@@ -1002,7 +1002,7 @@ function GateBody(props: { onView: (view: DeliveryView) => void; onIntent: (inte
             onClick={() => onIntent('F308:write-reason')}
           />
         </div>
-        <div className="del-ro push">
+        <div className="del-ro push" data-feature="F314">
           <Icon name="lock" size={16} />
           <span>No deploy, retry or merge runs from here. Viewers can read every check and cannot change one.</span>
         </div>

@@ -10,6 +10,9 @@
 //                             of a board that draws it: reached by a real click path, not just present in the source
 //                   partial = in apps/web/src but never seen on a click path (e.g. behind a prop the app never sets)
 //                   open    = not in apps/web/src
+//                   A feature a board lists only as a story (no drawn data-feature element in any state) can never
+//                   be seen rendered; it is proven when the id is in apps/web/src AND a test under apps/web/src or
+//                   crates/ names it (the test exercises the behaviour), else partial.
 //   kind "req"      every R-XXX-n in the canonical PRD (inputs/Spekin-PRD-v0.2.3.md)
 //                   proven  = a feature mapped to it (docs/design/spekin-canvas/maps-reqs.mjs REQS) is proven
 //                   partial = mapped features exist, none proven;  unmapped = no feature maps to it
@@ -35,15 +38,31 @@ for (const f of fs.readdirSync(path.join(root, canvasDir)).filter((x) => /^board
   for (const m of rd(`${canvasDir}/${f}`).matchAll(/\['(F\d+)',\s*'[a-z]+',\s*'((?:[^'\\]|\\.)*)'/g)) fdesc[m[1]] ??= m[2].replace(/\\'/g, "'");
 }
 
-// Feature ids present in the app source (tests excluded).
+// Feature ids present in the app source (tests excluded), and ids that tests name.
 const inApp = new Set();
+const inTests = {};
 (function walk(dir) {
   for (const e of fs.readdirSync(path.join(root, dir), { withFileTypes: true })) {
     const p = `${dir}/${e.name}`;
     if (e.isDirectory()) walk(p);
     else if (/\.(tsx?|jsx?)$/.test(e.name) && !/\.test\./.test(e.name)) for (const m of rd(p).matchAll(/\bF\d{3}\b/g)) inApp.add(m[0]);
+    else if (/\.test\.(tsx?|jsx?)$/.test(e.name)) for (const m of rd(p).matchAll(/\bF\d{3}\b/g)) (inTests[m[0]] ??= new Set()).add(p);
   }
 })('apps/web/src');
+(function walkRs(dir) {
+  for (const e of fs.readdirSync(path.join(root, dir), { withFileTypes: true })) {
+    const p = `${dir}/${e.name}`;
+    if (e.isDirectory() && e.name !== 'target') walkRs(p);
+    else if (e.name.endsWith('.rs')) for (const m of rd(p).matchAll(/\bF\d{3}\b/g)) (inTests[m[0]] ??= new Set()).add(p);
+  }
+})('crates');
+
+// Ids each board really draws as an element (not only in its Stories list).
+const drawn = {};
+for (const b of boards) {
+  const html = rd(`${canvasDir}/project/${b.board}`);
+  drawn[b.screen] = new Set([...html.matchAll(/data-feature="([^"]+)"/g)].flatMap((m) => m[1].split(/[\s,]+/)));
+}
 
 // PRD requirements and their line text.
 const prd = rd('inputs/Spekin-PRD-v0.2.3.md');
@@ -78,9 +97,13 @@ const featureCell = (f) => {
   const on = [...(boardsOf[f] ?? [])];
   const seen = (seenIn[f] ?? []).filter((x) => on.includes(x.split(':')[0]));
   let s, why;
+  const storyOnly = !on.some((x) => drawn[x]?.has(f));
+  const tests = [...(inTests[f] ?? [])];
   if (!inApp.has(f)) { s = 'open'; why = `not in apps/web/src; drawn on ${on.join(', ')}`; }
   else if (!harnessHasFeatures) { s = 'partial'; why = 'in apps/web/src; the harness report predates feature tracking: run npm run harness'; }
   else if (seen.length) { s = 'proven'; why = `rendered by the app on a passing click path: ${seen.slice(0, 4).join(', ')}${seen.length > 4 ? ' …' : ''}`; }
+  else if (storyOnly && tests.length) { s = 'proven'; why = `story only on ${on.join(', ')} (no drawn element); exercised by ${tests.slice(0, 2).join(', ')}`; }
+  else if (storyOnly) { s = 'partial'; why = `story only on ${on.join(', ')}; in apps/web/src but no test names it`; }
   else { s = 'partial'; why = `in apps/web/src but never rendered on a click path of ${on.join(', ')} (wire it or add a harness state)`; }
   featureState[f] = s;
   return { k: `${f} ${(fdesc[f] ?? '').slice(0, 70)}`.trim(), kind: 'feature', w: 2, s, why };

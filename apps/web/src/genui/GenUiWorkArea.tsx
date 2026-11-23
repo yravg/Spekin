@@ -130,7 +130,7 @@ function Kbd({ children }: { children: string }) {
 
 function ProvenanceAcc({ label }: { label: string }) {
   return (
-    <span className="sty-pv acc">
+    <span className="sty-pv acc" data-feature="F321">
       <Icon name="lock" size={10} stroke={2.2} />
       {label}
     </span>
@@ -139,7 +139,7 @@ function ProvenanceAcc({ label }: { label: string }) {
 
 function ProvenanceProp({ label = 'Model proposal' }: { label?: string }) {
   return (
-    <span className="sty-pv prop">
+    <span className="sty-pv prop" data-feature="F321">
       <Icon name="spark" size={10} stroke={2.2} />
       {label}
     </span>
@@ -148,7 +148,7 @@ function ProvenanceProp({ label = 'Model proposal' }: { label?: string }) {
 
 function ProvenanceObs({ label }: { label: string }) {
   return (
-    <span className="sty-pv obs">
+    <span className="sty-pv obs" data-feature="F321">
       <Icon name="image" size={10} stroke={2.2} />
       {label}
     </span>
@@ -450,7 +450,7 @@ export function GenUiWorkArea(props: {
   );
 
   const ckCard = (
-    <div className="sty-gx" data-id="AC-DASH-019">
+    <div className="sty-gx" data-id="AC-DASH-019" data-feature="F329">
       <div className="k">
         <Icon name="check" size={12} />
         Acceptance checklist
@@ -708,14 +708,14 @@ export function GenUiWorkArea(props: {
                 <ProvenanceObs label="REF-02 · imported" />
               </span>
             </div>
-            <div className="sty-why" role="status">
+            <div className="sty-why" role="status" data-feature="F322">
               <Icon name="alert" size={15} />
               <span>
                 <b>Shown as a table.</b> The card did not pass validation: <code>forecast</code> is missing for P-04. I
                 left it empty instead of guessing, and no action on this block is active.
               </span>
             </div>
-            <table className="sty-ft" aria-label="Variance by package, plain table">
+            <table className="sty-ft" aria-label="Variance by package, plain table" data-feature="F329">
               <thead>
                 <tr>
                   <th>Package</th>

@@ -729,7 +729,7 @@ export function ResponsiveProjectShell(props: {
 
     return (
       <div className="ap-root" data-screen="T01" data-tier="tablet">
-        <div className="sp-app mod-dsc ap-t01">
+        <div className="sp-app mod-dsc ap-t01" data-feature="F352">
           <header className="mod-ah">
             <span className="mk">S</span>
             <div className="pj">
@@ -1080,7 +1080,7 @@ export function ResponsiveProjectShell(props: {
 
   return (
     <div className="ap-root" data-screen="T01" data-tier="phone">
-      <div className="sp-app mod-dsc ap-t01">
+      <div className="sp-app mod-dsc ap-t01" data-feature="F352">
         {tab === 'review' ? (
           <>
             <header className="mod-pa">

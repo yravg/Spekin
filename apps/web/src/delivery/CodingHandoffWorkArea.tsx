@@ -1161,6 +1161,7 @@ export function CodingHandoffWorkArea(props: {
                       sm
                       icon="link"
                       later="A single expiring link instead of the long text; expiry must be checked on the server (LATER)"
+                      feature="F275"
                     />
                     <span className="del-fwl">
                       Links would expire. The check belongs on the server, so it waits.
