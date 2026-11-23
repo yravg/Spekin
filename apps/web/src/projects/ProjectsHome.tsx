@@ -475,14 +475,16 @@ export function ProjectsHome({ initialView = 'home' }: { initialView?: 'home' | 
   const recordIntent = useWorkspace((s) => s.recordIntent);
   // IMP-37: Recently deleted comes through the data door; the drawn copy is the seed.
   const data = useData();
-  const deleted = useDataRead(
-    {
-      ids: [data.sample.INTAKE_DELETED.id],
-      daysLeft: { [data.sample.INTAKE_DELETED.id]: data.sample.INTAKE_DELETED.days },
-    },
-    (source) => source.recentlyDeleted(),
-    [],
-  ).value;
+  const deleted =
+    useDataRead(
+      'projects:deleted',
+      {
+        ids: [data.sample.INTAKE_DELETED.id],
+        daysLeft: { [data.sample.INTAKE_DELETED.id]: data.sample.INTAKE_DELETED.days },
+      },
+      (source) => source.recentlyDeleted(),
+      [],
+    ).value ?? { ids: [], daysLeft: {} };
 
   const [view, setView] = useState<'home' | 'all' | 'first' | 'restore'>(initialView);
   const [overlay, setOverlay] = useState<'none' | 'switch' | 'create'>('none');

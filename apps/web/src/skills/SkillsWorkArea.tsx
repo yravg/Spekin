@@ -36,8 +36,8 @@ const SPEC_TABS: ArtifactTabItem[] = [
 export function SkillsWorkArea(props: { onShellOverride?: (o: { save?: SaveState; busy?: string }) => void }) {
   // IMP-37: the library and one skill's history come through the data door.
   const data = useData();
-  const skills = useDataRead(data.sample.SKL_SKILLS, (s) => s.skills(), []).value;
-  const history = useDataRead<SkillHistoryEntry[]>([], (s) => s.skillHistory('grill'), []).value;
+  const skills = useDataRead('skills', data.sample.SKL_SKILLS, (s) => s.skills(), []).value ?? [];
+  const history = useDataRead<SkillHistoryEntry[]>('skills:history:grill', [], (s) => s.skillHistory('grill'), []).value ?? [];
   const view = useWorkspace((s) => s.view('spec'));
   const setView = useWorkspace((s) => s.setView);
   const chatWidth = useWorkspace((s) => s.chatWidth);
