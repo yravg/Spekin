@@ -11599,7 +11599,7 @@
   },
   {
     "board": "S35-project-shell.dc.html",
-    "hash": "72aa80c50979034b",
+    "hash": "c072e1a07748a13e",
     "screen": "S35",
     "features": [
       "F101",
@@ -11613,6 +11613,7 @@
       "F109",
       "F110",
       "F111",
+      "F378",
       "F112",
       "F113",
       "F114",
@@ -11629,6 +11630,11 @@
         "state": "backend",
         "entry": "From Design, click Backend in the stage header.",
         "data": "sample/meranti-yard.mjs → BACKEND, CTX_BACKEND."
+      },
+      {
+        "state": "offline",
+        "entry": "Design stage while the Spekin server stops answering (API mode).",
+        "data": "sample/meranti-yard.mjs → STAGES, FRAMES (last loaded copy)."
       },
       {
         "state": "conflict",
@@ -12274,6 +12280,278 @@
         "feature": "F104"
       },
       {
+        "does": "Asks the server again; the banner closes when it answers",
+        "feature": "F378"
+      },
+      {
+        "does": "Shows the selected artifact as Canvas",
+        "feature": "F105"
+      },
+      {
+        "does": "Shows the selected artifact as Preview",
+        "feature": "F105"
+      },
+      {
+        "does": "Shows the selected artifact as Document",
+        "feature": "F105"
+      },
+      {
+        "does": "Shows the selected artifact as Compare",
+        "feature": "F105"
+      },
+      {
+        "does": "Undoes the last draft edit on this board",
+        "feature": "F116"
+      },
+      {
+        "does": "Redoes the last undone draft edit",
+        "feature": "F116"
+      },
+      {
+        "does": "Opens the revision list of the selected artifact",
+        "feature": "F108"
+      },
+      {
+        "does": "Select and move frames",
+        "feature": "F113"
+      },
+      {
+        "does": "Pans the board; Space-drag does the same",
+        "feature": "F113"
+      },
+      {
+        "does": "Starts an empty frame; asks for a prompt or a reference",
+        "feature": "F113"
+      },
+      {
+        "does": "Adds a text note to the board",
+        "feature": "F113"
+      },
+      {
+        "does": "Drops a nitpick pin on a frame region (S33)",
+        "feature": "F113"
+      },
+      {
+        "does": "Imports a PNG, JPEG or WebP the user picks as a reference image (S28)",
+        "feature": "F113"
+      },
+      {
+        "does": "When on, selecting a frame region opens the part-instruction popover (S32)",
+        "feature": "F113"
+      },
+      {
+        "does": "Pans to F-06, which is being designed off screen; the selection does not change",
+        "feature": "F113"
+      },
+      {
+        "does": "Zooms the board out; UI text keeps its size",
+        "feature": "F113"
+      },
+      {
+        "does": "Zooms the board in",
+        "feature": "F113"
+      },
+      {
+        "does": "Fits the selected frames in view",
+        "feature": "F113"
+      },
+      {
+        "does": "Opens frame actions: duplicate, compare, hand off",
+        "feature": "F108"
+      },
+      {
+        "does": "Shows the Links of the selection",
+        "feature": "F108"
+      },
+      {
+        "does": "Shows the Contract of the selection",
+        "feature": "F108"
+      },
+      {
+        "does": "Shows the Revisions of the selection",
+        "feature": "F108"
+      },
+      {
+        "does": "Shows the Evidence of the selection",
+        "feature": "F108"
+      },
+      {
+        "does": "Opens S08 review with the 3 pending items for this stage",
+        "feature": "F108"
+      },
+      {
+        "does": "Opens the quick project switcher (Cmd/Ctrl+K), most recent first; switching restores only that project's saved state",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens the increment picker: which feature increment the stages describe",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens the accepted spec revision and its history (S07); never edits it",
+        "feature": "F103"
+      },
+      {
+        "does": "Opens S36 usage: estimate, reservations, actuals, cap and remaining credits; the bar turns amber at 70% and red at 90% of the cap",
+        "feature": "F111"
+      },
+      {
+        "does": "Opens the Agent Inbox: running jobs and approvals, beside the work, never over it",
+        "feature": "F109"
+      },
+      {
+        "does": "Shows the UI in English",
+        "feature": "F115"
+      },
+      {
+        "does": "Shows the UI in Bahasa Indonesia",
+        "feature": "F115"
+      },
+      {
+        "does": "Switches the main workspace to Planning in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Specification in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Design in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Frontend in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Backend in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Integration in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Testing in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Switches the main workspace to Deployment in place, no reload; restores that stage's tabs, viewport, selection and drafts",
+        "feature": "F102"
+      },
+      {
+        "does": "Opens the stage inspector: required artifacts, blockers, evidence and next proposed action for the current stage",
+        "feature": "F101"
+      },
+      {
+        "does": "Drag to resize the chat column (300 to 520 px); the width is remembered per project",
+        "feature": "F114"
+      },
+      {
+        "does": "Lists earlier chats of this stage",
+        "feature": "F114"
+      },
+      {
+        "does": "Starts a new chat in this stage; the context list is kept",
+        "feature": "F114"
+      },
+      {
+        "does": "Collapses the chat panel; the board keeps its viewport",
+        "feature": "F114"
+      },
+      {
+        "does": "Removes F-03 Variance table from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Removes DESIGN.md from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Removes R-DASH-014 from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Removes REF-02 Site cost report from the next run's context",
+        "feature": "F106"
+      },
+      {
+        "does": "Adds a frame, artifact, requirement or reference to the context list",
+        "feature": "F106"
+      },
+      {
+        "does": "Shows the same cards as a plain table (text fallback)",
+        "feature": "F110"
+      },
+      {
+        "does": "Expands the card in place: criteria, sources and linked frames; focus stays on the card",
+        "feature": "F110"
+      },
+      {
+        "does": "Edits the proposed criterion as a draft; the spec is unchanged",
+        "feature": "F110"
+      },
+      {
+        "does": "Adds this proposal to S08 review with its exact diff",
+        "feature": "F110"
+      },
+      {
+        "does": "Puts this prompt in the composer; nothing runs until Send",
+        "feature": "F114"
+      },
+      {
+        "does": "Expands the run steps: each tool call, file and check, live",
+        "feature": "F109"
+      },
+      {
+        "does": "Stops this run at its next step; charges settle to what was used",
+        "feature": "F109"
+      },
+      {
+        "does": "Attaches a PNG, JPEG or WebP the user picked; nothing is read without a file choice",
+        "feature": "F114"
+      },
+      {
+        "does": "Inserts an artifact reference and adds it to the context list",
+        "feature": "F106"
+      },
+      {
+        "does": "Opens the model source picker: Hosted, BYOK, Local agent (deferred); provider, model, limits, billing source",
+        "feature": "F107"
+      },
+      {
+        "does": "Sends the message with exactly the listed context; a paid run reserves its maximum first",
+        "feature": "F114"
+      },
+      {
+        "does": "Shows Variance flows in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Shows F-03 Variance table in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Shows F-04 Alert drawer in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Shows DESIGN.md in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Shows Spec §3 in the work area; tabs are artifacts, not stages",
+        "feature": "F104"
+      },
+      {
+        "does": "Opens another artifact of this project in a new tab",
+        "feature": "F104"
+      },
+      {
+        "does": "Opens S34: downloads only accepted revisions with a fixed revision manifest",
+        "feature": "F104"
+      },
+      {
         "does": "Opens Compare: r8 on the left, your local draft on the right",
         "feature": "F112"
       },
@@ -12383,6 +12661,7 @@
       }
     ],
     "later": [
+      "Share and comment links (deferred in the browser MVP, R-WS-3)",
       "Share and comment links (deferred in the browser MVP, R-WS-3)",
       "Share and comment links (deferred in the browser MVP, R-WS-3)",
       "Share and comment links (deferred in the browser MVP, R-WS-3)"
