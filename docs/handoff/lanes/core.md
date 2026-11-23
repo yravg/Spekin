@@ -2,9 +2,46 @@
 
 Only this lane edits this file. Write here before you stop working.
 
+## IMP-43 · Skills audit client (core lane, hy4) — 24 Nov 2026
+
+**Status:** `done`. **Branch:** `imp-43-skills-audit` (base `origin/main`), one PR.
+
+**Changed:** `apps/web/src/data/api.ts` adds `skillsAuditUrl()` + `fetchSkillsAudit()` for
+`GET /api/skills/audit`, returning the generated `AuditResponse` and reusing `isAuditResponse`
+(the project audit client's shape check). `apps/web/src/data/api.test.ts` adds 5 tests. No screen,
+no `source.ts` change. Resolves the 23 Nov IMP-35 "no typed skills-audit client" request.
+
+**Evidence:** `npm run gate` EXIT 0 after `npm ci`: rules ok, licences ok, design/fixtures in sync,
+14 boards lint, typecheck ok, vitest 21 files / **147 tests** (142 + 5 new `Skills audit API (IMP-43)`
+cases: mocked body deep-equals + URL `/api/skills/audit`, 404 → `null`, wrong shape → `ApiError
+'shape'`, bad JSON → `'json'`, refused connection → `'network'`), vite build ok, Rust
+fmt/clippy/test workspace ok, `contracts current`. TDD: tests seen red (`fetchSkillsAudit is not a
+function`, 5 failed) before the implementation.
+
+**Not checked:** no live-socket/browser run of the client (unit-only card, no board); screens still
+do not draw the skills audit (IMP-45 wires it into the data door). No new dependency, no Python.
+
 ## Current status (verified 23 Nov 2026, lead)
 
 All core cards are merged into `main` (`0aba2c5`; PRs #1–#47 merged). Rows below marked `open` are stale snapshots from the stacked-PR period and are superseded by this note. Current gate: exit 0 — `rules ok (460 files)`, `licences ok (198 npm packages, 246 crates, 0 Python)`, 14 boards / 81 states, vitest 21 files / 142 tests, Rust 153 core tests plus workspace suites, contracts current. Postgres route, live-HTTP and concurrency stages were run on the worker branches; the lead re-run used the default memory store only.
+
+## IMP-44 · Stage values generated from Rust (OpenCode Go hy4, 24 Nov 2026)
+
+Status: **done**
+
+- Base `origin/main`, branch `imp-44-stage-values`, one PR, worker does not merge.
+- `crates/spekin-core/src/stage.rs`: added `StageId::ALL` (8 variants), `StageTone::ALL` (5), `StageId::ORDER = StageId::ALL`, and an exhaustive `as_str()` on both. A new enum variant fails to compile (non-exhaustive `match` in `as_str` and in both coverage tests) until it is added to `ALL` and the generated values.
+- Generator test `stage::tests::export_stage_values_bindings` runs in `cargo test --workspace` (the same step ts-rs writes its bindings) and writes `packages/contracts/src/generated/StageValues.ts` with `STAGE_IDS` / `STAGE_TONES` as `as const`, derived from `ALL`/`as_str`. `tools/check-contracts.mjs` sees drift because `cargo test` rewrites the file into the monitored `generated/` dir.
+- `packages/contracts/src/index.ts`: value re-export `export { STAGE_IDS, STAGE_TONES } from './generated/StageValues'`.
+- `apps/web/src/data/api.ts`: imports both consts from `@spekin/contracts`, deletes the local `STAGE_IDS`/`STAGE_TONES` mirrors and the now-unused `StageId`/`StageTone` type imports. `isStage`/`isStages` unchanged; `api.test.ts` not touched (card says existing cases pass unchanged).
+
+Evidence (local, 24 Nov 2026):
+- Test-first: `cargo test -p spekin-core --lib` failed to compile (E0599 `ALL` / `as_str` not found) before the impl; after the impl `156 passed`, including `stage_id_all_covers_every_variant`, `stage_tone_all_covers_every_variant`, `export_stage_values_bindings`.
+- `npm run typecheck`, `npm test` (21 files / 142 tests), `npm run build` all pass; `cargo clippy --workspace --all-targets -- -D warnings` clean; `cargo fmt --all --check` clean.
+- `npm run gate` EXIT 0: `rules ok (456 files)`, `licences ok (198 npm packages, 246 crates, 0 Python)`, 14 boards / 81 states, 142 web tests, `cargo fmt/clippy/test` (156 core lib tests plus workspace suites), `contracts current`.
+- `git status --porcelain -- packages/contracts/src/generated` clean after the gate: ts-rs rewrote every other binding byte-identically and `StageValues.ts` is regenerated identically by the generator test.
+
+Not checked: no harness/PNG (core card, no board changed); no live browser render of the consts (compile-time values only); Windows/Linux (macOS only). GitHub CI (`rust`, `web`, `state-gate` jobs) is only observed after the PR is opened — see PR body/final answer for the per-job result.
 
 ## Now (historical per-card record)
 

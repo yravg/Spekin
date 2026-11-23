@@ -40,11 +40,11 @@ import type {
   SkillUpdateOutcome,
   SkillsResponse,
   Stage,
-  StageId,
-  StageTone,
   UpdateCheck,
   UsageSnapshot,
 } from '@spekin/contracts';
+// ts-rs exports the contract types, not the enum values; the value lists come from Rust (IMP-44).
+import { STAGE_IDS, STAGE_TONES } from '@spekin/contracts';
 
 /** What went wrong, so callers can branch without matching on messages. */
 export type ApiErrorKind =
@@ -85,20 +85,6 @@ export interface ApiOptions {
   /** Lets a screen cancel a request when the stage switches away. */
   signal?: AbortSignal;
 }
-
-// Runtime mirrors of the Rust enums (crates/spekin-core/src/stage.rs). ts-rs exports the types,
-// not the values, so the shape check keeps its own list next to the type import above.
-const STAGE_IDS: readonly StageId[] = [
-  'planning',
-  'spec',
-  'design',
-  'frontend',
-  'backend',
-  'integration',
-  'testing',
-  'deploy',
-];
-const STAGE_TONES: readonly StageTone[] = ['ok', 'half', 'ring', 'warn', 'bad'];
 
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -797,6 +783,28 @@ export async function fetchAudit(
   if (!result.found) return null;
   if (!isAuditResponse(result.value)) {
     throw new ApiError('shape', `API audit body is not an AuditResponse: ${url}`, { url });
+  }
+  return result.value;
+}
+
+/** The URL the server serves the skills library's own hash-chained audit under (IMP-43). */
+export function skillsAuditUrl(options: ApiOptions = {}): string {
+  return `${apiBase(options)}/api/skills/audit`;
+}
+
+/**
+ * The skills library's own audit view (IMP-43). Both audit routes answer the same generated
+ * `AuditResponse`, so this reuses the project audit client's shape check. `null` means the server
+ * does not serve the chain (404); it is different from a verified but empty chain.
+ */
+export async function fetchSkillsAudit(
+  options: ApiOptions = {},
+): Promise<AuditResponse | null> {
+  const url = skillsAuditUrl(options);
+  const result = await getJson(url, options.signal);
+  if (!result.found) return null;
+  if (!isAuditResponse(result.value)) {
+    throw new ApiError('shape', `API skills audit body is not an AuditResponse: ${url}`, { url });
   }
   return result.value;
 }
