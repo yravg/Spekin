@@ -1,0 +1,66 @@
+{
+  "board": "S33-review-accept.dc.html",
+  "states": {
+    "pins": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Open review\")" },
+        { "wait": "[data-screen=\"S33\"]" }
+      ]
+    },
+    "hover": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Open review\")" },
+        { "hover": ".rev-rr:has-text(\"Table header\") button.rb" },
+        { "wait": ".rev-tip" }
+      ]
+    },
+    "stale": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Open review\")" },
+        { "click": ".rev-rr.stale button.rb" },
+        { "wait": ".rev-rs" }
+      ]
+    },
+    "diff": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Open review\")" },
+        { "click": "button:has-text(\"Open spec proposal\")" },
+        { "wait": ".rev-dv" }
+      ]
+    },
+    "accepted": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Open review\")" },
+        { "click": "button:has-text(\"Open spec proposal\")" },
+        { "click": "button:has-text(\"Accept and create r15\")" },
+        { "wait": ".rev-bn.ok" }
+      ]
+    },
+    "rejected": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Open review\")" },
+        { "click": "button:has-text(\"Open spec proposal\")" },
+        { "click": ".rev-ab button:has-text(\"Reject\")" },
+        { "wait": ".rev-bn.mute" }
+      ]
+    }
+  }
+}

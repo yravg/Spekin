@@ -1,0 +1,70 @@
+{
+  "board": "S32-targeted-change.dc.html",
+  "states": {
+    "select": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Ask on select\")" },
+        { "wait": "[data-screen=\"S32\"]" }
+      ]
+    },
+    "working": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Ask on select\")" },
+        { "type": [".rev-in", "Set the forecast to 5.95 after the re-quote"] },
+        { "click": ".rev-act button.ink" },
+        { "wait": ".rev-spin.in" }
+      ]
+    },
+    "applied": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Ask on select\")" },
+        { "type": [".rev-in", "Set the forecast to 5.95 after the re-quote"] },
+        { "click": ".rev-act button.ink" },
+        { "click": ".rev-bar .tx" },
+        { "wait": ".rev-bar:has-text(\"Applied in place\")" }
+      ]
+    },
+    "compare": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Ask on select\")" },
+        { "type": [".rev-in", "Set the forecast to 5.95 after the re-quote"] },
+        { "click": ".rev-act button.ink" },
+        { "click": ".rev-bar .tx" },
+        { "click": "button:has-text(\"Compare whole frame\")" },
+        { "wait": ".rev-cwork" }
+      ]
+    },
+    "variations": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Ask on select\")" },
+        { "click": ".rev-grp button.go" },
+        { "wait": ".rev-bar:has-text(\"Variation 1 of 3\")" }
+      ]
+    },
+    "clip": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Ask on select\")" },
+        { "click": "button.rev-tg" },
+        { "wait": ".rev-cliptag" }
+      ]
+    }
+  }
+}

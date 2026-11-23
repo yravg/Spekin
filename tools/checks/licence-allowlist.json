@@ -1,0 +1,4 @@
+{
+  "$comment": "Copyleft (GPL, LGPL, AGPL) and unclassified licences are refused by tools/checks/licences.mjs unless this file names them, with a reason a person wrote. Keep it empty unless the owner has decided the entry (docs/DECISIONS.md). Entries match on package name AND licence.",
+  "allowed": []
+}

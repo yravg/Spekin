@@ -1,0 +1,66 @@
+{
+  "board": "S29-frames-canvas.dc.html",
+  "states": {
+    "board": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "role=tab[name=\"Variance flows\"]" },
+        { "wait": "[data-screen=\"S29\"]" }
+      ]
+    },
+    "multi": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "role=tab[name=\"Variance flows\"]" },
+        { "click": "[data-frame=\"F-05\"]" },
+        { "wait": ".can-edge" }
+      ]
+    },
+    "chat": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "role=tab[name=\"Variance flows\"]" },
+        { "click": "button[aria-label=\"Open the Design chat\"]" },
+        { "wait": ".can-carry" }
+      ]
+    },
+    "jobs": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "role=tab[name=\"Variance flows\"]" },
+        { "click": ".can-pb button[aria-label=\"Send\"]" },
+        { "wait": ".can-cap" }
+      ]
+    },
+    "over": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "role=tab[name=\"Variance flows\"]" },
+        { "click": ".can-zp" },
+        { "click": "button[role=\"menuitem\"]:has-text(\"Zoom out\")" },
+        { "hover": ".can-pb .pc" },
+        { "wait": ".can-fan" }
+      ]
+    },
+    "empty": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "role=tab[name=\"Variance flows\"]" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "wait": ".can-empty" }
+      ]
+    }
+  }
+}
