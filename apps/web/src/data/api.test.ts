@@ -47,6 +47,7 @@ import {
   fetchProject,
   fetchSkillHistory,
   fetchSkills,
+  fetchSkillsAudit,
   fetchStages,
   fetchUsage,
   rejectProposal,
@@ -668,5 +669,61 @@ describe('Build contracts API (IMP-37)', () => {
 
     expect(error).toBeInstanceOf(ApiError);
     expect((error as ApiError).kind).toBe('json');
+  });
+});
+
+// IMP-43: GET /api/skills/audit serves the skills library's own hash-chained log. It reuses the
+// project audit client's shape check (both routes answer the same generated AuditResponse).
+describe('Skills audit API (IMP-43)', () => {
+  const entry = {
+    seq: 1,
+    actor: 'sample-user',
+    action: 'skill_update_applied',
+    target_id: 'ears',
+    revision: null,
+    reason: 'wording',
+    at: 1_735_689_600,
+    prev_hash: '0'.repeat(64),
+    hash: 'a'.repeat(64),
+  };
+  const audit = { entries: [entry], head_hash: entry.hash, error: null } as unknown as AuditResponse;
+
+  it('fetchSkillsAudit returns the mocked body and reads GET /api/skills/audit', async () => {
+    const spy = mockFetch(json(audit));
+
+    await expect(fetchSkillsAudit()).resolves.toEqual(audit);
+    expect(String(spy.mock.calls[0]?.[0])).toBe('/api/skills/audit');
+  });
+
+  it('a 404 answers null, not an empty chain', async () => {
+    mockFetch(new Response('not found', { status: 404 }));
+
+    await expect(fetchSkillsAudit()).resolves.toBeNull();
+  });
+
+  it('a wrong shape is a typed error, never a crash', async () => {
+    mockFetch(json({ entries: 'not an array', head_hash: 'x', error: null }));
+
+    const error = await fetchSkillsAudit().catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).kind).toBe('shape');
+  });
+
+  it('bad JSON is a typed error, never a crash', async () => {
+    mockFetch(new Response('<html>oops</html>', { status: 200 }));
+
+    const error = await fetchSkillsAudit().catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).kind).toBe('json');
+  });
+
+  it('a refused connection is a typed network error, never a raw TypeError', async () => {
+    mockFetch(() => {
+      throw new TypeError('fetch failed');
+    });
+
+    const error = await fetchSkillsAudit().catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).kind).toBe('network');
   });
 });
