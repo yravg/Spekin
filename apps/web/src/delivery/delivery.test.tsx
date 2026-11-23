@@ -105,4 +105,19 @@ describe('S37 Build contracts (IMP-18)', () => {
     expect(deliveryViewStage('gate')).toBe('deploy');
     expect(deliveryViewStage('evidence')).toBe('deploy');
   });
+
+  it('F314: S37 is read-only in every view — no deploy, retry or merge, viewers cannot change', () => {
+    for (const v of DELIVERY_VIEWS) {
+      const html = render(v.id);
+      // The read-only marker carries its feature id across all six states.
+      expect(html).toContain('data-feature="F314"');
+      expect(html).toContain('Read-only view');
+    }
+    const gate = render('gate');
+    expect(gate).toContain('No deploy, retry or merge runs from here. Viewers can read every check and cannot change one.');
+    // The only retry-looking control is a disabled LATER button: no run can be started from here.
+    const fail = render('fail');
+    expect(fail).toContain('Retry run');
+    expect(fail).toMatch(/data-later="[^"]*cannot retry CI[^"]*"/);
+  });
 });
