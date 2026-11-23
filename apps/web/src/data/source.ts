@@ -10,16 +10,31 @@
 import * as sampleModule from '@spekin/sample';
 import {
   ApiError,
+  fetchAudit,
+  fetchContracts,
+  fetchDeletedProjects,
+  fetchModels,
   fetchProject,
+  fetchSkillHistory,
+  fetchSkills,
   fetchStages,
   fetchUsage,
   validateGenUi as validateGenUiRequest,
   type ApiOptions,
 } from './api';
 import type {
+  AuditResponse,
+  LibrarySkill,
+  ModelCapability,
+  SkillHistoryEntry,
+} from '@spekin/contracts';
+import type {
+  SampleDeliveryContract,
   SampleGenUiCard,
   SampleGenUiVerdict,
+  SampleModelRegistryRow,
   SampleProject,
+  SampleSkillRow,
   SampleStage,
   SampleUsage,
   StageId,
@@ -47,6 +62,14 @@ export interface ProjectSnapshot {
 /** What the Rust GenUI validator says about one card, in the app's own words. */
 export type CardVerdict = SampleGenUiVerdict;
 
+/** Recently deleted projects: what S27 needs to mark a card gone, and the days it shows. */
+export interface RecentlyDeleted {
+  /** Project ids sitting in the restore window right now. */
+  ids: string[];
+  /** Whole days left per id, as the server counts them; the sample carries the window length. */
+  daysLeft: Record<string, number>;
+}
+
 export interface DataSource {
   readonly mode: DataMode;
   /** Sample-only datasets. Both implementations serve the same ones. */
@@ -56,11 +79,88 @@ export interface DataSource {
   project(id: string, options?: ApiOptions): Promise<SampleProject | null>;
   stages(id: string, options?: ApiOptions): Promise<SampleStage[]>;
   usage(id: string, options?: ApiOptions): Promise<SampleUsage | null>;
+  /** The S36 model registry, in the board's row shape. */
+  models(options?: ApiOptions): Promise<SampleModelRegistryRow[]>;
+  /** The S40 skills list, in the board's row shape and order. */
+  skills(options?: ApiOptions): Promise<SampleSkillRow[]>;
+  /** One skill's version history (IMP-34); the sample library starts with none. */
+  skillHistory(skillId: string, options?: ApiOptions): Promise<SkillHistoryEntry[]>;
+  /** The S37 build contracts, in the board's row shape. */
+  contracts(id: string, options?: ApiOptions): Promise<SampleDeliveryContract[]>;
+  /** The hash-chained audit view; null when the source has no chain (the sample). */
+  audit(id: string, options?: ApiOptions): Promise<AuditResponse | null>;
+  /** Recently deleted projects for S27. */
+  recentlyDeleted(options?: ApiOptions): Promise<RecentlyDeleted>;
   /** A recorded verdict for a sample card, or null when the source must ask the server. */
   knownCardVerdict(card: unknown): CardVerdict | null;
   /** The verdict for a card; a refusal or a network error is a rejection, never a partial card. */
   validateGenUi(card: unknown, options?: ApiOptions): Promise<CardVerdict>;
 }
+
+const STAGE_NAMES: Record<StageId, string> = {
+  planning: 'Planning',
+  spec: 'Specification',
+  design: 'Design',
+  frontend: 'Frontend',
+  backend: 'Backend',
+  integration: 'Integration',
+  testing: 'Testing',
+  deploy: 'Deployment',
+};
+
+/** 200000 → "200k", as the board writes it. */
+function tokenLabel(n: number): string {
+  return n >= 1000 && n % 1000 === 0 ? `${n / 1000}k` : String(n);
+}
+
+/**
+ * One S36 registry row from one capability.
+ *
+ * The API supplies the name, the limits, the rate card and availability. It does not carry the
+ * board's caps list ("Code", "Structured"), its credit estimate or its note, so those stay the
+ * drawn sample row's values (see docs/handoff/lanes/ui.md, "Still sample-only").
+ */
+function modelRow(cap: ModelCapability, drawn: SampleModelRegistryRow | undefined): SampleModelRegistryRow {
+  return {
+    id: cap.id,
+    name: cap.name,
+    caps: drawn?.caps ?? (cap.image_input ? ['Text', 'Vision'] : ['Text']),
+    lim: `${tokenLabel(cap.context_tokens)} in · ${tokenLabel(cap.max_output_tokens)} out`,
+    rc: cap.price?.rate_card ?? drawn?.rc ?? '',
+    est: drawn?.est ?? '',
+    st: cap.availability === 'selected' ? 'sel' : cap.availability === 'available' ? 'ok' : 'off',
+    note: drawn?.note ?? '',
+  };
+}
+
+/**
+ * One S40 row from one library skill.
+ *
+ * The API supplies the title, description, stages, source kind, licence and use count. The
+ * switch state and the update label ("Auto-update", "Update ready", …) are the board's
+ * vocabulary and are not in LibrarySkill, so they stay the drawn sample row's values.
+ */
+function skillRow(
+  skill: LibrarySkill,
+  drawn: SampleSkillRow | undefined,
+  sources: typeof sampleModule.SKL_SOURCES,
+): SampleSkillRow {
+  const kind = skill.kind;
+  const sourceKind = kind === 'template' ? 'template' : kind === 'user' ? 'mine' : 'github';
+  const source = sources.find((s) => s.kind === sourceKind) ?? sources[0];
+  return [
+    skill.manifest.id,
+    skill.manifest.title,
+    skill.manifest.description,
+    skill.manifest.stages.map((s) => STAGE_NAMES[s] ?? s),
+    source?.id ?? drawn?.[4] ?? '',
+    skill.manifest.licence,
+    drawn?.[6] ?? 'Auto-update',
+    drawn?.[7] ?? true,
+    skill.uses,
+  ];
+}
+
 
 // Recorded from the Rust validator (crates/spekin-core/src/genui.rs). IMP-36 will keep them equal to
 // genui::validate; the lead moves this list into sample/parts and exports GENUI_CARDS (see lanes/ui.md).
@@ -155,6 +255,17 @@ export const sampleSource: DataSource = {
   project: async (id) => sampleSnapshot(id)?.project ?? null,
   stages: async (id) => sampleSnapshot(id)?.stages ?? [],
   usage: async (id) => sampleSnapshot(id)?.usage ?? null,
+  models: async () => sampleModule.MODELS_REGISTRY,
+  skills: async () => sampleModule.SKL_SKILLS,
+  // The sample library has no version history: S40's update log (SKL_UPDATES) is drawn copy.
+  skillHistory: async () => [],
+  contracts: async (id) => (id === SAMPLE_PROJECT_ID ? sampleModule.DELIVERY_CONTRACTS : []),
+  // The sample has no hash-chained log; S33 draws its proposal's recorded audit entry.
+  audit: async () => null,
+  recentlyDeleted: async () => ({
+    ids: [sampleModule.INTAKE_DELETED.id],
+    daysLeft: { [sampleModule.INTAKE_DELETED.id]: sampleModule.INTAKE_DELETED.days },
+  }),
   knownCardVerdict: recordedVerdict,
   validateGenUi: async (card) =>
     recordedVerdict(card) ?? { status: 'rejected', reason: 'not recorded in the sample verdicts' },
@@ -171,6 +282,61 @@ export const apiSource: DataSource = {
     const snapshot = await fetchUsage(id, options);
     // The server carries numbers; the meter's source label is the drawn one ("Hosted").
     return snapshot ? { source: sampleModule.USAGE.source, used: snapshot.used, cap: snapshot.cap } : null;
+  },
+  models: async (options) => {
+    const capabilities = await fetchModels(options);
+    const drawn = new Map(sampleModule.MODELS_REGISTRY.map((row) => [row.id, row]));
+    return capabilities.map((cap) => modelRow(cap, drawn.get(cap.id)));
+  },
+  skills: async (options) => {
+    const library = await fetchSkills(options);
+    const drawn = new Map(sampleModule.SKL_SKILLS.map((row) => [row[0], row]));
+    const mapped = new Map(
+      library.skills.map((skill) => {
+        const row = skillRow(skill, drawn.get(skill.manifest.id), sampleModule.SKL_SOURCES);
+        return [row[0], row] as const;
+      }),
+    );
+    // Keep the order the board draws and append anything the library gained.
+    const ordered = sampleModule.SKL_SKILLS.flatMap((row) => {
+      const match = mapped.get(row[0]);
+      if (!match) return [];
+      mapped.delete(row[0]);
+      return [match];
+    });
+    return [...ordered, ...mapped.values()];
+  },
+  skillHistory: async (skillId, options) => (await fetchSkillHistory(skillId, options)) ?? [],
+  contracts: async (id, options) => {
+    const body = await fetchContracts(id, options);
+    if (!body) return [];
+    const drawn = new Map(sampleModule.DELIVERY_CONTRACTS.map((row) => [row.name, row]));
+    // The server serves the contracts in the board's order, so the row's position maps them.
+    return body.contracts.map((contract, i) => {
+      const row = drawn.get(contract.title) ?? sampleModule.DELIVERY_CONTRACTS[i];
+      // The API names the contract; the rest of the row is the board's copy (stage, number,
+      // kind, icon, version, status, link label and check count) until the server carries it.
+      if (row) return { ...row, name: contract.title };
+      return {
+        stage: '',
+        n: '',
+        kind: 'Contract',
+        ic: 'req',
+        name: contract.title,
+        ver: '',
+        st: ['mute', 'Draft'],
+        link: contract.id,
+        checks: `${contract.checks.length} checks`,
+      };
+    });
+  },
+  audit: (id, options) => fetchAudit(id, options),
+  recentlyDeleted: async (options) => {
+    const rows = await fetchDeletedProjects(options);
+    return {
+      ids: rows.map((row) => row.entry.id),
+      daysLeft: Object.fromEntries(rows.map((row) => [row.entry.id, Number(row.days_left)])),
+    };
   },
   knownCardVerdict: () => null,
   validateGenUi: async (card, options) => {
