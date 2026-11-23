@@ -25,3 +25,5 @@ One line per decision, newest first. The owner decides product questions. Agents
 | Payment method for paid plans (PRD T-404). | Midtrans QRIS. This is a recommendation only, not decided. |
 | When to build the MCP server that serves skills to the user's own agent. | After P5, with its own ADR (auth, tokens, connector). |
 | Which other skill sets join the library (each needs a licence check). | Start with mattpocock/skills (MIT) and Spekin templates; add others one repo at a time. |
+| 23 Nov 2026 | Persistence: Postgres via sqlx behind a Store trait, memory store by default (ADR 0008) | owner approved lead recommendation |
+| 23 Nov 2026 | Drive links outside the PRD may stay where they are needed: only the owner can open them | owner |
