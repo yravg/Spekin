@@ -138,7 +138,8 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-19 | ui | S38 GenUI panel | IMP-01 | done, part open: PR #34, stacked on #32 (lead re-ran: S38 6/6 PASS; a TS mirror of the Rust validator is used until IMP-21) |
 | IMP-20 | ui | T01 Tablet and phone | IMP-01 | done, part open: PR #35, stacked on #34 (lead re-ran: T01 5/5 PASS with device frames; real upload, zip download and keyboard-only traversal not checked) |
 | IMP-21 | ui | Screens read through one data source (sample default, API mode); S38 stops validating in the browser | IMP-26, PR #37 | done, part open: PR #38, stacked on #37 (lead re-ran: 80/80 sample mode; API mode S27, S35, S36, S40 pass per worker; project, stages, usage only so far) |
-| IMP-37 | ui + core | API mode for models, skills and history, contracts, audit, deleted projects (core adds fetchContracts to api.ts first) | IMP-21 | open |
+| IMP-37 | ui + core | API mode for models, skills and history, contracts, audit, deleted projects | IMP-21 | in progress (OpenCode Go DeepSeek V4.1 Flash, on #38) |
+| IMP-38 | core | Store trait, memory store, Postgres store (ADR 0008) | PR #37 | in progress (OpenCode Go DeepSeek V4 Pro, on #37) |
 | IMP-36 | core | GenUI sample verdicts equal the Rust validator | IMP-21 | open |
 
 ### IMP-21 · Screens read through one data source; API mode (ui)
@@ -156,6 +157,24 @@ Not in scope: writes from the screens (accept, reserve, copy skill and so on sta
 ### IMP-36 · GenUI sample verdicts equal the Rust validator (core)
 
 A Rust test reads the GenUI sample cards (exported to `fixtures/genui-cards.json` by `npm run sync:design`) and checks each card's recorded verdict equals `genui::validate`. Depends on IMP-21 and the lead adding the verdicts to the sample.
+
+### IMP-37 · API mode for the remaining reads (core then ui, one worker)
+
+Base: `imp-21-data-source` (PR #38). Branch `imp-37-api-reads`.
+1. Core part (`apps/web/src/data/api*.ts`): add `fetchContracts(projectId)` for GET /api/projects/{id}/contracts, with a test like the others (mocked fetch, typed error on bad JSON, null on 404).
+2. UI part: add models, skills (list and history), contracts, audit and deleted projects to the `DataSource` interface, both `sampleSource` and `apiSource`. S36, S40, S37 and S27 (Recently deleted) read them through `useData()`. Where the API shape differs from the sample shape, map it in `apiSource`, not in the screen. Anything the API cannot supply yet keeps the sample value and is listed in ui.md under "Still sample-only".
+3. Tests first: `apiSource` and `sampleSource` agree for each new read on the Meranti Yard fixture, or the test names the field that differs and why.
+4. Checks: `npm run gate`; sample mode all 14 boards 80/80; API mode (server on 8787) S27, S35, S36, S37, S40 pass or each failure is explained.
+
+### IMP-38 · Store trait, memory store, Postgres store (core)
+
+Read docs/adr/0008-persistence.md (short). Base: `origin/integration-2-2026-11-23` (PR #37). Branch `imp-38-store`.
+1. In `crates/spekin-core`: a `Store` trait covering what the server keeps today (projects, stages, revisions and proposals, ledger entries, skills and versions, audit entries plus the audit head kept apart, deleted projects). No database code in core.
+2. `MemoryStore` implements it; the server uses it by default, so every existing test passes unchanged.
+3. New crate `crates/spekin-store-pg` with `sqlx` (postgres, runtime-tokio, rustls; no default features you do not need) and plain SQL migrations in `crates/spekin-store-pg/migrations`. Revisions update under a row lock; a stale write returns the same typed conflict error the memory store returns.
+4. The server picks `PgStore` when `DATABASE_URL` is set. A command `cargo run -p spekin-server -- seed-sample` seeds Meranti Yard; it refuses unless `--yes` is given.
+5. Tests: one shared test suite run against `MemoryStore` always, and against `PgStore` only when `TEST_DATABASE_URL` is set; without it print "postgres stage skipped" (never claim it passed). Licence check (`node tools/checks/licences.mjs --check`) must pass with the new crates.
+6. Checks: `npm run gate` passes. Say in the PR whether the Postgres stage ran.
 
 ### IMP-01 · S35 work area (ui)
 
