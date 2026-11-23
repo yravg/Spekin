@@ -192,4 +192,46 @@ describe('S38 GenUI panel (IMP-19, IMP-21)', () => {
     expect(pinned).toContain('1 of 3 passed. Nothing else is shown as passed.');
     expect(pinned.match(/data-later=/g)?.length).toBe(1);
   });
+
+  it('F321: every GenUI card states its provenance and the label carries the feature id', () => {
+    const stream = renderToStaticMarkup(<GenUiWorkArea initialMode="stream" />);
+    const cards = renderToStaticMarkup(<GenUiWorkArea initialMode="cards" />);
+    const pinned = renderToStaticMarkup(<GenUiWorkArea initialMode="pinned" />);
+    const fallback = renderToStaticMarkup(<GenUiWorkArea initialMode="fallback" />);
+    for (const html of [stream, cards, pinned, fallback]) expect(html).toContain('data-feature="F321"');
+    // Accepted artifact, Model proposal and the imported observation family are all drawn.
+    expect(cards).toContain('Accepted artifact');
+    expect(cards).toContain('Model proposal');
+    expect(fallback).toContain('imported');
+    expect(pinned).toContain('Fixture run');
+  });
+
+  it('F322: an unknown card family is rejected by the Rust validator and the fallback shows why', () => {
+    const rejected = { status: 'rejected', reason: 'unknown_component: unknown_widget' } as const;
+    const html = renderToStaticMarkup(
+      <GenUiWorkArea initialMode="cards" customPayload={REFUSED_CARD} validation={rejected} />,
+    );
+    expect(html).toContain('data-feature="F322"');
+    expect(html).toContain('Plain table · fallback');
+    expect(html).toContain('rejected by Rust validation');
+    // None of the refused card reaches the screen.
+    expect(html).not.toContain('LEAKED_ROW_TEXT');
+    expect(html).not.toContain('SECRET_PARTIAL_TITLE_MUST_NOT_RENDER');
+    // The plain fallback state carries the id too.
+    const plain = renderToStaticMarkup(<GenUiWorkArea initialMode="fallback" />);
+    expect(plain).toContain('data-feature="F322"');
+  });
+
+  it('F329: untested and failed are never green, a missing figure says so', () => {
+    const pinned = renderToStaticMarkup(<GenUiWorkArea initialMode="pinned" />);
+    const fallback = renderToStaticMarkup(<GenUiWorkArea initialMode="fallback" />);
+    expect(pinned).toContain('data-feature="F329"');
+    expect(pinned).toContain('Untested');
+    expect(pinned).toContain('No evidence');
+    expect(pinned).toContain('Nothing else is shown as passed');
+    // A missing figure is labelled, never shown as zero or green.
+    expect(fallback).toContain('data-feature="F329"');
+    expect(fallback).toContain('Not provided');
+    expect(fallback).toContain('Cannot tell');
+  });
 });

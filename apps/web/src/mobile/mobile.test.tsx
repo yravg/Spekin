@@ -1,3 +1,7 @@
+// @ts-ignore - node:fs has no type declarations in this web tsconfig
+import { readFileSync } from 'node:fs';
+// @ts-ignore - node:url has no type declarations in this web tsconfig
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter, Route, Routes } from 'react-router';
@@ -145,5 +149,34 @@ describe('T01 Tablet and phone (IMP-20)', () => {
     expect(snap.frames.map((f) => f.id)).toEqual(['F-01', 'F-03']);
     expect(snap.excluded).toContain('F-04 Alert drawer');
     expect(snap.excluded).toContain('F-03 alternatives');
+  });
+
+  it('F352: T01 honours the touch rules on tablet and phone', () => {
+    const tablet = renderResponsive({ tier: 'tablet' });
+    const phone = renderResponsive({ tier: 'phone' });
+    for (const html of [tablet, phone]) {
+      // The touch-compliant surface carries the id and uses 44 px tap targets.
+      expect(html).toContain('data-feature="F352"');
+      expect(html).toContain('mod-chb'); // 44 px tall button present in both tiers
+    }
+    expect(tablet).toContain('mod-t4'); // 44 px tablet tabs
+    expect(phone).toContain('mod-tb'); // phone bottom tab bar
+    // Actions are always-visible tap targets: the phone list opens a sheet, never a hover-only menu.
+    const phoneActions = renderResponsive({ tier: 'phone', initialTab: 'frames', initialSheet: 'actions' });
+    expect(phoneActions).toContain('Actions for F-03 Variance table');
+    expect(phoneActions).toContain('role="dialog"');
+
+    // The stylesheets make the rules real (app.css + the synced design package).
+    const appCss = readFileSync(fileURLToPath(new URL('../app.css', import.meta.url)), 'utf8');
+    const designCss = readFileSync(
+      fileURLToPath(new URL('../../../../packages/design/spekin.css', import.meta.url)),
+      'utf8',
+    );
+    expect(designCss).toMatch(/\.mod-chb\s*\{[^}]*height:44px/); // 44 px targets
+    expect(designCss).toMatch(/\.mod-t4 button\s*\{[^}]*min-height:44px/);
+    expect(appCss).toContain('env(safe-area-inset-top'); // safe areas
+    expect(appCss).toContain('env(safe-area-inset-bottom');
+    expect(appCss).toMatch(/\.sp-app\.ap-t01\s*\{[^}]*font: 400 16px/); // 16 px text
+    expect(appCss).toContain('prefers-reduced-motion: reduce'); // Reduce Motion honoured
   });
 });

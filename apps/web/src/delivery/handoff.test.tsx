@@ -104,4 +104,19 @@ describe('S34 Coding handoff (IMP-16)', () => {
     expect(stale).toContain('Re-finalize (spec is stale)');
     expect(stale.match(/data-later=/g)?.length).toBe(1);
   });
+
+  it('F275: one expiring link is a disabled LATER control carrying its id, not a shipped link', () => {
+    const copied = renderToStaticMarkup(<CodingHandoffWorkArea initialMode="copied" />);
+    expect(copied).toContain('Copy as one link');
+    expect(copied).toContain('data-feature="F275"');
+    expect(copied).toContain('data-later="A single expiring link instead of the long text');
+    // The long pasted text stays; the single-link option is deferred, not wired to a URL.
+    expect(copied).toContain('Links would expire.');
+    // The F275 id sits on the same disabled, LATER-tagged button.
+    const at = copied.indexOf('data-feature="F275"');
+    expect(at).toBeGreaterThan(-1);
+    const tag = copied.slice(copied.lastIndexOf('<', at), at);
+    expect(tag).toContain('data-later=');
+    expect(tag).toContain('disabled');
+  });
 });
