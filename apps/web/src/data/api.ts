@@ -9,15 +9,20 @@ import type {
   AuditResponse,
   BuildContextRequest,
   BuildManifestRequest,
+  Check,
   CheckSkillUpdateRequest,
+  Contract,
+  ContractsResponse,
   CopySkillRequest,
   DeletedProjectView,
   EditSkillRequest,
   EstimateRunRequest,
+  Evidence,
   GenUiValidation,
   HeldUpdate,
   LibrarySkill,
   Manifest,
+  MatrixRow,
   ModelCapability,
   Project,
   ProjectEntry,
@@ -203,6 +208,64 @@ function isProjectEntry(v: unknown): v is ProjectEntry {
 
 function isDeletedProjectView(v: unknown): v is DeletedProjectView {
   return isRecord(v) && isProjectEntry(v.entry) && isNumber(v.days_left);
+}
+
+const CHECK_KINDS = ['unit', 'property', 'e2e', 'harness'] as const;
+const OWNER_LANES = ['ui', 'core', 'lead'] as const;
+const CONTRACT_STATUSES = ['met', 'failing', 'not_run', 'stale'] as const;
+const EVIDENCE_RESULTS = ['passed', 'failed', 'skipped'] as const;
+
+function isCheck(v: unknown): v is Check {
+  return (
+    isRecord(v) &&
+    isString(v.name) &&
+    oneOf(CHECK_KINDS, v.kind) &&
+    oneOf(OWNER_LANES, v.owner)
+  );
+}
+
+function isContract(v: unknown): v is Contract {
+  return (
+    isRecord(v) &&
+    isString(v.id) &&
+    isString(v.title) &&
+    isNumber(v.changed_at) &&
+    Array.isArray(v.checks) &&
+    v.checks.every(isCheck)
+  );
+}
+
+function isEvidence(v: unknown): v is Evidence {
+  return (
+    isRecord(v) &&
+    isString(v.check) &&
+    isString(v.commit) &&
+    isNumber(v.at) &&
+    oneOf(EVIDENCE_RESULTS, v.result) &&
+    isNumber(v.duration_ms) &&
+    isString(v.log)
+  );
+}
+
+function isMatrixRow(v: unknown): v is MatrixRow {
+  return (
+    isRecord(v) &&
+    isString(v.contract) &&
+    isString(v.check) &&
+    oneOf(CONTRACT_STATUSES, v.status)
+  );
+}
+
+function isContractsResponse(v: unknown): v is ContractsResponse {
+  return (
+    isRecord(v) &&
+    Array.isArray(v.contracts) &&
+    v.contracts.every(isContract) &&
+    Array.isArray(v.evidence) &&
+    v.evidence.every(isEvidence) &&
+    Array.isArray(v.matrix) &&
+    v.matrix.every(isMatrixRow)
+  );
 }
 
 function isSettlement(v: unknown): v is Settlement {
@@ -415,6 +478,11 @@ export function projectUrl(id: string, options: ApiOptions = {}): string {
 /** The URL the server serves that project's stages under. */
 export function stagesUrl(id: string, options: ApiOptions = {}): string {
   return `${projectUrl(id, options)}/stages`;
+}
+
+/** The URL the server serves that project's build contracts under. */
+export function contractsUrl(id: string, options: ApiOptions = {}): string {
+  return `${projectUrl(id, options)}/contracts`;
 }
 
 type JsonResult = { found: false } | { found: true; value: unknown };
@@ -700,6 +768,23 @@ export async function buildHandoffManifest(
     throw new ApiError('shape', `API manifest body is not a Manifest: ${url}`, { url });
   }
   return value;
+}
+
+/**
+ * The build contracts for one id: the named requirements, the recorded evidence and the
+ * readiness matrix S37 draws (IMP-33/IMP-37). `null` means the server does not know the id.
+ */
+export async function fetchContracts(
+  projectId: string,
+  options: ApiOptions = {},
+): Promise<ContractsResponse | null> {
+  const url = contractsUrl(projectId, options);
+  const result = await getJson(url, options.signal);
+  if (!result.found) return null;
+  if (!isContractsResponse(result.value)) {
+    throw new ApiError('shape', `API contracts body is not a ContractsResponse: ${url}`, { url });
+  }
+  return result.value;
 }
 
 /** The hash-chained audit view; the head hash is held by the server apart from the log (IMP-31). */

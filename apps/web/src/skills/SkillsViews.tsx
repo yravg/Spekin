@@ -1,3 +1,4 @@
+import type { SkillHistoryEntry } from '@spekin/contracts';
 import { sampleData } from '../data/source';
 const { SKL_SOURCES, SKL_STAGES } = sampleData;
 import type { SampleSkillDetail, SampleSkillDiffRow, SampleSkillEdit, SampleSkillGithub, SampleSkillGlossRow, SampleSkillRow, SampleSkillSource, SampleSkillUpdate } from '../data/source';
@@ -702,6 +703,8 @@ export function SkillGithubDrawer(props: {
 // Mirrors boards-skills.mjs updMain (S40:updates).
 export function SkillUpdatesView(props: {
   updates: SampleSkillUpdate[];
+  /** The server's version history for the skill; empty in the sample and on a fresh library. */
+  history?: SkillHistoryEntry[];
   diff: SampleSkillDiffRow[];
   onBack: () => void;
   onCheckNow: () => void;
@@ -710,7 +713,7 @@ export function SkillUpdatesView(props: {
   onApplyWithoutTool: () => void;
   onApply: () => void;
 }) {
-  const { updates, diff, onBack, onCheckNow, onRollback, onKeepCurrent, onApplyWithoutTool, onApply } = props;
+  const { updates, history = [], diff, onBack, onCheckNow, onRollback, onKeepCurrent, onApplyWithoutTool, onApply } = props;
   return (
     <div className="skl-page">
       <div className="skl-ph">
@@ -742,6 +745,18 @@ export function SkillUpdatesView(props: {
 
       <div className="skl-dbody">
         <div className="skl-hist" data-feature="F373">
+          {history.map((h) => (
+            <div key={'history-' + h.seq} className="skl-ev">
+              <div className="skl-evh">
+                <b>{h.skill_id}</b>
+                <span className="skl-mono">
+                  {h.action} · {h.version}
+                </span>
+                <span className="sp-fill" />
+                <span className="skl-when">{h.reason}</span>
+              </div>
+            </div>
+          ))}
           {updates.map((u, i) => (
             <div key={u.when + u.src} className={'skl-ev' + (i === 0 ? ' open' : '')}>
               <div className="skl-evh">

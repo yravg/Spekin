@@ -77,3 +77,44 @@ export function useProjectData(id: string): ProjectData {
 
   return data;
 }
+
+/**
+ * One screen read through the door (IMP-37), seeded with the drawn sample value.
+ *
+ * In sample mode the seed is the answer. In api mode the source's read replaces it when it
+ * arrives; an error keeps the seed on screen and is available to the caller, so a screen never
+ * draws half a board. `deps` are the read's arguments (a project id, a skill id).
+ */
+export function useDataRead<T>(
+  seed: T,
+  read: (source: DataSource) => Promise<T>,
+  deps: readonly unknown[] = [],
+): { value: T; error: string | null } {
+  const source = useData();
+  const [state, setState] = useState<{ value: T; error: string | null }>({
+    value: seed,
+    error: null,
+  });
+
+  useEffect(() => {
+    if (source.mode === 'sample') {
+      setState({ value: seed, error: null });
+      return;
+    }
+    let alive = true;
+    read(source)
+      .then((value) => {
+        if (alive) setState({ value, error: null });
+      })
+      .catch((error: unknown) => {
+        if (!alive) return;
+        setState({ value: seed, error: error instanceof Error ? error.message : String(error) });
+      });
+    return () => {
+      alive = false;
+    };
+    // `read` and `seed` are read at call time; deps name the arguments that change the answer.
+  }, [source, ...deps]);
+
+  return state;
+}
