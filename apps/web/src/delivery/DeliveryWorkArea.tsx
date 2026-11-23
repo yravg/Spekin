@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { sampleData, type ContextItem, type PillTuple, type PillTone, type SampleDeliveryCheck, type SampleDeliveryTimelineRow, type StageId } from '../data/source';
-const { BACKEND, DELIVERY_BUILD, DELIVERY_CHECKS, DELIVERY_CONTRACTS, DELIVERY_GATE, DELIVERY_MATRIX, DELIVERY_RUN, DELIVERY_TIMELINE, MODEL, STAGES } = sampleData;
+import { SAMPLE_PROJECT_ID, sampleData, type ContextItem, type PillTuple, type PillTone, type SampleDeliveryCheck, type SampleDeliveryContract, type SampleDeliveryTimelineRow, type StageId } from '../data/source';
+import { useData, useDataRead } from '../data/provider';
+const { BACKEND, DELIVERY_BUILD, DELIVERY_CHECKS, DELIVERY_GATE, DELIVERY_MATRIX, DELIVERY_RUN, DELIVERY_TIMELINE, MODEL, STAGES } = sampleData;
 import { useWorkspace } from '../state/workspace';
 import { Icon, type IconName } from '../ui/Icon';
 import { Btn, IconBtn } from '../ui/Button';
@@ -215,6 +216,13 @@ export function DeliveryWorkArea(props: {
   onIntent: (intent: string) => void;
 }) {
   const { view, onView, onIntent } = props;
+  // IMP-37: the contracts table comes through the data door; sample mode is the drawn rows.
+  const data = useData();
+  const contracts = useDataRead(
+    data.sample.DELIVERY_CONTRACTS,
+    (source) => source.contracts(SAMPLE_PROJECT_ID),
+    [],
+  ).value;
   const stage = deliveryViewStage(view);
   const stageRow = STAGES.find((s) => s.id === stage)!;
   const chat = CHAT[view];
@@ -373,7 +381,15 @@ export function DeliveryWorkArea(props: {
           ) : null}
         </div>
 
-        {view === 'contracts' ? <ContractsBody kind={kind} onKind={setKind} onView={onView} onIntent={onIntent} /> : null}
+        {view === 'contracts' ? (
+          <ContractsBody
+            contracts={contracts}
+            kind={kind}
+            onKind={setKind}
+            onView={onView}
+            onIntent={onIntent}
+          />
+        ) : null}
         {view === 'detail' ? <DetailBody onView={onView} onIntent={onIntent} /> : null}
         {view === 'matrix' ? <MatrixBody onView={onView} onIntent={onIntent} /> : null}
         {view === 'gate' ? <GateBody onIntent={onIntent} onView={onView} /> : null}
@@ -386,21 +402,22 @@ export function DeliveryWorkArea(props: {
 
 // ---------------------------------------------------------------- contracts
 function ContractsBody(props: {
+  contracts: SampleDeliveryContract[];
   kind: string;
   onKind: (kind: string) => void;
   onView: (view: DeliveryView) => void;
   onIntent: (intent: string) => void;
 }) {
-  const { kind, onKind, onView, onIntent } = props;
+  const { contracts, kind, onKind, onView, onIntent } = props;
   const kinds: [string, string][] = [
-    ['All kinds', '8'],
-    ['API contract', '1'],
-    ['Entity', '1'],
-    ['Migration', '1'],
-    ['Test definitions', '4'],
-    ['Checklist', '1'],
+    ['All kinds', String(contracts.length)],
+    ['API contract', String(contracts.filter((c) => c.kind === 'API contract').length)],
+    ['Entity', String(contracts.filter((c) => c.kind === 'Entity').length)],
+    ['Migration', String(contracts.filter((c) => c.kind === 'Migration').length)],
+    ['Test definitions', String(contracts.filter((c) => c.kind === 'Test definitions').length)],
+    ['Checklist', String(contracts.filter((c) => c.kind === 'Release checklist').length)],
   ];
-  const rows = kind === 'All kinds' ? DELIVERY_CONTRACTS : DELIVERY_CONTRACTS.filter((c) => c.kind === kind || (kind === 'Checklist' && c.kind === 'Release checklist'));
+  const rows = kind === 'All kinds' ? contracts : contracts.filter((c) => c.kind === kind || (kind === 'Checklist' && c.kind === 'Release checklist'));
 
   return (
     <div className="del-body">

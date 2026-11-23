@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { sampleData, type ModelsLedgerKind, type ModelsSourceId, type ModelsUsageMoment, type PillTuple, type SampleModelsCaps, type SampleModelsUsage } from '../data/source';
-const { CTX_DESIGN, MODELS_AGENT_RUN, MODELS_AGENTS, MODELS_API, MODELS_CAPS, MODELS_CONNECTOR, MODELS_EFFORT, MODELS_KEY, MODELS_LEDGER, MODELS_LEDGER_DETAIL, MODELS_PERIOD, MODELS_PROVIDERS, MODELS_REGISTRY, MODELS_RUN, MODELS_SOURCES, MODELS_TASKS, MODELS_USAGE } = sampleData;
+import { useData, useDataRead } from '../data/provider';
+const { CTX_DESIGN, MODELS_AGENT_RUN, MODELS_AGENTS, MODELS_API, MODELS_CAPS, MODELS_CONNECTOR, MODELS_EFFORT, MODELS_KEY, MODELS_LEDGER, MODELS_LEDGER_DETAIL, MODELS_PERIOD, MODELS_PROVIDERS, MODELS_RUN, MODELS_SOURCES, MODELS_TASKS, MODELS_USAGE } = sampleData;
 import { Icon, type IconName } from '../ui/Icon';
 import { Btn, IconBtn } from '../ui/Button';
 import { Pill } from '../ui/Pill';
@@ -86,6 +87,9 @@ export function ModelsUsageWorkArea(props: {
 }) {
   const { section, moment, initialSource = 'hosted', initialFilter = 'all', onSection, onExit } = props;
   const intent = props.onIntent ?? (() => {});
+  // IMP-37: the registry comes through the data door; sample mode is the drawn row.
+  const data = useData();
+  const registry = useDataRead(data.sample.MODELS_REGISTRY, (s) => s.models(), []).value;
   const [source, setSource] = useState<ModelsSourceId>(initialSource);
   const [filter, setFilter] = useState<LedgerFilter>(initialFilter);
   const [caps, setCaps] = useState<SampleModelsCaps>({ ...MODELS_CAPS });
@@ -631,7 +635,7 @@ export function ModelsUsageWorkArea(props: {
         <em>Rate card rc-7 · region and retention unknown</em>
       </div>
       <div className="mod-mods" role="radiogroup" aria-label="Model">
-        {MODELS_REGISTRY.map((m) => {
+        {registry.map((m) => {
           const on = m.st === 'sel';
           const off = m.st === 'off';
           return (

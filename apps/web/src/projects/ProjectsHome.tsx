@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { sampleData, type IntakeThumb, type SampleIntakeProject, type StageTone } from '../data/source';
+import { useData, useDataRead } from '../data/provider';
 const { INTAKE_COMPOSER, INTAKE_DELETED, INTAKE_NEW, INTAKE_PROJECTS, INTAKE_SWITCH_ORDER, MODEL, PROJECT, STAGES, USAGE } = sampleData;
 import { useWorkspace } from '../state/workspace';
 import { Icon } from '../ui/Icon';
@@ -472,6 +473,16 @@ export function CreateProjectModal(props: {
 export function ProjectsHome({ initialView = 'home' }: { initialView?: 'home' | 'all' | 'first' | 'restore' }) {
   const navigate = useNavigate();
   const recordIntent = useWorkspace((s) => s.recordIntent);
+  // IMP-37: Recently deleted comes through the data door; the drawn copy is the seed.
+  const data = useData();
+  const deleted = useDataRead(
+    {
+      ids: [data.sample.INTAKE_DELETED.id],
+      daysLeft: { [data.sample.INTAKE_DELETED.id]: data.sample.INTAKE_DELETED.days },
+    },
+    (source) => source.recentlyDeleted(),
+    [],
+  ).value;
 
   const [view, setView] = useState<'home' | 'all' | 'first' | 'restore'>(initialView);
   const [overlay, setOverlay] = useState<'none' | 'switch' | 'create'>('none');
@@ -482,7 +493,9 @@ export function ProjectsHome({ initialView = 'home' }: { initialView?: 'home' | 
   const [layout, setLayout] = useState<'cards' | 'list'>('cards');
   const [createUiLang, setCreateUiLang] = useState<'id' | 'en'>('en');
   const [createDomain, setCreateDomain] = useState<CreateDomain>('control');
-  const [goneId, setGoneId] = useState<string | null>(initialView === 'restore' ? INTAKE_DELETED.id : null);
+  const [goneId, setGoneId] = useState<string | null>(
+    initialView === 'restore' ? (deleted.ids[0] ?? null) : null,
+  );
   const [showRestoreBanner, setShowRestoreBanner] = useState(initialView === 'restore');
   const [palSel, setPalSel] = useState(1);
   const [palRenaming, setPalRenaming] = useState<number | null>(2);
@@ -522,7 +535,7 @@ export function ProjectsHome({ initialView = 'home' }: { initialView?: 'home' | 
 
   function openRestore() {
     setView('restore');
-    setGoneId(INTAKE_DELETED.id);
+    setGoneId(deleted.ids[0] ?? INTAKE_DELETED.id);
     setShowRestoreBanner(true);
     setOverlay('none');
   }

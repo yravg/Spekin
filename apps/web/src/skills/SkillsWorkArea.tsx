@@ -1,6 +1,8 @@
 import { useState, type KeyboardEvent } from 'react';
+import type { SkillHistoryEntry } from '@spekin/contracts';
 import { sampleData, type ContextItem, type SampleSkillRow } from '../data/source';
-const { MODEL, SKL_DETAIL, SKL_DIFF, SKL_EDIT, SKL_GH, SKL_GLOSS, SKL_SKILLS, SKL_UPDATES } = sampleData;
+import { useData, useDataRead } from '../data/provider';
+const { MODEL, SKL_DETAIL, SKL_DIFF, SKL_EDIT, SKL_GH, SKL_GLOSS, SKL_UPDATES } = sampleData;
 import { useWorkspace, type SaveState } from '../state/workspace';
 import { ChatPanel } from '../shell/ChatPanel';
 import { ArtifactTabs, type ArtifactTabItem } from '../shell/ArtifactTabs';
@@ -32,6 +34,10 @@ const SPEC_TABS: ArtifactTabItem[] = [
 
 // S40 Skills library work area inside the Specification stage (boards-skills.mjs).
 export function SkillsWorkArea(props: { onShellOverride?: (o: { save?: SaveState; busy?: string }) => void }) {
+  // IMP-37: the library and one skill's history come through the data door.
+  const data = useData();
+  const skills = useDataRead(data.sample.SKL_SKILLS, (s) => s.skills(), []).value;
+  const history = useDataRead<SkillHistoryEntry[]>([], (s) => s.skillHistory('grill'), []).value;
   const view = useWorkspace((s) => s.view('spec'));
   const setView = useWorkspace((s) => s.setView);
   const chatWidth = useWorkspace((s) => s.chatWidth);
@@ -46,7 +52,7 @@ export function SkillsWorkArea(props: { onShellOverride?: (o: { save?: SaveState
   const [statusFilter, setStatusFilter] = useState<'on' | 'waiting' | null>(null);
   const [query, setQuery] = useState('');
   const [enabledMap, setEnabledMap] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(SKL_SKILLS.map((s) => [s[0], s[7]])),
+    Object.fromEntries(skills.map((s) => [s[0], s[7]])),
   );
   const [detailPolicy, setDetailPolicy] = useState<'Auto' | 'Notify me' | 'Pinned'>('Auto');
   const [editTitle, setEditTitle] = useState(SKL_EDIT.title);
@@ -63,7 +69,7 @@ export function SkillsWorkArea(props: { onShellOverride?: (o: { save?: SaveState
   const activeTab = view.tab ?? 'Skills';
   const isUseMode = activeTab === 'GLOSSARY.md';
   const ctxItems = CTX_SPEC.filter(([, name]) => !view.removedCtx.includes(name));
-  const specSlashSkills: SampleSkillRow[] = SKL_SKILLS.filter(
+  const specSlashSkills: SampleSkillRow[] = skills.filter(
     (s) => s[3].includes('Specification') && (enabledMap[s[0]] ?? s[7]),
   ).slice(0, 4);
   const showSlashMenu = view.draft.startsWith('/') && !slashDismissed;
@@ -280,6 +286,7 @@ export function SkillsWorkArea(props: { onShellOverride?: (o: { save?: SaveState
         ) : subview === 'updates' ? (
           <SkillUpdatesView
             updates={SKL_UPDATES}
+            history={history}
             diff={SKL_DIFF}
             onBack={() => openSubview('library')}
             onCheckNow={() => recordIntent('F372:check-now')}
@@ -290,7 +297,7 @@ export function SkillsWorkArea(props: { onShellOverride?: (o: { save?: SaveState
           />
         ) : (
           <SkillsLibraryView
-            skills={SKL_SKILLS}
+            skills={skills}
             stageFilter={stageFilter}
             sourceFilter={sourceFilter}
             statusFilter={statusFilter}
