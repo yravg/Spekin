@@ -1,6 +1,15 @@
 # Implementation handoff: canvas to app
 
-Owner: Enrico (lead, with Claude Code). Last updated 23 Nov 2026. Baseline commit: see `git log -1 --format=%h docs/handoff/implementation.md`.
+Owner: Enrico (lead, with Claude Code). Last updated 23 Nov 2026 (statuses refreshed after the merge). Baseline commit: see `git log -1 --format=%h docs/handoff/implementation.md`.
+
+## Current state (verified 23 Nov 2026, lead)
+
+The historical tables and lane files below are a record of the build, not the current status. This section is authoritative: `main` is clean at `ddf763f`, all pull requests #1–#46 are merged, and there is no open worker card. The older "waiting for owner merge" and `part blocked` wording is superseded by it.
+
+- `npm run harness`: **81/81 states pass**, exit 0, on all 14 boards (S27, S28, S29, S30, S31, S32, S33, S34, S35, S36, S37, S38, S40, T01). Report: `tools/harness/out/report.md`. This clears the S29/S32/S33 1 px pixel states and the T01 tablet frames that the lane files still call blocked.
+- `npm run gate`: exit 0, measured 23 Nov 2026 after a fresh `npm ci` (the previous local `node_modules` predated the `jsdom` dev dependency and made vitest fail). Evidence from that run: `rules ok (460 files)`, `licences ok (198 npm packages, 246 crates, 0 Python)`, `14 boards pass the board lint, 81 states`, vitest `21 passed (21)` files / `142 passed (142)` tests, Rust 153 core tests plus the workspace suites, `contracts current`. The CI state gate is required, not report-only (`GATE=checked` in `.github/workflows/ci.yml`).
+- Canvas regeneration is done: F00 height `12300` in `docs/design/spekin-canvas/heights.json` and `docs/design/spekin-canvas/project/canvas.json`.
+- What remains is deferred or unverified scope, not unbuilt screens: real integrations, sample-only reads, writes with no drawn control, and the not-checked list in `lanes/ui.md` (viewports, keyboard, reduced motion, long text, EN/ID copy). See [AGENTS.md](../../AGENTS.md) for the short project brief.
 
 ## Continue prompts (paste one into the agent)
 
@@ -30,13 +39,15 @@ One card per pull request (gh pr create), never push to main, never merge your o
 No Python, no new crate without naming its licence in the PR. If unclear, write it under "Requests to lead" in lanes/core.md and stop that part.
 ```
 
-## Where things stand (23 Nov 2026)
+## Where things stand (23 Nov 2026 — historical build snapshot)
+
+Superseded by **Current state** above. Kept as the per-branch build record.
 
 | Area | Status | Evidence |
 |---|---|---|
-| Canvas: 14 boards, 80 states, 212 features, F00 map, R00 references (S40 Skills library added 23 Nov) | done | `npm run canvas:lint`: 14 boards pass, manifest current |
-| Build: 21 pull requests (#1 to #21), all reviewed by the lead. [#22](https://github.com/yravg/Spekin/pull/22) merges all of them with the conflicts resolved: gate passes, 207 Rust tests, 48 web tests, 33 of 33 states pass. Waiting for the owner to merge #22, as described in [workers.md](workers.md). Core: IMP-03, 04, 09, 10, 11, 12, 22, 24, 25, 26. UI: IMP-01, 02, 05, 07, 23. | done, waiting for owner merge | The status table below. The lead re-ran the state gate on every UI branch: S27 6/6, S29 6/6, S35 3/3, S40 6/6 PASS, pixel differences 0 to 0.09 %. |
-| CI state gate | part open | [#29](https://github.com/yravg/Spekin/pull/29) (stacked on #22) makes it required for checked click paths. On the #22 code: 33 of 33 pass. Until #29 merges, the job is report-only. |
+| Canvas: 14 boards, 81 states, 212 features, F00 map, R00 references (S40 Skills library added 23 Nov) | done | `npm run canvas:lint`: 14 boards pass, 81 states (measured in the current gate) |
+| Build: all pull requests #1–#46 merged into `main` (last merge `ddf763f`). Core: IMP-03, 04, 09–12, 22, 24–26, 28–35, 38, 40, 42. UI: IMP-01, 02, 05–08, 13–23, 36, 37, 39, 41. | done (merged) | `git log --oneline`; no open pull request or worker card. See [Current state](#current-state-verified-23-nov-2026-lead). |
+| CI state gate | done (required) | `.github/workflows/ci.yml` runs `GATE=checked npm run harness`; the report-only wording above was superseded when PR #29 merged. Current measured result: 81/81. |
 | DPAI addendum v1.0 | triaged | [incoming/2026-11-23-dpai-addendum-v1.0.md](incoming/2026-11-23-dpai-addendum-v1.0.md). Its checks are in cards IMP-07, 13, 14, 16, 24 and 25. |
 | Review supplement v1.0 and PRD v0.2.3 | triaged | [incoming/2026-11-23-review-supplement-v1.0.md](incoming/2026-11-23-review-supplement-v1.0.md). Canonical PRD is `inputs/Spekin-PRD-v0.2.3.md` (v0.2.2 kept for history). |
 | Repo standards: licence, NOTICE, README, CONTRIBUTING, SECURITY, glossary, ADRs, decisions, roadmap | done | this commit |
@@ -44,7 +55,7 @@ No Python, no new crate without naming its licence in the PR. If unclear, write 
 | S35 header (top bar and stage bar), same markup as the board | done, part open | Header text matches the board line for line in the harness. The pixel diff is the unbuilt work area. The `.ap-todo` stand-in is IMP-01. |
 | Rust core (Project, Stage, fixture check) and Axum server (`/api/health`, `/api/projects/:id`, `/stages`) | done | `cargo test`: 8 tests, including "API stages equal the sample the boards draw" |
 | Contracts: ts-rs to `packages/contracts` | done | `node tools/check-contracts.mjs` |
-| State gate harness | done | `npm run harness -- S35`: 0 / 3 pass. This is the **baseline**: it fails for the right reasons (work area not built, conflict path draft). |
+| State gate harness | done | Baseline was 0/3 on S35 by design. Current: `npm run harness` → **81/81 states pass** on all 14 boards, exit 0 (`tools/harness/out/report.md`). |
 | CI (rules, sync, board lint, types, tests, build, Rust, contracts; state gate as report) | done | GitHub Actions run since the repo went public (23 Nov). Run 45046818401 on 1750598: web ✓, rust ✓, state gate reports 0 passing as expected. |
 
 ## Lanes and file ownership
@@ -103,35 +114,35 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 
 | Card | Lane | Title | Depends on | Status |
 |---|---|---|---|---|
-| IMP-01 | ui | S35 work area: chat, artifact tabs, canvas pane and inspector for the design and backend states | – | done, part open, waiting for owner merge: PR #3. Lead re-ran the gate: design PASS 0.41 %, backend PASS 0.47 %. The conflict state is IMP-02. |
-| IMP-02 | ui | S35 conflict state, save states (F112), per-stage memory across switches | IMP-01 | done, waiting for owner merge: PR #6, stacked on #3 (lead re-ran: S35 3/3 PASS) |
+| IMP-01 | ui | S35 work area: chat, artifact tabs, canvas pane and inspector for the design and backend states | – | done, part open: PR #3. Lead re-ran the gate: design PASS 0.41 %, backend PASS 0.47 %. The conflict state is IMP-02. |
+| IMP-02 | ui | S35 conflict state, save states (F112), per-stage memory across switches | IMP-01 | done: PR #6, stacked on #3 (lead re-ran: S35 3/3 PASS) |
 | IMP-05 | ui | S27 Projects home (6 states), and "/" becomes S27 | IMP-01, C-01 | done, part open: PR #11, stacked on #9 (lead re-ran with the harness fixes: S27 6/6, S35 3/3, S40 6/6 PASS; C-01 create redraw matched in 271558a) |
-| IMP-03 | core | API source: typed client for the Rust API, equal to the sample | – | done, waiting for owner merge: PR #1 (lead review: approve) |
-| IMP-04 | core | Proposals and revisions in the core (accept, reject, revert, stale) | – | done, waiting for owner merge: PR #2 (lead review: approve; merge after #1) |
-| IMP-12 | core | No-Python and licence inventory check | – | done, waiting for owner merge: PR #4 (lead review: approve; one small follow-up on workspace links) |
-| IMP-09 | core | Ledger: estimate, reserve, settle, caps | IMP-04 | done, waiting for owner merge: PR #10, stacked on #2 |
-| IMP-11 | core | Model sources and capability registry | – | done, waiting for owner merge: PR #5 (lead review: approve) |
-| IMP-10 | core | GenUI schema validation, fail closed | – | done, waiting for owner merge: PR #7 (lead review: approve) |
-| IMP-22 | core | Skills core: SkillManifest, versions, update policy and update checks | IMP-04 | done, waiting for owner merge: PR #8 (lead review: approve) |
-| IMP-24 | core | Handoff manifest core (S34): accepted revisions, hashes, missing inputs, deterministic | IMP-04 | done, waiting for owner merge: PR #13, stacked on #2 |
-| IMP-25 | core | Next-request context builder (S29, S35): only the listed chips, pure | – | done, waiting for owner merge: PR #12 |
-| IMP-26 | core | API routes for the core (all core cards) + web client | IMP-03…IMP-25 | done, waiting for owner merge: PR #15 (merge last) |
-| IMP-27 | core | GitHub skill source adapter: pin to SHA, fetch with limits, update check | IMP-22 | done, waiting for owner merge: PR #17, stacked on #8 |
-| IMP-29 | core | Recently deleted and restore: 30-day window, pure | – | done, waiting for owner merge: PR #20 |
-| IMP-31 | core | Audit and restore in the API (routes, one audit entry per action, head kept apart) | IMP-26, IMP-29, IMP-30 | done, waiting for owner merge: PR #23, stacked on #22 |
-| IMP-32 | core | Server hardening: body limit, JSON only, timeout, CORS, headers, loopback bind | IMP-31 | done, waiting for owner merge: PR #24, stacked on #23 |
-| IMP-33 | core | Build contracts and evidence core (S37): not run is never passed | IMP-32 | done, waiting for owner merge: PR #26, stacked on #24 |
-| IMP-34 | core | Skills library API (S40): copies, versions, GitHub sources, update history and rollback | IMP-22, 27, 31 | done, waiting for owner merge: PR #27, stacked on #26 |
-| IMP-35 | core | Review follow-ups: chunked 413, skills audit chain, licences in gate, audit head | IMP-34 | done, waiting for owner merge: PR #28, stacked on #27 (allow-list empty; SPDX classifier) |
-| IMP-30 | core | Audit log core: append-only, hash-chained, verify | – | done, waiting for owner merge: PR #21 (follow-up: store the head hash apart from the log) |
-| IMP-28 | core | GenUI validation fuzzing (never panics, never partial) | IMP-10 | done, waiting for owner merge: PR #18, stacked on #7 (the fuzzer found and fixed a data: URL hole) |
-| IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
+| IMP-03 | core | API source: typed client for the Rust API, equal to the sample | – | done: PR #1 (lead review: approve) |
+| IMP-04 | core | Proposals and revisions in the core (accept, reject, revert, stale) | – | done: PR #2 (lead review: approve; merge after #1) |
+| IMP-12 | core | No-Python and licence inventory check | – | done: PR #4 (lead review: approve; one small follow-up on workspace links) |
+| IMP-09 | core | Ledger: estimate, reserve, settle, caps | IMP-04 | done: PR #10, stacked on #2 |
+| IMP-11 | core | Model sources and capability registry | – | done: PR #5 (lead review: approve) |
+| IMP-10 | core | GenUI schema validation, fail closed | – | done: PR #7 (lead review: approve) |
+| IMP-22 | core | Skills core: SkillManifest, versions, update policy and update checks | IMP-04 | done: PR #8 (lead review: approve) |
+| IMP-24 | core | Handoff manifest core (S34): accepted revisions, hashes, missing inputs, deterministic | IMP-04 | done: PR #13, stacked on #2 |
+| IMP-25 | core | Next-request context builder (S29, S35): only the listed chips, pure | – | done: PR #12 |
+| IMP-26 | core | API routes for the core (all core cards) + web client | IMP-03…IMP-25 | done: PR #15 (merge last) |
+| IMP-27 | core | GitHub skill source adapter: pin to SHA, fetch with limits, update check | IMP-22 | done: PR #17, stacked on #8 |
+| IMP-29 | core | Recently deleted and restore: 30-day window, pure | – | done: PR #20 |
+| IMP-31 | core | Audit and restore in the API (routes, one audit entry per action, head kept apart) | IMP-26, IMP-29, IMP-30 | done: PR #23, stacked on #22 |
+| IMP-32 | core | Server hardening: body limit, JSON only, timeout, CORS, headers, loopback bind | IMP-31 | done: PR #24, stacked on #23 |
+| IMP-33 | core | Build contracts and evidence core (S37): not run is never passed | IMP-32 | done: PR #26, stacked on #24 |
+| IMP-34 | core | Skills library API (S40): copies, versions, GitHub sources, update history and rollback | IMP-22, 27, 31 | done: PR #27, stacked on #26 |
+| IMP-35 | core | Review follow-ups: chunked 413, skills audit chain, licences in gate, audit head | IMP-34 | done: PR #28, stacked on #27 (allow-list empty; SPDX classifier) |
+| IMP-30 | core | Audit log core: append-only, hash-chained, verify | – | done: PR #21 (follow-up: store the head hash apart from the log) |
+| IMP-28 | core | GenUI validation fuzzing (never panics, never partial) | IMP-10 | done: PR #18, stacked on #7 (the fuzzer found and fixed a data: URL hole) |
+| IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
 | IMP-06 | ui | S28 Reference intake | IMP-01 | done, part open: PR #31, stacked on #30 (lead re-ran: S28 6/6 PASS; uploads, PII detector and job cancel record intent only) |
-| IMP-07 | ui | S29 Frames canvas | IMP-01 | done, waiting for owner merge: PR #14, stacked on #11 (lead re-ran: S29 6/6 PASS) |
+| IMP-07 | ui | S29 Frames canvas | IMP-01 | done: PR #14, stacked on #11 (lead re-ran: S29 6/6 PASS) |
 | IMP-08 | ui | S30 Style review | IMP-01 | done, part open: PR #30, stacked on #25 (lead re-ran: S30 6/6 PASS; links to later boards record intent only) |
-| IMP-13 | ui | S31 Alternatives | IMP-01 | done, waiting for owner merge: PR #25, stacked on #19 (lead re-ran: S31 6/6 PASS) |
-| IMP-14 | ui | S32 Targeted change | IMP-01 | done, waiting for owner merge: PR #19, stacked on #16 (lead re-ran: S32 6/6 PASS) |
-| IMP-15 | ui | S33 Review and accept | IMP-01 | done, waiting for owner merge: PR #16, stacked on #14 (lead re-ran: S33 6/6 PASS) |
+| IMP-13 | ui | S31 Alternatives | IMP-01 | done: PR #25, stacked on #19 (lead re-ran: S31 6/6 PASS) |
+| IMP-14 | ui | S32 Targeted change | IMP-01 | done: PR #19, stacked on #16 (lead re-ran: S32 6/6 PASS) |
+| IMP-15 | ui | S33 Review and accept | IMP-01 | done: PR #16, stacked on #14 (lead re-ran: S33 6/6 PASS) |
 | IMP-16 | ui | S34 Coding handoff | IMP-01 | done, part open: PR #32, stacked on #31 (lead re-ran: S34 6/6 PASS; zip download and clipboard record intent only) |
 | IMP-17 | ui | S36 Models and usage | IMP-01 | done, part open: PR #33, stacked on #30 (lead re-ran: S36 6/6 PASS; ledger and model actions record intent only) |
 | IMP-18 | ui | S37 Build contracts | IMP-01 | done, part open: PR #36, stacked on #33 (lead re-ran: S37 6/6 PASS; some board copy still to move into sample data) |
@@ -141,8 +152,8 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-37 | ui + core | API mode for models, skills and history, contracts, audit, deleted projects | IMP-21 | done, part open: PR #39, stacked on #38 (lead re-ran 80/80 sample mode; worker: API mode S27, S35, S36, S37, S40 pass; some fields still sample-only) |
 | IMP-39 | ui | Build the S35 offline state (F378, drawn 23 Nov): in API mode a failed read keeps the last loaded copy with the banner and the Offline save chip; never sample data. Harness path S35 offline | IMP-37 | done, part open: PR #42, stacked on #40 (lead re-ran 81/81; real-server stop test and banners on other boards open) |
 | IMP-38 | core | Store trait, memory store, Postgres store (ADR 0008) | PR #37 | done, part open: PR #41, stacked on #37 (lead ran the Postgres stage on Postgres 16 in Docker: shared suite passes; concurrent writers not tested) |
-| IMP-40 | core | PgStore under concurrency: two connections race one revision, exactly one wins, the other gets the stale error; audit chain stays valid | IMP-38 | done, waiting for owner merge: PR #44, stacked on #41. The hang was test isolation (two race tests truncating one database). Memory and Postgres stores now refuse a stale state; accept and revert write the revision and the audit entry in one transaction. The lead re-ran the Postgres stage (3 races × 50 rounds plus the shared suite), two mutation checks and the gate. Follow-up: StaleState maps to proposal_stale for reserve and reject too |
-| IMP-42 | core | The API on Postgres end to end: route tests on both backends, a live server smoke over HTTP, concurrent HTTP accepts | IMP-40 | done, waiting for owner merge: PR #45, stacked on #44 (lead re-ran the Postgres stage: route, audit and contract tests on both backends, a live server smoke over HTTP, 20 concurrent HTTP accept rounds; gate passes) |
+| IMP-40 | core | PgStore under concurrency: two connections race one revision, exactly one wins, the other gets the stale error; audit chain stays valid | IMP-38 | done: PR #44, stacked on #41. The hang was test isolation (two race tests truncating one database). Memory and Postgres stores now refuse a stale state; accept and revert write the revision and the audit entry in one transaction. The lead re-ran the Postgres stage (3 races × 50 rounds plus the shared suite), two mutation checks and the gate. Follow-up: StaleState maps to proposal_stale for reserve and reject too |
+| IMP-42 | core | The API on Postgres end to end: route tests on both backends, a live server smoke over HTTP, concurrent HTTP accepts | IMP-40 | done: PR #45, stacked on #44 (lead re-ran the Postgres stage: route, audit and contract tests on both backends, a live server smoke over HTTP, 20 concurrent HTTP accept rounds; gate passes) |
 | IMP-41 | ui | Screens write through the data door (accept, revert, reserve and settle, skill copy, edit and rollback, delete and restore) | IMP-39 | done, part open: PR #43, stacked on #42 (lead re-ran 81/81; lead fix: browser never settles; revert, delete and source rollback have no drawn control yet) |
 | IMP-36 | core | GenUI sample verdicts equal the Rust validator | IMP-21 | done: PR #40, stacked on #39 (lead re-ran 80/80; Rust test pins verdicts) |
 
@@ -458,19 +469,20 @@ These change boards, so only the lead does them: edit the generator, rebuild, li
 
 See [docs/DECISIONS.md](../DECISIONS.md) → Open. Agents never decide these.
 
-## Known failures and limits (baseline)
+## Known failures and limits
 
-- The state gate is 0 / 3 on S35 on purpose: the work area is IMP-01, and the conflict path is a draft for IMP-02.
+- No known failing build check: gate exit 0 and harness 81/81 on 23 Nov 2026.
 - The board's `.sp-app` measures 1440 × 901 and the app's 1440 × 900. The harness compares the common area and fails only on a gap over 2 px.
-- 71 board states have no click path yet. `check:rules` reports the count, and each card adds its own.
-- The state gate in CI only reports (`continue-on-error`). It becomes required per board as cards finish.
-- Playwright needs Chromium: run `npx playwright install chromium` once.
+- All 81 states have checked click paths; `check:rules` still reports the count.
+- CI's state gate is required (`GATE=checked`), not report-only.
+- Playwright needs Chromium: run `npx playwright install chromium` once. A fresh clone also needs `npm ci` before `npm run gate` — a stale `node_modules` without the declared `jsdom` dev dependency makes vitest fail with `ERR_MODULE_NOT_FOUND`.
+- API mode and the Postgres stages were exercised on the worker branches; this lead re-run exercised the default sample/memory path only.
 
-## Not checked in this baseline
+## Not checked in this lead re-run
 
-- CI runs on every push and pull request (public repo, free minutes). Still run `npm run gate` locally before you push. The state gate job only reports, and it fails until boards are built.
 - Windows and Linux local setup: only macOS was tried.
-- The app at 390 px and the EN/ID switch: the header switch exists, but no translations are wired yet (part of IMP-01/02).
+- 390 px and 1024 px viewport sweeps, keyboard-only traversal, reduced motion, long-text truncation and EN/ID copy translations (listed per card in `lanes/ui.md`). The header language switch exists; translations are not wired.
+- The full CI matrix; only local `npm run gate` and `npm run harness` were re-run here.
 
 ## Where the canvas lives
 
