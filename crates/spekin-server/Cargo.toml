@@ -7,6 +7,7 @@ license.workspace = true
 
 [dependencies]
 spekin-core = { path = "../spekin-core" }
+spekin-store-pg = { path = "../spekin-store-pg" }
 axum.workspace = true
 tokio.workspace = true
 tower-http.workspace = true
@@ -14,6 +15,8 @@ serde.workspace = true
 serde_json.workspace = true
 reqwest.workspace = true
 futures-util.workspace = true
+# Object-safe async `Store` trait (ADR 0008). Licence: MIT OR Apache-2.0.
+async-trait = "0.1"
 # Buffer the request body under a hard byte cap, including chunked bodies. Licence: MIT.
 http-body-util = "0.1"
 

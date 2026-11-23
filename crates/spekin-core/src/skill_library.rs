@@ -189,7 +189,8 @@ pub struct SkillsResponse {
 }
 
 /// In-memory library. The server owns one of these and calls only these rules.
-#[derive(Debug, Clone, PartialEq, Eq)]
+/// `Serialize`/`Deserialize` let the [`crate::store::Store`] implementations persist it (ADR 0008).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SkillLibrary {
     skills: BTreeMap<String, LibrarySkill>,
     versions: BTreeMap<String, Vec<SkillVersion>>,

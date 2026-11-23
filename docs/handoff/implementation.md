@@ -35,7 +35,8 @@ No Python, no new crate without naming its licence in the PR. If unclear, write 
 | Area | Status | Evidence |
 |---|---|---|
 | Canvas: 14 boards, 80 states, 212 features, F00 map, R00 references (S40 Skills library added 23 Nov) | done | `npm run canvas:lint`: 14 boards pass, manifest current |
-| Build: 15 pull requests open (#1 to #15), all reviewed by the lead and waiting for the owner to merge, in the order in [workers.md](workers.md). Core: IMP-03, 04, 09, 10, 11, 12, 22, 24, 25, 26. UI: IMP-01, 02, 05, 07, 23. | done, waiting for owner merge | The status table below. The lead re-ran the state gate on every UI branch: S27 6/6, S29 6/6, S35 3/3, S40 6/6 PASS, pixel differences 0 to 0.09 %. |
+| Build: 21 pull requests (#1 to #21), all reviewed by the lead. [#22](https://github.com/yravg/Spekin/pull/22) merges all of them with the conflicts resolved: gate passes, 207 Rust tests, 48 web tests, 33 of 33 states pass. Waiting for the owner to merge #22, as described in [workers.md](workers.md). Core: IMP-03, 04, 09, 10, 11, 12, 22, 24, 25, 26. UI: IMP-01, 02, 05, 07, 23. | done, waiting for owner merge | The status table below. The lead re-ran the state gate on every UI branch: S27 6/6, S29 6/6, S35 3/3, S40 6/6 PASS, pixel differences 0 to 0.09 %. |
+| CI state gate | part open | [#29](https://github.com/yravg/Spekin/pull/29) (stacked on #22) makes it required for checked click paths. On the #22 code: 33 of 33 pass. Until #29 merges, the job is report-only. |
 | DPAI addendum v1.0 | triaged | [incoming/2026-11-23-dpai-addendum-v1.0.md](incoming/2026-11-23-dpai-addendum-v1.0.md). Its checks are in cards IMP-07, 13, 14, 16, 24 and 25. |
 | Review supplement v1.0 and PRD v0.2.3 | triaged | [incoming/2026-11-23-review-supplement-v1.0.md](incoming/2026-11-23-review-supplement-v1.0.md). Canonical PRD is `inputs/Spekin-PRD-v0.2.3.md` (v0.2.2 kept for history). |
 | Repo standards: licence, NOTICE, README, CONTRIBUTING, SECURITY, glossary, ADRs, decisions, roadmap | done | this commit |
@@ -117,21 +118,86 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-26 | core | API routes for the core (all core cards) + web client | IMP-03…IMP-25 | done, waiting for owner merge: PR #15 (merge last) |
 | IMP-27 | core | GitHub skill source adapter: pin to SHA, fetch with limits, update check | IMP-22 | done, waiting for owner merge: PR #17, stacked on #8 |
 | IMP-29 | core | Recently deleted and restore: 30-day window, pure | – | done, waiting for owner merge: PR #20 |
-| IMP-30 | core | Audit log core: append-only, hash-chained, verify | – | open |
+| IMP-31 | core | Audit and restore in the API (routes, one audit entry per action, head kept apart) | IMP-26, IMP-29, IMP-30 | done, waiting for owner merge: PR #23, stacked on #22 |
+| IMP-32 | core | Server hardening: body limit, JSON only, timeout, CORS, headers, loopback bind | IMP-31 | done, waiting for owner merge: PR #24, stacked on #23 |
+| IMP-33 | core | Build contracts and evidence core (S37): not run is never passed | IMP-32 | done, waiting for owner merge: PR #26, stacked on #24 |
+| IMP-34 | core | Skills library API (S40): copies, versions, GitHub sources, update history and rollback | IMP-22, 27, 31 | done, waiting for owner merge: PR #27, stacked on #26 |
+| IMP-35 | core | Review follow-ups: chunked 413, skills audit chain, licences in gate, audit head | IMP-34 | done, waiting for owner merge: PR #28, stacked on #27 (allow-list empty; SPDX classifier) |
+| IMP-30 | core | Audit log core: append-only, hash-chained, verify | – | done, waiting for owner merge: PR #21 (follow-up: store the head hash apart from the log) |
 | IMP-28 | core | GenUI validation fuzzing (never panics, never partial) | IMP-10 | done, waiting for owner merge: PR #18, stacked on #7 (the fuzzer found and fixed a data: URL hole) |
 | IMP-23 | ui | S40 Skills library (6 states) | IMP-01, IMP-22 types | done, waiting for owner merge: PR #9, stacked on #6 (S40 6/6 PASS after the harness fix) |
-| IMP-06 | ui | S28 Reference intake | IMP-01 | open |
+| IMP-06 | ui | S28 Reference intake | IMP-01 | done, part open: PR #31, stacked on #30 (lead re-ran: S28 6/6 PASS; uploads, PII detector and job cancel record intent only) |
 | IMP-07 | ui | S29 Frames canvas | IMP-01 | done, waiting for owner merge: PR #14, stacked on #11 (lead re-ran: S29 6/6 PASS) |
-| IMP-08 | ui | S30 Style review | IMP-01 | open |
-| IMP-13 | ui | S31 Alternatives | IMP-01 | open |
+| IMP-08 | ui | S30 Style review | IMP-01 | done, part open: PR #30, stacked on #25 (lead re-ran: S30 6/6 PASS; links to later boards record intent only) |
+| IMP-13 | ui | S31 Alternatives | IMP-01 | done, waiting for owner merge: PR #25, stacked on #19 (lead re-ran: S31 6/6 PASS) |
 | IMP-14 | ui | S32 Targeted change | IMP-01 | done, waiting for owner merge: PR #19, stacked on #16 (lead re-ran: S32 6/6 PASS) |
 | IMP-15 | ui | S33 Review and accept | IMP-01 | done, waiting for owner merge: PR #16, stacked on #14 (lead re-ran: S33 6/6 PASS) |
-| IMP-16 | ui | S34 Coding handoff | IMP-01 | open |
-| IMP-17 | ui | S36 Models and usage | IMP-01 | open |
-| IMP-18 | ui | S37 Build contracts | IMP-01 | open |
-| IMP-19 | ui | S38 GenUI panel | IMP-01 | open |
-| IMP-20 | ui | T01 Tablet and phone | IMP-01 | open |
-| IMP-21 | ui | Screens read the API instead of the sample (reserved) | IMP-03 and server routes | open |
+| IMP-16 | ui | S34 Coding handoff | IMP-01 | done, part open: PR #32, stacked on #31 (lead re-ran: S34 6/6 PASS; zip download and clipboard record intent only) |
+| IMP-17 | ui | S36 Models and usage | IMP-01 | done, part open: PR #33, stacked on #30 (lead re-ran: S36 6/6 PASS; ledger and model actions record intent only) |
+| IMP-18 | ui | S37 Build contracts | IMP-01 | done, part open: PR #36, stacked on #33 (lead re-ran: S37 6/6 PASS; some board copy still to move into sample data) |
+| IMP-19 | ui | S38 GenUI panel | IMP-01 | done, part open: PR #34, stacked on #32 (lead re-ran: S38 6/6 PASS; a TS mirror of the Rust validator is used until IMP-21) |
+| IMP-20 | ui | T01 Tablet and phone | IMP-01 | done, part open: PR #35, stacked on #34 (lead re-ran: T01 5/5 PASS with device frames; real upload, zip download and keyboard-only traversal not checked) |
+| IMP-21 | ui | Screens read through one data source (sample default, API mode); S38 stops validating in the browser | IMP-26, PR #37 | done, part open: PR #38, stacked on #37 (lead re-ran: 80/80 sample mode; API mode S27, S35, S36, S40 pass per worker; project, stages, usage only so far) |
+| IMP-37 | ui + core | API mode for models, skills and history, contracts, audit, deleted projects | IMP-21 | done, part open: PR #39, stacked on #38 (lead re-ran 80/80 sample mode; worker: API mode S27, S35, S36, S37, S40 pass; some fields still sample-only) |
+| IMP-39 | ui | Build the S35 offline state (F378, drawn 23 Nov): in API mode a failed read keeps the last loaded copy with the banner and the Offline save chip; never sample data. Harness path S35 offline | IMP-37 | done, part open: PR #42, stacked on #40 (lead re-ran 81/81; real-server stop test and banners on other boards open) |
+| IMP-38 | core | Store trait, memory store, Postgres store (ADR 0008) | PR #37 | done, part open: PR #41, stacked on #37 (lead ran the Postgres stage on Postgres 16 in Docker: shared suite passes; concurrent writers not tested) |
+| IMP-40 | core | PgStore under concurrency: two connections race one revision, exactly one wins, the other gets the stale error; audit chain stays valid | IMP-38 | done, waiting for owner merge: PR #44, stacked on #41. The hang was test isolation (two race tests truncating one database). Memory and Postgres stores now refuse a stale state; accept and revert write the revision and the audit entry in one transaction. The lead re-ran the Postgres stage (3 races × 50 rounds plus the shared suite), two mutation checks and the gate. Follow-up: StaleState maps to proposal_stale for reserve and reject too |
+| IMP-42 | core | The API on Postgres end to end: route tests on both backends, a live server smoke over HTTP, concurrent HTTP accepts | IMP-40 | done, waiting for owner merge: PR #45, stacked on #44 (lead re-ran the Postgres stage: route, audit and contract tests on both backends, a live server smoke over HTTP, 20 concurrent HTTP accept rounds; gate passes) |
+| IMP-41 | ui | Screens write through the data door (accept, revert, reserve and settle, skill copy, edit and rollback, delete and restore) | IMP-39 | done, part open: PR #43, stacked on #42 (lead re-ran 81/81; lead fix: browser never settles; revert, delete and source rollback have no drawn control yet) |
+| IMP-36 | core | GenUI sample verdicts equal the Rust validator | IMP-21 | done: PR #40, stacked on #39 (lead re-ran 80/80; Rust test pins verdicts) |
+
+### IMP-21 · Screens read through one data source; API mode (ui)
+
+Base: `integration-2-2026-11-23` (PR #37). Branch `imp-21-data-source`.
+
+1. **One door.** No screen imports `@spekin/sample` any more (tests may). Every read goes through `apps/web/src/data/source.ts`, through a `DataSource` interface with two implementations: `sampleSource` (today's data, the default) and `apiSource` (`apps/web/src/data/api.ts`). Pick it with `VITE_SPK_DATA=api`; the default stays `sample`, so the boards and the harness keep comparing against the same data. Screens get data from a React context (`DataSourceProvider`, `useData()`); loading shows the board's skeleton or nothing, never a spinner that the boards do not draw.
+2. **What the API serves now**: project, stages, usage, models, skills (list, history), contracts, audit, deleted projects. Everything else (frames, findings, alternatives, delivery, intake, device frames) stays sample-only in both modes. List those under "Still sample-only" in ui.md, one line each, with the screen.
+3. **S38 GenUI.** Delete `apps/web/src/genui/validate.ts` and its imports: the browser never validates. In api mode a card goes through `validateGenUi()` (POST /api/genui/validate) before it renders; a refusal or a network error shows the fallback card, never part of the card. In sample mode the sample cards carry the verdict (`valid` or the refusal reason) recorded from the Rust validator, and the screen renders on that verdict. Add the verdict fields to `packages/sample/index.d.ts` and write under "Requests to lead": the lead adds the verdicts to `sample/parts` and IMP-36 adds a Rust test that keeps them equal to `genui::validate`.
+4. **Tests (write them first):** a vitest that `apiSource` and `sampleSource` return deep-equal project, stages and usage for meranti-yard, with `fetch` mocked from `fixtures/meranti-yard.json`; a vitest that S38 with a mocked refusal shows the fallback and no part of the card; a vitest that no file under `apps/web/src` other than `data/source.ts` and `*.test.tsx` imports `@spekin/sample`.
+5. **Checks:** `npm run gate` passes. In sample mode all 14 boards still pass (80/80). In api mode (`cargo run -p spekin-server` on 8787, then `VITE_SPK_DATA=api SPK_WEB_PORT=5174 npm run dev`): S27, S35, S36 and S40 still pass. Report any that do not, with the reason, rather than changing the board.
+
+Not in scope: writes from the screens (accept, reserve, copy skill and so on stay recorded intent), auth, persistence.
+
+### IMP-36 · GenUI sample verdicts equal the Rust validator (core)
+
+A Rust test reads the GenUI sample cards (exported to `fixtures/genui-cards.json` by `npm run sync:design`) and checks each card's recorded verdict equals `genui::validate`. Depends on IMP-21 and the lead adding the verdicts to the sample.
+
+### IMP-37 · API mode for the remaining reads (core then ui, one worker)
+
+Base: `imp-21-data-source` (PR #38). Branch `imp-37-api-reads`.
+1. Core part (`apps/web/src/data/api*.ts`): add `fetchContracts(projectId)` for GET /api/projects/{id}/contracts, with a test like the others (mocked fetch, typed error on bad JSON, null on 404).
+2. UI part: add models, skills (list and history), contracts, audit and deleted projects to the `DataSource` interface, both `sampleSource` and `apiSource`. S36, S40, S37 and S27 (Recently deleted) read them through `useData()`. Where the API shape differs from the sample shape, map it in `apiSource`, not in the screen. Anything the API cannot supply yet keeps the sample value and is listed in ui.md under "Still sample-only".
+3. Tests first: `apiSource` and `sampleSource` agree for each new read on the Meranti Yard fixture, or the test names the field that differs and why.
+4. Checks: `npm run gate`; sample mode all 14 boards 80/80; API mode (server on 8787) S27, S35, S36, S37, S40 pass or each failure is explained.
+
+### IMP-38 · Store trait, memory store, Postgres store (core)
+
+Read docs/adr/0008-persistence.md (short). Base: `origin/integration-2-2026-11-23` (PR #37). Branch `imp-38-store`.
+1. In `crates/spekin-core`: a `Store` trait covering what the server keeps today (projects, stages, revisions and proposals, ledger entries, skills and versions, audit entries plus the audit head kept apart, deleted projects). No database code in core.
+2. `MemoryStore` implements it; the server uses it by default, so every existing test passes unchanged.
+3. New crate `crates/spekin-store-pg` with `sqlx` (postgres, runtime-tokio, rustls; no default features you do not need) and plain SQL migrations in `crates/spekin-store-pg/migrations`. Revisions update under a row lock; a stale write returns the same typed conflict error the memory store returns.
+4. The server picks `PgStore` when `DATABASE_URL` is set. A command `cargo run -p spekin-server -- seed-sample` seeds Meranti Yard; it refuses unless `--yes` is given.
+5. Tests: one shared test suite run against `MemoryStore` always, and against `PgStore` only when `TEST_DATABASE_URL` is set; without it print "postgres stage skipped" (never claim it passed). Licence check (`node tools/checks/licences.mjs --check`) must pass with the new crates.
+6. Checks: `npm run gate` passes. Say in the PR whether the Postgres stage ran.
+
+### IMP-42 · The API on Postgres, end to end (core)
+
+Base: `imp-40-pg-concurrency` (PR #44). Branch `imp-42-api-on-pg`.
+1. The server's route tests run against both backends. Run the existing route tests in `crates/spekin-server` (or a shared helper they call) on `Backend::Memory` always and on `Backend::Pg` only when `TEST_DATABASE_URL` is set (seed Meranti Yard first with the same seed `seed-sample` uses). Without the variable, print "postgres stage skipped" and never claim it passed.
+2. One live smoke test: start the real server binary with `DATABASE_URL` on a free loopback port, then over HTTP: health, project, stages, accept (then the same accept again gives 409 `proposal_stale`), reject, revert, reserve and settle, audit (the chain verifies), deleted projects and restore. Stop the server at the end, even if the test fails.
+3. Two concurrent HTTP accepts on the same revision give exactly one 200 and one 409. Repeat 20 times.
+4. Fix what this exposes in the core lane. Do not change the UI or the boards.
+5. Throwaway Postgres: `docker run -d --name spekin-pg-imp42 -e POSTGRES_PASSWORD=spekin -e POSTGRES_DB=spekin_test -p 127.0.0.1:55435:5432 postgres:16-alpine`. Remove only that container when done.
+6. Checks: `npm run gate` passes. The PR says the Postgres stage ran, with the counts.
+
+### IMP-41 · Screens write through the data door (ui)
+
+Base: `imp-39-offline` (PR #42). Branch `imp-41-writes`.
+1. Add writes to the `DataSource` interface, using the existing client functions in `apps/web/src/data/api.ts` (do not change api.ts; if one is missing, write it under "Requests to lead"): accept and reject a proposal (S33), revert a revision (S33), estimate then reserve a run and settle it (composer Send, S36), copy and edit a skill and roll back a version (S40), delete and restore a project (S27).
+2. In sample mode each write changes an in-memory copy of the sample, so the screen shows the result the board draws for the next state (e.g. after Accept, the S33 accepted state). In API mode it calls the server and redraws from the server's answer. A 409 (stale) shows the S35 conflict state; a network failure shows the offline banner and keeps the user's input; nothing is ever shown as saved before the server says so.
+3. Every action that spends credits shows the estimate and needs the explicit confirm the boards draw; no write happens on Back/Forward or on page load.
+4. Tests first: one vitest per write in sample mode (the next drawn state appears), one per write in API mode with mocked fetch (request body and the redraw), one for 409 → conflict, one for a failed reserve that never shows "reserved".
+5. Checks: `npm run gate`; all 14 boards still 81/81 in sample mode (the starting state of every board must not change); list which board states a write now reaches by a real click and update those harness paths only if their steps get simpler (never weaker).
 
 ### IMP-01 · S35 work area (ui)
 
@@ -271,6 +337,55 @@ Pure Rust in spekin-core. S33 needs it, because a reject adds exactly one audit 
 - Property tests: any edit to any entry fails verify at that entry; appending never changes earlier hashes; sequence numbers are gapless.
 - A new dependency only under MIT or Apache-2.0 (sha2). Export the types with ts-rs. Branch from origin/main.
 
+### IMP-31 · Audit and restore in the API (core)
+
+Builds on IMP-26, IMP-29 and IMP-30. Branch from `origin/integration-2026-11-23` (PR #22).
+- The accept, reject and revert routes each append exactly one audit entry (C-03: a reject makes no revision and one audit entry). Reserve and settle append theirs too.
+- The server keeps the audit head hash apart from the log, as the lead's follow-up on #21 asks. `GET /api/projects/{id}/audit` returns the entries and the result of `verify` checked against that separate head.
+- `POST /api/projects/{id}/delete` and `…/restore` use the IMP-29 core and audit both. `GET /api/projects/deleted` lists entries with `days_left`.
+- One server test per route plus a 4xx test. One test shows that a reject adds exactly one audit entry and no revision. Add the client functions to `apps/web/src/data/api.ts`, with tests.
+
+### IMP-32 · Server hardening (core)
+
+Builds on IMP-31 (branch from `origin/imp-31-audit-restore-api`). Axum and tower-http layers, each with a test:
+- request body limit of 1 MB, giving a typed 413;
+- `POST` routes accept `application/json` only, giving a typed 415;
+- a request timeout of 15 s, giving a typed 504; the GitHub fetch has its own 20 s client timeout;
+- CORS allows only the configured web origin (`SPEKIN_WEB_ORIGIN`, default `http://127.0.0.1:5173`), never `*`;
+- security headers on every response: `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Cache-Control: no-store` on `/api`;
+- the server binds to 127.0.0.1 by default; `SPEKIN_BIND` changes it, and a log line says when it is not loopback;
+- errors never echo request bodies, tokens or file paths (a test sends a fake token and checks that the response and logs do not contain it).
+
+### IMP-33 · Build contracts and evidence core (core)
+
+Pure Rust in spekin-core for S37 (R-EVD-1, R-EVD-4, AC-SPK-22). Branch from `origin/imp-32-server-hardening`.
+- A `Contract` is a named requirement, for example `R-EDT-3: accept creates one revision`. It has a list of `Check`s (test name, kind unit/property/e2e/harness, owner lane).
+- `Evidence` records one run of one check: commit SHA, UTC time, result `passed | failed | skipped`, duration, and a log excerpt of at most 4 KB.
+- `status(contract, evidence) -> ContractStatus` returns `met | failing | not_run | stale`. A check with no evidence is `not_run`, never passed. Evidence from a commit older than the contract's last change is `stale`.
+- `matrix(contracts, evidence)` gives the S37 matrix rows: requirement × check × status.
+- `gate(contracts, evidence, required)` passes only when every required contract is `met`. It lists the reasons otherwise.
+- Property tests: missing evidence is never `met`; any failed required check fails the gate; adding newer passing evidence never turns `met` into `failing`.
+- Seed the S37 sample shapes from `docs/design/spekin-canvas/sample/parts/` (contracts, matrix). Export the types with ts-rs. Add `GET /api/projects/{id}/contracts` with a test.
+
+### IMP-34 · Skills library API (core)
+
+Builds on IMP-22, IMP-27 and IMP-31 (branch from `origin/imp-33-contracts-evidence`). It serves S40 and follows ADR 0007:
+- `GET /api/skills` returns the templates, the user's copies and the GitHub sources, each with its stage, source, licence and update policy (sample from `sample/parts/skills.mjs`, SKL_*).
+- `POST /api/skills/{id}/copy` makes a user copy of a template (`copy_for_user`). The template itself never changes.
+- `PUT /api/skills/{id}` edits a user copy and stores it as a new version. Editing a template or a GitHub skill gives a typed 409.
+- `POST /api/skills/github` adds a source with `{repo, path, ref}`, using the IMP-27 adapter through an injected client (tests use the fixtures) and pinning it to a SHA.
+- `POST /api/skills/{id}/check` runs the update check. An applied update makes a new version and one history entry. A held update stores the diff and the reasons, and nothing changes.
+- `GET /api/skills/{id}/history` and `POST /api/skills/{id}/rollback/{version}`: every version can be rolled back to, and the rollback is itself one history entry and one audit entry.
+- One test per route plus a 4xx test. Add the client functions to `apps/web/src/data/api.ts`, with tests.
+
+### IMP-35 · Review follow-ups (core)
+
+Branch from `origin/imp-34-skills-api`. Small items from the lead reviews:
+1. A typed 413 for a chunked request body with no Content-Length (from #24), with a test.
+2. A separate audit chain for the skills library (from #27). Skills routes append there, not to a project's chain. `GET /api/skills/audit` returns it with `verify`.
+3. Wire `tools/checks/licences.mjs` (IMP-12) into the root `npm run gate` after `check:rules`. The lead allows this edit of the lead-owned root `package.json` for this card only.
+4. The audit head hash: `AuditLog` serialisation skips `head_hash`, so a stored log can't carry its own anchor (from #21). The server keeps the head apart, as IMP-31 does.
+
 ### UI cards after P1 (written 23 Nov)
 
 Order: IMP-07 (S29), IMP-15 (S33), IMP-14 (S32), IMP-13 (S31), IMP-08 (S30), IMP-06 (S28), IMP-16 (S34), IMP-17 (S36), IMP-19 (S38), IMP-18 (S37), IMP-20 (T01). Each card branches from the previous ui branch while the earlier pull requests are still open (stacked), or from origin/main once they are merged. IMP-21 is kept free for "screens read the API" after the core API routes exist.
@@ -337,7 +452,7 @@ These change boards, so only the lead does them: edit the generator, rebuild, li
 | C-02 | F00 and all boards | **done** 23 Nov: `maps-reqs.mjs` traces 200 of 212 stories to PRD v0.2.3 R-IDs (every ID checked against the PRD). 12 have none yet, with a reason (layout details, S40 owner features). F00 shows them. | – |
 | C-03 | S33 | **done, part open**: Reject = no revision plus one audit entry. Still to do: the S30 local accept and S34 re-finalize wording. | S33 card |
 | C-04 | S28 | **done**: the consent line and F146 say files go only to providers whose terms forbid training | – |
-| C-05 | S36 | **done, part open**: the board says pairing and runs ship as a later adapter. Still to do: draw the cli state's pair button as later. | S36 card |
+| C-05 | S36 | Draw the S36 Local CLI pair button as LATER: **done** 23 Nov. Pair again is now LATER on the board (the app already matched; S36 6/6 PASS) | S36 card |
 
 ## Open decisions (owner)
 

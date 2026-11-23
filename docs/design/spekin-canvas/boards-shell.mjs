@@ -70,6 +70,8 @@ ${toolRow('Document', `Backend${ic('chevR', 12)}<b>API contract</b>`)}
   const C = S.CONFLICT;
   const conflictBanner = `<div class="sp-banner bad isnew" role="alert" data-feature="F112">${NT}${ic('alert', 16)}<p><b>${C.frame} changed elsewhere</b> (${C.rev}, ${C.by}, ${C.at}). Your edit is kept as a local draft.</p>${btn('Compare', { sm: true, cls: 'ink', does: 'Opens Compare: r8 on the left, your local draft on the right', f: 'F112' })}${btn('Keep as proposal', { sm: true, does: 'Saves your draft as a proposal on top of r8, for review in S08', f: 'F112' })}${btn('Discard draft', { sm: true, cls: 'plain', does: 'Asks to confirm, then drops the local draft and shows r8', f: 'F112' })}</div>`;
 
+  const offlineBanner = `<div class="sp-banner bad isnew" role="alert" data-feature="F378">${NT}${ic('alert', 16)}<p><b>The Spekin server is not answering.</b> You are looking at the last copy loaded at 12:41. New edits stay on this device until it answers.</p>${btn('Try again', { sm: true, cls: 'ink', does: 'Asks the server again; the banner closes when it answers', f: 'F378' })}</div>`;
+
   const N = {
     stage: note('<b>Click a stage</b> above: the work area swaps in place, no reload. Each stage keeps its tabs, zoom, selection and drafts. Switching never approves anything.', 'left:922px;top:388px;max-width:196px'),
     ctx: note('<b>Context list</b> (left) is exactly what the next run gets. Remove a chip to leave it out.', 'left:358px;top:676px;max-width:242px'),
@@ -78,11 +80,13 @@ ${toolRow('Document', `Backend${ic('chevR', 12)}<b>API contract</b>`)}
     draft: note('<b>Drafts</b> have a dashed edge and stay apart from accepted frames until reviewed in S08.', 'left:922px;top:656px;max-width:196px'),
     back: note('<b>Same shell, other stage.</b> The header item moved to Backend; Design keeps its board, zoom 64% and F-03 selection for when you come back.', 'left:820px;top:560px;max-width:290px'),
     up: note('<b>Upstream change</b>: an accepted spec change marks linked contracts, tasks and tests Needs review. Older accepted revisions and evidence stay.', 'left:820px;top:680px;max-width:290px'),
+    off: note('<b>Server offline</b>: the screen keeps the last copy it loaded and says so. It never swaps in sample or made-up data, and nothing is sent until the server answers.', 'left:922px;top:420px;max-width:196px'),
     conf: note('<b>Conflict</b>: two sessions edited F-04. Nothing is merged silently; you compare, keep yours as a proposal, or discard it.', 'left:922px;top:420px;max-width:196px'),
   };
 
   const vDesign = app({ stage: 'design', save: ['ok', 'Saved 12:41'], busy: '1 designing · 1 waiting', chat: chatDesign, main: designMain() }) + N.stage + N.ctx + N.model + N.save + N.draft;
   const vBackend = app({ stage: 'backend', save: ['ok', 'Saved 12:41'], chat: chatBackend, main: backendMain }) + N.back + N.up;
+  const vOffline = app({ stage: 'design', save: ['bad', 'Offline · kept on this device'], chat: chatDesign, main: designMain(offlineBanner, false) }) + N.off;
   const vConflict = app({ stage: 'design', save: ['bad', 'Conflict · F-04'], chat: chatDesign, main: designMain(conflictBanner, true) }) + N.conf + N.ctx;
 
   return [{
@@ -92,6 +96,7 @@ ${toolRow('Document', `Backend${ic('chevR', 12)}<b>API contract</b>`)}
     views: [
       { id: 'design', label: 'Design stage', html: vDesign, entry: 'Projects > Meranti Yard > header: Design.', data: 'sample/meranti-yard.mjs → STAGES, FRAMES, REQS, CTX_DESIGN.' },
       { id: 'backend', label: 'Switched to Backend', html: vBackend, entry: 'From Design, click Backend in the stage header.', data: 'sample/meranti-yard.mjs → BACKEND, CTX_BACKEND.' },
+      { id: 'offline', label: 'Server offline', html: vOffline, entry: 'Design stage while the Spekin server stops answering (API mode).', data: 'sample/meranti-yard.mjs → STAGES, FRAMES (last loaded copy).' },
       { id: 'conflict', label: 'Save conflict', html: vConflict, entry: 'Design > F-04 tab: edit while r8 is saved in another session.', data: 'sample/meranti-yard.mjs → CONFLICT.' },
     ],
     side: {
@@ -124,6 +129,7 @@ ${toolRow('Document', `Backend${ic('chevR', 12)}<b>API contract</b>`)}
         ['F109', 'new', 'Agent inbox, busy chip and a live run row (step, tokens, time, Stop) for jobs and approvals, beside the work (§7.11).', 'OpenDesign'],
         ['F110', 'new', 'Contextual GenUI families: requirement and gap cards, acceptance checklist, with a table fallback (R-GUI-1, R-GUI-4).', 'OpenDesign'],
         ['F111', 'new', 'Usage meter: source, used and cap (R-MOD-10).', 'Onlook'],
+        ['F378', 'new', 'Server offline: keep the last loaded copy, say so, hold edits on this device; never fall back to sample data (R-ARC-3).', 'Lead'],
         ['F112', 'new', 'Save states and conflict recovery; no silent overwrite (R-CAN-6, R-WF-10).', 'PRD'],
         ['F113', 'new', 'Canvas tools: select, pan, frame, text, nitpick pin, import, zoom, fit, Ask on select; zoom scales frames, not UI text (R-CAN-1, R-CAN-8, R-WS-4).', 'OpenDesign'],
         ['F114', 'new', 'Chat controls: history, new chat, collapse, resize, jump to latest, attach, suggestions, Send with the listed context only (R-CAN-4, R-WS-2).', 'OpenDesign'],
