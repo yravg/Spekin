@@ -38,3 +38,11 @@ npm run sync:design && npm run sync:fixtures   # lead only: copy the canvas CSS,
 9. **The repo is the memory.** Before you stop, update your lane file (status, evidence, next step, not checked) and push your branch.
 10. **Owner's Mac only:** a hook may summarise long reads. Never write back text you read through it. Edit with exact-match patches or node scripts.
 11. **End every session with a link** the owner can open: the pull request, the artifact or a Tailscale URL.
+
+### Mistakes we already made (24 Nov 2026). Do not repeat them
+
+12. **Workers never push to main, not even a docs fix.** Commit `a556960` went straight to main from a worker session. Push your branch and open a pull request. Only the lead merges.
+13. **Green means GitHub CI green, not only your local gate.** Before you say "done", run `gh pr checks <n>` and read every job. "Unstable", "failure" or "cancelled" is not green: open the failed log (`gh run view <id> --log-failed`), say which job failed and why, and fix it or list it as open. Main was red from #45 to #47 because only the local gate was checked.
+14. **The local harness and CI must test the same build.** The harness drives the dev server (`npm run dev`). A state that needs a dev-only switch (S35 offline uses `?sim=offline`) can never pass on `vite preview`. If you add a dev-only path, say so in the harness path note and check that CI still reaches it.
+15. **Fresh checkout or new branch: run `npm ci` before `npm run gate`.** An old `node_modules` without a newly declared dev dependency (`jsdom`) makes vitest fail with `ERR_MODULE_NOT_FOUND`. That is your setup, not a code failure.
+16. **Don't edit another session's files while it is working.** Before you edit a shared doc (AGENTS.md, implementation.md, lane files) in the main checkout, run `git status`. If it shows changes you didn't make, stop and ask the lead. Work in your own worktree (`../Spekin-core`, `../Spekin-ui`).

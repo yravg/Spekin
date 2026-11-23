@@ -156,6 +156,10 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-42 | core | The API on Postgres end to end: route tests on both backends, a live server smoke over HTTP, concurrent HTTP accepts | IMP-40 | done: PR #45, stacked on #44 (lead re-ran the Postgres stage: route, audit and contract tests on both backends, a live server smoke over HTTP, 20 concurrent HTTP accept rounds; gate passes) |
 | IMP-41 | ui | Screens write through the data door (accept, revert, reserve and settle, skill copy, edit and rollback, delete and restore) | IMP-39 | done, part open: PR #43, stacked on #42 (lead re-ran 81/81; lead fix: browser never settles; revert, delete and source rollback have no drawn control yet) |
 | IMP-36 | core | GenUI sample verdicts equal the Rust validator | IMP-21 | done: PR #40, stacked on #39 (lead re-ran 80/80; Rust test pins verdicts) |
+| IMP-43 | core | Skills audit client for `GET /api/skills/audit` | – | open (worker: OpenCode Go `hy4`) |
+| IMP-44 | core | Stage id and tone values generated from Rust, api.ts mirrors removed | – | open (worker: OpenCode Go `hy4`) |
+| IMP-45 | ui | Skills audit in the data door; S35 offline proven with a real server stop | IMP-43 | open (worker: OpenCode Go `hy4`) |
+| IMP-46 | ui | Sweep: 0 page errors, no sideways scroll at 1024 px, reduced motion, on every checked state | – | open (worker: OpenCode Go `hy4`) |
 
 ### IMP-21 · Screens read through one data source; API mode (ui)
 
@@ -190,6 +194,43 @@ Read docs/adr/0008-persistence.md (short). Base: `origin/integration-2-2026-11-2
 4. The server picks `PgStore` when `DATABASE_URL` is set. A command `cargo run -p spekin-server -- seed-sample` seeds Meranti Yard; it refuses unless `--yes` is given.
 5. Tests: one shared test suite run against `MemoryStore` always, and against `PgStore` only when `TEST_DATABASE_URL` is set; without it print "postgres stage skipped" (never claim it passed). Licence check (`node tools/checks/licences.mjs --check`) must pass with the new crates.
 6. Checks: `npm run gate` passes. Say in the PR whether the Postgres stage ran.
+
+### IMP-43 · Skills audit client (core)
+
+Base: `origin/main`. Branch `imp-43-skills-audit`. Follow-up from IMP-35 ("`GET /api/skills/audit` has no typed client").
+1. Add `fetchSkillsAudit()` to `apps/web/src/data/api.ts` for `GET /api/skills/audit`. It returns the generated `AuditResponse` contract type, the same shape as the project audit client already in `api.ts`. Reuse that client's shape check.
+2. Tests first, in `apps/web/src/data/api.test.ts`: a mocked body deep-equals the answer, 404 gives `null`, a wrong shape gives `ApiError` kind `shape`, bad JSON gives kind `json`, a refused connection gives kind `network`.
+3. Do not change any screen or `source.ts`. IMP-45 wires it into the data door.
+4. Checks: `npm run gate` passes.
+
+### IMP-44 · Stage values generated from Rust (core)
+
+Base: `origin/main`. Branch `imp-44-stage-values`. Follow-up from IMP-03: `api.ts` keeps hand-written mirrors `STAGE_IDS` and `STAGE_TONES` (lines 91–101) because ts-rs exports the types, not the values. Lead decision (24 Nov 2026): generate the value lists from Rust.
+1. In `crates/spekin-core`, give `StageId` and `StageTone` one list of all variants each (e.g. `StageId::ALL`). Add a test that the list covers every variant (an exhaustive `match`, so a new variant fails to compile until it is added).
+2. Export those lists to `packages/contracts/src/generated/` as TypeScript consts (`export const STAGE_IDS = [...] as const;` with the same names), written by the same `cargo test` step that writes the ts-rs bindings, so `tools/check-contracts.mjs` sees drift. Export them from `packages/contracts/src/index.ts`.
+3. `api.ts` imports `STAGE_IDS` and `STAGE_TONES` from `@spekin/contracts` and deletes its local copies. Existing `api.test.ts` cases still pass unchanged.
+4. Checks: `npm run gate` passes, including `contracts current`.
+
+### IMP-45 · Skills audit in the data door, and a real server stop for S35 offline (ui)
+
+Base: `origin/main` after IMP-43 merges (or branch from `imp-43-skills-audit` and say "stacked on IMP-43"). Branch `imp-45-door-and-offline`.
+1. Add `skillsAudit()` to the `DataSource` in `apps/web/src/data/source.ts`. Sample mode returns `null` (the sample draws no skills audit). API mode returns `fetchSkillsAudit()`. Tests first in `data/source.test.tsx` for both modes. No screen draws it yet, so do not add UI.
+2. IMP-39 follow-up: a real-server stop test. New file `tools/e2e/offline-real-server.mjs` (the lead grants this file and one root `package.json` script `e2e:offline` to this card). It builds nothing. It starts `cargo run -p spekin-server` on a free loopback port and the web dev server in API mode (`VITE_SPK_DATA=api`, `SPK_WEB_PORT` free, proxy to that API port). It opens S35 for Meranti Yard and waits for the design stage. Then it kills the API process, triggers one read (switch stage and back), and asserts: `[data-feature="F378"]` banner visible, the Offline save chip shown, the project name and stages still the ones the server served (not a sample-only value), and 0 `pageerror` events. It stops every process it started, also on failure. Exit code 0 only if every assertion passes.
+3. Do not use `?sim=offline` in this test. The point is a real stop.
+4. Checks: `npm run gate` passes; `npm run harness` still 81/81 on the dev server; `npm run e2e:offline` exit 0; paste its output in the PR.
+
+### IMP-46 · Viewport, motion and error sweep (ui)
+
+Base: `origin/main`. Branch `imp-46-sweep`. Covers the "not checked" list in `lanes/ui.md` that a script can check. Boards stay the source: do not change `docs/design/**` or any harness path.
+1. New file `tools/e2e/sweep.mjs` (lead grants it and the root script `e2e:sweep`). It reuses the harness click paths in `tools/harness/paths/*.json` (read them; do not change them) against the dev server and, for every `checked` state, records:
+   - at 1440×900: number of `pageerror` events and console errors (must be 0);
+   - at 1024×768: the same errors, plus `document.documentElement.scrollWidth <= innerWidth + 2` (no sideways page scroll);
+   - at 1440×900 with `reducedMotion: 'reduce'`: no running CSS animation or transition longer than 0.01 s on a visible element (`document.getAnimations()`).
+   T01 states keep their own frame sizes; skip the 1024 check for them.
+2. It writes `tools/e2e/out/sweep.md` (a table: state, errors, overflow, motion) and exits 1 if any check fails. Add `tools/e2e/out/` to `.gitignore`.
+3. Fix what it finds only in `apps/web/src/**` (CSS: `min-width: 0`, wrapping, a `prefers-reduced-motion` block using tokens). After every fix `npm run harness` must still be 81/81 at 1440. If a fix would change the 1440 look or needs a board change, do not make it: list the state under "Requests to lead" in `lanes/ui.md`.
+4. Not in this card: EN/ID translations, long-text truncation, 390 px (T01 covers phone frames).
+5. Checks: `npm run gate`, `npm run harness` 81/81, `npm run e2e:sweep` exit 0 (or exit 1 with every remaining failure listed as a request to lead). Paste the table summary in the PR.
 
 ### IMP-42 · The API on Postgres, end to end (core)
 
