@@ -4,7 +4,7 @@ Owner: Enrico (lead, with Claude Code). Last updated 23 Nov 2026 (statuses refre
 
 ## Current state (verified 23 Nov 2026, lead)
 
-The historical tables and lane files below are a record of the build, not the current status. This section is authoritative: `main` is clean at `ddf763f`, all pull requests #1–#46 are merged, and there is no open worker card. The older "waiting for owner merge" and `part blocked` wording is superseded by it.
+The historical tables and lane files below are a record of the build, not the current status. This section is authoritative: `main` is clean at `0aba2c5`, all pull requests #1–#47 are merged, and there is no open worker card. The older "waiting for owner merge" and `part blocked` wording is superseded by it.
 
 - `npm run harness`: **81/81 states pass**, exit 0, on all 14 boards (S27, S28, S29, S30, S31, S32, S33, S34, S35, S36, S37, S38, S40, T01). Report: `tools/harness/out/report.md`. This clears the S29/S32/S33 1 px pixel states and the T01 tablet frames that the lane files still call blocked.
 - `npm run gate`: exit 0, measured 23 Nov 2026 after a fresh `npm ci` (the previous local `node_modules` predated the `jsdom` dev dependency and made vitest fail). Evidence from that run: `rules ok (460 files)`, `licences ok (198 npm packages, 246 crates, 0 Python)`, `14 boards pass the board lint, 81 states`, vitest `21 passed (21)` files / `142 passed (142)` tests, Rust 153 core tests plus the workspace suites, `contracts current`. The CI state gate is required, not report-only (`GATE=checked` in `.github/workflows/ci.yml`).
@@ -46,7 +46,7 @@ Superseded by **Current state** above. Kept as the per-branch build record.
 | Area | Status | Evidence |
 |---|---|---|
 | Canvas: 14 boards, 81 states, 212 features, F00 map, R00 references (S40 Skills library added 23 Nov) | done | `npm run canvas:lint`: 14 boards pass, 81 states (measured in the current gate) |
-| Build: all pull requests #1–#46 merged into `main` (last merge `ddf763f`). Core: IMP-03, 04, 09–12, 22, 24–26, 28–35, 38, 40, 42. UI: IMP-01, 02, 05–08, 13–23, 36, 37, 39, 41. | done (merged) | `git log --oneline`; no open pull request or worker card. See [Current state](#current-state-verified-23-nov-2026-lead). |
+| Build: all pull requests #1–#47 merged into `main` (last merge `0aba2c5`). Core: IMP-03, 04, 09–12, 22, 24–26, 28–35, 38, 40, 42. UI: IMP-01, 02, 05–08, 13–23, 36, 37, 39, 41. | done (merged) | `git log --oneline`; no open pull request or worker card. See [Current state](#current-state-verified-23-nov-2026-lead). |
 | CI state gate | done (required) | `.github/workflows/ci.yml` runs `GATE=checked npm run harness`; the report-only wording above was superseded when PR #29 merged. Current measured result: 81/81. |
 | DPAI addendum v1.0 | triaged | [incoming/2026-11-23-dpai-addendum-v1.0.md](incoming/2026-11-23-dpai-addendum-v1.0.md). Its checks are in cards IMP-07, 13, 14, 16, 24 and 25. |
 | Review supplement v1.0 and PRD v0.2.3 | triaged | [incoming/2026-11-23-review-supplement-v1.0.md](incoming/2026-11-23-review-supplement-v1.0.md). Canonical PRD is `inputs/Spekin-PRD-v0.2.3.md` (v0.2.2 kept for history). |

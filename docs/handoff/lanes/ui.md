@@ -4,7 +4,7 @@ Only this lane edits this file. Write here before you stop working.
 
 ## Current status (verified 23 Nov 2026, lead)
 
-All UI cards are merged into `main` (`ddf763f`; PRs #1–#46 merged). The `part blocked` status words in the historical rows below were caused by a 1 px board-side vertical shift (S29, S32, S33) and by `.spwin` clipping the 1180 px tablet frames (T01). Both lead fixes are in `tools/harness/state-gate.mjs` (sub-pixel snap at line 101; unclip at lines 91–92) and F00 was regenerated to height `12300`. Current lead measurement: `npm run harness` → **81/81 states pass**, exit 0, report `tools/harness/out/report.md`; `npm run gate` → exit 0 (vitest 21 files / 142 tests) after a fresh `npm ci`. The remaining `part open` rows are real deferred scope, not build failures.
+All UI cards are merged into `main` (`0aba2c5`; PRs #1–#47 merged). The `part blocked` status words in the historical rows below were caused by a 1 px board-side vertical shift (S29, S32, S33) and by `.spwin` clipping the 1180 px tablet frames (T01). Both lead fixes are in `tools/harness/state-gate.mjs` (sub-pixel snap at line 101; unclip at lines 91–92) and F00 was regenerated to height `12300`. Current lead measurement: `npm run harness` → **81/81 states pass**, exit 0, report `tools/harness/out/report.md`; `npm run gate` → exit 0 (vitest 21 files / 142 tests) after a fresh `npm ci`. The remaining `part open` rows are real deferred scope, not build failures.
 
 ## Now (historical per-card record)
 
@@ -79,7 +79,7 @@ Read from `data/source.ts` (`sampleData`, the same surface in both modes); these
 
 ## Proposed glossary terms
 
-## Log
+## Log (historical; status words inside were true on their date, superseded by Current status above)
 
 - 2026-11-23 · IMP-01 · Built S35 design and backend work areas, removed `.ap-todo`, added unit tests (`shell.test.tsx`, `workspace.test.ts`), verified `npm run gate` and `npm run harness -- S35` (2/3 pass: design 0.41%, backend 0.47%; PNGs inspected). Commits: `a2dc76b`, `47b4576`, `7cc1f3d`.
 - 2026-11-23 · IMP-02 · Built S35 conflict state (`ConflictBanner`, dirty F-04 tab, save status chip with `data-save`), added keyboard ArrowLeft/ArrowRight stage navigation, unit tests for save states/conflict/NotFound, verified `npm run gate` and `npm run harness -- S35` (3/3 pass: design 0.41%, backend 0.47%, conflict 0.42%; PNGs inspected).

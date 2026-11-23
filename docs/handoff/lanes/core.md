@@ -4,7 +4,7 @@ Only this lane edits this file. Write here before you stop working.
 
 ## Current status (verified 23 Nov 2026, lead)
 
-All core cards are merged into `main` (`ddf763f`; PRs #1–#46 merged). Rows below marked `open` are stale snapshots from the stacked-PR period and are superseded by this note. Current gate: exit 0 — `rules ok (460 files)`, `licences ok (198 npm packages, 246 crates, 0 Python)`, 14 boards / 81 states, vitest 21 files / 142 tests, Rust 153 core tests plus workspace suites, contracts current. Postgres route, live-HTTP and concurrency stages were run on the worker branches; the lead re-run used the default memory store only.
+All core cards are merged into `main` (`0aba2c5`; PRs #1–#47 merged). Rows below marked `open` are stale snapshots from the stacked-PR period and are superseded by this note. Current gate: exit 0 — `rules ok (460 files)`, `licences ok (198 npm packages, 246 crates, 0 Python)`, 14 boards / 81 states, vitest 21 files / 142 tests, Rust 153 core tests plus workspace suites, contracts current. Postgres route, live-HTTP and concurrency stages were run on the worker branches; the lead re-run used the default memory store only.
 
 ## Now (historical per-card record)
 
