@@ -226,6 +226,7 @@ function BoardFrame(props: {
       className={['can-fr', sel ? 'sel' : '', f.st === 'draft' ? 'draft' : ''].filter(Boolean).join(' ')}
       style={{ left: x + 'px', top: y + 'px', width: w + 'px' }}
       data-frame={f.id}
+      data-feature={sel ? 'F165' : undefined}
       onPointerDown={(e) => {
         downPos.current = { x: e.clientX, y: e.clientY };
       }}
@@ -974,8 +975,8 @@ export function FramesCanvasWorkArea(props: {
             ) : null}
 
             {mode === 'over' ? (
-              <div className="can-world">
-                <div className="can-section" style={{ left: '100px', top: '70px', width: '648px', height: '320px' }}>
+              <div className="can-world" data-feature="F173">
+                <div className="can-section" data-feature="F173" style={{ left: '100px', top: '70px', width: '648px', height: '320px' }}>
                   <span>Variance flows · 7 items</span>
                 </div>
                 <BoardFrame frame={CANVAS_FRAMES.f01} x={o5[0]} y={98} z={0.1} />

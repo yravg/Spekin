@@ -63,9 +63,23 @@ function PillVariant({ v }: { v: SampleReviewVariant }) {
   );
 }
 
-function PartListRow({ id, name, sub, sel }: { id: string; name: string; sub: string; sel?: boolean }) {
+// F234: the part inspector's parts list is a keyboard route to picking a part. Tab focuses a row and Enter picks it.
+function PartListRow({ id, name, sub, sel, onSelect }: { id: string; name: string; sub: string; sel?: boolean; onSelect?: () => void }) {
+  const pick = () => onSelect?.();
   return (
-    <div className="sp-row">
+    <div
+      className="sp-row"
+      tabIndex={0}
+      data-does={'Selects the ' + name + ' part in this frame; Tab focuses it and Enter picks it'}
+      data-feature="F234"
+      onClick={pick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          pick();
+        }
+      }}
+    >
       <span className="id">{id}</span>
       <span className="nm">
         {name}
@@ -198,7 +212,7 @@ function ChangePopover(props: {
           <span>Text does not fit the clip: it is cut to “+6.4…”. Shorten it or turn Clip off.</span>
         </div>
       ) : null}
-      <div className="rev-pf">
+      <div className="rev-pf" data-feature="F235">
         <span>≈ 4 to 8 cr · Sonnet 5.5</span>
         <span className="sp-fill" />
         <span>Esc closes</span>
@@ -838,7 +852,7 @@ export function TargetedChangeWorkArea(props: { initialState?: TargetedState; on
           onSelectTab={(t) => recordIntent('F108:tab:' + t)}
           onMore={() => recordIntent('F108:more')}
         >
-          <div className="sp-sec">
+          <div className="sp-sec" data-feature="F231">
             <h4>
               Also changed<span>4</span>
             </h4>
@@ -993,16 +1007,16 @@ export function TargetedChangeWorkArea(props: { initialState?: TargetedState; on
             <b>{C.font}</b>
           </div>
         </div>
-        <div className="sp-sec">
+        <div className="sp-sec" data-feature="F234">
           <h4>
             Parts in this frame<span>6</span>
           </h4>
-          <PartListRow id="Title" name="Page title" sub="Variance by package" />
-          <PartListRow id="Chip" name="Threshold chip" sub="Threshold 3% · r14" />
-          <PartListRow id="KPI" name="KPI cards" sub="4 cards" />
-          <PartListRow id="Head" name="Table header" sub="5 labels" />
-          <PartListRow id="Cell" name="Forecast cell" sub="P-03 · 6.28" sel />
-          <PartListRow id="Pill" name="Variance pill" sub="P-03 · +6.4%" />
+          <PartListRow id="Title" name="Page title" sub="Variance by package" onSelect={() => recordIntent('F234:pick:Title')} />
+          <PartListRow id="Chip" name="Threshold chip" sub="Threshold 3% · r14" onSelect={() => recordIntent('F234:pick:Chip')} />
+          <PartListRow id="KPI" name="KPI cards" sub="4 cards" onSelect={() => recordIntent('F234:pick:KPI')} />
+          <PartListRow id="Head" name="Table header" sub="5 labels" onSelect={() => recordIntent('F234:pick:Head')} />
+          <PartListRow id="Cell" name="Forecast cell" sub="P-03 · 6.28" sel onSelect={() => recordIntent('F234:pick:Cell')} />
+          <PartListRow id="Pill" name="Variance pill" sub="P-03 · +6.4%" onSelect={() => recordIntent('F234:pick:Pill')} />
         </div>
         <p className="ap-callout">
           <b>No pointer?</b> Tab into the frame, arrow keys move through the parts and Enter selects. This list does the same.

@@ -51,3 +51,35 @@ describe('S32 Targeted change (IMP-14)', () => {
     expect(clipHtml).toContain('Text does not fit the clip');
   });
 });
+
+describe('S32 parity (IMP-48): F231, F234, F235', () => {
+  it('F231: "Also changed" lists every related value with its before and after', () => {
+    const appliedHtml = renderToStaticMarkup(<TargetedChangeWorkArea initialState="applied" />);
+    expect(appliedHtml).toContain('data-feature="F231"');
+    expect(appliedHtml).toContain('Also changed');
+    for (const a of REVIEW_ALSO) {
+      expect(appliedHtml).toContain(a.from);
+      expect(appliedHtml).toContain(a.to);
+    }
+    expect(appliedHtml).toContain('Not isolated.');
+  });
+
+  it('F234: the part inspector has a keyboard-pickable parts list (Enter selects)', () => {
+    const selectHtml = renderToStaticMarkup(<TargetedChangeWorkArea initialState="select" />);
+    expect(selectHtml).toContain('data-feature="F234"');
+    expect(selectHtml).toContain('Parts in this frame');
+    expect(selectHtml).toContain('Tab into the frame');
+    // every part row is keyboard reachable and says what picking it does
+    expect(selectHtml).toContain('tabindex="0"');
+    expect((selectHtml.match(/data-does="Selects the /g) ?? []).length).toBe(6);
+  });
+
+  it('F235: credit estimate and model source are shown before Send, scoped to the part', () => {
+    const selectHtml = renderToStaticMarkup(<TargetedChangeWorkArea initialState="select" />);
+    expect(selectHtml).toContain('data-feature="F235"');
+    expect(selectHtml).toContain('≈ 4 to 8 cr');
+    expect(selectHtml).toContain('Sonnet 5.5');
+    // the popover is scoped to the part, not the whole board
+    expect(selectHtml).toContain('Change the ');
+  });
+});

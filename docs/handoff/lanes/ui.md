@@ -2,6 +2,49 @@
 
 Only this lane edits this file. Write here before you stop working.
 
+## IMP-45 · Skills audit in the door + real-server offline stop (ui lane, hy4) — 24 Nov 2026
+
+**Status:** `done`. **Branch:** `imp-45-door-and-offline` (base `imp-43-skills-audit`, **stacked on
+PR #52**), one PR.
+
+**Changed:** `apps/web/src/data/source.ts` adds `DataSource.skillsAudit()` (sample → `null`, api →
+`fetchSkillsAudit()`) and its import; `apps/web/src/data/source.test.tsx` adds 2 tests (both modes +
+the route); `tools/e2e/offline-real-server.mjs` (new) + root `package.json` script `e2e:offline`.
+No screen draws it yet (no UI added). No new dependency (reuses `@playwright/test`, already a dev
+dependency), no Python.
+
+**The e2e test:** starts `cargo run -p spekin-server` on a free loopback port (`SPEKIN_BIND`) and the
+vite dev server in API mode (`VITE_SPK_DATA=api`, free `SPK_WEB_PORT`, API reads routed to that port),
+opens `/p/meranti-yard/design`, kills the API process, then switches stage spec → design to trigger
+one read. It does **not** use `?sim=offline`. The server is pointed (`SPEKIN_FIXTURE`) at a temp copy
+of the fixture with a project name / stage text `@spekin/sample` does NOT have, so the assertions
+prove the kept copy is the real server's, not a sample fallback. It stops every process it starts on
+success and failure (process groups + browser close + force-exit net) and exits 0 only when every
+assertion passes.
+
+**Evidence (all run locally):**
+- `npm run gate` EXIT 0 after `npm ci`: rules ok 456 files, licences ok (198 npm / 246 crates /
+  0 Python), design+fixtures sync, 14 boards lint, typecheck ok, vitest 21 files / **149 tests**
+  (147 + 2 new `data source (IMP-45): skills audit through the door`: sample `null` vs api verified
+  empty chain; URL `/api/skills/audit`), vite build ok, Rust fmt/clippy/test workspace ok,
+  `contracts current`. TDD: both tests seen red (`…skillsAudit is not a function`) first.
+- `npm run harness` on a sample-mode `npm run dev` (SPK_WEB_PORT=5174,
+  APP_URL=http://127.0.0.1:5174): **81/81 states pass**, EXIT 0, report
+  `tools/harness/out/report.md`.
+- `npm run e2e:offline` EXIT 0 — full output in the PR. Assertions: real API 200 + distinctive name;
+  CORS reflects the web origin; design stage (S35) loaded from the API; 6 real
+  `GET /api/projects/meranti-yard` 200 responses seen; API killed (connection refused);
+  `[data-feature="F378"]` banner visible; Offline chip (`data-save=conflict`, "Offline · kept on this
+  device"); project name kept as `"Meranti Yard · LIVE-API"` (NOT the sample `"Meranti Yard"`); all 8
+  stages kept (stage-bar text identical); **0 pageerror events**. The 4 console errors / 4 failed
+  requests after the stop are the expected refused `/api` fetches. Ports left free, no lingering
+  processes.
+
+**Not checked:** macOS / Node 22 only (no Windows/Linux); CI does not run `e2e:offline` (it is a
+local-only script, not in `npm run gate` or CI — the card granted exactly one script and CI is
+lead-owned); the offline banner on boards other than S35 (IMP-39 part-open; those boards draw no
+offline state); no screen draws `skillsAudit()` yet (by design).
+
 ## Current status (verified 23 Nov 2026, lead)
 
 All UI cards are merged into `main` (`0aba2c5`; PRs #1–#47 merged). The `part blocked` status words in the historical rows below were caused by a 1 px board-side vertical shift (S29, S32, S33) and by `.spwin` clipping the 1180 px tablet frames (T01). Both lead fixes are in `tools/harness/state-gate.mjs` (sub-pixel snap at line 101; unclip at lines 91–92) and F00 was regenerated to height `12300`. Current lead measurement: `npm run harness` → **81/81 states pass**, exit 0, report `tools/harness/out/report.md`; `npm run gate` → exit 0 (vitest 21 files / 142 tests) after a fresh `npm ci`. The remaining `part open` rows are real deferred scope, not build failures.
@@ -10,6 +53,7 @@ All UI cards are merged into `main` (`0aba2c5`; PRs #1–#47 merged). The `part 
 
 | Card | Branch | Status | Evidence | Not checked |
 |---|---|---|---|---|
+| IMP-46 | imp-46-sweep | done, part open | Test first: `APP_URL=http://127.0.0.1:5175 npm run e2e:sweep` first run exit 1, **11/81** — found 0 pageerror/console errors everywhere, 1024×768 horizontal overflow in 70 states (up to +229 px), 3 running `can-breathe` (2800 ms) animations under `reducedMotion: reduce` on `.can-cover::before` (S29:jobs ×2, S31:gen ×1), and 11 click paths that cannot reach their state at 1024 (floating drawn overlays cover the button). Fixes in `apps/web/src/app.css`: (1) the `prefers-reduced-motion` block now also stops `::before`/`::after` animations (`.ap-root *`, `.ap-root *::before`, `.ap-root *::after`) — only `none` is used, no raw colour/font value; (2) a `@media (min-width:1024px) and (max-width:1439px)` band adds `min-width: 0` to `.sp-top > .ap-grp`, `.int-app`, `.int-body` and `overflow-x: clip` to `.ap-root`. Both are scoped so they never apply at 1440×900 (the board/state-gate view) or on T01 device frames. After the fixes: `npm run gate` exit 0 (rules, licences, design/fixture sync, 14 boards lint, typecheck, vitest, build, Rust fmt/clippy/test, contracts current), `APP_URL=http://127.0.0.1:5175 npm run harness` **81/81**, `APP_URL=http://127.0.0.1:5175 npm run e2e:sweep` **70/81**, exit 1 (table `tools/e2e/out/sweep.md`, gitignored). New `tools/e2e/sweep.mjs` reads the harness click paths unchanged, runs every checked state at 1440×900, 1024×768 and 1440×900 reduced-motion, writes `tools/e2e/out/sweep.md` (state, errors, overflow, motion) and exits 1 on any failure; root script `e2e:sweep`, `tools/e2e/out/` added to `.gitignore`. No Python, no new dependency. | **Part open:** 11 states cannot be driven by their harness click path at 1024×768 because floating drawn overlays intercept the button (`S28:drop/imported/rejected/pii` — `.sp-chat / .sp-msgs` covers "Choose files" F143; `S31:grid` — `.can-vb .ut` covers "Grid" F204 at 768 px height; `S32:select/working/applied/compare/variations/clip` — `.sp-zoom` "64%" covers "Ask on select" F113 at 1024 px width). Fixing them needs a 1024 desktop board (T01 only draws < 1024 px), so per the card they are listed under Requests to lead and not fixed; the sweep exits 1 on them. EN/ID translations, long-text truncation and 390 px are out of the card (T01 covers phone frames). |
 | IMP-01 | imp-01-shell-work-area | done, part open | `npm run gate` pass (rules ok 204 files, sync ok, 14 boards lint, typecheck ok, vitest 7/7: `workspace.test.ts` 3 + `shell.test.tsx` 4, vite build ok, Rust fmt/clippy/test 8/8, contracts current). `npm run harness -- S35`: `S35:design` PASS (0.41% pixels, text equal), `S35:backend` PASS (0.47% pixels, text equal), `S35:conflict` FAIL (IMP-02 scope). Viewed all 6 PNGs (`S35-{design,backend}-{board,app,diff}.png`). Playwright verified AC-SPK-17 stage switch memory (`design -> backend -> design`, 0 reloads, tab/selection/draft preserved) and keyboard-only stage switch. | Controls targeting later boards (S08 review/diff, S28 import, S32 ask-on-select, S34 hand off, S36 model picker, chat history/attach/send, undo/redo, revisions, run steps/stop) record intent in `useWorkspace.lastIntent` (part open). `S35:conflict` is IMP-02. EN/ID copy translations not wired yet. Long text truncation not tested. 1024 px and 390 px viewports currently overflow horizontally (desktop shell fixed widths; responsive layout is board T01). |
 | IMP-02 | imp-02-conflict-save-memory | done, part open | `npm run gate` pass (rules ok, sync ok, 14 boards lint, typecheck ok, vitest 11/11: `workspace.test.ts` 4 + `shell.test.tsx` 7, vite build ok, Rust fmt/clippy/test 8/8, contracts current). `npm run harness -- S35`: 3/3 PASS (`S35:design` 0.41%, `S35:backend` 0.47%, `S35:conflict` 0.42%, text equal, paths `checked`). Viewed all 3 conflict PNGs (`S35-conflict-{board,app,diff}.png`). Verified save chip words (`saved`, `saving`, `failed`, `conflict` with `data-save`), conflict banner + dirty F-04 tab, keyboard ArrowLeft/ArrowRight + Tab/Enter stage switching, safe `NotFound` for unknown `/p/x/y` links, and drafts kept in store (never in URL). | Conflict actions (`Compare`, `Keep as proposal`, `Discard draft`) update local state/intent; full Compare diff view and S08 review handoff are later boards. EN/ID copy translations, long text truncation, 1024 px and 390 px viewports (board T01) not checked. |
 | IMP-23 | imp-23-skills-library | done, part open | `npm run gate` pass (rules ok 222 files, sync ok, 14 boards lint, typecheck ok, vitest 22/22, vite build ok, Rust fmt/clippy/test 8/8, contracts current). `npm run harness -- S40`: 6/6 PASS (`library`, `detail`, `edit`, `github`, `updates`, `use`; text equal, pixels ≤ 1%, 0 stand-ins, later count matches `Share` on detail only, paths `checked`, PNGs inspected). Keyboard `/` skill picker (`ArrowDown`, `ArrowUp`, `Enter`, `Escape` keeps text) and project switches (never run anything) implemented and tested. | Real GitHub fetch and IMP-22 Rust API are later cards; actions (`Scan`, `Check now`, `Roll back`, `Try again`, `Open review`) record intent. EN/ID copy translations, long text, 1024 px and 390 px viewports not checked. |
@@ -52,6 +96,8 @@ Read from `data/source.ts` (`sampleData`, the same surface in both modes); these
 
 ## Requests to lead
 
+- 2026-11-24 · IMP-46 · **11 states need a 1024 desktop board (listed, not fixed).** `e2e:sweep` cannot reach these states at 1024×768 because floating drawn overlays intercept the button the harness click path must press: `S28:drop`, `S28:imported`, `S28:rejected`, `S28:pii` — `.sp-chat / .sp-msgs` covers "Choose files" (F143) and the `.int-start` panel is unstable; `S31:grid` — `.can-vb .ut` covers "Grid" (F204) at 768 px height (it passes at 1024×900); `S32:select`, `S32:working`, `S32:applied`, `S32:compare`, `S32:variations`, `S32:clip` — `.sp-zoom` "64%" covers "Ask on select" (F113) at 1024 px width (they pass at 1440×768). At 1440×900 none overlap. The desktop boards are drawn only at 1440 and T01 only draws tablet/phone below 1024 px, so no board defines where these overlays sit at 1024; a proper fix needs a board change (a 1024 desktop board, or moving the T01 breakpoint to >= 1024), which the card forbids without the lead. CSS z-index/`pointer-events` workarounds were deliberately not used: they hide the overlap instead of placing the drawn controls and risk the 1440 look. All 11 are recorded in `tools/e2e/out/sweep.md`; `npm run e2e:sweep` exits 1 on them. Please add the board, then re-run `e2e:sweep` for a 0 exit.
+- 2026-11-24 · IMP-45 · `apps/web/vite.config.ts` hardcodes the `/api` proxy target to `127.0.0.1:8787`. This card's real-server-stop test reaches its free API port through the API client's documented `VITE_API_BASE` (cross-origin, with `SPEKIN_WEB_ORIGIN` for CORS) instead of editing a file this lane does not own. If you want the literal vite proxy bound to a free port, add a `SPK_API_PORT` env to `vite.config.ts` (lead-owned) and drop `VITE_API_BASE`; the rest of the test is unchanged.
 - 2026-11-23 · IMP-41 · Added `jsdom` (MIT) as a dev dependency so a vitest can click a real button and see the next drawn state; `docs/licences.md` was regenerated. No runtime dependency.
 - 2026-11-23 · IMP-41 · The S33 accepted state draws **Revert as proposal** (R-EDT-7: a new proposal, never a revision), while `POST /api/projects/{id}/revisions/{artifact}/revert` writes a revision immediately. `revertRevision` is in the `DataSource` and tested, but wiring that button to it would break the board's copy; please draw the proposal version of revert (or a separate revision action) before it is clicked through.
 - 2026-11-23 · IMP-41 · S27 draws no card menu or delete confirmation, so `deleteProject` has no drawn control to fire it. `restoreProject` is clicked through (Restore project). If delete should be reachable, the board needs the menu/confirm state; until then the card menu records intent.
