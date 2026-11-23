@@ -8,6 +8,7 @@
 pub mod api;
 pub mod audit;
 pub mod context;
+pub mod contracts;
 pub mod genui;
 pub mod github_source;
 pub mod handoff;
@@ -17,17 +18,28 @@ pub mod project;
 pub mod proposal;
 pub mod restore;
 pub mod revision;
+pub mod skill_library;
 pub mod skills;
 pub mod stage;
 
 pub use api::{
-    ApiErrorBody, BuildContextRequest, BuildManifestRequest, CheckSkillUpdateRequest,
-    EstimateRunRequest, RejectProposalRequest, ReserveRunRequest,
+    AddGithubSkillRequest, ApiErrorBody, AuditResponse, BuildContextRequest, BuildManifestRequest,
+    CheckSkillUpdateRequest, ContractsResponse, CopySkillRequest, DeletedProjectView,
+    EditSkillRequest, EstimateRunRequest, RejectProposalRequest, ReserveRunRequest,
+    RevertRevisionRequest, SettleRunRequest, SkillCheckRequest,
 };
-pub use audit::{AuditAction, AuditEntry, AuditError, AuditEvent, AuditLog, GENESIS_HASH, verify};
+pub use audit::{
+    AuditAction, AuditEntry, AuditError, AuditEvent, AuditLog, GENESIS_HASH, head_hash, verify,
+    verify_with_head,
+};
 pub use context::{
     BoardArtifact, BoardSnapshot, ContextChip, ContextItemStatus, RequestContext,
     RequestContextItem, build_context, format_token_estimate,
+};
+pub use contracts::{
+    Check, CheckKind, Contract, ContractStatus, Evidence, EvidenceError, EvidenceResult,
+    GateResult, MAX_LOG_BYTES, MatrixRow, OwnerLane, check_status, gate, matrix, sample_contracts,
+    sample_evidence, sample_matrix, status,
 };
 pub use genui::{
     AllowedActionKind, ChecklistItem, ChecklistStatus, ComparisonOption, GenUiAction, GenUiCard,
@@ -62,6 +74,11 @@ pub use restore::{
     days_left, delete, purge_due, restore, window_close,
 };
 pub use revision::Revision;
+pub use skill_library::{
+    DiffLine, DiffOp, HeldUpdate, LibrarySkill, SkillEdit, SkillHistoryAction, SkillHistoryEntry,
+    SkillLibrary, SkillLibraryError, SkillSourceInfo, SkillSourceKind, SkillUpdateOutcome,
+    SkillsResponse,
+};
 pub use skills::{
     AllowedContext, ContextItem, HoldReason, SkillError, SkillManifest, SkillSource, UpdateCheck,
     UpdateDecision, UpdatePolicy, check_update, classify_update, enforce, parse_skill_md,

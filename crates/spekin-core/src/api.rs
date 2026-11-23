@@ -6,8 +6,9 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use crate::{
-    ArtifactRevisionRecord, BoardSnapshot, ContextChip, ManifestSelection, RequiredInput,
-    RunEstimate, SkillManifest, UpdatePolicy,
+    ArtifactRevisionRecord, AuditEntry, AuditError, BoardSnapshot, ContextChip, Contract, Evidence,
+    ManifestSelection, MatrixRow, ProjectEntry, RequiredInput, Revision, RunEstimate, SkillEdit,
+    SkillManifest, StageId, UpdatePolicy,
 };
 
 /// Typed error body returned by `spekin-server` on 4xx/5xx responses.
@@ -53,6 +54,22 @@ pub struct CheckSkillUpdateRequest {
     pub policy: UpdatePolicy,
 }
 
+/// Request body for `POST /api/projects/{id}/revisions/{artifact}/revert` (IMP-31).
+/// The earlier revision's content is written as a new revision; history is never rewritten.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct RevertRevisionRequest {
+    pub to: Revision,
+}
+
+/// Request body for `POST /api/projects/{id}/runs/settle` (IMP-31).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct SettleRunRequest {
+    pub run_id: String,
+    pub actual: u32,
+}
+
 /// Request body for `POST /api/projects/{id}/context`.
 /// When `board` is omitted, the server uses the project's seeded board snapshot.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
@@ -73,4 +90,99 @@ pub struct BuildManifestRequest {
     pub revisions: Option<Vec<ArtifactRevisionRecord>>,
     #[serde(default)]
     pub inputs: Option<Vec<RequiredInput>>,
+}
+
+/// The audit view served by `GET /api/projects/{id}/audit` (IMP-31).
+///
+/// The head hash is held by the server *apart* from the log (the lead's follow-up on #21):
+/// `verify` is checked against that separate anchor, and `error` is null only when both the
+/// hash chain and the head are intact. The log itself never carries its own head in this view.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct AuditResponse {
+    pub entries: Vec<AuditEntry>,
+    /// The head hash the server keeps apart from the log.
+    pub head_hash: String,
+    /// Typed verify failure, or null when the chain and the separate head agree.
+    pub error: Option<AuditError>,
+}
+
+/// One row of `GET /api/projects/deleted` (IMP-31): an IMP-29 entry with the
+/// whole-day countdown S27 shows ("27 days left").
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct DeletedProjectView {
+    pub entry: ProjectEntry,
+    pub days_left: i64,
+}
+
+/// Response for `GET /api/projects/{id}/contracts` (IMP-33). The matrix carries
+/// the status of every check, so a missing check is shown as `not_run`, never passed.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct ContractsResponse {
+    pub contracts: Vec<Contract>,
+    pub evidence: Vec<Evidence>,
+    pub matrix: Vec<MatrixRow>,
+}
+
+/// Request body for `POST /api/skills/{id}/copy` (IMP-34).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct CopySkillRequest {
+    pub new_id: String,
+    pub new_title: String,
+}
+
+/// Request body for `PUT /api/skills/{id}` (IMP-34). Only a user copy can be edited.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct EditSkillRequest {
+    #[serde(default)]
+    #[ts(optional)]
+    pub title: Option<String>,
+    #[serde(default)]
+    #[ts(optional)]
+    pub description: Option<String>,
+    #[serde(default)]
+    #[ts(optional)]
+    pub stages: Option<Vec<StageId>>,
+    #[serde(default)]
+    #[ts(optional)]
+    pub body: Option<String>,
+}
+
+/// Request body for `POST /api/skills/github` (IMP-34). `git_ref` is pinned to a SHA.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct AddGithubSkillRequest {
+    pub repo: String,
+    pub path: String,
+    pub git_ref: String,
+    pub policy: UpdatePolicy,
+}
+
+/// Request body for `POST /api/skills/{id}/check` (IMP-34). A GitHub skill is checked
+/// through the injected adapter; other kinds need a candidate `new` manifest.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct SkillCheckRequest {
+    #[serde(default)]
+    #[ts(optional)]
+    pub new: Option<SkillManifest>,
+    #[serde(default)]
+    #[ts(optional)]
+    pub policy: Option<UpdatePolicy>,
+}
+
+/// Convert the wire edit request into the pure core edit (IMP-34).
+impl From<EditSkillRequest> for SkillEdit {
+    fn from(req: EditSkillRequest) -> Self {
+        Self {
+            title: req.title,
+            description: req.description,
+            stages: req.stages,
+            body: req.body,
+        }
+    }
 }

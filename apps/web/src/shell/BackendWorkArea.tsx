@@ -16,7 +16,7 @@ const BACKEND_TABS: ArtifactTabItem[] = [
 ];
 
 // Mirrors boards-shell.mjs Backend stage: chat, artifact tabs, warning banner, contract doc, readiness inspector.
-export function BackendWorkArea() {
+export function BackendWorkArea(props: { onOpenDelivery?: () => void } = {}) {
   const view = useWorkspace((s) => s.view('backend'));
   const setView = useWorkspace((s) => s.setView);
   const chatWidth = useWorkspace((s) => s.chatWidth);
@@ -127,6 +127,13 @@ export function BackendWorkArea() {
           onSelect={(tab) => setView('backend', { tab })}
           onClose={(name) => recordIntent('F104:close:' + name)}
           onOpenArtifact={() => recordIntent('F104:open')}
+          openItems={[
+            {
+              icon: 'flag',
+              name: 'Release readiness',
+              onSelect: () => (props.onOpenDelivery ? props.onOpenDelivery() : recordIntent('F104:release-readiness')),
+            },
+          ]}
           right={right}
         />
         <div className="sp-banner warn" role="status">

@@ -1,0 +1,74 @@
+{
+  "board": "S34-coding-handoff.dc.html",
+  "states": {
+    "select": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Hand off\")" },
+        { "wait": "[data-screen=\"S34\"]" }
+      ]
+    },
+    "manifest": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Hand off\")" },
+        { "wait": "[data-screen=\"S34\"]" },
+        { "click": "button.del-it:has-text(\"Variance table · 1440\")" },
+        { "click": "button.rb:has-text(\"F-03\")" },
+        { "wait": ".del-code" }
+      ]
+    },
+    "ready": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Hand off\")" },
+        { "wait": "[data-screen=\"S34\"]" },
+        { "click": "button.del-it:has-text(\"Variance table · 1440\")" },
+        { "click": "button[role=\"tab\"]:has-text(\"Files\")" },
+        { "wait": ".del-tree" }
+      ]
+    },
+    "copied": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Hand off\")" },
+        { "wait": "[data-screen=\"S34\"]" },
+        { "click": "button.del-it:has-text(\"Variance table · 1440\")" },
+        { "click": "button:has-text(\"Copy for a coding agent\")" },
+        { "wait": ".del-toast" }
+      ]
+    },
+    "blocked": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Hand off\")" },
+        { "wait": "[data-screen=\"S34\"]" },
+        { "click": "button[aria-label=\"Hand-off history\"]" },
+        { "wait": ".sp-banner.bad" }
+      ]
+    },
+    "stale": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button:has-text(\"Open review\")" },
+        { "click": "button:has-text(\"Open spec proposal\")" },
+        { "click": "button:has-text(\"Accept and create r15\")" },
+        { "wait": ".rev-bn.ok" },
+        { "click": "button:has-text(\"Hand off\")" },
+        { "wait": ".sp-banner.warn" }
+      ]
+    }
+  }
+}

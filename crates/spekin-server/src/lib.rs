@@ -3,6 +3,7 @@
 //! The server holds in-memory state seeded from `fixtures/meranti-yard.json` and calls
 //! `spekin-core` for all business rules (ADR 0002).
 
+pub mod hardening;
 pub mod skills;
 
 use std::collections::BTreeMap;
@@ -13,21 +14,36 @@ use axum::{
     extract::{Path, State},
     http::StatusCode,
     response::{IntoResponse, Response},
-    routing::{get, post},
+    routing::{get, post, put},
 };
+use hardening::{HardeningConfig, apply_hardening};
 use serde_json::Value;
+use skills::github::{DynGitHubSkillSource, HttpGitHubClient, injected_source};
 use spekin_core::{
-    ApiErrorBody, ArtifactRevisionRecord, ArtifactRevisionState, BoardArtifact, BoardSnapshot,
+    AddGithubSkillRequest, ApiErrorBody, ArtifactRevisionRecord, ArtifactRevisionState,
+    AuditAction, AuditEntry, AuditEvent, AuditLog, AuditResponse, BoardArtifact, BoardSnapshot,
     BuildContextRequest, BuildManifestRequest, CapabilityRegistry, CheckSkillUpdateRequest,
-    ContextItemStatus, EstimateRunRequest, Fixture, GenUiValidation, Hunk, Ledger, LedgerCaps,
-    LedgerError, Manifest, ManifestError, ModelCapability, Project, Proposal, ProposalError,
-    RejectProposalRequest, Rejection, RejectionReason, RequestContext, RequiredInput, Reservation,
-    ReserveRunRequest, Revision, RunEstimate, Stage, UpdateCheck, UsageSnapshot, accept,
-    build_context, build_manifest, check_update, estimate, reject, validate_genui_json,
+    ContextItemStatus, ContractsResponse, CopySkillRequest, DeletedProjectView, EditSkillRequest,
+    EstimateRunRequest, Fixture, GENESIS_HASH, GenUiValidation, GitHubSourceError, Hunk, Ledger,
+    LedgerCaps, LedgerError, LibrarySkill, Manifest, ManifestError, ModelCapability, Project,
+    ProjectEntry, Proposal, ProposalError, RejectProposalRequest, Rejection, RejectionReason,
+    RequestContext, RequiredInput, Reservation, ReserveRunRequest, RestoreError,
+    RevertRevisionRequest, Revision, RunEstimate, SECONDS_PER_DAY, SettleRunRequest, Settlement,
+    SkillCheckRequest, SkillHistoryEntry, SkillLibrary, SkillLibraryError, SkillSourceKind,
+    SkillUpdateOutcome, SkillsResponse, Stage, UpdateCheck, UsageSnapshot, accept, build_context,
+    build_manifest, check_update, days_left, delete, estimate, reject, restore, revert,
+    sample_contracts, sample_evidence, sample_matrix, validate_genui_json, verify_with_head,
 };
 
 /// The project id the sample fixture is served under. The URL uses it: /p/meranti-yard/design.
 pub const SAMPLE_PROJECT_ID: &str = "meranti-yard";
+
+/// Actor recorded on audit entries until authentication exists (IMP-31).
+const SAMPLE_ACTOR: &str = "sample-user";
+
+/// Fixed UTC seconds (2025-01-01T00:00:00Z) used for audit entries and the restore window,
+/// so every route is deterministic. Tests can override it with [`AppState::with_now`].
+pub const DEFAULT_NOW: i64 = 1_735_689_600;
 
 /// Mutable in-memory state for one project, seeded from `fixtures/meranti-yard.json`.
 struct ProjectStore {
@@ -38,6 +54,21 @@ struct ProjectStore {
     board: BoardSnapshot,
     handoff_revisions: Vec<ArtifactRevisionRecord>,
     required_inputs: Vec<RequiredInput>,
+    /// The append-only audit chain (IMP-30).
+    audit: AuditLog,
+    /// The head hash held *apart* from the log, as the lead's follow-up on #21 asks.
+    /// Every append updates this; `GET .../audit` checks verify against it.
+    audit_head: String,
+    /// IMP-29 entries for delete / restore / Recently deleted.
+    project_entries: BTreeMap<String, ProjectEntry>,
+}
+
+/// The skills library's own append-only chain, with its head held apart from
+/// the stored log (IMP-35, lead's follow-up on #27 and #21). Skills routes are
+/// global, so they must never append to a project's chain.
+struct SkillsAudit {
+    log: AuditLog,
+    head: String,
 }
 
 #[derive(Clone)]
@@ -45,18 +76,63 @@ pub struct AppState {
     pub sample: Arc<Fixture>,
     models: Arc<CapabilityRegistry>,
     project_store: Arc<Mutex<ProjectStore>>,
+    /// IMP-34: the in-memory skills library (templates, copies, GitHub skills).
+    library: Arc<Mutex<SkillLibrary>>,
+    /// IMP-35: the skills library's own audit chain and its separate head.
+    skills_audit: Arc<Mutex<SkillsAudit>>,
+    /// IMP-34: the GitHub adapter with an injected client (fixtures in tests).
+    github: Arc<DynGitHubSkillSource>,
+    /// UTC Unix seconds for audit entries and the 30-day restore window.
+    now: i64,
+    /// IMP-32 hardening values and the redacted rejection log.
+    pub config: HardeningConfig,
 }
 
 impl AppState {
     pub fn from_fixture_json(text: &str) -> Result<Self, spekin_core::FixtureError> {
         let sample = Fixture::from_json(text)?;
         let raw: Value = serde_json::from_str(text).unwrap_or(Value::Null);
-        let store = seed_project_store(&raw);
+        let store = seed_project_store(&raw, DEFAULT_NOW);
         Ok(Self {
             sample: Arc::new(sample),
             models: Arc::new(CapabilityRegistry::sample_s36()),
             project_store: Arc::new(Mutex::new(store)),
+            library: Arc::new(Mutex::new(SkillLibrary::from_fixture(&raw))),
+            skills_audit: Arc::new(Mutex::new(SkillsAudit {
+                log: AuditLog::new(),
+                head: GENESIS_HASH.to_owned(),
+            })),
+            github: Arc::new(injected_source(HttpGitHubClient::new())),
+            now: DEFAULT_NOW,
+            config: HardeningConfig::from_env(),
         })
+    }
+
+    /// Inject a GitHub client (recorded fixtures in tests, never the network).
+    pub fn with_github_client<C: skills::github::GitHubClient + 'static>(
+        mut self,
+        client: C,
+    ) -> Self {
+        self.github = Arc::new(injected_source(client));
+        self
+    }
+
+    /// Start from an empty skills library (tests that install GitHub skills cleanly).
+    pub fn with_library(mut self, library: SkillLibrary) -> Self {
+        self.library = Arc::new(Mutex::new(library));
+        self
+    }
+
+    /// Override the clock used by audit and restore routes, for deterministic tests.
+    pub fn with_now(mut self, now: i64) -> Self {
+        self.now = now;
+        self
+    }
+
+    /// IMP-32: the fixed, redacted reason strings recorded by hardening layers.
+    /// No request body, token or path is ever included.
+    pub fn log_lines(&self) -> Vec<String> {
+        self.config.log.lines()
     }
 }
 
@@ -106,8 +182,78 @@ impl IntoResponse for ServerError {
     }
 }
 
+/// Append one audit entry and move the separately held head to it (IMP-31).
+/// The core computes the sequence, hashes and UTC time; the server only supplies the facts.
+fn append_audit(
+    store: &mut ProjectStore,
+    now: i64,
+    action: AuditAction,
+    target_id: impl Into<String>,
+    revision: Option<String>,
+    reason: impl Into<String>,
+) -> AuditEntry {
+    let entry = store.audit.append(
+        AuditEvent {
+            actor: SAMPLE_ACTOR.to_owned(),
+            action,
+            target_id: target_id.into(),
+            revision,
+            reason: reason.into(),
+        },
+        now.max(0) as u64,
+    );
+    store.audit_head = entry.hash.clone();
+    entry
+}
+
+/// Append one entry to the skills library's own chain and move its separately
+/// held head. A skills route never touches a project's chain (IMP-35).
+fn append_skills_audit(
+    state: &AppState,
+    action: AuditAction,
+    target_id: impl Into<String>,
+    revision: Option<String>,
+    reason: impl Into<String>,
+) {
+    let mut audit = state.skills_audit.lock().expect("skills audit lock");
+    let entry = audit.log.append(
+        AuditEvent {
+            actor: SAMPLE_ACTOR.to_owned(),
+            action,
+            target_id: target_id.into(),
+            revision,
+            reason: reason.into(),
+        },
+        state.now.max(0) as u64,
+    );
+    audit.head = entry.hash;
+}
+
+/// The view both audit routes return: the entries, the head held apart from the
+/// log, and the typed verify result against that head (IMP-35).
+fn audit_response(log: &AuditLog, head: &str) -> AuditResponse {
+    AuditResponse {
+        entries: log.entries().to_vec(),
+        head_hash: head.to_owned(),
+        error: verify_with_head(log, head).err(),
+    }
+}
+
+fn map_restore_error(err: RestoreError) -> ServerError {
+    let message = err.to_string();
+    match err {
+        RestoreError::NotDeleted => ServerError::conflict("not_deleted", message),
+        RestoreError::AlreadyDeleted => ServerError::conflict("already_deleted", message),
+        RestoreError::WindowClosed { .. } => ServerError::conflict("window_closed", message),
+        RestoreError::ClockBackwards { .. } => {
+            ServerError::unprocessable("clock_backwards", message)
+        }
+    }
+}
+
 pub fn router(state: AppState) -> Router {
-    Router::new()
+    let hardening = state.config.clone();
+    let app = Router::new()
         .route("/api/health", get(|| async { "ok" }))
         .route("/api/projects/{id}", get(project))
         .route("/api/projects/{id}/stages", get(stages))
@@ -119,18 +265,37 @@ pub fn router(state: AppState) -> Router {
             "/api/projects/{id}/proposals/{pid}/reject",
             post(reject_proposal),
         )
+        .route(
+            "/api/projects/{id}/revisions/{artifact}/revert",
+            post(revert_revision),
+        )
         .route("/api/projects/{id}/runs/estimate", post(estimate_run))
         .route("/api/projects/{id}/runs/reserve", post(reserve_run))
+        .route("/api/projects/{id}/runs/settle", post(settle_run))
         .route("/api/projects/{id}/usage", get(project_usage))
+        .route("/api/projects/{id}/audit", get(project_audit))
+        .route("/api/projects/{id}/contracts", get(project_contracts))
+        .route("/api/projects/{id}/delete", post(delete_project))
+        .route("/api/projects/{id}/restore", post(restore_project))
+        .route("/api/projects/deleted", get(deleted_projects))
         .route("/api/models", get(list_models))
         .route("/api/genui/validate", post(validate_genui))
         .route("/api/skills/check-update", post(check_skill_update))
+        .route("/api/skills/audit", get(skills_audit))
+        .route("/api/skills", get(list_skills))
+        .route("/api/skills/github", post(add_github_skill))
+        .route("/api/skills/{id}", put(edit_skill))
+        .route("/api/skills/{id}/copy", post(copy_skill))
+        .route("/api/skills/{id}/check", post(check_skill))
+        .route("/api/skills/{id}/history", get(skill_history))
+        .route("/api/skills/{id}/rollback/{version}", post(rollback_skill))
         .route("/api/projects/{id}/context", post(project_context))
         .route(
             "/api/projects/{id}/handoff/manifest",
             post(project_handoff_manifest),
         )
-        .with_state(state)
+        .with_state(state);
+    apply_hardening(app, hardening)
 }
 
 fn ensure_project(id: &str) -> Result<(), ServerError> {
@@ -184,6 +349,14 @@ async fn accept_proposal(
             store
                 .revisions
                 .insert(proposal.artifact.clone(), next_rev.clone());
+            append_audit(
+                &mut store,
+                s.now,
+                AuditAction::Accept,
+                &pid,
+                Some(format!("r{}", next_rev.n)),
+                format!("accepted proposal {pid}"),
+            );
             Ok(Json(next_rev))
         }
         Err(err) => Err(map_proposal_error(err)),
@@ -209,7 +382,43 @@ async fn reject_proposal(
     })?;
     let rejection = reject(&proposal, reason);
     store.rejections.push(rejection.clone());
+    append_audit(
+        &mut store,
+        s.now,
+        AuditAction::Reject,
+        &pid,
+        Some(format!("r{}", proposal.base)),
+        reason,
+    );
     Ok(Json(rejection))
+}
+
+/// Revert one artifact to the content of an earlier revision, writing a new revision
+/// and exactly one audit entry (IMP-31, C-03).
+async fn revert_revision(
+    State(s): State<AppState>,
+    Path((id, artifact)): Path<(String, String)>,
+    Json(req): Json<RevertRevisionRequest>,
+) -> Result<Json<Revision>, ServerError> {
+    ensure_project(&id)?;
+    let mut store = s.project_store.lock().expect("project store lock");
+    let current = store.revisions.get(&artifact).cloned().ok_or_else(|| {
+        ServerError::not_found(
+            "artifact_not_found",
+            format!("unknown artifact: {artifact}"),
+        )
+    })?;
+    let next = revert(&current, &req.to).map_err(map_proposal_error)?;
+    store.revisions.insert(artifact.clone(), next.clone());
+    append_audit(
+        &mut store,
+        s.now,
+        AuditAction::Revert,
+        &artifact,
+        Some(format!("r{}", next.n)),
+        format!("reverted {artifact} to r{}", req.to.n),
+    );
+    Ok(Json(next))
 }
 
 async fn estimate_run(
@@ -231,11 +440,45 @@ async fn reserve_run(
     let est = estimate(req.estimate.min, req.estimate.max, req.estimate.reserve)
         .map_err(map_ledger_error)?;
     let mut store = s.project_store.lock().expect("project store lock");
-    store
+    let reservation = store
         .ledger
         .reserve(req.run_id, req.person_id, req.idempotency_key, &est)
-        .map(Json)
-        .map_err(map_ledger_error)
+        .map_err(map_ledger_error)?;
+    append_audit(
+        &mut store,
+        s.now,
+        AuditAction::Reserve,
+        &reservation.run_id,
+        None,
+        format!(
+            "reserved {} cr for run {}",
+            reservation.reserved, reservation.run_id
+        ),
+    );
+    Ok(Json(reservation))
+}
+
+/// Settle a reserved run at its actual cost, with one audit entry (IMP-31).
+async fn settle_run(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+    Json(req): Json<SettleRunRequest>,
+) -> Result<Json<Settlement>, ServerError> {
+    ensure_project(&id)?;
+    let mut store = s.project_store.lock().expect("project store lock");
+    let settlement = store
+        .ledger
+        .settle(&req.run_id, req.actual)
+        .map_err(map_ledger_error)?;
+    append_audit(
+        &mut store,
+        s.now,
+        AuditAction::Settle,
+        &req.run_id,
+        None,
+        format!("settled run {} at {} cr", req.run_id, req.actual),
+    );
+    Ok(Json(settlement))
 }
 
 async fn project_usage(
@@ -245,6 +488,88 @@ async fn project_usage(
     ensure_project(&id)?;
     let store = s.project_store.lock().expect("project store lock");
     Ok(Json(store.ledger.project_usage()))
+}
+
+/// The audit chain plus the result of `verify` checked against the head hash the
+/// server holds apart from the log (IMP-31, lead's follow-up on #21).
+async fn project_audit(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<Json<AuditResponse>, ServerError> {
+    ensure_project(&id)?;
+    let store = s.project_store.lock().expect("project store lock");
+    Ok(Json(audit_response(&store.audit, &store.audit_head)))
+}
+
+/// S37 build contracts, evidence and matrix (IMP-33). The core seeds the sample
+/// shapes from the board; the server only loads them and returns typed JSON.
+async fn project_contracts(Path(id): Path<String>) -> Result<Json<ContractsResponse>, ServerError> {
+    ensure_project(&id)?;
+    Ok(Json(ContractsResponse {
+        contracts: sample_contracts(),
+        evidence: sample_evidence(),
+        matrix: sample_matrix(),
+    }))
+}
+
+/// Mark a live project deleted through the IMP-29 core and audit the action (IMP-31).
+async fn delete_project(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<Json<ProjectEntry>, ServerError> {
+    let mut store = s.project_store.lock().expect("project store lock");
+    let entry = store.project_entries.get(&id).cloned().ok_or_else(|| {
+        ServerError::not_found("project_not_found", format!("unknown project: {id}"))
+    })?;
+    let deleted = delete(entry, s.now).map_err(map_restore_error)?;
+    store.project_entries.insert(id.clone(), deleted.clone());
+    append_audit(
+        &mut store,
+        s.now,
+        AuditAction::Delete,
+        &id,
+        None,
+        "project deleted (S27)",
+    );
+    Ok(Json(deleted))
+}
+
+/// Restore a recently deleted project inside the 30-day window and audit it (IMP-31).
+async fn restore_project(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<Json<ProjectEntry>, ServerError> {
+    let mut store = s.project_store.lock().expect("project store lock");
+    let entry = store.project_entries.get(&id).cloned().ok_or_else(|| {
+        ServerError::not_found("project_not_found", format!("unknown project: {id}"))
+    })?;
+    let restored = restore(entry, s.now).map_err(map_restore_error)?;
+    store.project_entries.insert(id.clone(), restored.clone());
+    append_audit(
+        &mut store,
+        s.now,
+        AuditAction::Restore,
+        &id,
+        None,
+        "project restored (S27)",
+    );
+    Ok(Json(restored))
+}
+
+/// Recently deleted entries with the whole-day countdown S27 shows (IMP-31).
+async fn deleted_projects(State(s): State<AppState>) -> Json<Vec<DeletedProjectView>> {
+    let store = s.project_store.lock().expect("project store lock");
+    let mut rows: Vec<DeletedProjectView> = store
+        .project_entries
+        .values()
+        .filter(|entry| entry.is_deleted())
+        .map(|entry| DeletedProjectView {
+            entry: entry.clone(),
+            days_left: days_left(entry, s.now),
+        })
+        .collect();
+    rows.sort_by(|a, b| a.entry.id.cmp(&b.entry.id));
+    Json(rows)
 }
 
 async fn list_models(State(s): State<AppState>) -> Json<Vec<ModelCapability>> {
@@ -277,6 +602,172 @@ async fn check_skill_update(
         ));
     }
     Ok(Json(check_update(&req.old, &req.new, req.policy)))
+}
+
+/// `GET /api/skills/audit`: the skills library's own chain with `verify` checked
+/// against the head the server keeps apart from the log (IMP-35).
+async fn skills_audit(State(s): State<AppState>) -> Json<AuditResponse> {
+    let audit = s.skills_audit.lock().expect("skills audit lock");
+    Json(audit_response(&audit.log, &audit.head))
+}
+
+/// `GET /api/skills`: templates, user copies and GitHub sources with their policy (IMP-34).
+async fn list_skills(State(s): State<AppState>) -> Json<SkillsResponse> {
+    let library = s.library.lock().expect("skills library lock");
+    Json(library.response())
+}
+
+/// `POST /api/skills/{id}/copy`: a template becomes the user's own version 1 (IMP-34).
+async fn copy_skill(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+    Json(req): Json<CopySkillRequest>,
+) -> Result<Json<LibrarySkill>, ServerError> {
+    let mut library = s.library.lock().expect("skills library lock");
+    library
+        .copy_template(&id, req.new_id, req.new_title, s.now)
+        .map(Json)
+        .map_err(map_library_error)
+}
+
+/// `PUT /api/skills/{id}`: edit a user copy, storing a new version (IMP-34).
+async fn edit_skill(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+    Json(req): Json<EditSkillRequest>,
+) -> Result<Json<LibrarySkill>, ServerError> {
+    let mut library = s.library.lock().expect("skills library lock");
+    library
+        .edit(&id, req.into(), s.now)
+        .map(Json)
+        .map_err(map_library_error)
+}
+
+/// `POST /api/skills/github`: resolve a ref to a SHA and store the fetched bundle (IMP-34).
+async fn add_github_skill(
+    State(s): State<AppState>,
+    Json(req): Json<AddGithubSkillRequest>,
+) -> Result<Json<LibrarySkill>, ServerError> {
+    let pinned = s
+        .github
+        .resolve(&req.repo, &req.path, &req.git_ref)
+        .await
+        .map_err(map_github_error)?;
+    let bundle = s.github.fetch(&pinned).await.map_err(map_github_error)?;
+    let mut library = s.library.lock().expect("skills library lock");
+    library
+        .add_github(bundle, req.policy, s.now)
+        .map(Json)
+        .map_err(map_library_error)
+}
+
+/// `POST /api/skills/{id}/check`: run the update check. An applied update makes a new
+/// version; a held one stores the diff and reasons and changes nothing (ADR 0007).
+async fn check_skill(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+    Json(req): Json<SkillCheckRequest>,
+) -> Result<Json<SkillUpdateOutcome>, ServerError> {
+    // Read what we need, then drop the guard: the adapter awaits IO and a MutexGuard
+    // cannot be held across an await in an Axum handler.
+    let (skill, bundle, policy) = {
+        let library = s.library.lock().expect("skills library lock");
+        let skill = library.get(&id).ok_or_else(|| {
+            ServerError::not_found("skill_not_found", format!("unknown skill: {id}"))
+        })?;
+        let policy = req.policy.unwrap_or(skill.policy);
+        let bundle = if skill.kind == SkillSourceKind::Github {
+            Some(library.bundle(&id).ok_or_else(|| {
+                ServerError::not_found("skill_bundle_missing", format!("no bundle for skill: {id}"))
+            })?)
+        } else {
+            None
+        };
+        (skill, bundle, policy)
+    };
+
+    let (check, new_manifest) = if let Some(bundle) = bundle {
+        let check = s
+            .github
+            .check(&bundle, policy)
+            .await
+            .map_err(map_github_error)?;
+        let fresh = s
+            .github
+            .fetch_latest(&bundle)
+            .await
+            .map_err(map_github_error)?;
+        (check, fresh.manifest)
+    } else {
+        let new = req.new.ok_or_else(|| {
+            ServerError::conflict(
+                "no_upstream",
+                format!("skill {id} has no upstream to check"),
+            )
+        })?;
+        if new.id != id {
+            return Err(ServerError::bad_request(
+                "skill_id_mismatch",
+                format!("candidate skill id '{}' does not match {id}", new.id),
+            ));
+        }
+        (check_update(&skill.manifest, &new, policy), new)
+    };
+
+    let diff = SkillLibrary::diff_text(&skill.manifest.body, &new_manifest.body);
+    let mut library = s.library.lock().expect("skills library lock");
+    let outcome = library
+        .record_update(&id, &check, new_manifest, diff, s.now)
+        .map_err(map_library_error)?;
+    let (action, reason) = match &outcome {
+        SkillUpdateOutcome::Applied { version, .. } => (
+            AuditAction::SkillUpdateApplied,
+            format!("applied skill update to {id} version {version}"),
+        ),
+        SkillUpdateOutcome::Held { held, .. } => (
+            AuditAction::SkillUpdateHeld,
+            format!(
+                "held skill update for {id}: {} reason(s)",
+                held.reasons.len()
+            ),
+        ),
+    };
+    append_skills_audit(&s, action, &id, None, reason);
+    Ok(Json(outcome))
+}
+
+/// `GET /api/skills/{id}/history`: every version and update decision in order (IMP-34).
+async fn skill_history(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<Json<Vec<SkillHistoryEntry>>, ServerError> {
+    let library = s.library.lock().expect("skills library lock");
+    if library.get(&id).is_none() {
+        return Err(ServerError::not_found(
+            "skill_not_found",
+            format!("unknown skill: {id}"),
+        ));
+    }
+    Ok(Json(library.history(&id)))
+}
+
+/// `POST /api/skills/{id}/rollback/{version}`: restore any version as a new one (IMP-34).
+async fn rollback_skill(
+    State(s): State<AppState>,
+    Path((id, version)): Path<(String, String)>,
+) -> Result<Json<LibrarySkill>, ServerError> {
+    let mut library = s.library.lock().expect("skills library lock");
+    let skill = library
+        .rollback(&id, &version, s.now)
+        .map_err(map_library_error)?;
+    append_skills_audit(
+        &s,
+        AuditAction::Revert,
+        &id,
+        Some(format!("v{}", skill.manifest.version)),
+        format!("rolled back skill {id} to version {version}"),
+    );
+    Ok(Json(skill))
 }
 
 async fn project_context(
@@ -365,6 +856,47 @@ fn map_manifest_error(err: ManifestError) -> ServerError {
     }
 }
 
+fn map_library_error(err: SkillLibraryError) -> ServerError {
+    let message = err.to_string();
+    match err {
+        SkillLibraryError::NotFound { .. } => ServerError::not_found("skill_not_found", message),
+        SkillLibraryError::VersionNotFound { .. } => {
+            ServerError::not_found("version_not_found", message)
+        }
+        SkillLibraryError::TemplateImmutable { .. } => {
+            ServerError::conflict("template_immutable", message)
+        }
+        SkillLibraryError::NotEditable { .. } => ServerError::conflict("not_editable", message),
+        SkillLibraryError::DuplicateId { .. } => {
+            ServerError::conflict("duplicate_skill_id", message)
+        }
+        SkillLibraryError::EmptyCopyId => ServerError::bad_request("empty_copy_id", message),
+    }
+}
+
+fn map_github_error(err: GitHubSourceError) -> ServerError {
+    let message = err.to_string();
+    match err {
+        GitHubSourceError::InvalidRepoUrl { .. }
+        | GitHubSourceError::UnsupportedHost { .. }
+        | GitHubSourceError::InvalidPath { .. }
+        | GitHubSourceError::RefNotFound { .. } => {
+            ServerError::bad_request("invalid_repo_url", message)
+        }
+        GitHubSourceError::NoLicense { .. }
+        | GitHubSourceError::InvalidSkill { .. }
+        | GitHubSourceError::MissingFile { .. }
+        | GitHubSourceError::FileTooLarge { .. }
+        | GitHubSourceError::BundleTooLarge { .. }
+        | GitHubSourceError::TooManyFiles { .. } => {
+            ServerError::unprocessable("invalid_skill_bundle", message)
+        }
+        GitHubSourceError::Transport { .. } => {
+            ServerError::new(StatusCode::BAD_GATEWAY, "github_transport", message)
+        }
+    }
+}
+
 fn parse_rev_number(label: &str) -> u32 {
     label
         .strip_prefix('r')
@@ -373,7 +905,7 @@ fn parse_rev_number(label: &str) -> u32 {
 }
 
 /// Seed in-memory state from `fixtures/meranti-yard.json` so every route works out of the box.
-fn seed_project_store(raw: &Value) -> ProjectStore {
+fn seed_project_store(raw: &Value, now: i64) -> ProjectStore {
     // 1. Proposals & spec revision from REVIEW_PROPOSAL.
     let prop_id = raw["REVIEW_PROPOSAL"]["id"]
         .as_str()
@@ -510,6 +1042,49 @@ fn seed_project_store(raw: &Value) -> ProjectStore {
         },
     ];
 
+    // 5. Projects for delete / restore (IMP-29) and the audit chain (IMP-30/31).
+    let sample_project: Project =
+        serde_json::from_value(raw["PROJECT"].clone()).unwrap_or(Project {
+            name: "Meranti Yard".to_owned(),
+            product: "Cost variance dashboard".to_owned(),
+            increment: "Inc. 2 · Variance alerts".to_owned(),
+            spec: "r14".to_owned(),
+            user: "Rina (sample)".to_owned(),
+            initials: "RS".to_owned(),
+        });
+    let mut project_entries = BTreeMap::new();
+    project_entries.insert(
+        SAMPLE_PROJECT_ID.to_owned(),
+        ProjectEntry::new(
+            SAMPLE_PROJECT_ID,
+            sample_project.clone(),
+            vec!["r14".to_owned()],
+            now,
+        ),
+    );
+    // The fixture's Recently deleted row (INTAKE_DELETED) seeds one entry three days into
+    // the 30-day window, so S27's "27 days left" is served without a clock or a database.
+    if let Some(deleted) = raw["INTAKE_DELETED"].as_object() {
+        let id = deleted["id"].as_str().unwrap_or("kenari-fleet").to_owned();
+        let deleted_at = now - 3 * SECONDS_PER_DAY;
+        let mut entry = ProjectEntry::new(
+            id.clone(),
+            Project {
+                name: "Kenari Fleet".to_owned(),
+                ..sample_project
+            },
+            vec![
+                "r1".to_owned(),
+                "r2".to_owned(),
+                "r3".to_owned(),
+                "r4".to_owned(),
+            ],
+            deleted_at,
+        );
+        entry.deleted_at = Some(deleted_at);
+        project_entries.insert(id, entry);
+    }
+
     ProjectStore {
         revisions,
         proposals,
@@ -518,6 +1093,9 @@ fn seed_project_store(raw: &Value) -> ProjectStore {
         board,
         handoff_revisions,
         required_inputs,
+        audit: AuditLog::new(),
+        audit_head: GENESIS_HASH.to_owned(),
+        project_entries,
     }
 }
 
@@ -527,6 +1105,7 @@ mod tests {
     use axum::body::Body;
     use axum::http::Request;
     use http_body_util::BodyExt;
+    use spekin_core::AuditError;
     use tower::ServiceExt;
 
     const SAMPLE: &str = include_str!("../../../fixtures/meranti-yard.json");
@@ -577,5 +1156,76 @@ mod tests {
     async fn unknown_project_is_404() {
         let (status, _) = get_json("/api/projects/nope/stages").await;
         assert_eq!(status, StatusCode::NOT_FOUND);
+    }
+
+    /// IMP-31 / lead's follow-up on #21: the head is held apart from the log, and
+    /// the audit route reports a broken anchor even when the entries are untouched.
+    #[tokio::test]
+    async fn audit_head_is_checked_apart_from_the_log() {
+        let state = AppState::from_fixture_json(SAMPLE).unwrap();
+        {
+            let mut store = state.project_store.lock().expect("project store lock");
+            append_audit(
+                &mut store,
+                state.now,
+                AuditAction::Accept,
+                "P-07",
+                Some("r15".to_owned()),
+                "accepted proposal P-07",
+            );
+        }
+        let Json(view) = project_audit(State(state.clone()), Path(SAMPLE_PROJECT_ID.to_owned()))
+            .await
+            .ok()
+            .expect("audit route");
+        assert_eq!(view.error, None, "a fresh chain verifies");
+        assert_eq!(view.entries.len(), 1);
+        let head = view.head_hash.clone();
+
+        // Tamper only with the separately held head: the log is unchanged.
+        state
+            .project_store
+            .lock()
+            .expect("project store lock")
+            .audit_head = "deadbeef".to_owned();
+        let Json(broken) = project_audit(State(state), Path(SAMPLE_PROJECT_ID.to_owned()))
+            .await
+            .ok()
+            .expect("audit route");
+        assert_eq!(broken.head_hash, "deadbeef");
+        assert_eq!(broken.entries.len(), 1, "the log itself was not edited");
+        assert!(
+            matches!(broken.error, Some(AuditError::Truncated { seq: 2 })),
+            "the broken separate head is reported at the next sequence: {:?}",
+            broken.error
+        );
+        assert_ne!(head, "deadbeef");
+    }
+
+    /// IMP-35: the skills chain keeps its head apart too; a rewritten stored
+    /// head cannot satisfy the route's verify check.
+    #[tokio::test]
+    async fn skills_audit_head_is_checked_apart_from_the_log() {
+        let state = AppState::from_fixture_json(SAMPLE).expect("sample fixture is valid");
+        append_skills_audit(
+            &state,
+            AuditAction::Revert,
+            "grill",
+            Some("v2".to_owned()),
+            "rolled back skill grill",
+        );
+        let Json(view) = skills_audit(State(state.clone())).await;
+        assert_eq!(view.error, None, "a fresh chain verifies");
+        let head = view.head_hash.clone();
+
+        state.skills_audit.lock().expect("skills audit lock").head = "deadbeef".to_owned();
+        let Json(broken) = skills_audit(State(state)).await;
+        assert_eq!(broken.head_hash, "deadbeef");
+        assert_eq!(broken.entries.len(), 1, "the log itself was not edited");
+        assert!(matches!(
+            broken.error,
+            Some(AuditError::Truncated { seq: 2 })
+        ));
+        assert_ne!(head, "deadbeef");
     }
 }

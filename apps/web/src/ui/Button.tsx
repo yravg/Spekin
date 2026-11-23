@@ -13,10 +13,11 @@ function actionProps(a: Action) {
     : { 'data-does': a.does, 'data-feature': a.feature, onClick: a.onClick };
 }
 
-export function Btn(props: Action & { label: ReactNode; cls?: 'ghost' | 'ink' | 'plain'; sm?: boolean; icon?: IconName }) {
+export function Btn(props: Action & { label: ReactNode; cls?: 'ghost' | 'ink' | 'plain' | 'danger'; sm?: boolean; icon?: IconName }) {
   const { label, cls = 'ghost', sm, icon } = props;
+  const clsName = cls === 'danger' ? 'ghost mod-danger' : cls;
   return (
-    <button type="button" className={'sp-btn ' + cls + (sm ? ' sm' : '')} {...actionProps(props)}>
+    <button type="button" className={'sp-btn ' + clsName + (sm ? ' sm' : '')} {...actionProps(props)}>
       {icon ? <Icon name={icon} size={14} /> : null}
       {label}
     </button>

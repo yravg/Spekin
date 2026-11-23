@@ -41,10 +41,9 @@ jobs:
       - name: Generated TypeScript contracts are committed
         run: node tools/check-contracts.mjs
   state-gate:
-    # Report only for now: it lists which board states the app reaches and matches. It becomes required per board
-    # when that board's task card is done (see docs/handoff/implementation.md, "Definition of done").
+    # Required: every board state whose click path is marked "checked" must reach and match its board (GATE=checked).
+    # The full report (all states, drafts included) is uploaded as an artifact.
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -54,11 +53,11 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run build
-      - name: State gate
+      - name: State gate (checked click paths, required)
         run: |
           npm run preview -w @spekin/web &
           npx --yes wait-on@8 http://127.0.0.1:5173/ --timeout 60000
-          npm run harness
+          GATE=checked npm run harness
       - uses: actions/upload-artifact@v4
         if: always()
         with:

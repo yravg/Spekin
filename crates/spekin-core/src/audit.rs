@@ -224,18 +224,40 @@ pub fn verify(log: &AuditLog) -> Result<(), AuditError> {
         }
     }
 
-    // The head anchor catches a removed tail, which a bare chain cannot see
-    // because no later entry is left to break.
-    let expected_head = log
-        .entries
-        .last()
-        .map_or(GENESIS_HASH, |entry| entry.hash.as_str());
-    if log.head_hash != expected_head {
+    // The head stored inside the log catches accidental truncation; a stored
+    // log's own head can be rewritten, so callers must also use
+    // `verify_with_head` with an anchor kept apart from the log.
+    if log.head_hash != head_hash(log) {
         return Err(AuditError::Truncated {
             seq: log.entries.len() as u64 + 1,
         });
     }
 
+    Ok(())
+}
+
+/// Hash of the last entry, or the genesis anchor when the log is empty.
+///
+/// The server keeps this value *apart* from the stored log (lead review on
+/// #21): a log that carries its own head can be rewritten so it looks valid on
+/// its own. Callers that persist a log must persist this anchor separately and
+/// pass it to [`verify_with_head`].
+pub fn head_hash(log: &AuditLog) -> String {
+    log.entries
+        .last()
+        .map_or_else(|| GENESIS_HASH.to_owned(), |entry| entry.hash.clone())
+}
+
+/// Verify the chain *and* the head held apart from it. `verify` alone checks
+/// the head stored inside the log; this is the authoritative check for a stored
+/// log, whose own head may have been tampered with together with its entries.
+pub fn verify_with_head(log: &AuditLog, expected_head: &str) -> Result<(), AuditError> {
+    verify(log)?;
+    if expected_head != head_hash(log) {
+        return Err(AuditError::Truncated {
+            seq: log.entries.len() as u64 + 1,
+        });
+    }
     Ok(())
 }
 

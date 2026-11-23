@@ -1,0 +1,134 @@
+{
+  "board": "S36-models-usage.dc.html",
+  "states": {
+    "source": {
+      "status": "checked",
+      "steps": [
+        {
+          "goto": "/"
+        },
+        {
+          "click": "button.int-cn:has-text(\"Meranti Yard\")"
+        },
+        {
+          "click": "button.sp-model:has-text(\"Sonnet 5.5\")"
+        },
+        {
+          "wait": "[data-screen=\"S36\"]"
+        }
+      ]
+    },
+    "cli": {
+      "status": "checked",
+      "steps": [
+        {
+          "goto": "/"
+        },
+        {
+          "click": "button.int-cn:has-text(\"Meranti Yard\")"
+        },
+        {
+          "click": "button.sp-model:has-text(\"Sonnet 5.5\")"
+        },
+        {
+          "wait": "[data-screen=\"S36\"]"
+        },
+        {
+          "click": "button.mod-sc:has-text(\"Local CLI\")"
+        },
+        {
+          "click": "button.mod-agr:has-text(\"Claude Code\")"
+        },
+        {
+          "wait": ".mod-ags"
+        }
+      ]
+    },
+    "api": {
+      "status": "checked",
+      "steps": [
+        {
+          "goto": "/"
+        },
+        {
+          "click": "button.int-cn:has-text(\"Meranti Yard\")"
+        },
+        {
+          "click": "button.sp-model:has-text(\"Sonnet 5.5\")"
+        },
+        {
+          "wait": "[data-screen=\"S36\"]"
+        },
+        {
+          "click": "button.mod-sc:has-text(\"API provider\")"
+        },
+        {
+          "click": "button:has-text(\"Test connection\")"
+        },
+        {
+          "wait": ".mod-tst"
+        }
+      ]
+    },
+    "estimate": {
+      "status": "checked",
+      "steps": [
+        {
+          "goto": "/"
+        },
+        {
+          "click": "button.int-cn:has-text(\"Meranti Yard\")"
+        },
+        {
+          "click": "button.sp-model:has-text(\"Sonnet 5.5\")"
+        },
+        {
+          "wait": "[data-screen=\"S36\"]"
+        },
+        {
+          "click": ".sp-seg button:has-text(\"Next run\")"
+        },
+        {
+          "wait": ".mod-rng"
+        }
+      ]
+    },
+    "ledger": {
+      "status": "checked",
+      "steps": [
+        {
+          "goto": "/"
+        },
+        {
+          "click": "button.int-cn:has-text(\"Meranti Yard\")"
+        },
+        {
+          "click": "button.sp-meter"
+        },
+        {
+          "wait": "[data-screen=\"S36\"]"
+        },
+        {
+          "click": ".sp-seg button:has-text(\"Ledger\")"
+        },
+        {
+          "wait": ".mod-led"
+        }
+      ]
+    },
+    "capped": {
+      "status": "checked",
+      "steps": [
+        {
+          "goto": "/p/meranti-yard/usage?moment=capped"
+        },
+        {
+          "click": "button.sp-meter"
+        },
+        {
+          "wait": ".sp-banner"
+        }
+      ]
+    }
+  }
+}

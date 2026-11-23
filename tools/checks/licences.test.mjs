@@ -11,7 +11,7 @@ const npmPkg = (name, licence, extra = {}) => ({ name, version: '1.0.0', licence
 const crate = (name, licence, extra = {}) => ({ name, version: '1.0.0', licence, source: 'crate', ...extra });
 
 test('permissive licences are allowed and reported as permissive', () => {
-  for (const l of ['MIT', 'Apache-2.0', 'ISC', 'BSD-3-Clause', 'MIT OR Apache-2.0', 'Apache-2.0 OR MIT', '(MIT OR Apache-2.0) AND Unicode-3.0', 'Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT']) {
+  for (const l of ['MIT', 'Apache-2.0', 'ISC', 'BSD-3-Clause', 'MIT OR Apache-2.0', 'Apache-2.0 OR MIT', 'MIT OR GPL-3.0', '(MIT OR Apache-2.0) AND Unicode-3.0', 'Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT']) {
     const c = classifyLicence(l);
     assert.equal(c.kind, 'permissive', l);
     assert.equal(c.copyleft, false, l);
@@ -19,7 +19,7 @@ test('permissive licences are allowed and reported as permissive', () => {
 });
 
 test('GPL, LGPL and AGPL are copyleft and need an allow-list entry', () => {
-  for (const [l, family] of [['GPL-3.0-only', 'GPL'], ['GPL-2.0-or-later', 'GPL'], ['AGPL-3.0', 'AGPL'], ['LGPL-2.1', 'LGPL'], ['MIT OR GPL-3.0', 'GPL']]) {
+  for (const [l, family] of [['GPL-3.0-only', 'GPL'], ['GPL-2.0-or-later', 'GPL'], ['AGPL-3.0', 'AGPL'], ['LGPL-2.1', 'LGPL']]) {
     const c = classifyLicence(l);
     assert.equal(c.copyleft, true, l);
     assert.equal(c.family, family, l);
@@ -30,6 +30,48 @@ test('an empty or unrecognised licence is unknown, never silently permissive', (
   for (const l of ['', undefined, 'SEE LICENCE IN LICENSE', 'WTFPL']) {
     assert.equal(classifyLicence(l).kind, 'unknown', String(l));
   }
+});
+
+// IMP-35 fix-up (lead review of PR #28): the allow-list is for owner decisions only.
+// These two transitive crates are permissive by their own SPDX expressions.
+
+test('an SPDX OR expression is permissive when any option is permissive', () => {
+  // r-efi: transitive of getrandom (UEFI target), MIT OR Apache-2.0 OR LGPL-2.1-or-later.
+  const c = classifyLicence('MIT OR Apache-2.0 OR LGPL-2.1-or-later');
+  assert.equal(c.kind, 'permissive');
+  assert.equal(c.copyleft, false);
+  const r = audit({ npm: [npmPkg('r-efi', 'MIT OR Apache-2.0 OR LGPL-2.1-or-later')], crates: [] });
+  assert.equal(r.ok, true, 'r-efi must pass with an empty allow-list');
+  assert.equal(r.copyleft.length, 0);
+  assert.equal(r.unknown.length, 0);
+});
+
+test('CDLA-Permissive-2.0 is a permissive data licence', () => {
+  // webpki-roots: transitive of reqwest/hyper-rustls (IMP-27).
+  const c = classifyLicence('CDLA-Permissive-2.0');
+  assert.equal(c.kind, 'permissive');
+  assert.equal(c.copyleft, false);
+  const r = audit({ npm: [npmPkg('webpki-roots', 'CDLA-Permissive-2.0')], crates: [] });
+  assert.equal(r.ok, true, 'webpki-roots must pass with an empty allow-list');
+  assert.equal(r.unknown.length, 0);
+});
+
+test('GPL-3.0-only is still copyleft and refused with an empty allow-list', () => {
+  const c = classifyLicence('GPL-3.0-only');
+  assert.equal(c.copyleft, true);
+  assert.equal(c.family, 'GPL');
+  const r = audit({ npm: [npmPkg('gpl-only', 'GPL-3.0-only')], crates: [] });
+  assert.equal(r.ok, false);
+  assert.ok(r.problems.some((p) => p.kind === 'copyleft' && p.name === 'gpl-only'));
+});
+
+test('an AND expression is refused when any part is not allowed', () => {
+  const c = classifyLicence('MIT AND GPL-3.0-only');
+  assert.equal(c.copyleft, true, 'AND needs every part allowed');
+  assert.equal(c.family, 'GPL');
+  const r = audit({ npm: [npmPkg('and-mixed', 'MIT AND GPL-3.0-only')], crates: [] });
+  assert.equal(r.ok, false);
+  assert.ok(r.problems.some((p) => p.kind === 'copyleft' && p.name === 'and-mixed'));
 });
 
 test('a missing licence fails the inventory', () => {

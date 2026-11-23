@@ -24,7 +24,7 @@
     "harness": "node tools/harness/state-gate.mjs",
     "rust:check": "cargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace",
     "check:contracts": "node tools/check-contracts.mjs",
-    "gate": "npm run check:rules && npm run check:sync && npm run canvas:lint && npm run typecheck && npm test && npm run build && npm run rust:check && npm run check:contracts",
+    "gate": "npm run check:rules && node --test tools/checks/licences.test.mjs && node tools/checks/licences.mjs --check && npm run check:sync && npm run canvas:lint && npm run typecheck && npm test && npm run build && npm run rust:check && npm run check:contracts",
     "preview": "npm run preview -w @spekin/web",
     "canvas:states": "node tools/canvas/lint-all.mjs --write",
     "server": "cargo run -p spekin-server",

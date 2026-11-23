@@ -1,0 +1,71 @@
+{
+  "board": "S30-style-review.dc.html",
+  "states": {
+    "learning": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-tab:has-text(\"DESIGN.md\")" },
+        { "wait": "[data-screen=\"S30\"]" },
+        { "click": "button:has-text(\"Learned from references\")" },
+        { "wait": ".sty-banner-ok, .sty-info" }
+      ]
+    },
+    "review": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-tab:has-text(\"DESIGN.md\")" },
+        { "wait": "[data-screen=\"S30\"]" }
+      ]
+    },
+    "conflict": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-tab:has-text(\"DESIGN.md\")" },
+        { "wait": "[data-screen=\"S30\"]" },
+        { "click": "[data-token=\"color.accent\"] button:has-text(\"Resolve\")" },
+        { "wait": ".sty-cmpd" }
+      ]
+    },
+    "markdown": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-tab:has-text(\"DESIGN.md\")" },
+        { "wait": "[data-screen=\"S30\"]" },
+        { "click": "button[role=\"tab\"]:has-text(\"Markdown\")" },
+        { "wait": ".sty-ed" }
+      ]
+    },
+    "promote": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-tab:has-text(\"DESIGN.md\")" },
+        { "wait": "[data-screen=\"S30\"]" },
+        { "click": "button:has-text(\"Promote to spec\")" },
+        { "wait": ".sty-prop" }
+      ]
+    },
+    "accepted": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-tab:has-text(\"DESIGN.md\")" },
+        { "wait": "[data-screen=\"S30\"]" },
+        { "click": "button:has-text(\"Promote to spec\")" },
+        { "wait": ".sty-prop" },
+        { "click": ".sty-bar.b2 button:has-text(\"Send to review in S08\")" },
+        { "wait": ".sty-ok" }
+      ]
+    }
+  }
+}

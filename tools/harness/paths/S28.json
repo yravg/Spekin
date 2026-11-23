@@ -1,0 +1,80 @@
+{
+  "board": "S28-reference-intake.dc.html",
+  "states": {
+    "empty": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "wait": "[data-screen=\"S28\"]" }
+      ]
+    },
+    "drop": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "wait": "[data-screen=\"S28\"]" },
+        { "click": ".int-start button:has-text(\"Choose files\")" },
+        { "wait": ".int-droplit" }
+      ]
+    },
+    "imported": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "wait": "[data-screen=\"S28\"]" },
+        { "click": ".int-start button:has-text(\"Choose files\")" },
+        { "wait": ".int-droplit" },
+        { "click": ".int-droplit" },
+        { "wait": ".int-job" }
+      ]
+    },
+    "rejected": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "wait": "[data-screen=\"S28\"]" },
+        { "click": ".int-start button:has-text(\"Choose files\")" },
+        { "wait": ".int-droplit" },
+        { "click": ".int-droplit" },
+        { "wait": ".int-job" },
+        { "click": "button:has-text(\"Add references\")" },
+        { "wait": ".sp-banner.bad" }
+      ]
+    },
+    "pii": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "wait": "[data-screen=\"S28\"]" },
+        { "click": ".int-start button:has-text(\"Choose files\")" },
+        { "wait": ".int-droplit" },
+        { "click": ".int-droplit" },
+        { "wait": ".int-job" },
+        { "click": "[data-ref=\"REF-04\"]" },
+        { "wait": ".sp-banner.warn" }
+      ]
+    },
+    "pasted": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "wait": "[data-screen=\"S28\"]" },
+        { "click": ".int-cv" },
+        { "press": "Control+v" },
+        { "wait": ".int-pbar" }
+      ]
+    }
+  }
+}

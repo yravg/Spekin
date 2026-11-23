@@ -1,0 +1,65 @@
+{
+  "board": "S38-genui-panel.dc.html",
+  "states": {
+    "stream": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "type": ["textarea.ap-ta-input", "Check F-04 against the 3% threshold"] },
+        { "click": "button[aria-label=\"Send\"]" },
+        { "wait": "[data-screen=\"S38\"] .sty-run" }
+      ]
+    },
+    "cards": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": ".sp-gc button:has-text(\"Details\")" },
+        { "wait": "[data-screen=\"S38\"] [data-id=\"ALT-F03\"]" }
+      ]
+    },
+    "question": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "type": ["textarea.ap-ta-input", "Draw an alert drawer"] },
+        { "click": "button[aria-label=\"Send\"]" },
+        { "wait": "[data-screen=\"S38\"] .sty-qs" }
+      ]
+    },
+    "fallback": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "type": ["textarea.ap-ta-input", "Show cost variance by package as a card"] },
+        { "click": "button[aria-label=\"Send\"]" },
+        { "wait": "[data-screen=\"S38\"] .sty-why" }
+      ]
+    },
+    "confirm": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "type": ["textarea.ap-ta-input", "Draw 3 more takes of F-04"] },
+        { "click": "button[aria-label=\"Send\"]" },
+        { "wait": "[data-screen=\"S38\"] .sty-cf" }
+      ]
+    },
+    "pinned": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": ".sp-gc button:has-text(\"Details\")" },
+        { "wait": "[data-screen=\"S38\"] [data-id=\"GAP-07\"]" },
+        { "click": "[data-id=\"GAP-07\"] button:has-text(\"Pin\")" },
+        { "wait": "[data-screen=\"S38\"] .sty-pin" }
+      ]
+    }
+  }
+}

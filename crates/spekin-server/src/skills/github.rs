@@ -6,9 +6,15 @@
 //! upstream ref using IMP-22's `check_update`. All HTTP is behind
 //! [`GitHubClient`], so tests use recorded fixtures and never touch the network.
 
+use std::future::Future;
+use std::sync::Arc;
+use std::time::Duration;
+
 use futures_util::StreamExt;
+use futures_util::future::BoxFuture;
 use reqwest::RequestBuilder;
 
+use crate::hardening::GITHUB_TIMEOUT;
 use spekin_core::github_source::{
     BundleFile, GitHubRepo, GitHubSourceError, MAX_FILE_BYTES, PinnedSource, SkillBundle,
     assemble_bundle, join_relative, license_from, listed_files, parse_github_repo, skill_md_path,
@@ -16,27 +22,27 @@ use spekin_core::github_source::{
 use spekin_core::skills::{UpdateCheck, UpdatePolicy, check_update};
 
 /// The only IO the adapter needs. Tests supply recorded fixtures instead.
-#[allow(async_fn_in_trait)]
+/// Futures are `Send` so the adapter can live behind `Arc<dyn DynGitHubClient>` in Axum state.
 pub trait GitHubClient: Send + Sync {
     /// Resolve a branch or tag to a commit SHA.
-    async fn resolve_ref(
+    fn resolve_ref(
         &self,
         repo: &GitHubRepo,
         git_ref: &str,
-    ) -> Result<String, GitHubSourceError>;
+    ) -> impl Future<Output = Result<String, GitHubSourceError>> + Send;
     /// Download one file at an exact commit.
-    async fn fetch_file(
+    fn fetch_file(
         &self,
         repo: &GitHubRepo,
         commit: &str,
         path: &str,
-    ) -> Result<String, GitHubSourceError>;
+    ) -> impl Future<Output = Result<String, GitHubSourceError>> + Send;
     /// Find and download the repository licence file.
-    async fn fetch_license(
+    fn fetch_license(
         &self,
         repo: &GitHubRepo,
         commit: &str,
-    ) -> Result<BundleFile, GitHubSourceError>;
+    ) -> impl Future<Output = Result<BundleFile, GitHubSourceError>> + Send;
 }
 
 /// Public-GitHub HTTPS client. `GITHUB_TOKEN` is read per request and is never
@@ -53,8 +59,15 @@ impl Default for HttpGitHubClient {
 
 impl HttpGitHubClient {
     pub fn new() -> Self {
+        Self::with_timeout(GITHUB_TIMEOUT)
+    }
+
+    /// The GitHub adapter has its own 20 s client timeout in production; tests
+    /// pass a short one so a stalled loopback socket proves it is enforced.
+    pub fn with_timeout(timeout: Duration) -> Self {
         Self {
             client: reqwest::Client::builder()
+                .timeout(timeout)
                 .user_agent(concat!("spekin-skills/", env!("CARGO_PKG_VERSION")))
                 .build()
                 .unwrap_or_else(|_| reqwest::Client::new()),
@@ -114,7 +127,6 @@ impl HttpGitHubClient {
     }
 }
 
-#[allow(async_fn_in_trait)]
 impl GitHubClient for HttpGitHubClient {
     async fn resolve_ref(
         &self,
@@ -196,7 +208,7 @@ impl GitHubClient for HttpGitHubClient {
             "LICENCE.md",
             "LICENCE.txt",
         ] {
-            if let Ok(content) = self.fetch_file(repo, commit, name).await {
+            if let Ok(content) = GitHubClient::fetch_file(self, repo, commit, name).await {
                 return Ok(BundleFile {
                     path: name.into(),
                     content,
@@ -266,12 +278,12 @@ impl<C: GitHubClient> GitHubSkillSource<C> {
         assemble_bundle(pinned, &skill_md, listed, Some(license))
     }
 
-    /// Resolve the same ref again and classify its change under `policy`.
-    pub async fn check(
+    /// Resolve the installed ref again and download the current upstream manifest.
+    /// The manifest is plain data; nothing here executes the skill (IMP-27/34).
+    pub async fn fetch_latest(
         &self,
         installed: &SkillBundle,
-        policy: UpdatePolicy,
-    ) -> Result<UpdateCheck, GitHubSourceError> {
+    ) -> Result<SkillBundle, GitHubSourceError> {
         let source = self
             .resolve(
                 &installed.source.repo,
@@ -286,7 +298,128 @@ impl<C: GitHubClient> GitHubSkillSource<C> {
             .await?;
         let license = self.client.fetch_license(&repo_ref, &source.commit).await?;
         let license = license_from(&license.path, &license.content);
-        let fresh = assemble_bundle(&source, &skill_md, Vec::new(), Some(license))?;
+        assemble_bundle(&source, &skill_md, Vec::new(), Some(license))
+    }
+
+    /// Resolve the same ref again and classify its change under `policy`.
+    pub async fn check(
+        &self,
+        installed: &SkillBundle,
+        policy: UpdatePolicy,
+    ) -> Result<UpdateCheck, GitHubSourceError> {
+        let fresh = self.fetch_latest(installed).await?;
         Ok(check_update(&installed.manifest, &fresh.manifest, policy))
+    }
+}
+
+/// An object-safe form of [`GitHubClient`] so the server can hold one client behind
+/// `Arc<dyn ...>`. `async fn` in a trait is not dyn-compatible; these boxed futures are.
+/// Tests inject a recorded client; production uses [`HttpGitHubClient`].
+pub trait DynGitHubClient: Send + Sync {
+    fn resolve_ref<'a>(
+        &'a self,
+        repo: &'a GitHubRepo,
+        git_ref: &'a str,
+    ) -> BoxFuture<'a, Result<String, GitHubSourceError>>;
+    fn fetch_file<'a>(
+        &'a self,
+        repo: &'a GitHubRepo,
+        commit: &'a str,
+        path: &'a str,
+    ) -> BoxFuture<'a, Result<String, GitHubSourceError>>;
+    fn fetch_license<'a>(
+        &'a self,
+        repo: &'a GitHubRepo,
+        commit: &'a str,
+    ) -> BoxFuture<'a, Result<BundleFile, GitHubSourceError>>;
+}
+
+impl<C: GitHubClient> DynGitHubClient for C {
+    fn resolve_ref<'a>(
+        &'a self,
+        repo: &'a GitHubRepo,
+        git_ref: &'a str,
+    ) -> BoxFuture<'a, Result<String, GitHubSourceError>> {
+        Box::pin(GitHubClient::resolve_ref(self, repo, git_ref))
+    }
+    fn fetch_file<'a>(
+        &'a self,
+        repo: &'a GitHubRepo,
+        commit: &'a str,
+        path: &'a str,
+    ) -> BoxFuture<'a, Result<String, GitHubSourceError>> {
+        Box::pin(GitHubClient::fetch_file(self, repo, commit, path))
+    }
+    fn fetch_license<'a>(
+        &'a self,
+        repo: &'a GitHubRepo,
+        commit: &'a str,
+    ) -> BoxFuture<'a, Result<BundleFile, GitHubSourceError>> {
+        Box::pin(GitHubClient::fetch_license(self, repo, commit))
+    }
+}
+
+impl<'a> GitHubClient for Arc<dyn DynGitHubClient + 'a> {
+    async fn resolve_ref(
+        &self,
+        repo: &GitHubRepo,
+        git_ref: &str,
+    ) -> Result<String, GitHubSourceError> {
+        DynGitHubClient::resolve_ref(self.as_ref(), repo, git_ref).await
+    }
+    async fn fetch_file(
+        &self,
+        repo: &GitHubRepo,
+        commit: &str,
+        path: &str,
+    ) -> Result<String, GitHubSourceError> {
+        DynGitHubClient::fetch_file(self.as_ref(), repo, commit, path).await
+    }
+    async fn fetch_license(
+        &self,
+        repo: &GitHubRepo,
+        commit: &str,
+    ) -> Result<BundleFile, GitHubSourceError> {
+        DynGitHubClient::fetch_license(self.as_ref(), repo, commit).await
+    }
+}
+
+/// The GitHub source held by the server. The client can be swapped in tests.
+pub type DynGitHubSkillSource = GitHubSkillSource<Arc<dyn DynGitHubClient>>;
+
+/// Wrap any client for injection into [`AppState`](crate::AppState).
+pub fn injected_source<C: GitHubClient + 'static>(client: C) -> DynGitHubSkillSource {
+    GitHubSkillSource::new(Arc::new(client) as Arc<dyn DynGitHubClient>)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::hardening::GITHUB_TIMEOUT;
+    use std::time::Duration;
+
+    /// IMP-32: the GitHub client has its own 20 s timeout, shorter than nothing
+    /// else, so a stalled upstream can never hold a request past the server's
+    /// own timeout budget. The test uses a loopback socket that never answers.
+    #[tokio::test]
+    async fn github_client_timeout_is_enforced() {
+        assert_eq!(GITHUB_TIMEOUT, Duration::from_secs(20));
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
+            .await
+            .expect("loopback listener");
+        let addr = listener.local_addr().expect("local addr");
+        let held = tokio::spawn(async move {
+            let (_socket, _) = listener.accept().await.expect("accept");
+            tokio::time::sleep(Duration::from_secs(2)).await;
+        });
+        let client = HttpGitHubClient::with_timeout(Duration::from_millis(50));
+        let result = client
+            .get_json(&format!("http://{addr}/never-answers"))
+            .await;
+        held.abort();
+        assert!(
+            matches!(result, Err(GitHubSourceError::Transport { .. })),
+            "a stalled upstream must be a typed transport error, not a hang"
+        );
     }
 }
