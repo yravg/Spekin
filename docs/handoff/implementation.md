@@ -138,7 +138,8 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-19 | ui | S38 GenUI panel | IMP-01 | done, part open: PR #34, stacked on #32 (lead re-ran: S38 6/6 PASS; a TS mirror of the Rust validator is used until IMP-21) |
 | IMP-20 | ui | T01 Tablet and phone | IMP-01 | done, part open: PR #35, stacked on #34 (lead re-ran: T01 5/5 PASS with device frames; real upload, zip download and keyboard-only traversal not checked) |
 | IMP-21 | ui | Screens read through one data source (sample default, API mode); S38 stops validating in the browser | IMP-26, PR #37 | done, part open: PR #38, stacked on #37 (lead re-ran: 80/80 sample mode; API mode S27, S35, S36, S40 pass per worker; project, stages, usage only so far) |
-| IMP-37 | ui + core | API mode for models, skills and history, contracts, audit, deleted projects | IMP-21 | in progress (OpenCode Go DeepSeek V4.1 Flash, on #38) |
+| IMP-37 | ui + core | API mode for models, skills and history, contracts, audit, deleted projects | IMP-21 | done, part open: PR #39, stacked on #38 (lead re-ran 80/80 sample mode; worker: API mode S27, S35, S36, S37, S40 pass; some fields still sample-only) |
+| IMP-39 | lead then ui | API offline / read failed state: draw it on the canvas, then build it; API mode must never fall back to sample data silently | IMP-37 | open |
 | IMP-38 | core | Store trait, memory store, Postgres store (ADR 0008) | PR #37 | in progress (OpenCode Go DeepSeek V4 Pro, on #37) |
 | IMP-36 | core | GenUI sample verdicts equal the Rust validator | IMP-21 | open |
 
