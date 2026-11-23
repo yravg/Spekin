@@ -2,6 +2,49 @@
 
 Only this lane edits this file. Write here before you stop working.
 
+## IMP-45 · Skills audit in the door + real-server offline stop (ui lane, hy4) — 24 Nov 2026
+
+**Status:** `done`. **Branch:** `imp-45-door-and-offline` (base `imp-43-skills-audit`, **stacked on
+PR #52**), one PR.
+
+**Changed:** `apps/web/src/data/source.ts` adds `DataSource.skillsAudit()` (sample → `null`, api →
+`fetchSkillsAudit()`) and its import; `apps/web/src/data/source.test.tsx` adds 2 tests (both modes +
+the route); `tools/e2e/offline-real-server.mjs` (new) + root `package.json` script `e2e:offline`.
+No screen draws it yet (no UI added). No new dependency (reuses `@playwright/test`, already a dev
+dependency), no Python.
+
+**The e2e test:** starts `cargo run -p spekin-server` on a free loopback port (`SPEKIN_BIND`) and the
+vite dev server in API mode (`VITE_SPK_DATA=api`, free `SPK_WEB_PORT`, API reads routed to that port),
+opens `/p/meranti-yard/design`, kills the API process, then switches stage spec → design to trigger
+one read. It does **not** use `?sim=offline`. The server is pointed (`SPEKIN_FIXTURE`) at a temp copy
+of the fixture with a project name / stage text `@spekin/sample` does NOT have, so the assertions
+prove the kept copy is the real server's, not a sample fallback. It stops every process it starts on
+success and failure (process groups + browser close + force-exit net) and exits 0 only when every
+assertion passes.
+
+**Evidence (all run locally):**
+- `npm run gate` EXIT 0 after `npm ci`: rules ok 456 files, licences ok (198 npm / 246 crates /
+  0 Python), design+fixtures sync, 14 boards lint, typecheck ok, vitest 21 files / **149 tests**
+  (147 + 2 new `data source (IMP-45): skills audit through the door`: sample `null` vs api verified
+  empty chain; URL `/api/skills/audit`), vite build ok, Rust fmt/clippy/test workspace ok,
+  `contracts current`. TDD: both tests seen red (`…skillsAudit is not a function`) first.
+- `npm run harness` on a sample-mode `npm run dev` (SPK_WEB_PORT=5174,
+  APP_URL=http://127.0.0.1:5174): **81/81 states pass**, EXIT 0, report
+  `tools/harness/out/report.md`.
+- `npm run e2e:offline` EXIT 0 — full output in the PR. Assertions: real API 200 + distinctive name;
+  CORS reflects the web origin; design stage (S35) loaded from the API; 6 real
+  `GET /api/projects/meranti-yard` 200 responses seen; API killed (connection refused);
+  `[data-feature="F378"]` banner visible; Offline chip (`data-save=conflict`, "Offline · kept on this
+  device"); project name kept as `"Meranti Yard · LIVE-API"` (NOT the sample `"Meranti Yard"`); all 8
+  stages kept (stage-bar text identical); **0 pageerror events**. The 4 console errors / 4 failed
+  requests after the stop are the expected refused `/api` fetches. Ports left free, no lingering
+  processes.
+
+**Not checked:** macOS / Node 22 only (no Windows/Linux); CI does not run `e2e:offline` (it is a
+local-only script, not in `npm run gate` or CI — the card granted exactly one script and CI is
+lead-owned); the offline banner on boards other than S35 (IMP-39 part-open; those boards draw no
+offline state); no screen draws `skillsAudit()` yet (by design).
+
 ## Current status (verified 23 Nov 2026, lead)
 
 All UI cards are merged into `main` (`0aba2c5`; PRs #1–#47 merged). The `part blocked` status words in the historical rows below were caused by a 1 px board-side vertical shift (S29, S32, S33) and by `.spwin` clipping the 1180 px tablet frames (T01). Both lead fixes are in `tools/harness/state-gate.mjs` (sub-pixel snap at line 101; unclip at lines 91–92) and F00 was regenerated to height `12300`. Current lead measurement: `npm run harness` → **81/81 states pass**, exit 0, report `tools/harness/out/report.md`; `npm run gate` → exit 0 (vitest 21 files / 142 tests) after a fresh `npm ci`. The remaining `part open` rows are real deferred scope, not build failures.
@@ -52,6 +95,7 @@ Read from `data/source.ts` (`sampleData`, the same surface in both modes); these
 
 ## Requests to lead
 
+- 2026-11-24 · IMP-45 · `apps/web/vite.config.ts` hardcodes the `/api` proxy target to `127.0.0.1:8787`. This card's real-server-stop test reaches its free API port through the API client's documented `VITE_API_BASE` (cross-origin, with `SPEKIN_WEB_ORIGIN` for CORS) instead of editing a file this lane does not own. If you want the literal vite proxy bound to a free port, add a `SPK_API_PORT` env to `vite.config.ts` (lead-owned) and drop `VITE_API_BASE`; the rest of the test is unchanged.
 - 2026-11-23 · IMP-41 · Added `jsdom` (MIT) as a dev dependency so a vitest can click a real button and see the next drawn state; `docs/licences.md` was regenerated. No runtime dependency.
 - 2026-11-23 · IMP-41 · The S33 accepted state draws **Revert as proposal** (R-EDT-7: a new proposal, never a revision), while `POST /api/projects/{id}/revisions/{artifact}/revert` writes a revision immediately. `revertRevision` is in the `DataSource` and tested, but wiring that button to it would break the board's copy; please draw the proposal version of revert (or a separate revision action) before it is clicked through.
 - 2026-11-23 · IMP-41 · S27 draws no card menu or delete confirmation, so `deleteProject` has no drawn control to fire it. `restoreProject` is clicked through (Restore project). If delete should be reachable, the board needs the menu/confirm state; until then the card menu records intent.

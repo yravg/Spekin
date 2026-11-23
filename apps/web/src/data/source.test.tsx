@@ -342,3 +342,28 @@ describe('data source (IMP-36): the S38 cards and their recorded verdicts come f
     expect(sampleSource.knownCardVerdict({})).toBeNull();
   });
 });
+
+// IMP-45: GET /api/skills/audit reaches the data door. No screen draws it yet (no UI in this card).
+describe('data source (IMP-45): skills audit through the door', () => {
+  it('sample mode draws no skills audit; api mode serves the verified chain', async () => {
+    mockFetchByPath();
+
+    expect(await sampleSource.skillsAudit()).toBeNull();
+    const fromApi = await apiSource.skillsAudit();
+    expect(fromApi?.entries).toEqual([]);
+    expect(fromApi?.error).toBeNull();
+    expect(fromApi?.head_hash).toHaveLength(64);
+  });
+
+  it('api mode reads the skills audit from /api/skills/audit', async () => {
+    const spy = vi.fn(async (_input: RequestInfo | URL) =>
+      json({ entries: [], head_hash: 'a'.repeat(64), error: null }),
+    );
+    vi.stubGlobal('fetch', spy);
+
+    const out = await apiSource.skillsAudit();
+
+    expect(String(spy.mock.calls[0]?.[0])).toBe('/api/skills/audit');
+    expect(out?.entries).toEqual([]);
+  });
+});
