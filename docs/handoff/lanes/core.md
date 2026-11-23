@@ -2,7 +2,11 @@
 
 Only this lane edits this file. Write here before you stop working.
 
-## Now
+## Current status (verified 23 Nov 2026, lead)
+
+All core cards are merged into `main` (`ddf763f`; PRs #1–#46 merged). Rows below marked `open` are stale snapshots from the stacked-PR period and are superseded by this note. Current gate: exit 0 — `rules ok (460 files)`, `licences ok (198 npm packages, 246 crates, 0 Python)`, 14 boards / 81 states, vitest 21 files / 142 tests, Rust 153 core tests plus workspace suites, contracts current. Postgres route, live-HTTP and concurrency stages were run on the worker branches; the lead re-run used the default memory store only.
+
+## Now (historical per-card record)
 
 | Card | Branch | Status | Evidence | Not checked |
 |---|---|---|---|---|
@@ -10,16 +14,16 @@ Only this lane edits this file. Write here before you stop working.
 | IMP-40 | imp-40-pg-concurrency (stacked on imp-38-store / PR #41) | done | Lead fix-up (items 1 & 2) done. (1) `MemoryStore::save_state` now compares `ProjectState.version` and refuses a stale write with `StoreError::StaleState`, matching `PgStore`; the shared suite (`run_suite`) holds both backends to a stale-save case. (2) New `Store::update_revision_and_state` writes a revision and the project state atomically — one lock (memory), one transaction (Postgres) — implemented by `MemoryStore`, `PgStore` and the server `Backend` enum; `accept_proposal` commits the revision and its audit entry through it, so a revision can never advance without its entry. Race tests in `crates/spekin-store-pg/tests/concurrency.rs` stay barrier-safe (20 s timeout, serialised, distinct project ids). Ran against a throwaway `postgres:16-alpine` (127.0.0.1:55433, removed after): 50 accept + 50 reserve + 50 accept-vs-reject rounds, exactly one winner per round (loser typed `StaleRevision`/`StaleState`); the accept-vs-reject race proves the revision never advances without its audit entry and the chain verifies. `pg_store_passes_the_shared_suite` passes against Postgres. `npm run gate` EXIT 0 (rules, licences 170 npm/246 crates/0 Python, 14 boards, typecheck, web tests, build, `cargo fmt --check`, `cargo clippy -D warnings`, 312 workspace tests, contracts current). | No live `npm run server` with `DATABASE_URL` (only the store crate exercised against Postgres); no harness/PNG (core card, no board); Windows/Linux. |
 | IMP-38 | imp-38-store | done, part open | Store trait + `MemoryStore` + `StoreSeed` in `spekin-core` (no DB code in core); `SkillLibrary` now derives `Serialize`/`Deserialize`; server reads/writes through `Arc`-free `Backend` enum (`Memory` default, `Pg` when `DATABASE_URL`), so every existing route test passes unchanged. New crate `spekin-store-pg` (sqlx postgres/runtime-tokio/tls-rustls, plain-SQL migrations, revisions updated under `SELECT … FOR UPDATE` → `StoreError::StaleRevision` maps to the same 409 `proposal_stale`). `cargo run -p spekin-server -- seed-sample` refuses without `--yes` (verified). Shared suite `spekin_core::store::test_support::run_suite` runs against `MemoryStore` always (`crates/spekin-core/tests/store.rs`) and against `PgStore` only with `TEST_DATABASE_URL` (`crates/spekin-store-pg/tests/store.rs`, prints "postgres stage skipped" otherwise). `npm run gate` EXIT 0 (rules ok 438 files, licences ok 170 npm/246 crates/0 Python, 14 boards, typecheck, 94 web tests, build, `cargo fmt --check`, `cargo clippy --workspace --all-targets -D warnings`, `cargo test --workspace` 309 tests, contracts current). Live smoke on 127.0.0.1:8787: health/project/stages/deleted/accept(stale→409)/audit/usage all correct. | Postgres stage did **not** run (no `TEST_DATABASE_URL`): `PgStore` migrations/seed/row-lock are compiled and the shared suite is wired, but never executed against a real Postgres. No concurrent-request test for `PgStore`. |
 | IMP-03 | imp-03-api-source | done | `apps/web/src/data/api.test.ts` 8 cases pass (vitest): `fetchProject`/`fetchStages` deep-equal `getProject`/`getStages`; 404 → `null`; non-JSON → `ApiError kind 'json'`; wrong shape → `'shape'`; 500 → `'http'` with status; refused connection → `'network'`; explicit base URL. Rust: `project_matches_the_fixture_exactly`, `unknown_project_is_404_for_the_project_route` (4 server tests pass). Live check on 127.0.0.1:8787: `/api/projects/meranti-yard` 200 and byte-equal to fixture `PROJECT`, `/stages` 200 equal to `STAGES`, `/api/projects/nope` 404. `npm run gate` passes (rules, sync, board lint, typecheck, 10 vitest, build, cargo fmt/clippy/test, contracts current). | The screens still read `source.ts` on purpose (card says not to switch them; that is a lead step after IMP-01). No live test against a browser build, no CORS check (dev proxy covers `/api`). `fetchProject`/`fetchStages` have no timeout of their own; a caller can pass an `AbortSignal`. |
-| IMP-03 | `imp-03-api-source` (PR #1) | open (in PR #1) | – | – |
-| IMP-04 | `imp-04-proposals` (PR #2) | open (in PR #2) | – | – |
+| IMP-03 | `imp-03-api-source` (PR #1) | done (merged, PR #1) | – | – |
+| IMP-04 | `imp-04-proposals` (PR #2) | done (merged, PR #2) | – | – |
 | IMP-12 | `imp-12-licences` (PR #4) | done (in PR #4) | – | – |
 | IMP-11 | `imp-11-model-sources` | done | `cargo test --workspace` (18 unit/ts-rs + 5 `tests/model_source.rs` + 2 server tests pass); `npm run gate` passes | Server endpoints and UI wiring for S36 (later cards) |
-| IMP-10 | – | open | – | – |
+| IMP-10 | – | done (merged) | – | – |
 | IMP-11 | `imp-11-model-sources` (PR #5) | done (in PR #5) | – | – |
 | IMP-10 | `imp-10-genui-validate` | done | `cargo test --workspace` (17 unit/ts-rs + 5 `tests/genui.rs` + 2 server tests pass); `npm run gate` passes | TS fallback renderer and S38 UI wiring (later UI card) |
 | IMP-28 | `imp-28-genui-fuzz` (stacked on IMP-10) | done | `arbitrary_json_never_yields_an_unsafe_or_partial_card` (2 000 default; 50 000 with `SPEKIN_GENUI_FUZZ_CASES=50000`, both pass); `imp_28_failing_case_data_url_in_text_field_is_rejected`; `imp_28_unsafe_urls_are_rejected_in_every_string_field`; `npm run gate` exit 0 | CI run of the PR (not observed); repeated 50 000-case runs with other seeds; Windows/Linux; S38 TS fallback renderer and harness PNGs (UI, out of lane) |
-| IMP-22 | – | open | – | – |
-| IMP-03 | – | open | – | – |
+| IMP-22 | – | done (merged) | – | – |
+| IMP-03 | – | done (merged) | – | – |
 | IMP-25 | imp-25-context-builder | done | `crates/spekin-core/tests/context_builder.rs`: 5 unit cases (`request_carries_only_listed_chips_and_never_unchipped_or_hidden_frames`, `hidden_frame_is_never_included_even_if_referenced_as_a_chip`, `removing_a_chip_changes_context_never_board_content`, `duplicate_chips_are_deduplicated_preserving_first_order`, `empty_chip_set_produces_empty_context_with_zero_tokens`) + 2 proptest properties (`every_output_item_is_in_the_chip_set_and_never_hidden`, `removing_any_chip_never_changes_board_hash`) + 2 unit tests in `src/context.rs`. `cargo test --workspace` (14 + 7 + 2 pass); `npm run gate` passes (rules, sync, board lint, typecheck, vitest, build, cargo fmt/clippy/test, contracts current). Bindings committed: `BoardArtifact`, `BoardSnapshot`, `ContextChip`, `ContextItemStatus`, `RequestContext`, `RequestContextItem`. | No HTTP API route yet (core-only card); not wired to S29 or S35 UI (ui lane cards IMP-01/IMP-07); no real model tokenizer (uses per-chip estimated token counts). |
 | IMP-10 | `imp-10-genui-validate` (PR #7) | done (in PR #7) | – | – |
 | IMP-22 | `imp-22-skills-core` | done | `cargo test --workspace` (15 unit/ts-rs + 5 `tests/skills.rs` + 2 server tests pass); `npm run gate` passes | GitHub network fetcher and IMP-04 proposal integration (out of scope / waiting on PR #2) |
@@ -123,12 +127,12 @@ TDD commits: `688ba60` (red tests), `a5e3ff8` (core head helpers), `970a258` (ea
 
 - 23 Nov 2026 · IMP-03: `apps/web/src/data/source.ts` still serves the screens. When IMP-01 lands, switch it to `fetchProject`/`fetchStages` (or keep it as the offline fallback) — that file is ui-lane owned, so I did not touch it.
 - 23 Nov 2026 · IMP-03: `apps/web/src/data/api.ts` keeps runtime mirrors of the `StageId` and `StageTone` values for its shape check, because ts-rs exports the types but not the enum values. If you want one source, the core could emit a value list (for example a generated `STAGE_IDS` const) — that needs a lead decision on the ts-rs setup.
-| IMP-03 | `imp-03-api-source` (PR #1) | open (in PR #1) | – | – |
-| IMP-04 | `imp-04-proposals` (PR #2) | open (in PR #2) | – | – |
+| IMP-03 | `imp-03-api-source` (PR #1) | done (merged, PR #1) | – | – |
+| IMP-04 | `imp-04-proposals` (PR #2) | done (merged, PR #2) | – | – |
 | IMP-12 | `imp-12-licences` | done | `node --test tools/checks/licences.test.mjs` (11/11 pass, incl. workspace link resolution without `node_modules`); `node tools/checks/licences.mjs --check` (`licences ok (170 npm packages, 62 crates, 0 Python)`); `npm run gate` passes | Not wired into root `package.json` `npm run gate` (lead-owned); Windows/Linux paths not tested (macOS only) |
-| IMP-11 | – | open | – | – |
-| IMP-10 | – | open | – | – |
-| IMP-22 | – | open | – | – |
+| IMP-11 | – | done (merged) | – | – |
+| IMP-10 | – | done (merged) | – | – |
+| IMP-22 | – | done (merged) | – | – |
 
 
 - 2026-11-23 (IMP-12): Please add `node tools/checks/licences.mjs --check` and `node --test tools/checks/licences.test.mjs` to `npm run gate` in root `package.json` (lead-owned).
