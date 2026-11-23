@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { SAMPLE_GENUI_CARDS, apiSource, sampleData, sampleSource } from '../data/source';
+import { apiSource, sampleData, sampleSource } from '../data/source';
 import { createConfirmState, executeConfirmedAction, GenUiWorkArea } from './GenUiWorkArea';
 
 const { PACKAGES } = sampleData;
@@ -67,15 +67,15 @@ describe('S38 GenUI panel (IMP-19, IMP-21)', () => {
   });
 
   it('in sample mode the recorded Rust verdict decides, with no request', async () => {
-    const valid = SAMPLE_GENUI_CARDS.find((c) => c.verdict.status === 'valid')!;
-    const refused = SAMPLE_GENUI_CARDS.find((c) => c.verdict.status === 'rejected')!;
+    const valid = sampleData.GENUI_CARDS.find((c) => c.verdict.status === 'valid')!;
+    const refused = sampleData.GENUI_CARDS.find((c) => c.verdict.status === 'rejected')!;
 
     expect(sampleSource.knownCardVerdict(valid.payload)?.status).toBe('valid');
     expect(sampleSource.knownCardVerdict(refused.payload)?.status).toBe('rejected');
     expect(sampleSource.knownCardVerdict({ id: 'not-a-sample-card' })).toBeNull();
     expect(await sampleSource.validateGenUi(refused.payload)).toEqual({
       status: 'rejected',
-      reason: expect.stringMatching(/forecast|missing/),
+      reason: expect.stringMatching(/privilege|accept/i),
     });
 
     const html = renderToStaticMarkup(
