@@ -42,7 +42,12 @@ impl PgStore {
     /// Connect and run the migrations. This is the entry point the server uses
     /// when `DATABASE_URL` is set.
     pub async fn connect(url: &str) -> Result<Self, StoreError> {
+        // IMP-40: two concurrent writers each hold one transaction while the
+        // loser blocks on the winner's row lock; reads also need a free
+        // connection. Ten is ample and well above sqlx's need here, but explicit
+        // so the pool can never be the thing that deadlocks a race.
         let pool = sqlx::postgres::PgPoolOptions::new()
+            .max_connections(10)
             .connect(url)
             .await
             .map_err(backend)?;
