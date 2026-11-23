@@ -203,11 +203,7 @@ fn write_revision(
 
 /// Write a project state under an already-held lock, refusing a stale version
 /// and bumping it on success (IMP-40).
-fn write_state(
-    inner: &mut MemoryInner,
-    id: &str,
-    state: &ProjectState,
-) -> Result<(), StoreError> {
+fn write_state(inner: &mut MemoryInner, id: &str, state: &ProjectState) -> Result<(), StoreError> {
     if let Some(current) = inner.states.get(id) {
         if current.version != state.version {
             return Err(StoreError::StaleState {
@@ -499,7 +495,10 @@ pub mod test_support {
         let stale_save = store.save_state(&id, &stale_state).await;
         assert!(matches!(
             stale_save,
-            Err(StoreError::StaleState { base: 1, current: 2 })
+            Err(StoreError::StaleState {
+                base: 1,
+                current: 2
+            })
         ));
 
         // an atomic revision + state write lands both or neither (IMP-40): the
@@ -535,7 +534,10 @@ pub mod test_support {
             .await;
         assert!(matches!(
             stale_atomic,
-            Err(StoreError::StaleState { base: 2, current: 3 })
+            Err(StoreError::StaleState {
+                base: 2,
+                current: 3
+            })
         ));
         assert_eq!(
             store.revision(&id, "spec").await.unwrap().unwrap().n,
@@ -555,7 +557,10 @@ pub mod test_support {
             .await;
         assert!(matches!(
             stale_rev,
-            Err(StoreError::StaleRevision { base: 2, current: 3 })
+            Err(StoreError::StaleRevision {
+                base: 2,
+                current: 3
+            })
         ));
         assert_eq!(
             store.load_state(&id).await.unwrap().unwrap().version,
