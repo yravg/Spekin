@@ -1,6 +1,7 @@
 import { sampleData } from '../data/source';
 const { CTX_DESIGN, FRAMES, MODEL, REQS } = sampleData;
 import type { PillTuple, SampleConflict, SampleFrame } from '../data/source';
+import { useConnection } from '../data/provider';
 import { useWorkspace } from '../state/workspace';
 import { Icon } from '../ui/Icon';
 import { Btn, IconBtn } from '../ui/Button';
@@ -10,6 +11,7 @@ import { ArtifactTabs, type ArtifactTabItem } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
 import { Inspector, InspectorRow } from './Inspector';
 import { MiniDashboard } from './MiniDashboard';
+import { OfflineBanner } from './OfflineBanner';
 import { routeGenUiPrompt, type GenUiMode } from '../genui/GenUiWorkArea';
 
 const DESIGN_TABS: ArtifactTabItem[] = [
@@ -118,6 +120,7 @@ export function DesignWorkArea(
   const toggleChatCollapsed = useWorkspace((s) => s.toggleChatCollapsed);
   const recordIntent = useWorkspace((s) => s.recordIntent);
   const conflict = useWorkspace((s) => s.conflict);
+  const connection = useConnection();
   const dirtyTabs = useWorkspace((s) => s.dirtyTabs);
   const triggerConflict = useWorkspace((s) => s.triggerConflict);
   const resolveConflict = useWorkspace((s) => s.resolveConflict);
@@ -290,6 +293,7 @@ export function DesignWorkArea(
           }}
           right={right}
         />
+        {connection.offline ? <OfflineBanner lastLoadedAt={connection.lastLoadedAt} /> : null}
         {conflict ? (
           <ConflictBanner
             conflict={conflict}
