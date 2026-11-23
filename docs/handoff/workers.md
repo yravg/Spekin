@@ -1,6 +1,6 @@
 # Running the build workers
 
-The owner runs two AI workers overnight. Each works in its own git worktree, on its own branch, one card per pull request. **Only the owner merges.** The lead (Claude Code) reviews each pull request and leaves a review comment, but a safety check stops the lead from merging.
+The owner runs two AI workers overnight. Each works in its own git worktree, on its own branch, one card per pull request. **Workers never merge.** The lead (Claude Code) reviews each pull request. Under the owner rule of 23 Nov 2026, the lead then merges it to main by itself if the owner has not replied within 1 minute of being told. On 23 Nov every open pull request (#1–#45) was merged, so the merge-order notes below are history.
 
 | Lane | Tool | Model | Worktree |
 |---|---|---|---|
