@@ -142,6 +142,7 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-39 | ui | Build the S35 offline state (F378, drawn 23 Nov): in API mode a failed read keeps the last loaded copy with the banner and the Offline save chip; never sample data. Harness path S35 offline | IMP-37 | done, part open: PR #42, stacked on #40 (lead re-ran 81/81; real-server stop test and banners on other boards open) |
 | IMP-38 | core | Store trait, memory store, Postgres store (ADR 0008) | PR #37 | done, part open: PR #41, stacked on #37 (lead ran the Postgres stage on Postgres 16 in Docker: shared suite passes; concurrent writers not tested) |
 | IMP-40 | core | PgStore under concurrency: two connections race one revision, exactly one wins, the other gets the stale error; audit chain stays valid | IMP-38 | in progress (OpenCode Go DeepSeek V4 Pro, on #41) |
+| IMP-41 | ui | Screens write through the data door (accept, revert, reserve and settle, skill copy, edit and rollback, delete and restore) | IMP-39 | in progress (OpenCode Go DeepSeek V4.1 Flash, on #42) |
 | IMP-36 | core | GenUI sample verdicts equal the Rust validator | IMP-21 | done: PR #40, stacked on #39 (lead re-ran 80/80; Rust test pins verdicts) |
 
 ### IMP-21 · Screens read through one data source; API mode (ui)
@@ -177,6 +178,15 @@ Read docs/adr/0008-persistence.md (short). Base: `origin/integration-2-2026-11-2
 4. The server picks `PgStore` when `DATABASE_URL` is set. A command `cargo run -p spekin-server -- seed-sample` seeds Meranti Yard; it refuses unless `--yes` is given.
 5. Tests: one shared test suite run against `MemoryStore` always, and against `PgStore` only when `TEST_DATABASE_URL` is set; without it print "postgres stage skipped" (never claim it passed). Licence check (`node tools/checks/licences.mjs --check`) must pass with the new crates.
 6. Checks: `npm run gate` passes. Say in the PR whether the Postgres stage ran.
+
+### IMP-41 · Screens write through the data door (ui)
+
+Base: `imp-39-offline` (PR #42). Branch `imp-41-writes`.
+1. Add writes to the `DataSource` interface, using the existing client functions in `apps/web/src/data/api.ts` (do not change api.ts; if one is missing, write it under "Requests to lead"): accept and reject a proposal (S33), revert a revision (S33), estimate then reserve a run and settle it (composer Send, S36), copy and edit a skill and roll back a version (S40), delete and restore a project (S27).
+2. In sample mode each write changes an in-memory copy of the sample, so the screen shows the result the board draws for the next state (e.g. after Accept, the S33 accepted state). In API mode it calls the server and redraws from the server's answer. A 409 (stale) shows the S35 conflict state; a network failure shows the offline banner and keeps the user's input; nothing is ever shown as saved before the server says so.
+3. Every action that spends credits shows the estimate and needs the explicit confirm the boards draw; no write happens on Back/Forward or on page load.
+4. Tests first: one vitest per write in sample mode (the next drawn state appears), one per write in API mode with mocked fetch (request body and the redraw), one for 409 → conflict, one for a failed reserve that never shows "reserved".
+5. Checks: `npm run gate`; all 14 boards still 81/81 in sample mode (the starting state of every board must not change); list which board states a write now reaches by a real click and update those harness paths only if their steps get simpler (never weaker).
 
 ### IMP-01 · S35 work area (ui)
 
