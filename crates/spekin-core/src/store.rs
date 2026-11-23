@@ -204,13 +204,13 @@ fn write_revision(
 /// Write a project state under an already-held lock, refusing a stale version
 /// and bumping it on success (IMP-40).
 fn write_state(inner: &mut MemoryInner, id: &str, state: &ProjectState) -> Result<(), StoreError> {
-    if let Some(current) = inner.states.get(id) {
-        if current.version != state.version {
-            return Err(StoreError::StaleState {
-                base: state.version,
-                current: current.version,
-            });
-        }
+    if let Some(current) = inner.states.get(id)
+        && current.version != state.version
+    {
+        return Err(StoreError::StaleState {
+            base: state.version,
+            current: current.version,
+        });
     }
     let mut next = state.clone();
     next.version = state.version.saturating_add(1);
@@ -282,13 +282,13 @@ impl Store for MemoryStore {
                 current: current_n,
             });
         }
-        if let Some(current) = inner.states.get(id) {
-            if current.version != state.version {
-                return Err(StoreError::StaleState {
-                    base: state.version,
-                    current: current.version,
-                });
-            }
+        if let Some(current) = inner.states.get(id)
+            && current.version != state.version
+        {
+            return Err(StoreError::StaleState {
+                base: state.version,
+                current: current.version,
+            });
         }
         inner
             .revisions
