@@ -424,6 +424,67 @@ pub mod test_support {
             Err(StoreError::StaleState { base: 1, current: 2 })
         ));
 
+        // an atomic revision + state write lands both or neither (IMP-40): the
+        // revision advances only together with the state that carries its audit entry.
+        let r3 = r2.next("R-DASH-020: second alert rule.".to_owned());
+        let mut atomic_state = store.load_state(&id).await.unwrap().unwrap();
+        assert_eq!(atomic_state.version, 2);
+        let entry = atomic_state.audit.append(
+            AuditEvent {
+                actor: "sample-user".to_owned(),
+                action: AuditAction::Accept,
+                target_id: "P-1".to_owned(),
+                revision: Some(r3.label()),
+                reason: "accepted".to_owned(),
+            },
+            1_735_689_600,
+        );
+        atomic_state.audit_head = entry.hash.clone();
+        store
+            .update_revision_and_state(&id, "spec", 2, &r3, &atomic_state)
+            .await
+            .unwrap();
+        assert_eq!(store.revision(&id, "spec").await.unwrap().unwrap().n, 3);
+        let after_atomic = store.load_state(&id).await.unwrap().unwrap();
+        assert_eq!(after_atomic.version, 3);
+        assert_eq!(after_atomic.audit.len(), 1);
+        assert_eq!(after_atomic.audit_head, entry.hash);
+
+        // a stale state version refuses the whole write — the revision must not move.
+        let r4 = r3.next("R-DASH-021".to_owned());
+        let stale_atomic = store
+            .update_revision_and_state(&id, "spec", 3, &r4, &atomic_state)
+            .await;
+        assert!(matches!(
+            stale_atomic,
+            Err(StoreError::StaleState { base: 2, current: 3 })
+        ));
+        assert_eq!(
+            store.revision(&id, "spec").await.unwrap().unwrap().n,
+            3,
+            "a stale state must not advance the revision"
+        );
+
+        // a stale revision base refuses the whole write — the state must not move.
+        let mut rev_stale_state = store.load_state(&id).await.unwrap().unwrap();
+        rev_stale_state.rejections.push(crate::Rejection {
+            id: "P-1".to_owned(),
+            base: 1,
+            reason: "again".to_owned(),
+        });
+        let stale_rev = store
+            .update_revision_and_state(&id, "spec", 2, &r4, &rev_stale_state)
+            .await;
+        assert!(matches!(
+            stale_rev,
+            Err(StoreError::StaleRevision { base: 2, current: 3 })
+        ));
+        assert_eq!(
+            store.load_state(&id).await.unwrap().unwrap().version,
+            3,
+            "a stale revision base must not move the state"
+        );
+
         // project entries: put a second, deleted project, then list both.
         let mut deleted = ProjectEntry::new(
             "kenari-fleet".to_owned(),

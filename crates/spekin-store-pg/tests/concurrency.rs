@@ -13,8 +13,8 @@ use std::time::Duration;
 
 use spekin_core::store::test_support;
 use spekin_core::{
-    AuditAction, AuditEvent, Ledger, LedgerCaps, ProjectState, Revision, Store, StoreError,
-    estimate,
+    AuditAction, AuditEvent, Ledger, LedgerCaps, ProjectState, Rejection, Revision, Store,
+    StoreError, estimate,
 };
 use spekin_store_pg::PgStore;
 use tokio::sync::{Barrier, Mutex};
@@ -78,8 +78,6 @@ async fn accept_once(store: PgStore, barrier: Arc<Barrier>, id: String) -> Resul
     barrier.wait().await;
 
     let (base, next, mut state) = prep?;
-    store.update_revision(&id, "spec", base, &next).await?;
-
     let entry = state.audit.append(
         AuditEvent {
             actor: "sample-user".to_owned(),
@@ -91,6 +89,45 @@ async fn accept_once(store: PgStore, barrier: Arc<Barrier>, id: String) -> Resul
         NOW,
     );
     state.audit_head = entry.hash.clone();
+    // IMP-40: the revision and its audit entry (in the state) commit atomically,
+    // so a revision can never advance without its entry.
+    store
+        .update_revision_and_state(&id, "spec", base, &next, &state)
+        .await
+}
+
+/// One side of the accept-vs-reject race. A reject only writes the state (a
+/// rejection plus its audit entry); all fallible work happens before the barrier,
+/// so the barrier is always awaited and the two writes always overlap.
+async fn reject_once(store: PgStore, barrier: Arc<Barrier>, id: String) -> Result<(), StoreError> {
+    let prep: Result<ProjectState, StoreError> = async {
+        let mut state = store
+            .load_state(&id)
+            .await?
+            .ok_or_else(|| StoreError::NotFound("state".to_owned()))?;
+        state.rejections.push(Rejection {
+            id: "P-1".to_owned(),
+            base: 1,
+            reason: "no".to_owned(),
+        });
+        let entry = state.audit.append(
+            AuditEvent {
+                actor: "sample-user".to_owned(),
+                action: AuditAction::Reject,
+                target_id: "P-1".to_owned(),
+                revision: Some("r1".to_owned()),
+                reason: "rejected".to_owned(),
+            },
+            NOW,
+        );
+        state.audit_head = entry.hash.clone();
+        Ok(state)
+    }
+    .await;
+
+    barrier.wait().await;
+
+    let state = prep?;
     store.save_state(&id, &state).await?;
     Ok(())
 }
@@ -197,6 +234,78 @@ async fn two_concurrent_accepts_only_one_wins() {
             2,
             "round {round}: revision advanced once"
         );
+    }
+}
+
+/// IMP-40 item 2: an accept (revision + state) racing a reject (state only) on the
+/// same project. Exactly one wins; the loser is refused with `StaleState`. The
+/// invariant is that the revision advances *only* when its audit entry committed
+/// with it — if the revision moved, the single audit entry is the accept; if not,
+/// it is the reject.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn accept_vs_reject_never_advances_the_revision_without_its_audit_entry() {
+    let Some(store) = connect().await else { return };
+    let _guard = DB_GUARD.lock().await;
+
+    let id = "imp40-accept-reject".to_owned();
+    let (_, seed) = test_support::seed();
+    store.seed(&id, &seed).await.expect("seed");
+
+    for round in 0..50 {
+        store.seed(&id, &seed).await.expect("reset for round");
+
+        let barrier = Arc::new(Barrier::new(2));
+        let h1 = tokio::spawn(accept_once(store.clone(), barrier.clone(), id.clone()));
+        let h2 = tokio::spawn(reject_once(store.clone(), barrier.clone(), id.clone()));
+
+        let (r1, r2) = tokio::time::timeout(RACE_TIMEOUT, async {
+            let r1 = h1.await.expect("accept task panicked");
+            let r2 = h2.await.expect("reject task panicked");
+            (r1, r2)
+        })
+        .await
+        .unwrap_or_else(|_| {
+            panic!("round {round}: accept-vs-reject race timed out after {RACE_TIMEOUT:?}")
+        });
+
+        let ok = [r1.is_ok(), r2.is_ok()].iter().filter(|b| **b).count();
+        assert_eq!(
+            ok, 1,
+            "round {round}: exactly one of accept/reject should win, got {r1:?} {r2:?}"
+        );
+        let stale = [&r1, &r2].iter().any(|r| {
+            matches!(
+                r,
+                Err(StoreError::StaleState {
+                    base: 1,
+                    current: 2
+                })
+            )
+        });
+        assert!(
+            stale,
+            "round {round}: the loser must be StaleState, got {r1:?} {r2:?}"
+        );
+
+        let state = store.load_state(&id).await.expect("load").expect("state");
+        assert_eq!(state.audit.len(), 1, "round {round}: one audit entry");
+        spekin_core::verify_with_head(&state.audit, &state.audit_head)
+            .expect("round {round}: audit verifies");
+        let action = state.audit.entries()[0].action;
+        let rev_n = store.revision(&id, "spec").await.unwrap().unwrap().n;
+        match rev_n {
+            2 => assert_eq!(
+                action,
+                AuditAction::Accept,
+                "round {round}: the revision advanced, so the audit entry must be the accept"
+            ),
+            1 => assert_eq!(
+                action,
+                AuditAction::Reject,
+                "round {round}: the revision did not advance, so the audit entry must be the reject"
+            ),
+            other => panic!("round {round}: unexpected revision {other}"),
+        }
     }
 }
 
