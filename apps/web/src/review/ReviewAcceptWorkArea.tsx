@@ -1,6 +1,7 @@
 import { useLayoutEffect, useState } from 'react';
-import { sampleData, type DiffSegment, type PillTuple, type SampleReviewProposal, type StageId } from '../data/source';
+import { SAMPLE_PROJECT_ID, sampleData, type DiffSegment, type PillTuple, type SampleReviewProposal, type StageId } from '../data/source';
 const { MODEL, REVIEW_NITS, REVIEW_PROPOSAL } = sampleData;
+import { useData } from '../data/provider';
 import { useWorkspace, type SaveState } from '../state/workspace';
 import { Icon } from '../ui/Icon';
 import { Btn, IconBtn } from '../ui/Button';
@@ -106,10 +107,53 @@ export function ReviewAcceptWorkArea(props: {
 }) {
   const { initialState = 'pins', onShellOverride, onOpenHandoff } = props;
   const recordIntent = useWorkspace((s) => s.recordIntent);
+  const data = useData();
 
   const [state, setState] = useState<ReviewState>(initialState);
   const [includedHunks, setIncludedHunks] = useState<string[]>(REVIEW_PROPOSAL.hunks.map((h) => h.id));
   const [draft, setDraft] = useState('');
+  const [writing, setWriting] = useState<'accept' | 'reject' | null>(null);
+  const [writeError, setWriteError] = useState<string | null>(null);
+
+  // IMP-41: Accept and Reject write through the data door, then draw the board's next state.
+  // A 409 (stale) draws the S35 conflict save chip; nothing is saved until the source says so.
+  async function writeAccept() {
+    if (writing || includedHunks.length === 0) return;
+    setWriting('accept');
+    setWriteError(null);
+    onShellOverride?.({ save: { status: 'saving', tone: 'warn', text: 'Saving…' } });
+    const out = await data.acceptProposal(SAMPLE_PROJECT_ID, REVIEW_PROPOSAL.id);
+    setWriting(null);
+    if (out.ok) {
+      setState('accepted');
+      onShellOverride?.({ save: { status: 'saved', tone: 'ok', text: 'Saved 12:52' } });
+    } else if (out.kind === 'stale') {
+      setState('stale');
+      onShellOverride?.({ save: { status: 'conflict', tone: 'bad', text: 'Conflict · proposal changed' } });
+    } else {
+      setWriteError(out.message);
+      onShellOverride?.({ save: { status: 'failed', tone: 'bad', text: 'Failed (kept on this device)' } });
+    }
+  }
+
+  async function writeReject() {
+    if (writing) return;
+    setWriting('reject');
+    setWriteError(null);
+    onShellOverride?.({ save: { status: 'saving', tone: 'warn', text: 'Saving…' } });
+    const out = await data.rejectProposal(SAMPLE_PROJECT_ID, REVIEW_PROPOSAL.id, 'Not this increment');
+    setWriting(null);
+    if (out.ok) {
+      setState('rejected');
+      onShellOverride?.({ save: { status: 'saved', tone: 'ok', text: 'Saved 12:52' } });
+    } else if (out.kind === 'stale') {
+      setState('stale');
+      onShellOverride?.({ save: { status: 'conflict', tone: 'bad', text: 'Conflict · proposal changed' } });
+    } else {
+      setWriteError(out.message);
+      onShellOverride?.({ save: { status: 'failed', tone: 'bad', text: 'Failed (kept on this device)' } });
+    }
+  }
 
   useLayoutEffect(() => {
     if (!onShellOverride) return;
@@ -397,27 +441,23 @@ export function ReviewAcceptWorkArea(props: {
                   <div className="tx">
                     <b>{includedHunks.length} of 4 hunks included</b>
                     <span>Creates r15 from r14 · 3 items need review · 1 ticket · 1 audit entry</span>
+                    {writeError ? <span role="alert">{writeError}</span> : null}
                   </div>
                   <span className="sp-fill" />
                   <RevBtn
                     does="Rejects the proposal: no new revision, r14 stays current; one audit entry is recorded"
                     feature="F252"
-                    onClick={() => {
-                      rejectProposal(REVIEW_PROPOSAL, 'r14');
-                      setState('rejected');
-                    }}
+                    disabled={writing !== null}
+                    onClick={() => void writeReject()}
                   >
                     Reject
                   </RevBtn>
                   <RevBtn
                     cls="ink"
-                    disabled={includedHunks.length === 0}
+                    disabled={includedHunks.length === 0 || writing !== null}
                     does="Asks to confirm with Cancel as the default, then creates r15 from r14 with the included hunks and one audit entry"
                     feature="F251"
-                    onClick={() => {
-                      const res = acceptProposal(REVIEW_PROPOSAL, 'r14', includedHunks);
-                      if (res.ok) setState('accepted');
-                    }}
+                    onClick={() => void writeAccept()}
                   >
                     Accept and create r15 <span className="rev-kbd">⌘↵</span>
                   </RevBtn>

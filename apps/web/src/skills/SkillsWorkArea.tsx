@@ -1,5 +1,5 @@
 import { useState, type KeyboardEvent } from 'react';
-import type { SkillHistoryEntry } from '@spekin/contracts';
+import type { SkillHistoryEntry, StageId } from '@spekin/contracts';
 import { sampleData, type ContextItem, type SampleSkillRow } from '../data/source';
 import { useData, useDataRead } from '../data/provider';
 const { MODEL, SKL_DETAIL, SKL_DIFF, SKL_EDIT, SKL_GH, SKL_GLOSS, SKL_UPDATES } = sampleData;
@@ -31,6 +31,19 @@ const SPEC_TABS: ArtifactTabItem[] = [
   { icon: 'doc', name: 'GLOSSARY.md' },
   { icon: 'layers', name: 'Skills' },
 ];
+
+const COPY_ID = 'grill-meranti';
+
+const STAGE_IDS: Record<string, StageId> = {
+  Planning: 'planning',
+  Specification: 'spec',
+  Design: 'design',
+  Frontend: 'frontend',
+  Backend: 'backend',
+  Integration: 'integration',
+  Testing: 'testing',
+  Deployment: 'deploy',
+};
 
 // S40 Skills library work area inside the Specification stage (boards-skills.mjs).
 export function SkillsWorkArea(props: { onShellOverride?: (o: { save?: SaveState; busy?: string }) => void }) {
@@ -65,6 +78,14 @@ export function SkillsWorkArea(props: { onShellOverride?: (o: { save?: SaveState
   const [ghPolicy, setGhPolicy] = useState('Auto-update');
   const [slashIndex, setSlashIndex] = useState(0);
   const [slashDismissed, setSlashDismissed] = useState(false);
+  // IMP-41: a write refreshes what the screen draws from the source's answer.
+  const [skillRows, setSkillRows] = useState<SampleSkillRow[] | null>(null);
+  const [historyRows, setHistoryRows] = useState<SkillHistoryEntry[] | null>(null);
+  const [copyId, setCopyId] = useState<string | null>(null);
+  const [writeError, setWriteError] = useState<string | null>(null);
+
+  const shownSkills = skillRows ?? skills;
+  const shownHistory = historyRows ?? history;
 
   const activeTab = view.tab ?? 'Skills';
   const isUseMode = activeTab === 'GLOSSARY.md';
@@ -121,6 +142,64 @@ export function SkillsWorkArea(props: { onShellOverride?: (o: { save?: SaveState
       }
     } else if (action.type === 'close') {
       setSlashDismissed(true);
+    }
+  }
+
+  // IMP-41: Copy and edit, Save and Roll back write through the data door. The screen redraws
+  // from the source's answer; a 409 stays on the drawn state and shows the failure, never "saved".
+  async function copyAndEdit() {
+    setWriteError(null);
+    const out = await data.copySkill('grill', { new_id: COPY_ID, new_title: SKL_EDIT.title });
+    if (out.ok) {
+      setCopyId(out.value.manifest.id);
+    } else if (out.kind === 'stale') {
+      // The copy already exists in this session; editing it is still the drawn next step.
+      setCopyId(COPY_ID);
+    } else {
+      setWriteError(out.message);
+      props.onShellOverride?.({ save: { status: 'failed', tone: 'bad', text: 'Failed (kept on this device)' } });
+      return;
+    }
+    setSkillRows(await data.skills());
+    openSubview('edit');
+  }
+
+  async function saveCopy() {
+    if (!copyId) {
+      recordIntent('F368:save-v2');
+      openSubview('detail');
+      return;
+    }
+    setWriteError(null);
+    props.onShellOverride?.({ save: { status: 'saving', tone: 'warn', text: 'Saving…' } });
+    const out = await data.editSkill(copyId, {
+      title: editTitle,
+      description: editDesc,
+      stages: editStages.map((s) => STAGE_IDS[s]).filter((s): s is StageId => s !== undefined),
+    });
+    if (out.ok) {
+      setSkillRows(await data.skills());
+      setHistoryRows(await data.skillHistory(copyId));
+      props.onShellOverride?.({ save: { status: 'saved', tone: 'ok', text: 'Saved 12:53' } });
+      openSubview('detail');
+    } else if (out.kind === 'stale') {
+      props.onShellOverride?.({ save: { status: 'conflict', tone: 'bad', text: 'Conflict · skill changed' } });
+      setWriteError(out.message);
+    } else {
+      props.onShellOverride?.({ save: { status: 'failed', tone: 'bad', text: 'Failed (kept on this device)' } });
+      setWriteError(out.message);
+    }
+  }
+
+  async function rollback(from: string) {
+    const target = copyId ?? 'grill';
+    const out = await data.rollbackSkill(target, from);
+    if (out.ok) {
+      setHistoryRows(await data.skillHistory(target));
+      setSkillRows(await data.skills());
+    } else {
+      // The drawn updates log is per source; a template that has no user copy keeps the intent.
+      recordIntent('F373:rollback:' + from);
     }
   }
 
@@ -247,6 +326,12 @@ export function SkillsWorkArea(props: { onShellOverride?: (o: { save?: SaveState
           right={right}
         />
 
+        {writeError ? (
+          <div className="sp-banner bad" role="alert" data-feature="F368">
+            <p>{writeError}</p>
+          </div>
+        ) : null}
+
         {isUseMode ? (
           <SkillGlossaryView rows={SKL_GLOSS} onOpenReview={() => recordIntent('F375:open-review')} />
         ) : subview === 'detail' ? (
@@ -255,7 +340,7 @@ export function SkillsWorkArea(props: { onShellOverride?: (o: { save?: SaveState
             policy={detailPolicy}
             enabled={enabledMap.grill ?? true}
             onBack={() => openSubview('library')}
-            onCopyEdit={() => openSubview('edit')}
+            onCopyEdit={() => void copyAndEdit()}
             onUseInChat={() => {
               setView('spec', { draft: '/grill' });
               setSlashDismissed(false);
@@ -277,27 +362,24 @@ export function SkillsWorkArea(props: { onShellOverride?: (o: { save?: SaveState
               setEditStages((prev) => (prev.includes(st) ? prev.filter((x) => x !== st) : [...prev, st]))
             }
             onDiscard={() => openSubview('detail')}
-            onSave={() => {
-              recordIntent('F368:save-v2');
-              openSubview('detail');
-            }}
+            onSave={() => void saveCopy()}
             onTryAgain={() => recordIntent('F369:try-again')}
           />
         ) : subview === 'updates' ? (
           <SkillUpdatesView
             updates={SKL_UPDATES}
-            history={history}
+            history={shownHistory}
             diff={SKL_DIFF}
             onBack={() => openSubview('library')}
             onCheckNow={() => recordIntent('F372:check-now')}
-            onRollback={(from) => recordIntent('F373:rollback:' + from)}
+            onRollback={(from) => void rollback(from)}
             onKeepCurrent={() => recordIntent('F372:keep-current')}
             onApplyWithoutTool={() => recordIntent('F372:apply-without-tool')}
             onApply={() => recordIntent('F372:apply')}
           />
         ) : (
           <SkillsLibraryView
-            skills={skills}
+            skills={shownSkills}
             stageFilter={stageFilter}
             sourceFilter={sourceFilter}
             statusFilter={statusFilter}

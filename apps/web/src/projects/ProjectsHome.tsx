@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { sampleData, type IntakeThumb, type SampleIntakeProject, type StageTone } from '../data/source';
+import { sampleData, type IntakeThumb, type RecentlyDeleted, type SampleIntakeProject, type StageTone } from '../data/source';
 import { useData, useDataRead } from '../data/provider';
 const { INTAKE_COMPOSER, INTAKE_DELETED, INTAKE_NEW, INTAKE_PROJECTS, INTAKE_SWITCH_ORDER, MODEL, PROJECT, STAGES, USAGE } = sampleData;
 import { useWorkspace } from '../state/workspace';
@@ -488,6 +488,9 @@ export function ProjectsHome({ initialView = 'home' }: { initialView?: 'home' | 
 
   const [view, setView] = useState<'home' | 'all' | 'first' | 'restore'>(initialView);
   const [overlay, setOverlay] = useState<'none' | 'switch' | 'create'>('none');
+  const [deletedView, setDeletedView] = useState<RecentlyDeleted | null>(null);
+  const [restoreError, setRestoreError] = useState<string | null>(null);
+  const deletedNow = deletedView ?? deleted;
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [ideaLang, setIdeaLang] = useState<'id' | 'en'>('en');
   const [startChip, setStartChip] = useState<'idea' | 'refs' | 'spec'>('idea');
@@ -537,9 +540,29 @@ export function ProjectsHome({ initialView = 'home' }: { initialView?: 'home' | 
 
   function openRestore() {
     setView('restore');
-    setGoneId(deleted.ids[0] ?? INTAKE_DELETED.id);
+    setGoneId(deletedNow.ids[0] ?? INTAKE_DELETED.id);
     setShowRestoreBanner(true);
     setOverlay('none');
+  }
+
+  // IMP-41: Restore writes through the data door; the screen redraws only when it answers.
+  async function restore(id: string) {
+    setRestoreError(null);
+    const out = await data.restoreProject(id);
+    if (out.ok) {
+      const daysLeft = { ...deletedNow.daysLeft };
+      delete daysLeft[id];
+      setDeletedView({ ids: deletedNow.ids.filter((x) => x !== id), daysLeft });
+      setGoneId(null);
+      setShowRestoreBanner(false);
+    } else {
+      setRestoreError(out.message);
+      if (out.kind === 'stale') {
+        // Already live elsewhere: draw it live rather than pretending a restore happened.
+        setDeletedView({ ids: deletedNow.ids.filter((x) => x !== id), daysLeft: deletedNow.daysLeft });
+        setGoneId(null);
+      }
+    }
   }
 
   return (
@@ -1000,10 +1023,7 @@ export function ProjectsHome({ initialView = 'home' }: { initialView?: 'home' | 
                     cls="ink"
                     does="Restores Kenari Fleet with all revisions; it returns to the list in its last-opened place"
                     feature="F134"
-                    onClick={() => {
-                      setGoneId(null);
-                      setShowRestoreBanner(false);
-                    }}
+                    onClick={() => void restore(INTAKE_DELETED.id)}
                   />
                   <IntakeBtn
                     label="Dismiss"
@@ -1013,6 +1033,11 @@ export function ProjectsHome({ initialView = 'home' }: { initialView?: 'home' | 
                     feature="F134"
                     onClick={() => setShowRestoreBanner(false)}
                   />
+                </div>
+              ) : null}
+              {restoreError ? (
+                <div className="sp-banner bad" role="alert" data-feature="F134">
+                  <p>{restoreError}</p>
                 </div>
               ) : null}
               <div className="int-ph">
@@ -1109,10 +1134,7 @@ export function ProjectsHome({ initialView = 'home' }: { initialView?: 'home' | 
                     project={p}
                     gone={isRestore && goneId === p.id}
                     onOpen={openProject}
-                    onRestore={() => {
-                      setGoneId(null);
-                      setShowRestoreBanner(false);
-                    }}
+                    onRestore={() => void restore(p.id)}
                     onMenu={(id) => recordIntent('F135:menu:' + id)}
                   />
                 ))}
