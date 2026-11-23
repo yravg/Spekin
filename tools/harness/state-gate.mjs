@@ -55,6 +55,10 @@ try { await fetch(APP + '/'); } catch { console.log('App not reachable at ' + AP
 
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
+// Each click-path step may wait this long. CI drives the Vite dev server, which compiles a screen's modules on
+// first visit; on a slow runner that went past the old 5 s (S36:source, S36:api flaked 23-24 Nov 2026). A pass
+// still returns as soon as the element appears, so a longer limit only slows a real failure.
+const STEP_MS = Number(process.env.HARNESS_STEP_MS || 15000);
 const results = [];
 for (const b of manifest) {
   for (const st of b.states) {
@@ -110,15 +114,15 @@ for (const b of manifest) {
     try {
       for (const [i, s] of p.steps.entries()) {
         if (s.goto !== undefined) { if (i > 0) throw new Error('goto after the first step is a URL shortcut'); await ap.goto(APP + s.goto); }
-        else if (s.wait) await ap.waitForSelector(s.wait, { timeout: 5000 });
-        else if (s.click) await ap.locator(s.click).first().click({ timeout: 5000 });
-        else if (s.dblclick) await ap.locator(s.dblclick).first().dblclick({ timeout: 5000 });
-        else if (s.hover) await ap.locator(s.hover).first().hover({ timeout: 5000 });
+        else if (s.wait) await ap.waitForSelector(s.wait, { timeout: STEP_MS });
+        else if (s.click) await ap.locator(s.click).first().click({ timeout: STEP_MS });
+        else if (s.dblclick) await ap.locator(s.dblclick).first().dblclick({ timeout: STEP_MS });
+        else if (s.hover) await ap.locator(s.hover).first().hover({ timeout: STEP_MS });
         else if (s.press) await ap.keyboard.press(s.press);
-        else if (s.type) await ap.locator(s.type[0]).first().fill(s.type[1], { timeout: 5000 });
+        else if (s.type) await ap.locator(s.type[0]).first().fill(s.type[1], { timeout: STEP_MS });
         else throw new Error('unknown step ' + JSON.stringify(s));
       }
-      await ap.waitForSelector('[data-screen="' + b.screen + '"]', { timeout: 5000 });
+      await ap.waitForSelector('[data-screen="' + b.screen + '"]', { timeout: STEP_MS });
     } catch (e) { r.reasons.push('not reached: ' + e.message.split('\n')[0]); await ap.close(); if (actx !== ctx) await actx.close(); continue; }
     await ap.evaluate(() => document.fonts.ready);
     const aApp = frame ? ap.locator('body') : ap.locator(APP_ROOT).first();
