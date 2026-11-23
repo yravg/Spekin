@@ -22,6 +22,7 @@ import {
   fetchProject,
   fetchSkillHistory,
   fetchSkills,
+  fetchSkillsAudit,
   revertRevision as revertRevisionRequest,
   fetchStages,
   fetchUsage,
@@ -161,6 +162,8 @@ export interface DataSource {
   contracts(id: string, options?: ApiOptions): Promise<SampleDeliveryContract[]>;
   /** The hash-chained audit view; null when the source has no chain (the sample). */
   audit(id: string, options?: ApiOptions): Promise<AuditResponse | null>;
+  /** The skills library's own audit view (IMP-45); null when the source has no chain (the sample). */
+  skillsAudit(options?: ApiOptions): Promise<AuditResponse | null>;
   /** Recently deleted projects for S27. */
   recentlyDeleted(options?: ApiOptions): Promise<RecentlyDeleted>;
   /** A recorded verdict for a sample card, or null when the source must ask the server. */
@@ -625,6 +628,8 @@ export const sampleSource: DataSource = {
   contracts: async (id) => (id === SAMPLE_PROJECT_ID ? sampleModule.DELIVERY_CONTRACTS : []),
   // The sample has no hash-chained log; S33 draws its proposal's recorded audit entry.
   audit: async () => null,
+  // The sample draws no skills audit; the library's own chain lives on the API only.
+  skillsAudit: async () => null,
   recentlyDeleted: async () => ({
     ids: [...sampleWrites.deleted.keys()],
     daysLeft: Object.fromEntries(
@@ -700,6 +705,7 @@ export const apiSource: DataSource = {
     });
   },
   audit: (id, options) => fetchAudit(id, options),
+  skillsAudit: (options) => fetchSkillsAudit(options),
   recentlyDeleted: async (options) => {
     const rows = await fetchDeletedProjects(options);
     return {

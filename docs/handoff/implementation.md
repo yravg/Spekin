@@ -160,6 +160,12 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-44 | core | Stage id and tone values generated from Rust, api.ts mirrors removed | – | open (worker: OpenCode Go `hy4`) |
 | IMP-45 | ui | Skills audit in the data door; S35 offline proven with a real server stop | IMP-43 | open (worker: OpenCode Go `hy4`) |
 | IMP-46 | ui | Sweep: 0 page errors, no sideways scroll at 1024 px, reduced motion, on every checked state | – | open (worker: OpenCode Go `hy4`) |
+| IMP-47 | ui | S28 parity: F145, F147, F153, F154 | – | open (worker: OpenCode Go `hy4`) |
+| IMP-48 | ui | S29 and S32 parity: F165, F173, F231, F234, F235 | – | open (worker: OpenCode Go `hy4`) |
+| IMP-49 | ui | S33 parity: F244, F248, F250, F253, F255 | – | open (worker: OpenCode Go `hy4`) |
+| IMP-50 | ui | S34, S37, S38, T01 parity: F275, F314, F321, F322, F329, F352 | – | open (worker: OpenCode Go `hy4`) |
+| IMP-51 | ui | Every state reachable at 1024 × 768 (overlays in the 1024–1439 band) | – | open (worker: OpenCode Go `hy4`) |
+| IMP-52 | lead-assist | Classify the 80 PRD requirements no canvas feature maps to | – | open (worker: OpenCode Go `hy4`) |
 
 ### IMP-21 · Screens read through one data source; API mode (ui)
 
@@ -194,6 +200,43 @@ Read docs/adr/0008-persistence.md (short). Base: `origin/integration-2-2026-11-2
 4. The server picks `PgStore` when `DATABASE_URL` is set. A command `cargo run -p spekin-server -- seed-sample` seeds Meranti Yard; it refuses unless `--yes` is given.
 5. Tests: one shared test suite run against `MemoryStore` always, and against `PgStore` only when `TEST_DATABASE_URL` is set; without it print "postgres stage skipped" (never claim it passed). Licence check (`node tools/checks/licences.mjs --check`) must pass with the new crates.
 6. Checks: `npm run gate` passes. Say in the PR whether the Postgres stage ran.
+
+### Rules for IMP-47 to IMP-52 (parity cards, 24 Nov 2026)
+
+Goal: every cell on the live parity page (`node tools/live/parity-export.mjs`) is proven. A canvas feature is proven only when its `data-feature="F…"` id is on the element in `apps/web/src` that does what the board draws (not in a comment, not in a test) and every state of its board passes the harness. Five workers run in parallel, so:
+- Do not edit `docs/handoff/lanes/*.md`, `docs/handoff/implementation.md`, `AGENTS.md`, boards, `tools/harness/**` or CI. Put status, evidence and "not checked" in the PR body. Requests to the lead go in the PR body under "Requests to lead".
+- Edit only the screen files of your boards (and their tests). If you must touch a shared file (`app.css`, `source.ts`, `ProjectShell.tsx`), keep the change small and say so in the PR.
+- Build exactly what the board draws (open it with `npm run canvas:serve`; the annotation text for each F-id is in `docs/design/spekin-canvas/boards-*.mjs`). A control the board marks LATER is drawn disabled with its LATER tag and carries the id.
+- Done = `npm run gate` passes, `npm run harness` 81/81, `node tools/live/parity-export.mjs` shows your F-ids proven, and `gh pr checks` all green.
+
+### IMP-47 · S28 reference intake: F145, F147, F153, F154 (ui)
+
+Branch `imp-47-s28-parity`. F145 paste an image on the board with Cmd/Ctrl+V (it arrives as a preview); F147 reference frames titled by source (ID, file name, kind, size); F153 Capture from a live page (shown, disabled, tagged LATER); F154 Send frames from an editor over MCP (shown, disabled, tagged LATER). Tests first in `intake.test.tsx`. This also proves R-WS-3 and R-WS-12.
+
+### IMP-48 · S29 frames canvas and S32 targeted change: F165, F173, F231, F234, F235 (ui)
+
+Branch `imp-48-s29-s32-parity`. F165 selection ring and handles that keep their size at any zoom, Shift and box multi-select; F173 zoomed-out overview keeps rounded frames and fixed-size titles; F231 "Also changed" lists related values with before and after; F234 part inspector with a parts list (keyboard pick, Enter selects); F235 credit estimate and model source shown before Send. Tests first in `canvas.test.tsx` and `targeted.test.tsx`.
+
+### IMP-49 · S33 review and accept: F244, F248, F250, F253, F255 (ui)
+
+Branch `imp-49-s33-parity`. F244 footer counts what is left ("7 changes · 1 needs a look"); F248 Apply to other frames is a separate reviewed change set; F250 linked requirements, tests, tasks and sources with what will be marked; F253 stale proposal guard (a proposal whose base is no longer current cannot be accepted; the core already refuses it, the screen must show and block it); F255 follow-up tickets from a gap check sit in the same diff. Tests first in `review.test.tsx`. This also proves R-EDT-6.
+
+### IMP-50 · S34, S37, S38, T01: F275, F314, F321, F322, F329, F352 (ui)
+
+Branch `imp-50-s34-s38-parity`. F275 LATER one expiring link instead of the long text (disabled, tagged LATER); F314 S37 is read-only (no deploy, retry or merge control; viewers cannot change); F321 provenance label on every GenUI card (Accepted artifact, Model proposal, Imported ...); F322 closed registry of card families, unknown components rejected (the IMP-10 validator; the fallback shows it); F329 evidence honesty (untested and failed never green, a missing figure says so); F352 touch rules on T01 (44 px targets, safe areas, 16 px text, no hover-only actions). Tests first in the boards' test files. This also proves R-ARC-5, R-DEL-2 and R-GUI-12.
+
+### IMP-51 · Every state reachable at 1024 × 768 (ui)
+
+Branch `imp-51-band-1024`. Lead decision (24 Nov 2026): 1024 px and wider is the desktop layout; T01 (below 1024) covers tablet and phone. `npm run e2e:sweep` fails 11 states at 1024×768 because floating overlays cover the button the click path needs: `S28:drop/imported/rejected/pii` (`.sp-chat`/`.sp-msgs` over "Choose files" F143), `S31:grid` (`.can-vb .ut` over "Grid" F204), `S32:select/working/applied/compare/variations/clip` (`.sp-zoom` over the canvas). In the `@media (min-width:1024px) and (max-width:1439px)` band only, make those overlays smaller or move them so no control is covered. Nothing may change at 1440×900. Checks: `npm run e2e:sweep` 81/81 exit 0, `npm run harness` 81/81, gate.
+
+### IMP-52 · Map the 80 unmapped PRD requirements (lead-assist, read-only plus one file)
+
+Branch `imp-52-req-map`. `node tools/live/parity-export.mjs` lists 80 requirements of `inputs/Spekin-PRD-v0.2.3.md` that no canvas feature maps to (`docs/design/spekin-canvas/maps-reqs.mjs`). For each one, write one row in a new file `docs/handoff/req-map-2026-11-24.md` (table: R-id, the requirement in short, verdict, evidence):
+- `map` — an existing F-id already does it: name the F-id and the board element (file:line in `apps/web/src`);
+- `core` — it is a server or core rule, not a screen: name the Rust or JS test that proves it (file and test name), or say "no test";
+- `later` — the PRD itself puts it in a later increment or slice: quote the PRD line;
+- `gap` — nothing does it yet: say what is missing.
+Do not edit `maps-reqs.mjs` or boards; the lead applies the `map` rows. Done = 80 rows, each with evidence a reader can check.
 
 ### IMP-43 · Skills audit client (core)
 

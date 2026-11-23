@@ -91,3 +91,66 @@ describe('S28 Reference intake (IMP-06)', () => {
     expect(pasted.match(/data-later=/g)?.length).toBe(2);
   });
 });
+
+describe('S28 reference intake parity (IMP-47)', () => {
+  // Opening tags that carry a given data-feature id. The id must be on the element that
+  // does what the board draws, never in a comment and never only in a test.
+  const tagsWith = (html: string, tag: 'div' | 'button', feature: string) =>
+    [...html.matchAll(new RegExp(`<${tag}[^>]*>`, 'g'))]
+      .map((m) => m[0] ?? '')
+      .filter((t) => t.includes(`data-feature="${feature}"`));
+
+  it('F145: Cmd/Ctrl+V paste lands on the focusable board as a preview, never straight to a run', () => {
+    const empty = renderToStaticMarkup(<ReferenceIntakeWorkArea initialMode="empty" />);
+    const pasteTargets = tagsWith(empty, 'div', 'F145');
+    expect(pasteTargets).toHaveLength(1);
+    expect(pasteTargets[0]).toContain('sp-cv');
+    expect(pasteTargets[0]).toContain('int-cv');
+    expect(pasteTargets[0]).toMatch(/tabindex="0"/i);
+    // The empty board advertises the shortcut; reaching the pasted state shows a preview only.
+    expect(empty).toContain('Paste a screenshot');
+    expect(empty).toContain('⌘V');
+    expect(empty).toContain('Ctrl V');
+    const pasted = renderToStaticMarkup(<ReferenceIntakeWorkArea initialMode="pasted" />);
+    expect(pasted).toContain('Preview only; nothing is uploaded yet.');
+    expect(pasted).toContain('Not added yet');
+  });
+
+  it('F147: reference frames are titled by source (ID, file name, kind, size)', () => {
+    const imported = renderToStaticMarkup(<ReferenceIntakeWorkArea initialMode="imported" />);
+    const frames = tagsWith(imported, 'div', 'F147');
+    expect(frames).toHaveLength(3);
+    for (const f of frames) expect(f).toContain('sp-fr');
+    for (const r of [INTAKE_REFS.r3, INTAKE_REFS.r4, INTAKE_REFS.r5]) {
+      expect(imported).toContain(r.id);
+      expect(imported).toContain(r.src);
+      expect(imported).toContain(r.kind);
+      expect(imported).toContain(r.size);
+    }
+  });
+
+  it('F153: Capture a live page is shown, disabled and tagged LATER (FR-04 to FR-09)', () => {
+    const empty = renderToStaticMarkup(<ReferenceIntakeWorkArea initialMode="empty" />);
+    const btns = tagsWith(empty, 'button', 'F153');
+    expect(btns.length).toBeGreaterThanOrEqual(1);
+    for (const b of btns) {
+      expect(b).toContain('disabled');
+      expect(b).toContain('data-later="Capture from a live page');
+      expect(b).toContain('FR-04 to FR-09');
+    }
+    expect(empty).toContain('Capture a live page');
+  });
+
+  it('F154: Send frames from an editor over MCP is shown, disabled and tagged LATER (FR-47)', () => {
+    const empty = renderToStaticMarkup(<ReferenceIntakeWorkArea initialMode="empty" />);
+    const btns = tagsWith(empty, 'button', 'F154');
+    expect(btns.length).toBeGreaterThanOrEqual(1);
+    for (const b of btns) {
+      expect(b).toContain('disabled');
+      expect(b).toContain('data-later=');
+      expect(b).toContain('FR-47');
+    }
+    expect(empty).toContain('Send frames from your editor');
+    expect(empty).toContain('Connect an editor (MCP)');
+  });
+});
