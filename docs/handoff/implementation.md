@@ -141,7 +141,7 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-37 | ui + core | API mode for models, skills and history, contracts, audit, deleted projects | IMP-21 | done, part open: PR #39, stacked on #38 (lead re-ran 80/80 sample mode; worker: API mode S27, S35, S36, S37, S40 pass; some fields still sample-only) |
 | IMP-39 | ui | Build the S35 offline state (F378, drawn 23 Nov): in API mode a failed read keeps the last loaded copy with the banner and the Offline save chip; never sample data. Harness path S35 offline | IMP-37 | open (board drawn) |
 | IMP-38 | core | Store trait, memory store, Postgres store (ADR 0008) | PR #37 | done, part open: PR #41, stacked on #37 (lead ran the Postgres stage on Postgres 16 in Docker: shared suite passes; concurrent writers not tested) |
-| IMP-40 | core | PgStore under concurrency: two connections race one revision, exactly one wins, the other gets the stale error; audit chain stays valid | IMP-38 | open |
+| IMP-40 | core | PgStore under concurrency: two connections race one revision, exactly one wins, the other gets the stale error; audit chain stays valid | IMP-38 | in progress (OpenCode Go DeepSeek V4 Pro, on #41) |
 | IMP-36 | core | GenUI sample verdicts equal the Rust validator | IMP-21 | done: PR #40, stacked on #39 (lead re-ran 80/80; Rust test pins verdicts) |
 
 ### IMP-21 · Screens read through one data source; API mode (ui)
