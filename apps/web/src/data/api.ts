@@ -787,6 +787,28 @@ export async function fetchAudit(
   return result.value;
 }
 
+/** The URL the server serves the skills library's own hash-chained audit under (IMP-43). */
+export function skillsAuditUrl(options: ApiOptions = {}): string {
+  return `${apiBase(options)}/api/skills/audit`;
+}
+
+/**
+ * The skills library's own audit view (IMP-43). Both audit routes answer the same generated
+ * `AuditResponse`, so this reuses the project audit client's shape check. `null` means the server
+ * does not serve the chain (404); it is different from a verified but empty chain.
+ */
+export async function fetchSkillsAudit(
+  options: ApiOptions = {},
+): Promise<AuditResponse | null> {
+  const url = skillsAuditUrl(options);
+  const result = await getJson(url, options.signal);
+  if (!result.found) return null;
+  if (!isAuditResponse(result.value)) {
+    throw new ApiError('shape', `API skills audit body is not an AuditResponse: ${url}`, { url });
+  }
+  return result.value;
+}
+
 /** Revert an artifact to an earlier revision's content, writing a new revision (IMP-31). */
 export async function revertRevision(
   projectId: string,

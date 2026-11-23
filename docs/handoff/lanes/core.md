@@ -2,6 +2,25 @@
 
 Only this lane edits this file. Write here before you stop working.
 
+## IMP-43 · Skills audit client (core lane, hy4) — 24 Nov 2026
+
+**Status:** `done`. **Branch:** `imp-43-skills-audit` (base `origin/main`), one PR.
+
+**Changed:** `apps/web/src/data/api.ts` adds `skillsAuditUrl()` + `fetchSkillsAudit()` for
+`GET /api/skills/audit`, returning the generated `AuditResponse` and reusing `isAuditResponse`
+(the project audit client's shape check). `apps/web/src/data/api.test.ts` adds 5 tests. No screen,
+no `source.ts` change. Resolves the 23 Nov IMP-35 "no typed skills-audit client" request.
+
+**Evidence:** `npm run gate` EXIT 0 after `npm ci`: rules ok, licences ok, design/fixtures in sync,
+14 boards lint, typecheck ok, vitest 21 files / **147 tests** (142 + 5 new `Skills audit API (IMP-43)`
+cases: mocked body deep-equals + URL `/api/skills/audit`, 404 → `null`, wrong shape → `ApiError
+'shape'`, bad JSON → `'json'`, refused connection → `'network'`), vite build ok, Rust
+fmt/clippy/test workspace ok, `contracts current`. TDD: tests seen red (`fetchSkillsAudit is not a
+function`, 5 failed) before the implementation.
+
+**Not checked:** no live-socket/browser run of the client (unit-only card, no board); screens still
+do not draw the skills audit (IMP-45 wires it into the data door). No new dependency, no Python.
+
 ## Current status (verified 23 Nov 2026, lead)
 
 All core cards are merged into `main` (`0aba2c5`; PRs #1–#47 merged). Rows below marked `open` are stale snapshots from the stacked-PR period and are superseded by this note. Current gate: exit 0 — `rules ok (460 files)`, `licences ok (198 npm packages, 246 crates, 0 Python)`, 14 boards / 81 states, vitest 21 files / 142 tests, Rust 153 core tests plus workspace suites, contracts current. Postgres route, live-HTTP and concurrency stages were run on the worker branches; the lead re-run used the default memory store only.
