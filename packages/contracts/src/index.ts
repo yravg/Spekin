@@ -116,6 +116,8 @@ export type { SkillVersion } from './generated/SkillVersion';
 export type { Stage } from './generated/Stage';
 export type { StageId } from './generated/StageId';
 export type { StageTone } from './generated/StageTone';
+// Runtime value lists generated from StageId::ALL / StageTone::ALL (IMP-44).
+export { STAGE_IDS, STAGE_TONES } from './generated/StageValues';
 export type { UpdateCheck } from './generated/UpdateCheck';
 export type { UpdateDecision } from './generated/UpdateDecision';
 export type { UpdatePolicy } from './generated/UpdatePolicy';

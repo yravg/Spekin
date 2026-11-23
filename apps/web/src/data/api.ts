@@ -40,11 +40,11 @@ import type {
   SkillUpdateOutcome,
   SkillsResponse,
   Stage,
-  StageId,
-  StageTone,
   UpdateCheck,
   UsageSnapshot,
 } from '@spekin/contracts';
+// ts-rs exports the contract types, not the enum values; the value lists come from Rust (IMP-44).
+import { STAGE_IDS, STAGE_TONES } from '@spekin/contracts';
 
 /** What went wrong, so callers can branch without matching on messages. */
 export type ApiErrorKind =
@@ -85,20 +85,6 @@ export interface ApiOptions {
   /** Lets a screen cancel a request when the stage switches away. */
   signal?: AbortSignal;
 }
-
-// Runtime mirrors of the Rust enums (crates/spekin-core/src/stage.rs). ts-rs exports the types,
-// not the values, so the shape check keeps its own list next to the type import above.
-const STAGE_IDS: readonly StageId[] = [
-  'planning',
-  'spec',
-  'design',
-  'frontend',
-  'backend',
-  'integration',
-  'testing',
-  'deploy',
-];
-const STAGE_TONES: readonly StageTone[] = ['ok', 'half', 'ring', 'warn', 'bad'];
 
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
