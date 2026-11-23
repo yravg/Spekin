@@ -220,8 +220,17 @@ impl Store for MemoryStore {
 
     async fn save_state(&self, id: &str, state: &ProjectState) -> Result<(), StoreError> {
         let mut inner = self.inner.lock().expect("memory store lock");
-        // Mirror the Postgres store's optimistic-concurrency bump so the shared
-        // suite round-trips identically on both backends (IMP-40).
+        // Optimistic concurrency (IMP-40): refuse a write whose version moved
+        // since the caller loaded it, then bump on success — the same typed
+        // conflict the Postgres store returns.
+        if let Some(current) = inner.states.get(id) {
+            if current.version != state.version {
+                return Err(StoreError::StaleState {
+                    base: state.version,
+                    current: current.version,
+                });
+            }
+        }
         let mut next = state.clone();
         next.version = state.version.saturating_add(1);
         inner.states.insert(id.to_owned(), next);
