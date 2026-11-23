@@ -1,29 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import {
-  CTX_DESIGN,
-  MODELS_AGENT_RUN,
-  MODELS_AGENTS,
-  MODELS_API,
-  MODELS_CAPS,
-  MODELS_CONNECTOR,
-  MODELS_EFFORT,
-  MODELS_KEY,
-  MODELS_LEDGER,
-  MODELS_LEDGER_DETAIL,
-  MODELS_PERIOD,
-  MODELS_PROVIDERS,
-  MODELS_REGISTRY,
-  MODELS_RUN,
-  MODELS_SOURCES,
-  MODELS_TASKS,
-  MODELS_USAGE,
-  type ModelsLedgerKind,
-  type ModelsSourceId,
-  type ModelsUsageMoment,
-  type PillTuple,
-  type SampleModelsCaps,
-  type SampleModelsUsage,
-} from '@spekin/sample';
+import { sampleData, type ModelsLedgerKind, type ModelsSourceId, type ModelsUsageMoment, type PillTuple, type SampleModelsCaps, type SampleModelsUsage } from '../data/source';
+const { CTX_DESIGN, MODELS_AGENT_RUN, MODELS_AGENTS, MODELS_API, MODELS_CAPS, MODELS_CONNECTOR, MODELS_EFFORT, MODELS_KEY, MODELS_LEDGER, MODELS_LEDGER_DETAIL, MODELS_PERIOD, MODELS_PROVIDERS, MODELS_REGISTRY, MODELS_RUN, MODELS_SOURCES, MODELS_TASKS, MODELS_USAGE } = sampleData;
 import { Icon, type IconName } from '../ui/Icon';
 import { Btn, IconBtn } from '../ui/Button';
 import { Pill } from '../ui/Pill';

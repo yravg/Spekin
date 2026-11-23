@@ -1,13 +1,6 @@
 import { useLayoutEffect, useState } from 'react';
-import {
-  MODEL,
-  REVIEW_NITS,
-  REVIEW_PROPOSAL,
-  type DiffSegment,
-  type PillTuple,
-  type SampleReviewProposal,
-  type StageId,
-} from '@spekin/sample';
+import { sampleData, type DiffSegment, type PillTuple, type SampleReviewProposal, type StageId } from '../data/source';
+const { MODEL, REVIEW_NITS, REVIEW_PROPOSAL } = sampleData;
 import { useWorkspace, type SaveState } from '../state/workspace';
 import { Icon } from '../ui/Icon';
 import { Btn, IconBtn } from '../ui/Button';

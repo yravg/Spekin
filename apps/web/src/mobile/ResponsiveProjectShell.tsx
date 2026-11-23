@@ -1,17 +1,6 @@
 import { useState } from 'react';
-import {
-  MODELS_BUNDLE,
-  MODELS_DEVICE_FRAMES,
-  MODELS_FINDING,
-  STYLE_TOKENS,
-  type SampleDeviceBundlePick,
-  type SampleDeviceFrame,
-  type SampleDeviceThumbKind,
-  type SampleProject,
-  type SampleStage,
-  type SampleUsage,
-  type StageId,
-} from '@spekin/sample';
+import { sampleData, type SampleDeviceBundlePick, type SampleDeviceFrame, type SampleDeviceThumbKind, type SampleProject, type SampleStage, type SampleUsage, type StageId } from '../data/source';
+const { MODELS_BUNDLE, MODELS_DEVICE_FRAMES, MODELS_FINDING, STYLE_TOKENS } = sampleData;
 import { useWorkspace } from '../state/workspace';
 import { MiniDashboard } from '../shell/MiniDashboard';
 import { Pill } from '../ui/Pill';

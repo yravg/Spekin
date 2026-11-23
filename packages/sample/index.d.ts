@@ -571,4 +571,18 @@ export declare const DELIVERY_MATRIX: SampleDeliveryMatrixRow[];
 export declare const DELIVERY_GATE: SampleDeliveryGate[];
 export declare const DELIVERY_RUN: SampleDeliveryRun;
 export declare const DELIVERY_TIMELINE: SampleDeliveryTimelineRow[];
+// S38 GenUI cards and the verdict the Rust validator recorded for each (IMP-21, IMP-36).
+// A card renders only on a `valid` verdict; a refusal renders the fallback card and never part of the card.
+export type SampleGenUiVerdict =
+  | { status: 'valid' }
+  | { status: 'rejected'; reason: string };
+export interface SampleGenUiCard {
+  id: string;
+  title: string;
+  family: 'checklist' | 'comparison' | 'question';
+  payload: unknown;
+  verdict: SampleGenUiVerdict;
+}
+export declare const GENUI_CARDS: SampleGenUiCard[];
+
 // Everything else the boards use is exported too; declare it here before use.

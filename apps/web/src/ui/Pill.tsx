@@ -1,4 +1,4 @@
-import type { PillTone } from '@spekin/sample';
+import type { PillTone } from '../data/source';
 
 // Mirrors kit.mjs pill([k, t]).
 export function Pill({ tone, label }: { tone: PillTone; label: string }) {

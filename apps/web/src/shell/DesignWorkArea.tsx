@@ -1,5 +1,6 @@
-import { CTX_DESIGN, FRAMES, MODEL, REQS } from '@spekin/sample';
-import type { PillTuple, SampleConflict, SampleFrame } from '@spekin/sample';
+import { sampleData } from '../data/source';
+const { CTX_DESIGN, FRAMES, MODEL, REQS } = sampleData;
+import type { PillTuple, SampleConflict, SampleFrame } from '../data/source';
 import { useWorkspace } from '../state/workspace';
 import { Icon } from '../ui/Icon';
 import { Btn, IconBtn } from '../ui/Button';

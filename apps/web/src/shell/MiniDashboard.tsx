@@ -1,4 +1,5 @@
-import { KPIS, PACKAGES } from '@spekin/sample';
+import { sampleData } from '../data/source';
+const { KPIS, PACKAGES } = sampleData;
 
 const CHART_BARS = [38, 52, 46, 60, 72, 58, 80, 66, 90, 74, 62, 84];
 

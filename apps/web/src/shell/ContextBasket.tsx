@@ -1,4 +1,4 @@
-import type { ContextItem, ContextKind } from '@spekin/sample';
+import type { ContextItem, ContextKind } from '../data/source';
 import { Icon, type IconName } from '../ui/Icon';
 
 const CI: Record<ContextKind, IconName> = {

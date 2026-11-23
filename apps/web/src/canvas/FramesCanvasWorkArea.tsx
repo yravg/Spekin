@@ -1,16 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import {
-  CANVAS_BASELINE,
-  CANVAS_CHATS,
-  CANVAS_FRAMES,
-  CANVAS_REGIONS,
-  CANVAS_STACK,
-  CANVAS_TAKES,
-  CANVAS_VIEWMENU,
-  MODEL,
-  REQS,
-  type SampleCanvasFrame,
-} from '@spekin/sample';
+import { sampleData, type SampleCanvasFrame } from '../data/source';
+const { CANVAS_BASELINE, CANVAS_CHATS, CANVAS_FRAMES, CANVAS_REGIONS, CANVAS_STACK, CANVAS_TAKES, CANVAS_VIEWMENU, MODEL, REQS } = sampleData;
 import { useWorkspace, type SaveState } from '../state/workspace';
 import { Icon, type IconName } from '../ui/Icon';
 import { Btn, IconBtn } from '../ui/Button';

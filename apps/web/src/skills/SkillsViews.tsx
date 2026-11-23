@@ -1,14 +1,6 @@
-import { SKL_SOURCES, SKL_STAGES } from '@spekin/sample';
-import type {
-  SampleSkillDetail,
-  SampleSkillDiffRow,
-  SampleSkillEdit,
-  SampleSkillGithub,
-  SampleSkillGlossRow,
-  SampleSkillRow,
-  SampleSkillSource,
-  SampleSkillUpdate,
-} from '@spekin/sample';
+import { sampleData } from '../data/source';
+const { SKL_SOURCES, SKL_STAGES } = sampleData;
+import type { SampleSkillDetail, SampleSkillDiffRow, SampleSkillEdit, SampleSkillGithub, SampleSkillGlossRow, SampleSkillRow, SampleSkillSource, SampleSkillUpdate } from '../data/source';
 import { Icon } from '../ui/Icon';
 import { Btn, IconBtn } from '../ui/Button';
 

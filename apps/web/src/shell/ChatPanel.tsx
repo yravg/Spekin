@@ -1,5 +1,5 @@
 import type { KeyboardEvent, ReactNode } from 'react';
-import type { ContextItem, SampleModel } from '@spekin/sample';
+import type { ContextItem, SampleModel } from '../data/source';
 import { Icon } from '../ui/Icon';
 import { IconBtn } from '../ui/Button';
 import { ContextBasket } from './ContextBasket';

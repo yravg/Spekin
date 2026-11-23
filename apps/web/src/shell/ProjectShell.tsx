@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
-import { MODEL, MODELS_USAGE, type SampleStage, type StageId } from '@spekin/sample';
-import { getProject, getStages, getUsage, isStageId } from '../data/source';
+import { sampleData, isStageId, type SampleStage, type StageId } from '../data/source';
+const { MODEL, MODELS_USAGE } = sampleData;
+import { useProjectData } from '../data/provider';
 import { useWorkspace, type SaveState } from '../state/workspace';
 import { TopBar } from './TopBar';
 import { StageBar } from './StageBar';
@@ -175,9 +176,9 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   const conflict = useWorkspace((s) => s.conflict);
   const setView = useWorkspace((s) => s.setView);
   const recordIntent = useWorkspace((s) => s.recordIntent);
-  const project = getProject(projectId);
-  const usage = getUsage(projectId);
-  const stages = getStages(projectId);
+  const { project, stages, usage, loading } = useProjectData(projectId);
+  // Loading draws nothing: the boards draw no spinner. In api mode the fetch resolves within the harness wait.
+  if (loading) return null;
   if (!project || !usage || !isStageId(stages, stage)) return <NotFound />;
   const currentStage = stages.find((s) => s.id === stage)!;
   const screenId = usageView

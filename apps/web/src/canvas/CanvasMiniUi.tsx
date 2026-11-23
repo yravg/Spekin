@@ -1,4 +1,5 @@
-import { KPIS, PACKAGES } from '@spekin/sample';
+import { sampleData } from '../data/source';
+const { KPIS, PACKAGES } = sampleData;
 import { Icon } from '../ui/Icon';
 
 interface PkgRow {

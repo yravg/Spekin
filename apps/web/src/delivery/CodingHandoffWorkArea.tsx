@@ -1,17 +1,6 @@
 import { useLayoutEffect, useState, type ReactNode } from 'react';
-import {
-  DELIVERY_BLOCKED,
-  DELIVERY_FILES,
-  DELIVERY_FRAMEWORKS,
-  DELIVERY_ITEMS,
-  DELIVERY_MANIFEST,
-  DELIVERY_PROMPT,
-  DELIVERY_STALE,
-  MODEL,
-  type ContextItem,
-  type PillTuple,
-  type SampleDeliveryItem,
-} from '@spekin/sample';
+import { sampleData, type ContextItem, type PillTuple, type SampleDeliveryItem } from '../data/source';
+const { DELIVERY_BLOCKED, DELIVERY_FILES, DELIVERY_FRAMEWORKS, DELIVERY_ITEMS, DELIVERY_MANIFEST, DELIVERY_PROMPT, DELIVERY_STALE, MODEL } = sampleData;
 import { useWorkspace, type SaveState } from '../state/workspace';
 import { Icon } from '../ui/Icon';
 import { Btn, IconBtn } from '../ui/Button';
