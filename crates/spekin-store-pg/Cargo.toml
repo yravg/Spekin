@@ -1,0 +1,27 @@
+[package]
+name = "spekin-store-pg"
+description = "Spekin Postgres store (sqlx). Persists the spekin-core Store trait (ADR 0008)."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+spekin-core = { path = "../spekin-core" }
+serde.workspace = true
+serde_json.workspace = true
+# Object-safe async `Store` trait (ADR 0008). Licence: MIT OR Apache-2.0.
+async-trait = "0.1"
+# Postgres persistence (ADR 0008). Licence: MIT OR Apache-2.0. No default features
+# beyond what is needed: the postgres driver, the tokio runtime, and rustls TLS.
+# Migrations are plain SQL files applied directly (no sqlx `migrate` feature).
+sqlx = { version = "0.8", default-features = false, features = [
+    "postgres",
+    "runtime-tokio",
+    "tls-rustls",
+] }
+
+[dev-dependencies]
+tokio.workspace = true
+
+[lints]
+workspace = true

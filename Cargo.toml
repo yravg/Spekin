@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/spekin-core", "crates/spekin-server"]
+members = ["crates/spekin-core", "crates/spekin-server", "crates/spekin-store-pg"]
 
 [workspace.package]
 version = "0.1.0"

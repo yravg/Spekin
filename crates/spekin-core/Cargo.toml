@@ -12,10 +12,14 @@ ts-rs.workspace = true
 thiserror.workspace = true
 # SHA-256 hashes for handoff manifests (IMP-24) and the audit log (IMP-30). Licence: MIT OR Apache-2.0.
 sha2.workspace = true
+# Object-safe async `Store` trait (ADR 0008). Licence: MIT OR Apache-2.0.
+async-trait = "0.1"
 
 [dev-dependencies]
 # Property tests (proposals, revisions, ledger, context builder, GenUI fuzzing, restore window). Licence: MIT OR Apache-2.0.
 proptest = "1"
+# Async test runtime for the store suite (IMP-38).
+tokio.workspace = true
 
 [lints]
 workspace = true
