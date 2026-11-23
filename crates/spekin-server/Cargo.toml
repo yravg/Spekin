@@ -22,6 +22,10 @@ http-body-util = "0.1"
 
 [dev-dependencies]
 tower = { version = "0.5", features = ["util"] }
+# Live HTTP smoke test (IMP-42) reuses the workspace HTTP client and JSON types
+# already in the dependency tree; no new crate. Licences: MIT OR Apache-2.0.
+reqwest.workspace = true
+serde_json.workspace = true
 
 [lints]
 workspace = true
