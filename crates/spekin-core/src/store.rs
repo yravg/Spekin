@@ -27,6 +27,8 @@ pub enum StoreError {
     NotFound(String),
     #[error("revision is against r{base} but the artifact is at r{current}")]
     StaleRevision { base: u32, current: u32 },
+    #[error("project state changed (loaded v{base}, now v{current}); re-read and retry")]
+    StaleState { base: u64, current: u64 },
     #[error("store backend error: {0}")]
     Backend(String),
 }
@@ -38,6 +40,11 @@ pub enum StoreError {
 /// delete/restore are also kept apart, in [`Store::entries`]/[`Store::put_entry`].
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ProjectState {
+    /// Optimistic-concurrency version, bumped on every [`Store::save_state`]. Two
+    /// writers that read the same version race; the second save is refused as
+    /// [`StoreError::StaleState`] (IMP-40).
+    #[serde(default = "initial_version")]
+    pub version: u64,
     pub proposals: BTreeMap<String, Proposal>,
     pub rejections: Vec<Rejection>,
     pub ledger: Ledger,
@@ -47,6 +54,11 @@ pub struct ProjectState {
     /// The append-only audit chain, with its head held apart from the stored log.
     pub audit: AuditLog,
     pub audit_head: String,
+}
+
+/// The first version a fresh state starts at.
+fn initial_version() -> u64 {
+    1
 }
 
 /// The full seed for one project: everything a store needs to serve the sample
@@ -208,7 +220,11 @@ impl Store for MemoryStore {
 
     async fn save_state(&self, id: &str, state: &ProjectState) -> Result<(), StoreError> {
         let mut inner = self.inner.lock().expect("memory store lock");
-        inner.states.insert(id.to_owned(), state.clone());
+        // Mirror the Postgres store's optimistic-concurrency bump so the shared
+        // suite round-trips identically on both backends (IMP-40).
+        let mut next = state.clone();
+        next.version = state.version.saturating_add(1);
+        inner.states.insert(id.to_owned(), next);
         Ok(())
     }
 
@@ -306,6 +322,7 @@ pub mod test_support {
             concurrency: 2,
         });
         let state = ProjectState {
+            version: 1,
             proposals,
             rejections: vec![],
             ledger,
@@ -384,7 +401,9 @@ pub mod test_support {
             reason: "no".to_owned(),
         });
         store.save_state(&id, &state).await.unwrap();
-        assert_eq!(store.load_state(&id).await.unwrap().unwrap(), state);
+        let mut expected = state;
+        expected.version += 1;
+        assert_eq!(store.load_state(&id).await.unwrap().unwrap(), expected);
         assert_eq!(store.load_state("nope").await.unwrap(), None);
 
         // project entries: put a second, deleted project, then list both.

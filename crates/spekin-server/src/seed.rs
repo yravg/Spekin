@@ -166,6 +166,7 @@ pub fn seed_from_fixture(text: &str, now: i64) -> Result<(String, StoreSeed), Fi
     ];
 
     let state = ProjectState {
+        version: 1,
         proposals,
         rejections: Vec::new(),
         ledger,

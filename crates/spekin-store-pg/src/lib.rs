@@ -18,6 +18,12 @@ use sqlx::Row;
 /// The plain SQL migrations (ADR 0008), applied directly on connect.
 const MIGRATIONS: &str = include_str!("../migrations/0001_init.sql");
 
+/// A transaction-scoped advisory lock key ("SPEKIN"), so concurrent `connect`
+/// calls (for example several test binaries, or a multi-instance deploy)
+/// serialise on the migrations instead of racing on `CREATE TABLE`'s implicit
+/// composite types in `pg_type`.
+const MIGRATION_LOCK_KEY: i64 = 0x5350_454B_494E;
+
 fn backend(e: sqlx::Error) -> StoreError {
     StoreError::Backend(e.to_string())
 }
@@ -40,10 +46,19 @@ impl PgStore {
             .connect(url)
             .await
             .map_err(backend)?;
-        sqlx::raw_sql(MIGRATIONS)
-            .execute(&pool)
+        // Run the migrations inside one transaction, guarded by an advisory lock,
+        // so concurrent connects can't race on the DDL (IMP-40).
+        let mut tx = pool.begin().await.map_err(backend)?;
+        sqlx::query("SELECT pg_advisory_xact_lock($1)")
+            .bind(MIGRATION_LOCK_KEY)
+            .execute(&mut *tx)
             .await
             .map_err(backend)?;
+        sqlx::raw_sql(MIGRATIONS)
+            .execute(&mut *tx)
+            .await
+            .map_err(backend)?;
+        tx.commit().await.map_err(backend)?;
         Ok(Self { pool })
     }
 
@@ -242,16 +257,50 @@ impl Store for PgStore {
     }
 
     async fn save_state(&self, id: &str, state: &ProjectState) -> Result<(), StoreError> {
-        let text = serde_json::to_string(state).map_err(backend_json)?;
-        sqlx::query(
-            "INSERT INTO spekin_states (project_id, state) VALUES ($1, $2) \
-             ON CONFLICT (project_id) DO UPDATE SET state = EXCLUDED.state",
-        )
-        .bind(id)
-        .bind(&text)
-        .execute(&self.pool)
-        .await
-        .map_err(backend)?;
+        // Optimistic concurrency (IMP-40): re-read the stored state under a row
+        // lock, refuse the write if its version moved since the caller loaded it,
+        // then bump the version on success. This turns the read-modify-write the
+        // server performs (load -> mutate -> save) into a single serialised
+        // write, so two concurrent reserves can never both pass the cap.
+        let mut tx = self.pool.begin().await.map_err(backend)?;
+        let row = sqlx::query("SELECT state FROM spekin_states WHERE project_id = $1 FOR UPDATE")
+            .bind(id)
+            .fetch_optional(&mut *tx)
+            .await
+            .map_err(backend)?;
+
+        match row {
+            None => {
+                let text = serde_json::to_string(state).map_err(backend_json)?;
+                sqlx::query("INSERT INTO spekin_states (project_id, state) VALUES ($1, $2)")
+                    .bind(id)
+                    .bind(&text)
+                    .execute(&mut *tx)
+                    .await
+                    .map_err(backend)?;
+            }
+            Some(row) => {
+                let text: String = row.try_get("state").map_err(backend)?;
+                let current: ProjectState = decode(&text)?;
+                if current.version != state.version {
+                    return Err(StoreError::StaleState {
+                        base: state.version,
+                        current: current.version,
+                    });
+                }
+                let mut next = state.clone();
+                next.version = state.version.saturating_add(1);
+                let next_text = serde_json::to_string(&next).map_err(backend_json)?;
+                sqlx::query("UPDATE spekin_states SET state = $1 WHERE project_id = $2")
+                    .bind(&next_text)
+                    .bind(id)
+                    .execute(&mut *tx)
+                    .await
+                    .map_err(backend)?;
+            }
+        }
+
+        tx.commit().await.map_err(backend)?;
         Ok(())
     }
 

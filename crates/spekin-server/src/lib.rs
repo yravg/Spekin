@@ -338,6 +338,7 @@ fn map_store_error(err: StoreError) -> ServerError {
     match err {
         StoreError::NotFound(_) => ServerError::not_found("not_found", message),
         StoreError::StaleRevision { .. } => ServerError::conflict("proposal_stale", message),
+        StoreError::StaleState { .. } => ServerError::conflict("proposal_stale", message),
         StoreError::Backend(_) => {
             ServerError::new(StatusCode::INTERNAL_SERVER_ERROR, "store_error", message)
         }
