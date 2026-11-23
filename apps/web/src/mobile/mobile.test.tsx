@@ -38,7 +38,7 @@ function renderResponsive(props: {
 }
 
 describe('T01 Tablet and phone (IMP-20)', () => {
-  it('maps viewport width to desktop, tablet and phone tiers without inspecting user agent', () => {
+  it('F341: maps viewport width to desktop, tablet and phone tiers without inspecting user agent', () => {
     expect(layoutTierForWidth(1440)).toBe('desktop');
     expect(layoutTierForWidth(1024)).toBe('desktop');
     expect(layoutTierForWidth(1023)).toBe('tablet');
