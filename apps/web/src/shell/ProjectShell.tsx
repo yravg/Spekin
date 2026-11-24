@@ -10,6 +10,7 @@ import { NotFound } from './NotFound';
 import { DesignWorkArea } from './DesignWorkArea';
 import { BackendWorkArea } from './BackendWorkArea';
 import { SkillsWorkArea } from '../skills/SkillsWorkArea';
+import { SpecDepthWorkArea, isSpecDepthView } from '../spec/SpecDepthWorkArea';
 import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/FramesCanvasWorkArea';
 import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/ReviewAcceptWorkArea';
 import { TargetedChangeWorkArea } from '../review/TargetedChangeWorkArea';
@@ -159,6 +160,8 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   // S37 keeps its artifact view in the query (never draft text): /p/meranti-yard/backend?view=contracts.
   const viewParam = search.get('view');
   const delivery = isDeliveryView(viewParam) ? viewParam : null;
+  const depthParam = search.get('depth');
+  const specDepth = stage === 'spec' && isSpecDepthView(depthParam) ? depthParam : null;
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
@@ -187,7 +190,7 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
     : delivery
       ? 'S37'
       : stage === 'spec'
-        ? 'S40'
+        ? (specDepth ? 'S07' : 'S40')
       : stage === 'design' && designSub === 'canvas'
         ? (canvasOverride.screen ?? 'S29')
         : stage === 'design' && designSub === 'review'
@@ -279,7 +282,7 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
           usagePct={usageView ? usagePct(s36Usage) : undefined}
           onOpenSwitcher={() => setPanel('switcher')}
           onOpenIncrement={() => setPanel('increment')}
-          onOpenSpec={() => setPanel('spec')}
+          onOpenSpec={() => navigate('/p/' + projectId + '/spec?depth=detailed')}
           onOpenUsage={() => {
             if (usageView) setSearch({ section: 'limits', moment });
             else navigate('/p/' + projectId + '/usage?section=models');
@@ -378,7 +381,14 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
           ) : stage === 'backend' ? (
             <BackendWorkArea onOpenDelivery={() => openDelivery('backend')} />
           ) : stage === 'spec' ? (
-            <SkillsWorkArea onShellOverride={setSpecOverride} />
+            specDepth ? (
+              <SpecDepthWorkArea
+                initialView={specDepth}
+                onDepthChange={(next) => setSearch({ depth: next })}
+              />
+            ) : (
+              <SkillsWorkArea onShellOverride={setSpecOverride} />
+            )
           ) : (
             <StagePlaceholderWorkArea stage={currentStage} onOpenDelivery={(s) => openDelivery(s.id)} />
           )}
