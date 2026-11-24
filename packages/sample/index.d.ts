@@ -585,4 +585,17 @@ export interface SampleGenUiCard {
 }
 export declare const GENUI_CARDS: SampleGenUiCard[];
 
+// S25 Export (IMP-66).
+export interface SampleGapdExport {
+  rev: string;
+  name: string;
+  tree: ['dir' | 'file', string, string][];
+  tickets: [string, string, string, string, PillTone][];
+  layers: [string, string, string][];
+  left: [string, string][];
+  statusBack: [string, string, string, PillTone][];
+}
+export declare const GAPD_EXPORT: SampleGapdExport;
+export declare const GAPD_CTX: ContextItem[];
+
 // Everything else the boards use is exported too; declare it here before use.

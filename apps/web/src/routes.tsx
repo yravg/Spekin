@@ -12,6 +12,8 @@ export const router = createBrowserRouter([
   { path: '/welcome', element: <ProjectsHome initialView="first" /> },
   { path: '/skills', element: <Navigate to={'/p/' + SAMPLE_PROJECT_ID + '/spec'} replace /> },
   { path: '/p/:project/:stage', element: <ProjectShell /> },
+  // S25 Export (Markdown, zip, yravgbuilder): /p/meranti-yard/spec/export (format in the query).
+  { path: '/p/:project/spec/export', element: <ProjectShell exportView /> },
   // S36 Models and usage lives beside the work: /p/meranti-yard/usage?section=models|next|ledger|limits
   { path: '/p/:project/usage', element: <ProjectShell usageView /> },
   { path: '*', element: <NotFound /> },

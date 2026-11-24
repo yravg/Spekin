@@ -21,6 +21,7 @@ import { useLayoutTier } from '../mobile/layoutTier';
 import { ResponsiveProjectShell } from '../mobile/ResponsiveProjectShell';
 import { ModelsUsageWorkArea, isUsageMoment, isUsageSection, usagePct, type UsageMoment, type UsageSection } from '../models/ModelsUsageWorkArea';
 import { DeliveryWorkArea, deliveryStageView, deliveryViewStage, isDeliveryView } from '../delivery/DeliveryWorkArea';
+import { ExportWorkArea, type ExportFormat, type ExportMode } from '../export/ExportWorkArea';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -149,13 +150,16 @@ function StagePlaceholderWorkArea({ stage, onOpenDelivery }: { stage: SampleStag
 }
 
 // S35 Project shell. Board: docs/design/spekin-canvas/project/S35-project-shell.dc.html (data-screen="S35").
-export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}) {
+export function ProjectShell({ usageView = false, exportView = false }: { usageView?: boolean; exportView?: boolean } = {}) {
   const { project: projectId = '', stage: stageParam } = useParams();
-  const stage = stageParam ?? 'design';
+  const stage = exportView ? 'spec' : (stageParam ?? 'design');
   const navigate = useNavigate();
   const [search, setSearch] = useSearchParams();
   const section: UsageSection = isUsageSection(search.get('section')) ? (search.get('section') as UsageSection) : 'models';
   const moment: UsageMoment = isUsageMoment(search.get('moment')) ? (search.get('moment') as UsageMoment) : 'calm';
+  const exportFormatParam = search.get('format');
+  const exportInitialMode: ExportMode =
+    exportFormatParam === 'yb' ? 'yb' : exportFormatParam === 'zip' ? 'left' : 'md';
   // S37 keeps its artifact view in the query (never draft text): /p/meranti-yard/backend?view=contracts.
   const viewParam = search.get('view');
   const delivery = isDeliveryView(viewParam) ? viewParam : null;
@@ -184,10 +188,12 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   const currentStage = stages.find((s) => s.id === stage)!;
   const screenId = usageView
     ? 'S36'
-    : delivery
-      ? 'S37'
-      : stage === 'spec'
-        ? 'S40'
+    : exportView
+      ? 'S25'
+      : delivery
+        ? 'S37'
+        : stage === 'spec'
+          ? 'S40'
       : stage === 'design' && designSub === 'canvas'
         ? (canvasOverride.screen ?? 'S29')
         : stage === 'design' && designSub === 'review'
@@ -205,7 +211,7 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
                     : 'S35';
   const s36Usage = MODELS_USAGE[moment];
   const activeSave =
-    usageView
+    usageView || exportView
       ? save
       : stage === 'spec' && specOverride.save
       ? specOverride.save
@@ -223,7 +229,7 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
                   ? genUiOverride.save
                   : save;
   const activeBusy =
-    usageView
+    usageView || exportView
       ? undefined
       : stage === 'spec'
       ? specOverride.busy
@@ -310,6 +316,21 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
               }}
               onIntent={recordIntent}
             />
+          ) : exportView ? (
+            <ExportWorkArea
+              initialMode={exportInitialMode}
+              onFormatChange={(next: ExportFormat) => setSearch({ format: next }, { replace: true })}
+              onCloseExport={() => navigate('/p/' + projectId + '/spec')}
+              onOpenHandoff={() => {
+                setHandoffInitialMode('select');
+                setDesignSub('handoff');
+                navigate('/p/' + projectId + '/design');
+              }}
+              onOpenReview={() => {
+                setDesignSub('review');
+                navigate('/p/' + projectId + '/design');
+              }}
+            />
           ) : delivery ? (
             <DeliveryWorkArea
               view={delivery}
@@ -378,7 +399,10 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
           ) : stage === 'backend' ? (
             <BackendWorkArea onOpenDelivery={() => openDelivery('backend')} />
           ) : stage === 'spec' ? (
-            <SkillsWorkArea onShellOverride={setSpecOverride} />
+            <SkillsWorkArea
+              onShellOverride={setSpecOverride}
+              onOpenExport={() => navigate('/p/' + projectId + '/spec/export')}
+            />
           ) : (
             <StagePlaceholderWorkArea stage={currentStage} onOpenDelivery={(s) => openDelivery(s.id)} />
           )}
