@@ -7,7 +7,9 @@ export { S };
 const HERE = new URL('.', import.meta.url);
 // Publish mode (SPK_PUBLISH=1) points assets at the canvas's /_blob/ uploads (blobs.json); local mode keeps relative paths for render and offline.
 export const PUBLISH = process.env.SPK_PUBLISH === '1';
-const blobs = PUBLISH && existsSync(new URL('blobs.json', HERE)) ? JSON.parse(readFileSync(new URL('blobs.json', HERE), 'utf8')) : {};
+// SPK_BLOBS names another id file: each canvas artifact has its own uploads (blobs-gaps.json for the gaps canvas).
+const BLOBS = process.env.SPK_BLOBS || 'blobs.json';
+const blobs = PUBLISH && existsSync(new URL(BLOBS, HERE)) ? JSON.parse(readFileSync(new URL(BLOBS, HERE), 'utf8')) : {};
 export const W = 1900;
 export const img = (p) => (blobs[p] ? '/_blob/' + blobs[p] : 'ref/' + p);
 

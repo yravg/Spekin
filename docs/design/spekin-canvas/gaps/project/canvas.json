@@ -1,0 +1,180 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-24T12:00:00Z"
+ },
+ "title": "Spekin: gaps canvas for review before build",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 300,
+   "w": 1900,
+   "h": 1240,
+   "title": "Cover"
+  },
+  "G00-gap-map.dc.html": {
+   "x": 2020,
+   "y": 300,
+   "w": 1900,
+   "h": 2400,
+   "title": "G00 · Gap map"
+  },
+  "S02-sign-in.dc.html": {
+   "x": 0,
+   "y": 3120,
+   "w": 1900,
+   "h": 2486,
+   "title": "S02 · Sign-in and legal pages",
+   "is_interactive": true
+  },
+  "S04-interview.dc.html": {
+   "x": 2020,
+   "y": 3120,
+   "w": 1900,
+   "h": 3104,
+   "title": "S04 · Interview",
+   "is_interactive": true
+  },
+  "S05-decision-log.dc.html": {
+   "x": 0,
+   "y": 6344,
+   "w": 1900,
+   "h": 2577,
+   "title": "S05 · Decision log",
+   "is_interactive": true
+  },
+  "S06-pitch.dc.html": {
+   "x": 2020,
+   "y": 6344,
+   "w": 1900,
+   "h": 2940,
+   "title": "S06 · Pitch (Simple)",
+   "is_interactive": true
+  },
+  "S07-spec-depth.dc.html": {
+   "x": 0,
+   "y": 9704,
+   "w": 1900,
+   "h": 3034,
+   "title": "S07 · Spec document at every depth",
+   "is_interactive": true
+  },
+  "S14-design-system.dc.html": {
+   "x": 2020,
+   "y": 9704,
+   "w": 1900,
+   "h": 2847,
+   "title": "S14 · Design system: kit and GAP register",
+   "is_interactive": true
+  },
+  "S19-adrs-glossary.dc.html": {
+   "x": 0,
+   "y": 12858,
+   "w": 1900,
+   "h": 2878,
+   "title": "S19 · ADRs and glossary",
+   "is_interactive": true
+  },
+  "S15-ticket-board.dc.html": {
+   "x": 0,
+   "y": 16156,
+   "w": 1900,
+   "h": 3374,
+   "title": "S15 · Ticket board: trust-ladder order, slices and locks",
+   "is_interactive": true
+  },
+  "S16-ticket-detail.dc.html": {
+   "x": 2020,
+   "y": 16156,
+   "w": 1900,
+   "h": 3082,
+   "title": "S16 · Ticket detail: criteria and copyable prompt",
+   "is_interactive": true
+  },
+  "S21-canvas-step.dc.html": {
+   "x": 0,
+   "y": 19650,
+   "w": 1900,
+   "h": 3259,
+   "title": "S21 · Canvas step: approval and sandboxed preview",
+   "is_interactive": true
+  },
+  "S18-review-report.dc.html": {
+   "x": 0,
+   "y": 23329,
+   "w": 1900,
+   "h": 2895,
+   "title": "S18 · Verification and review report",
+   "is_interactive": true
+  },
+  "S20-agent-inbox.dc.html": {
+   "x": 2020,
+   "y": 23329,
+   "w": 1900,
+   "h": 2702,
+   "title": "S20 · Agent inbox",
+   "is_interactive": true
+  },
+  "S25-export.dc.html": {
+   "x": 0,
+   "y": 26344,
+   "w": 1900,
+   "h": 2658,
+   "title": "S25 · Export (Markdown, zip, yravgbuilder)",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "G00-gap-map.dc.html",
+  "S02-sign-in.dc.html",
+  "S04-interview.dc.html",
+  "S05-decision-log.dc.html",
+  "S06-pitch.dc.html",
+  "S07-spec-depth.dc.html",
+  "S14-design-system.dc.html",
+  "S19-adrs-glossary.dc.html",
+  "S15-ticket-board.dc.html",
+  "S16-ticket-detail.dc.html",
+  "S21-canvas-step.dc.html",
+  "S18-review-report.dc.html",
+  "S20-agent-inbox.dc.html",
+  "S25-export.dc.html"
+ ],
+ "notes": {
+  "t0": {
+   "x": 0,
+   "y": 2820,
+   "text": "Start: sign-in, interview, decisions and pitch",
+   "kind": "title1",
+   "maxW": 1600
+  },
+  "t1": {
+   "x": 0,
+   "y": 9404,
+   "text": "Living spec: depth, design system, ADRs and glossary",
+   "kind": "title1",
+   "maxW": 1600
+  },
+  "t2": {
+   "x": 0,
+   "y": 15856,
+   "text": "Build plan: tickets, ticket detail, canvas step",
+   "kind": "title1",
+   "maxW": 1600
+  },
+  "t3": {
+   "x": 0,
+   "y": 23029,
+   "text": "Delivery: review report, agent inbox, export",
+   "kind": "title1",
+   "maxW": 1600
+  }
+ },
+ "designSystems": []
+}
