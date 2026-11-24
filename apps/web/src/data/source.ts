@@ -778,3 +778,65 @@ export function isStageId(stages: SampleStage[], s: string | undefined): s is St
   return !!s && stages.some((x) => x.id === s);
 }
 
+export interface GapCLane {
+  id: string;
+  n: number;
+  name: string;
+  sub: string;
+}
+
+export interface GapCTicket {
+  id: string;
+  lane: string;
+  title: string;
+  ui: boolean;
+  comp: string | null;
+  stages: string[];
+  blockers: string[];
+  owns: string;
+  st: 'ready' | 'blocked' | 'locked' | 'proposed';
+  crit: number;
+}
+
+export type GapCComponentOption = [slug: string, desc: string, src: string];
+
+export interface GapCTicketDetail {
+  id: string;
+  title: string;
+  lane: string;
+  rev: string;
+  summary: string;
+  comp: { slug: string; name: string; install: string; ver: string } | null;
+  blockers: [string, string, PillTone, string][];
+  owns: string;
+  criteria: [string, string, string, [PillTone, string]][];
+  rules: string[];
+  designRev: string;
+  newRev: string;
+  stagesL?: string[];
+}
+
+export interface GapCSample {
+  ctx: ContextItem[];
+  ctxS16: ContextItem[];
+  lanes: GapCLane[];
+  tickets: GapCTicket[];
+  components: GapCComponentOption[];
+  lockedIds: string[];
+  t05: GapCTicketDetail;
+}
+
+export function gapCSample(): GapCSample {
+  const m = sampleModule as unknown as Record<string, unknown>;
+  return {
+    ctx: m.GAPC_CTX as ContextItem[],
+    ctxS16: m.GAPC_CTX_S16 as ContextItem[],
+    lanes: m.GAPC_LANES as GapCLane[],
+    tickets: m.GAPC_TICKETS as GapCTicket[],
+    components: m.GAPC_COMPONENTS as GapCComponentOption[],
+    lockedIds: m.GAPC_LOCKED_TICKETS as string[],
+    t05: m.GAPC_T05 as GapCTicketDetail,
+  };
+}
+
+

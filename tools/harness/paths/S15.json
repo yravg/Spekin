@@ -1,0 +1,69 @@
+{
+  "board": "S15-ticket-board.dc.html",
+  "states": {
+    "ladder": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"planning\"]" },
+        { "wait": "[data-screen=\"S15\"]" }
+      ]
+    },
+    "comp": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"planning\"]" },
+        { "wait": "[data-screen=\"S15\"]" },
+        { "click": ".gpc-comp.none" },
+        { "wait": ".gpc-pop:has-text(\"Primary component for T-08\")" }
+      ]
+    },
+    "graph": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"planning\"]" },
+        { "wait": "[data-screen=\"S15\"]" },
+        { "click": ".gpc-seg button:has-text(\"Task graph\")" },
+        { "wait": ".gpc-graph" }
+      ]
+    },
+    "stages": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"planning\"]" },
+        { "wait": "[data-screen=\"S15\"]" },
+        { "click": "button[aria-label=\"Edit stage labels of T-05\"]" },
+        { "wait": ".gpc-pop:has-text(\"Stage labels for T-05\")" }
+      ]
+    },
+    "locked": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"planning\"]" },
+        { "wait": "[data-screen=\"S15\"]" },
+        { "hover": ".gpc-tr.locked button:has-text(\"Slice: variance table flags packages over 3%\")" },
+        { "wait": ".gpc-pop:has-text(\"T-05 is locked\")" }
+      ]
+    },
+    "empty": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"planning\"]" },
+        { "wait": "[data-screen=\"S15\"]" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "wait": ".gpc-empty" }
+      ]
+    }
+  }
+}

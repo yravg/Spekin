@@ -10,6 +10,7 @@ import { NotFound } from './NotFound';
 import { DesignWorkArea } from './DesignWorkArea';
 import { BackendWorkArea } from './BackendWorkArea';
 import { SkillsWorkArea } from '../skills/SkillsWorkArea';
+import { TicketBoardWorkArea } from '../tickets/TicketBoardWorkArea';
 import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/FramesCanvasWorkArea';
 import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/ReviewAcceptWorkArea';
 import { TargetedChangeWorkArea } from '../review/TargetedChangeWorkArea';
@@ -186,6 +187,8 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
     ? 'S36'
     : delivery
       ? 'S37'
+      : stage === 'planning'
+        ? 'S15'
       : stage === 'spec'
         ? 'S40'
       : stage === 'design' && designSub === 'canvas'
@@ -375,6 +378,8 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
                 onOpenUsage={() => navigate('/p/' + projectId + '/usage?section=models')}
               />
             )
+          ) : stage === 'planning' ? (
+            <TicketBoardWorkArea />
           ) : stage === 'backend' ? (
             <BackendWorkArea onOpenDelivery={() => openDelivery('backend')} />
           ) : stage === 'spec' ? (
