@@ -1,5 +1,7 @@
 # Gaps canvas (24 Nov 2026)
 
+**Approved 24 Nov 2026 (owner).** IMP-53 moved the boards into the main canvas (docs/design/spekin-canvas/project/, 28 boards, 160 states). Build cards IMP-54 to IMP-67 are in docs/handoff/implementation.md; Neon 4 workers N1-N7 build them (prompts tools/workers/prompt-ui-N*.txt, live page tools/live/team.json).
+
 ## Continue prompt
 
 > Repo yravg/Spekin, branch main. Read AGENTS.md, then this file, then docs/design/spekin-canvas/gaps-plan.mjs.

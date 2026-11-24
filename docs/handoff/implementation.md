@@ -166,6 +166,21 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-50 | ui | S34, S37, S38, T01 parity: F275, F314, F321, F322, F329, F352 | – | open (worker: OpenCode Go `hy4`) |
 | IMP-51 | ui | Every state reachable at 1024 × 768 (overlays in the 1024–1439 band) | – | open (worker: OpenCode Go `hy4`) |
 | IMP-52 | lead-assist | Classify the 80 PRD requirements no canvas feature maps to | – | open (worker: OpenCode Go `hy4`) |
+| IMP-53 | lead | Approved gap boards and S41 moved into the main canvas (28 boards, 160 states) | – | done |
+| IMP-54 | ui | S02 Sign-in and legal pages (F401-F409) | – | open (worker: Antigravity Neon 4) |
+| IMP-55 | ui | S04 Interview (F411-F419) | – | open (worker: Antigravity Neon 4) |
+| IMP-56 | ui | S05 Decision log (F421-F429) | – | open (worker: Antigravity Neon 4) |
+| IMP-57 | ui | S06 Pitch (Simple) (F431-F439) | – | open (worker: Antigravity Neon 4) |
+| IMP-58 | ui | S07 Spec document at every depth (F441-F449) | – | open (worker: Antigravity Neon 4) |
+| IMP-59 | ui | S19 ADRs and glossary (F461-F469) | – | open (worker: Antigravity Neon 4) |
+| IMP-60 | ui | S14 Design system: kit and GAP register (F451-F459) | – | open (worker: Antigravity Neon 4) |
+| IMP-61 | ui | S21 Canvas step and sandboxed preview (F491-F499) | – | open (worker: Antigravity Neon 4) |
+| IMP-62 | ui | S15 Ticket board (F471-F479) | – | open (worker: Antigravity Neon 4) |
+| IMP-63 | ui | S16 Ticket detail and criteria (F481-F489) | – | open (worker: Antigravity Neon 4) |
+| IMP-64 | ui | S18 Verification and review report (F501-F509) | – | open (worker: Antigravity Neon 4) |
+| IMP-65 | ui | S20 Agent inbox (F511-F519) | – | open (worker: Antigravity Neon 4) |
+| IMP-66 | ui | S25 Export (Markdown, zip, yravgbuilder) (F521-F529) | – | open (worker: Antigravity Neon 4) |
+| IMP-67 | ui | S41 Enhance prompt (F531-F539) | – | open (worker: Antigravity Neon 4) |
 
 ### IMP-21 · Screens read through one data source; API mode (ui)
 
@@ -237,6 +252,70 @@ Branch `imp-52-req-map`. `node tools/live/parity-export.mjs` lists 80 requiremen
 - `later` — the PRD itself puts it in a later increment or slice: quote the PRD line;
 - `gap` — nothing does it yet: say what is missing.
 Do not edit `maps-reqs.mjs` or boards; the lead applies the `map` rows. Done = 80 rows, each with evidence a reader can check.
+
+### Rules for IMP-54 to IMP-67 (gap and enhance boards, 24 Nov 2026)
+
+The owner approved the 13 gaps-canvas boards and S41 on 24 Nov 2026. IMP-53 (lead) moved them into the main canvas: `docs/design/spekin-canvas/project/` now has 28 boards and `canvas-states.json` 160 states, so the harness, the board lint and the parity page cover them. Several Neon 4 workers build in parallel, one board per pull request:
+- Do not edit `docs/handoff/lanes/*.md`, `docs/handoff/implementation.md`, `AGENTS.md`, boards or anything under `docs/design/`, `tools/harness/state-gate.mjs`, `tools/live/` or CI. Put status, evidence and "not checked" in the PR body; requests to the lead go under "Requests to lead" in the PR body.
+- Edit only your screen's files, its test and `tools/harness/paths/<board>.json`. Shared files (`routes.tsx`, `ProjectShell.tsx`, `app.css`, `data/source.ts`): smallest possible change, named in the PR.
+- Build exactly what the board draws. A control marked LATER is drawn disabled with its LATER tag and carries its id. No "not built yet" anywhere. R11: no HTML markup in strings.
+- Done = `npm run gate` passes; `npm run harness -- <board>` passes every state of the board; the full `npm run harness` still passes the 81 states that passed before; `node tools/live/parity-export.mjs` shows your F-ids proven; `gh pr checks <n>` all green.
+
+### IMP-54 · S02 Sign-in and legal pages: F401-F409 (ui)
+
+Branch `imp-54-s02-sign-in` from origin/main. Board `docs/design/spekin-canvas/project/S02-sign-in.dc.html` (open it with `npm run canvas:serve`; the behaviour text for each F-id is in `docs/design/spekin-canvas/boards-gap-*.mjs`). States: signin, code, wrong, google, terms, privacy (6). Features: F401, F402, F403, F404, F405, F406, F407, F408, F409. Build the screen where the board's "Where it lives" card says, as React components with the board's classes, labels, order and `data-feature` ids, reading data from `@spekin/sample` (its sample part is already exported). Write `tools/harness/paths/S02.json` with a click path for every state (status "checked" only after the harness reached it and you looked at the PNG). Tests first in a new `sign-in.test.tsx` next to the screen. Owner decision 24 Nov: keep the marked sample legal text and the routes /masuk /syarat /privasi exactly as drawn; the real legal text and route names are confirmed later (PRD AC-43), so the sample marking stays visible.
+
+### IMP-55 · S04 Interview: F411-F419 (ui)
+
+Branch `imp-55-s04-interview` from origin/main. Board `docs/design/spekin-canvas/project/S04-interview.dc.html` (open it with `npm run canvas:serve`; the behaviour text for each F-id is in `docs/design/spekin-canvas/boards-gap-*.mjs`). States: ask, skip, ground, why, cukup, twelve (6). Features: F411, F412, F413, F414, F415, F416, F417, F418, F419. Build the screen where the board's "Where it lives" card says, as React components with the board's classes, labels, order and `data-feature` ids, reading data from `@spekin/sample` (its sample part is already exported). Write `tools/harness/paths/S04.json` with a click path for every state (status "checked" only after the harness reached it and you looked at the PNG). Tests first in a new `interview.test.tsx` next to the screen.
+
+### IMP-56 · S05 Decision log: F421-F429 (ui)
+
+Branch `imp-56-s05-decision-log` from origin/main. Board `docs/design/spekin-canvas/project/S05-decision-log.dc.html` (open it with `npm run canvas:serve`; the behaviour text for each F-id is in `docs/design/spekin-canvas/boards-gap-*.mjs`). States: log, entry, kit, open, empty (5). Features: F421, F422, F423, F424, F425, F426, F427, F428, F429. Build the screen where the board's "Where it lives" card says, as React components with the board's classes, labels, order and `data-feature` ids, reading data from `@spekin/sample` (its sample part is already exported). Write `tools/harness/paths/S05.json` with a click path for every state (status "checked" only after the harness reached it and you looked at the PNG). Tests first in a new `decision-log.test.tsx` next to the screen.
+
+### IMP-57 · S06 Pitch (Simple): F431-F439 (ui)
+
+Branch `imp-57-s06-pitch` from origin/main. Board `docs/design/spekin-canvas/project/S06-pitch.dc.html` (open it with `npm run canvas:serve`; the behaviour text for each F-id is in `docs/design/spekin-canvas/boards-gap-*.mjs`). States: proposal, accepted, guard, breakdown, made (5). Features: F431, F432, F433, F434, F435, F436, F437, F438, F439. Build the screen where the board's "Where it lives" card says, as React components with the board's classes, labels, order and `data-feature` ids, reading data from `@spekin/sample` (its sample part is already exported). Write `tools/harness/paths/S06.json` with a click path for every state (status "checked" only after the harness reached it and you looked at the PNG). Tests first in a new `pitch.test.tsx` next to the screen.
+
+### IMP-58 · S07 Spec document at every depth: F441-F449 (ui)
+
+Branch `imp-58-s07-spec-depth` from origin/main. Board `docs/design/spekin-canvas/project/S07-spec-depth.dc.html` (open it with `npm run canvas:serve`; the behaviour text for each F-id is in `docs/design/spekin-canvas/boards-gap-*.mjs`). States: simple, detailed, expert, deeper, principles, impact (6). Features: F441, F442, F443, F444, F445, F446, F447, F448, F449. Build the screen where the board's "Where it lives" card says, as React components with the board's classes, labels, order and `data-feature` ids, reading data from `@spekin/sample` (its sample part is already exported). Write `tools/harness/paths/S07.json` with a click path for every state (status "checked" only after the harness reached it and you looked at the PNG). Tests first in a new `spec-depth.test.tsx` next to the screen.
+
+### IMP-59 · S19 ADRs and glossary: F461-F469 (ui)
+
+Branch `imp-59-s19-adrs-glossary` from origin/main. Board `docs/design/spekin-canvas/project/S19-adrs-glossary.dc.html` (open it with `npm run canvas:serve`; the behaviour text for each F-id is in `docs/design/spekin-canvas/boards-gap-*.mjs`). States: glossary, adrs, propose, contradiction, stale (5). Features: F461, F462, F463, F464, F465, F466, F467, F468, F469. Build the screen where the board's "Where it lives" card says, as React components with the board's classes, labels, order and `data-feature` ids, reading data from `@spekin/sample` (its sample part is already exported). Write `tools/harness/paths/S19.json` with a click path for every state (status "checked" only after the harness reached it and you looked at the PNG). Tests first in a new `adrs-glossary.test.tsx` next to the screen.
+
+### IMP-60 · S14 Design system: kit and GAP register: F451-F459 (ui)
+
+Branch `imp-60-s14-design-system` from origin/main. Board `docs/design/spekin-canvas/project/S14-design-system.dc.html` (open it with `npm run canvas:serve`; the behaviour text for each F-id is in `docs/design/spekin-canvas/boards-gap-*.mjs`). States: kit, tokens, gap, register, reuse, policy (6). Features: F451, F452, F453, F454, F455, F456, F457, F458, F459. Build the screen where the board's "Where it lives" card says, as React components with the board's classes, labels, order and `data-feature` ids, reading data from `@spekin/sample` (its sample part is already exported). Write `tools/harness/paths/S14.json` with a click path for every state (status "checked" only after the harness reached it and you looked at the PNG). Tests first in a new `design-system.test.tsx` next to the screen. S21 (another worker) reads the GAP register drawn here; keep its data in @spekin/sample, do not invent a second copy.
+
+### IMP-61 · S21 Canvas step and sandboxed preview: F491-F499 (ui)
+
+Branch `imp-61-s21-canvas-step` from origin/main. Board `docs/design/spekin-canvas/project/S21-canvas-step.dc.html` (open it with `npm run canvas:serve`; the behaviour text for each F-id is in `docs/design/spekin-canvas/boards-gap-*.mjs`). States: grid, detail, sandbox, untrusted, approve, approved (6). Features: F491, F492, F493, F494, F495, F496, F497, F498, F499. Build the screen where the board's "Where it lives" card says, as React components with the board's classes, labels, order and `data-feature` ids, reading data from `@spekin/sample` (its sample part is already exported). Write `tools/harness/paths/S21.json` with a click path for every state (status "checked" only after the harness reached it and you looked at the PNG). Tests first in a new `canvas-step.test.tsx` next to the screen. Owner decision 24 Nov: "Setujui kanvas" is blocked while any UI part has no component; a GAP register entry for that part unblocks it. Test both.
+
+### IMP-62 · S15 Ticket board: F471-F479 (ui)
+
+Branch `imp-62-s15-ticket-board` from origin/main. Board `docs/design/spekin-canvas/project/S15-ticket-board.dc.html` (open it with `npm run canvas:serve`; the behaviour text for each F-id is in `docs/design/spekin-canvas/boards-gap-*.mjs`). States: ladder, comp, graph, stages, locked, empty (6). Features: F471, F472, F473, F474, F475, F476, F477, F478, F479. Build the screen where the board's "Where it lives" card says, as React components with the board's classes, labels, order and `data-feature` ids, reading data from `@spekin/sample` (its sample part is already exported). Write `tools/harness/paths/S15.json` with a click path for every state (status "checked" only after the harness reached it and you looked at the PNG). Tests first in a new `ticket-board.test.tsx` next to the screen.
+
+### IMP-63 · S16 Ticket detail and criteria: F481-F489 (ui)
+
+Branch `imp-63-s16-ticket-detail` from origin/main. Board `docs/design/spekin-canvas/project/S16-ticket-detail.dc.html` (open it with `npm run canvas:serve`; the behaviour text for each F-id is in `docs/design/spekin-canvas/boards-gap-*.mjs`). States: detail, copied, pulled, nocomp, stale (5). Features: F481, F482, F483, F484, F485, F486, F487, F488, F489. Build the screen where the board's "Where it lives" card says, as React components with the board's classes, labels, order and `data-feature` ids, reading data from `@spekin/sample` (its sample part is already exported). Write `tools/harness/paths/S16.json` with a click path for every state (status "checked" only after the harness reached it and you looked at the PNG). Tests first in a new `ticket-detail.test.tsx` next to the screen. The install-line format on ticket prompts is still an open owner question: build it exactly as drawn and say so in the PR.
+
+### IMP-64 · S18 Verification and review report: F501-F509 (ui)
+
+Branch `imp-64-s18-review-report` from origin/main. Board `docs/design/spekin-canvas/project/S18-review-report.dc.html` (open it with `npm run canvas:serve`; the behaviour text for each F-id is in `docs/design/spekin-canvas/boards-gap-*.mjs`). States: report, none, split, risk, prop (5). Features: F501, F502, F503, F504, F505, F506, F507, F508, F509. Build the screen where the board's "Where it lives" card says, as React components with the board's classes, labels, order and `data-feature` ids, reading data from `@spekin/sample` (its sample part is already exported). Write `tools/harness/paths/S18.json` with a click path for every state (status "checked" only after the harness reached it and you looked at the PNG). Tests first in a new `review-report.test.tsx` next to the screen.
+
+### IMP-65 · S20 Agent inbox: F511-F519 (ui)
+
+Branch `imp-65-s20-agent-inbox` from origin/main. Board `docs/design/spekin-canvas/project/S20-agent-inbox.dc.html` (open it with `npm run canvas:serve`; the behaviour text for each F-id is in `docs/design/spekin-canvas/boards-gap-*.mjs`). States: list, steer, approve, done, cap, empty (6). Features: F511, F512, F513, F514, F515, F516, F517, F518, F519. Build the screen where the board's "Where it lives" card says, as React components with the board's classes, labels, order and `data-feature` ids, reading data from `@spekin/sample` (its sample part is already exported). Write `tools/harness/paths/S20.json` with a click path for every state (status "checked" only after the harness reached it and you looked at the PNG). Tests first in a new `agent-inbox.test.tsx` next to the screen.
+
+### IMP-66 · S25 Export (Markdown, zip, yravgbuilder): F521-F529 (ui)
+
+Branch `imp-66-s25-export` from origin/main. Board `docs/design/spekin-canvas/project/S25-export.dc.html` (open it with `npm run canvas:serve`; the behaviour text for each F-id is in `docs/design/spekin-canvas/boards-gap-*.mjs`). States: md, yb, left, build, done, back (6). Features: F521, F522, F523, F524, F525, F526, F527, F528, F529. Build the screen where the board's "Where it lives" card says, as React components with the board's classes, labels, order and `data-feature` ids, reading data from `@spekin/sample` (its sample part is already exported). Write `tools/harness/paths/S25.json` with a click path for every state (status "checked" only after the harness reached it and you looked at the PNG). Tests first in a new `export.test.tsx` next to the screen.
+
+### IMP-67 · S41 Enhance prompt: F531-F539 (ui)
+
+Branch `imp-67-s41-enhance-prompt` from origin/main. Board `docs/design/spekin-canvas/project/S41-enhance-prompt.dc.html` (open it with `npm run canvas:serve`; the behaviour text for each F-id is in `docs/design/spekin-canvas/boards-enh-a.mjs`). States: empty, ready, busy, review, applied, blocked (6). Features: F531, F532, F533, F534, F535, F536, F537, F538, F539. Build the screen where the board's "Where it lives" card says, as React components with the board's classes, labels, order and `data-feature` ids, reading data from `@spekin/sample` (its sample part is already exported). Write `tools/harness/paths/S41.json` with a click path for every state (status "checked" only after the harness reached it and you looked at the PNG). Tests first in a new `enhance-prompt.test.tsx` next to the screen. Owner approved the board as drawn (24 Nov): sparkle button immediately left of Send in the chat composer, shortcut Ctrl/Cmd+Shift+E, never sends by itself, Undo returns the exact original. Build the states as drawn; Undo does not need to survive a reload unless the board shows it.
 
 ### IMP-43 · Skills audit client (core)
 
