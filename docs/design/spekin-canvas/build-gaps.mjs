@@ -31,7 +31,9 @@ for (const g of gaps) if (!placed.includes(g)) fail(`gap ${g} is on no board and
 for (const p of placed) { if (placed.filter((x) => x === p).length > 1) fail(`${p} is placed twice`); if (rows.length && !gaps.includes(p)) fail(`${p} is placed but is not a "gap" row`); }
 
 // ---- boards from boards-gap-*.mjs
-const mods = readdirSync(HERE).filter((f) => /^boards-gap-.*\.mjs$/.test(f)).sort();
+// SPK_ONLY=gap-a builds one group (a worker checking its own boards while others are mid-edit).
+const ONLY = (process.env.SPK_ONLY || '').split(',').filter(Boolean);
+const mods = readdirSync(HERE).filter((f) => /^boards-gap-.*\.mjs$/.test(f) && (!ONLY.length || ONLY.some((o) => f.includes(o)))).sort();
 const tiers = [];
 for (const f of mods) {
   const m = await import(pathToFileURL(HERE + f).href);
