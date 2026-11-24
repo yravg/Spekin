@@ -74,6 +74,40 @@ export type SampleSurface = typeof sampleModule;
 /** The sample-only datasets themselves, read through the same door in both modes. */
 export const sampleData: SampleSurface = sampleModule;
 
+/** Typed view of S14 design-system sample data from sample/parts/gap-b.mjs (IMP-60). */
+export interface SampleGapBKit {
+  name: string;
+  rev: string;
+  picked: number;
+  decision: string;
+  by: string;
+}
+export type SampleGapBPick = [string, string, string, 'ok' | 'gap'];
+export type SampleGapBToken = [string, string, string, string];
+export interface SampleGapBGap {
+  id: string;
+  need: string;
+  closest: string;
+  why: string;
+  used: string;
+  st: ['ok' | 'warn' | 'bad' | 'acc' | 'mute', string];
+}
+export interface SampleGapBProv {
+  file: string;
+  src: string;
+  lic: string;
+  obl: string;
+  v: ['ok' | 'warn' | 'bad' | 'acc' | 'mute', string];
+}
+export interface SampleGapBDesignSystem {
+  GAPB_KIT: SampleGapBKit;
+  GAPB_PICKS: SampleGapBPick[];
+  GAPB_TOKENS: SampleGapBToken[];
+  GAPB_GAPS: SampleGapBGap[];
+  GAPB_PROV: SampleGapBProv[];
+}
+export const gapBDesignSystem: SampleGapBDesignSystem = sampleModule as unknown as SampleGapBDesignSystem;
+
 export type DataMode = 'sample' | 'api';
 
 /** The project context the top bar, the stage bar and the work areas draw. Equal in both modes. */

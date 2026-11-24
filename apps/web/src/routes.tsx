@@ -12,6 +12,8 @@ export const router = createBrowserRouter([
   { path: '/welcome', element: <ProjectsHome initialView="first" /> },
   { path: '/skills', element: <Navigate to={'/p/' + SAMPLE_PROJECT_ID + '/spec'} replace /> },
   { path: '/p/:project/:stage', element: <ProjectShell /> },
+  // S14 Design system: kit and GAP register: /p/meranti-yard/design/system (tab and gap in the query)
+  { path: '/p/:project/design/system', element: <ProjectShell designSystemView /> },
   // S36 Models and usage lives beside the work: /p/meranti-yard/usage?section=models|next|ledger|limits
   { path: '/p/:project/usage', element: <ProjectShell usageView /> },
   { path: '*', element: <NotFound /> },

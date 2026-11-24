@@ -21,6 +21,7 @@ import { useLayoutTier } from '../mobile/layoutTier';
 import { ResponsiveProjectShell } from '../mobile/ResponsiveProjectShell';
 import { ModelsUsageWorkArea, isUsageMoment, isUsageSection, usagePct, type UsageMoment, type UsageSection } from '../models/ModelsUsageWorkArea';
 import { DeliveryWorkArea, deliveryStageView, deliveryViewStage, isDeliveryView } from '../delivery/DeliveryWorkArea';
+import { DesignSystemWorkArea, isDesignSystemState } from '../design-system/DesignSystemWorkArea';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -149,13 +150,15 @@ function StagePlaceholderWorkArea({ stage, onOpenDelivery }: { stage: SampleStag
 }
 
 // S35 Project shell. Board: docs/design/spekin-canvas/project/S35-project-shell.dc.html (data-screen="S35").
-export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}) {
+export function ProjectShell({ usageView = false, designSystemView = false }: { usageView?: boolean; designSystemView?: boolean } = {}) {
   const { project: projectId = '', stage: stageParam } = useParams();
   const stage = stageParam ?? 'design';
   const navigate = useNavigate();
   const [search, setSearch] = useSearchParams();
   const section: UsageSection = isUsageSection(search.get('section')) ? (search.get('section') as UsageSection) : 'models';
   const moment: UsageMoment = isUsageMoment(search.get('moment')) ? (search.get('moment') as UsageMoment) : 'calm';
+  const dsTab = search.get('tab');
+  const designSystemState = isDesignSystemState(dsTab) ? dsTab : 'kit';
   // S37 keeps its artifact view in the query (never draft text): /p/meranti-yard/backend?view=contracts.
   const viewParam = search.get('view');
   const delivery = isDeliveryView(viewParam) ? viewParam : null;
@@ -184,6 +187,8 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   const currentStage = stages.find((s) => s.id === stage)!;
   const screenId = usageView
     ? 'S36'
+    : designSystemView
+      ? 'S14'
     : delivery
       ? 'S37'
       : stage === 'spec'
@@ -207,6 +212,8 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   const activeSave =
     usageView
       ? save
+      : designSystemView
+        ? { status: 'saved' as const, tone: 'ok' as const, text: 'Saved 12:44' }
       : stage === 'spec' && specOverride.save
       ? specOverride.save
       : stage === 'design' && designSub === 'canvas' && canvasOverride.save
@@ -223,7 +230,7 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
                   ? genUiOverride.save
                   : save;
   const activeBusy =
-    usageView
+    usageView || designSystemView
       ? undefined
       : stage === 'spec'
       ? specOverride.busy
@@ -310,6 +317,20 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
               }}
               onIntent={recordIntent}
             />
+          ) : designSystemView ? (
+            <DesignSystemWorkArea
+              state={designSystemState}
+              onStateChange={(next) => setSearch(next === 'gap' ? { tab: next, gap: 'GAP-01' } : { tab: next })}
+              onOpenReview={() => {
+                setDesignSub('review');
+                navigate('/p/' + projectId + '/design');
+              }}
+              onOpenCanvas={() => {
+                setDesignSub('canvas');
+                navigate('/p/' + projectId + '/design');
+              }}
+              onOpenUsage={() => navigate('/p/' + projectId + '/usage?section=models')}
+            />
           ) : delivery ? (
             <DeliveryWorkArea
               view={delivery}
@@ -373,6 +394,7 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
                   setDesignSub('genui');
                 }}
                 onOpenUsage={() => navigate('/p/' + projectId + '/usage?section=models')}
+                onOpenDesignSystem={() => navigate('/p/' + projectId + '/design/system')}
               />
             )
           ) : stage === 'backend' ? (
