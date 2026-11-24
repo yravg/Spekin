@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router';
 import { ProjectShell } from './shell/ProjectShell';
 import { ProjectsHome } from './projects/ProjectsHome';
+import { SignInScreen } from './auth/SignInScreen';
 import { NotFound } from './shell/NotFound';
 import { SAMPLE_PROJECT_ID } from './data/source';
 
@@ -10,6 +11,9 @@ export const router = createBrowserRouter([
   { path: '/', element: <ProjectsHome initialView="home" /> },
   { path: '/projects', element: <ProjectsHome initialView="all" /> },
   { path: '/welcome', element: <ProjectsHome initialView="first" /> },
+  { path: '/masuk', element: <SignInScreen page="signin" /> },
+  { path: '/syarat', element: <SignInScreen page="terms" /> },
+  { path: '/privasi', element: <SignInScreen page="privacy" /> },
   { path: '/skills', element: <Navigate to={'/p/' + SAMPLE_PROJECT_ID + '/spec'} replace /> },
   { path: '/p/:project/:stage', element: <ProjectShell /> },
   // S36 Models and usage lives beside the work: /p/meranti-yard/usage?section=models|next|ledger|limits
