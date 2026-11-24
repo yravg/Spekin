@@ -12,7 +12,7 @@ const OUT = process.env.SPK_OUT || 'project';
 const R = HERE + (K.PUBLISH ? 'publish/project' : OUT);
 mkdirSync(R, { recursive: true });
 // One stylesheet: spekin.css, then css/*.css (one file per board group), sorted.
-const cssParts = existsSync(HERE + 'css') ? readdirSync(HERE + 'css').filter((f) => f.endsWith('.css') && !f.startsWith('gap-')).sort() : [];
+const cssParts = existsSync(HERE + 'css') ? readdirSync(HERE + 'css').filter((f) => f.endsWith('.css') && !f.startsWith('gap-') && !f.startsWith('enh-')).sort() : [];
 writeFileSync(R + '/spekin.css', [readFileSync(HERE + 'spekin.css', 'utf8'), ...cssParts.map((f) => `/* ---- css/${f} */\n` + readFileSync(HERE + 'css/' + f, 'utf8'))].join('\n'));
 if (OUT !== 'project' || K.PUBLISH) {
   copyFileSync(HERE + 'project/support.js', R + '/support.js');
@@ -22,7 +22,7 @@ const heights = existsSync(HERE + 'heights.json') ? JSON.parse(readFileSync(HERE
 const add = (o) => K.board(R, writeFileSync, heights, o);
 
 const ONLY = (process.env.SPK_ONLY || '').split(',').filter(Boolean);
-const mods = readdirSync(HERE).filter((f) => /^boards-.*\.mjs$/.test(f) && !f.startsWith('boards-gap-') && (!ONLY.length || ONLY.some((o) => f.includes(o)))).sort();
+const mods = readdirSync(HERE).filter((f) => /^boards-.*\.mjs$/.test(f) && !f.startsWith('boards-gap-') && !f.startsWith('boards-enh-') && (!ONLY.length || ONLY.some((o) => f.includes(o)))).sort();
 const tiers = [];
 for (const f of mods) {
   const m = await import(pathToFileURL(HERE + f).href);

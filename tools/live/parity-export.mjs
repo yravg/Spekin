@@ -16,6 +16,7 @@
 //   kind "req"      every R-XXX-n in the canonical PRD (inputs/Spekin-PRD-v0.2.3.md)
 //                   proven  = a feature mapped to it (docs/design/spekin-canvas/maps-reqs.mjs REQS) is proven
 //                   partial = mapped features exist, none proven;  unmapped = no feature maps to it
+//                   dropped = unmapped and deferred by the PRD (IMP-52 "later"); left out of the score
 // Weights: state 3, feature 2, req 1. Score = weighted share of proven cells.
 // Usage (from the repo root): node tools/live/parity-export.mjs
 import fs from 'node:fs';
@@ -118,6 +119,16 @@ const features = boards.map((b) => ({
   cells: [...b.states.map((st) => stateCell(b, st)), ...b.features.map(featureCell)],
 }));
 
+// Deferred requirements (owner decision, 24 Nov 2026): rows the IMP-52 classification marks "later" (the PRD itself
+// defers them to a later increment) show as "dropped" with the reason, and do not count in the score.
+const deferred = {};
+try {
+  for (const line of rd('docs/handoff/req-map-2026-11-24.md').split('\n')) {
+    const c = line.split('|').map((x) => x.trim());
+    if (/^R-[A-Z]+-\d+$/.test(c[2] || '') && (c[4] || '').toLowerCase() === 'later') deferred[c[2]] = (c[5] || '').slice(0, 160);
+  }
+} catch { /* no classification yet */ }
+
 // Spec rows: one per requirement group (R-WS, R-MOD, ...).
 const featuresOfReq = {};
 for (const [f, reqs] of Object.entries(REQS)) for (const r of reqs) (featuresOfReq[r] ??= []).push(f);
@@ -125,7 +136,8 @@ const groups = {};
 for (const r of Object.keys(reqTitle).sort((a, b) => a.localeCompare(b, 'en', { numeric: true }))) {
   const fs_ = featuresOfReq[r] ?? [];
   let s, why;
-  if (!fs_.length) { s = 'unmapped'; why = 'no canvas feature maps to it (maps-reqs.mjs)'; }
+  if (!fs_.length && deferred[r] !== undefined) { s = 'dropped'; why = `deferred to a later increment by the PRD: ${deferred[r]}`; }
+  else if (!fs_.length) { s = 'unmapped'; why = 'no canvas feature maps to it (maps-reqs.mjs)'; }
   else if (fs_.some((f) => featureState[f] === 'proven')) { s = 'proven'; why = `proven by ${fs_.filter((f) => featureState[f] === 'proven').join(', ')}`; }
   else { s = 'partial'; why = `mapped to ${fs_.join(', ')}; none proven yet`; }
   (groups[r.replace(/-\d+$/, '')] ??= []).push({ k: `${r} ${reqTitle[r].replace(r, '').trim().slice(0, 70)}`.trim(), kind: 'req', w: 1, s, why });
@@ -137,7 +149,7 @@ for (const [g, cells] of Object.entries(groups)) {
 const all = features.flatMap((f) => f.cells);
 const counts = {};
 for (const c of all) counts[c.s] = (counts[c.s] || 0) + 1;
-const wAll = all.reduce((a, c) => a + c.w, 0);
+const wAll = all.filter((c) => c.s !== 'dropped').reduce((a, c) => a + c.w, 0);
 const wProven = all.filter((c) => c.s === 'proven').reduce((a, c) => a + c.w, 0);
 const by_kind = {};
 for (const c of all) { const k = (by_kind[c.kind] ??= { items: 0, proven: 0 }); k.items++; if (c.s === 'proven') k.proven++; }
