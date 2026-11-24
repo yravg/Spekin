@@ -12,7 +12,7 @@ const OUT = process.env.SPK_OUT || 'project';
 const R = HERE + (K.PUBLISH ? 'publish/project' : OUT);
 mkdirSync(R, { recursive: true });
 // One stylesheet: spekin.css, then css/*.css (one file per board group), sorted.
-const cssParts = existsSync(HERE + 'css') ? readdirSync(HERE + 'css').filter((f) => f.endsWith('.css')).sort() : [];
+const cssParts = existsSync(HERE + 'css') ? readdirSync(HERE + 'css').filter((f) => f.endsWith('.css') && !f.startsWith('gap-')).sort() : [];
 writeFileSync(R + '/spekin.css', [readFileSync(HERE + 'spekin.css', 'utf8'), ...cssParts.map((f) => `/* ---- css/${f} */\n` + readFileSync(HERE + 'css/' + f, 'utf8'))].join('\n'));
 if (OUT !== 'project' || K.PUBLISH) {
   copyFileSync(HERE + 'project/support.js', R + '/support.js');
