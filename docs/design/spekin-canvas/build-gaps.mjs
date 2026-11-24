@@ -11,7 +11,7 @@ import { GAP_BOARDS, GAP_RULES, GROUPS, GROUP_ORDER } from './gaps-plan.mjs';
 const HERE = fileURLToPath(new URL('.', import.meta.url));
 const R = HERE + (K.PUBLISH ? 'publish-gaps/project' : 'gaps/project');
 mkdirSync(R, { recursive: true });
-const cssParts = existsSync(HERE + 'css') ? readdirSync(HERE + 'css').filter((f) => f.endsWith('.css')).sort() : [];
+const cssParts = existsSync(HERE + 'css') ? readdirSync(HERE + 'css').filter((f) => f.endsWith('.css') && !f.startsWith('enh-')).sort() : [];
 writeFileSync(R + '/spekin.css', [readFileSync(HERE + 'spekin.css', 'utf8'), ...cssParts.map((f) => `/* ---- css/${f} */\n` + readFileSync(HERE + 'css/' + f, 'utf8'))].join('\n'));
 copyFileSync(HERE + 'project/support.js', R + '/support.js');
 if (!K.PUBLISH && existsSync(HERE + 'project/ref')) { mkdirSync(R + '/ref', { recursive: true }); for (const f of readdirSync(HERE + 'project/ref')) copyFileSync(HERE + 'project/ref/' + f, R + '/ref/' + f); }

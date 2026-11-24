@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spekin enhance prompt</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="spekin.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="board" style="min-height:760px"><div class="hd"><div class="hdt"><span class="ey"><span class="tier">CANVAS</span>SPEKIN · ENHANCE PROMPT · BY YRAVG</span><h1 class="ttl">Spekin: an Enhance prompt button in the chat composer</h1><p class="ext">A small sparkle button left of Send that rewrites the user's draft into a clearer, fuller prompt before it is sent. One board, S41, with six states: empty draft, draft ready, enhancing, review proposal, applied with Undo, and blocked at the credit cap. Same look, kit and sample project (Meranti Yard) as the main canvas.</p></div></div>
+<div class="rw" style="flex-wrap:wrap;gap:12px;align-items:flex-start">
+<div class="card" style="width:600px"><span class="lbl">Board</span><div class="where"><span><a href="S41-enhance-prompt.dc.html"><b>S41</b></a> · Enhance prompt · F531 to F539</span></div></div>
+<div class="card" style="width:600px"><span class="lbl">Why</span><div class="where"><span>Short or rough drafts waste a paid run. Enhance spends about 1 to 2 credits to make the message complete before an 18 to 30 credit run.</span><span>It stays safe: the result is a proposal you review, nothing is sent for you, one Undo restores your exact words, and it invents no requirement (guesses are marked assumptions).</span></div></div>
+<div class="card" style="width:600px"><span class="lbl">Open questions for Enrico</span><div class="where"><span>1. Shortcut: Ctrl/Cmd+Shift+E proposed (not Ctrl/Cmd+I). Agree?</span><span>2. Which model runs it: the composer chip's model, or a smaller one on the same source?</span><span>3. Should Undo survive a page reload?</span><span>4. May a project switch Enhance off?</span></div></div>
+<div class="card" style="width:600px"><span class="lbl">How to read a board</span><div class="where"><span>Yellow outline = NEW, navy note = behaviour, the state buttons switch real states, every control says what it does.</span></div></div>
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1900,"height":760}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
