@@ -7,69 +7,87 @@
   },
   "workers": [
     {
-      "id": "W1",
-      "title": "Spekin W1",
-      "model": "opencode-go/hy4",
-      "cards": "IMP-47 S28",
-      "worktree": "../Spekin-core",
-      "log": "../worker-W1.log",
+      "id": "N1",
+      "title": "Spekin N1",
+      "model": "Antigravity gemini-4-neon-medium",
+      "cards": "IMP-54 S02 + IMP-55 S04",
+      "worktree": "../Spekin-n1",
+      "log": "../worker-N1.log",
       "branches": [
-        "imp-47-s28-parity"
+        "imp-54-s02-sign-in",
+        "imp-55-s04-interview"
       ]
     },
     {
-      "id": "W2",
-      "title": "Spekin W2",
-      "model": "opencode-go/hy4",
-      "cards": "IMP-48 S29+S32",
-      "worktree": "../Spekin-ui",
-      "log": "../worker-W2.log",
+      "id": "N2",
+      "title": "Spekin N2",
+      "model": "Antigravity gemini-4-neon-medium",
+      "cards": "IMP-56 S05 + IMP-57 S06",
+      "worktree": "../Spekin-n2",
+      "log": "../worker-N2.log",
       "branches": [
-        "imp-48-s29-s32-parity"
+        "imp-56-s05-decision-log",
+        "imp-57-s06-pitch"
       ]
     },
     {
-      "id": "W3",
-      "title": "Spekin W3",
-      "model": "opencode-go/hy4",
-      "cards": "IMP-49 S33",
-      "worktree": "../Spekin-w3",
-      "log": "../worker-W3.log",
+      "id": "N3",
+      "title": "Spekin N3",
+      "model": "Antigravity gemini-4-neon-medium",
+      "cards": "IMP-58 S07 + IMP-59 S19",
+      "worktree": "../Spekin-n3",
+      "log": "../worker-N3.log",
       "branches": [
-        "imp-49-s33-parity"
+        "imp-58-s07-spec-depth",
+        "imp-59-s19-adrs-glossary"
       ]
     },
     {
-      "id": "W4",
-      "title": "Spekin W4",
-      "model": "opencode-go/hy4",
-      "cards": "IMP-50 S34-S38+T01",
-      "worktree": "../Spekin-w4",
-      "log": "../worker-W4.log",
+      "id": "N4",
+      "title": "Spekin N4",
+      "model": "Antigravity gemini-4-neon-medium",
+      "cards": "IMP-60 S14 + IMP-61 S21",
+      "worktree": "../Spekin-n4",
+      "log": "../worker-N4.log",
       "branches": [
-        "imp-50-s34-s38-parity"
+        "imp-60-s14-design-system",
+        "imp-61-s21-canvas-step"
       ]
     },
     {
-      "id": "W5",
-      "title": "Spekin W5",
-      "model": "opencode/hy4-flash-free",
-      "cards": "IMP-51 1024 band",
-      "worktree": "../Spekin-w5",
-      "log": "../worker-W5.log",
+      "id": "N5",
+      "title": "Spekin N5",
+      "model": "Antigravity gemini-4-neon-medium",
+      "cards": "IMP-62 S15 + IMP-63 S16",
+      "worktree": "../Spekin-n5",
+      "log": "../worker-N5.log",
       "branches": [
-        "imp-51-band-1024"
+        "imp-62-s15-ticket-board",
+        "imp-63-s16-ticket-detail"
       ]
     },
     {
-      "id": "W6",
-      "title": "Spekin W6",
-      "model": "opencode/hy4-flash-free",
-      "cards": "IMP-52 req map",
-      "worktree": "../Spekin-w4",
-      "log": "../worker-W6.log",
+      "id": "N6",
+      "title": "Spekin N6",
+      "model": "Antigravity gemini-4-neon-medium",
+      "cards": "IMP-64 S18 + IMP-65 S20",
+      "worktree": "../Spekin-n6",
+      "log": "../worker-N6.log",
       "branches": [
-        "imp-52-req-map"
+        "imp-64-s18-review-report",
+        "imp-65-s20-agent-inbox"
+      ]
+    },
+    {
+      "id": "N7",
+      "title": "Spekin N7",
+      "model": "Antigravity gemini-4-neon-medium",
+      "cards": "IMP-66 S25 + IMP-67 S41",
+      "worktree": "../Spekin-n7",
+      "log": "../worker-N7.log",
+      "branches": [
+        "imp-66-s25-export",
+        "imp-67-s41-enhance-prompt"
       ]
     }
   ],

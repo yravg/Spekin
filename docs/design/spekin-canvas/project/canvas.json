@@ -40,9 +40,49 @@
    "title": "S35 · Project shell: eight stages, artifacts, chat and canvas",
    "is_interactive": true
   },
-  "S27-projects.dc.html": {
+  "S41-enhance-prompt.dc.html": {
    "x": 0,
    "y": 17012,
+   "w": 1900,
+   "h": 3234,
+   "title": "S41 · Enhance prompt",
+   "is_interactive": true
+  },
+  "S02-sign-in.dc.html": {
+   "x": 0,
+   "y": 20666,
+   "w": 1900,
+   "h": 2486,
+   "title": "S02 · Sign-in and legal pages",
+   "is_interactive": true
+  },
+  "S04-interview.dc.html": {
+   "x": 2020,
+   "y": 20666,
+   "w": 1900,
+   "h": 3104,
+   "title": "S04 · Interview",
+   "is_interactive": true
+  },
+  "S05-decision-log.dc.html": {
+   "x": 0,
+   "y": 23890,
+   "w": 1900,
+   "h": 2577,
+   "title": "S05 · Decision log",
+   "is_interactive": true
+  },
+  "S06-pitch.dc.html": {
+   "x": 2020,
+   "y": 23890,
+   "w": 1900,
+   "h": 2940,
+   "title": "S06 · Pitch (Simple)",
+   "is_interactive": true
+  },
+  "S27-projects.dc.html": {
+   "x": 0,
+   "y": 27250,
    "w": 1900,
    "h": 4270,
    "title": "S27 · Projects home: home, all projects, switcher, create",
@@ -50,7 +90,7 @@
   },
   "S28-reference-intake.dc.html": {
    "x": 2020,
-   "y": 17012,
+   "y": 27250,
    "w": 1900,
    "h": 3983,
    "title": "S28 · Reference intake: drop, pick, paste screenshots",
@@ -58,7 +98,7 @@
   },
   "S29-frames-canvas.dc.html": {
    "x": 0,
-   "y": 21702,
+   "y": 31940,
    "w": 1900,
    "h": 4307,
    "title": "S29 · Frames canvas: board, frames, prompt bar and jobs",
@@ -66,15 +106,63 @@
   },
   "S31-alternatives.dc.html": {
    "x": 2020,
-   "y": 21702,
+   "y": 31940,
    "w": 1900,
    "h": 3553,
    "title": "S31 · Alternatives: takes stack and compare with the baseline",
    "is_interactive": true
   },
+  "S07-spec-depth.dc.html": {
+   "x": 0,
+   "y": 36667,
+   "w": 1900,
+   "h": 3034,
+   "title": "S07 · Spec document at every depth",
+   "is_interactive": true
+  },
+  "S14-design-system.dc.html": {
+   "x": 2020,
+   "y": 36667,
+   "w": 1900,
+   "h": 2847,
+   "title": "S14 · Design system: kit and GAP register",
+   "is_interactive": true
+  },
+  "S19-adrs-glossary.dc.html": {
+   "x": 0,
+   "y": 39821,
+   "w": 1900,
+   "h": 2878,
+   "title": "S19 · ADRs and glossary",
+   "is_interactive": true
+  },
+  "S15-ticket-board.dc.html": {
+   "x": 0,
+   "y": 43119,
+   "w": 1900,
+   "h": 3374,
+   "title": "S15 · Ticket board: trust-ladder order, slices and locks",
+   "is_interactive": true
+  },
+  "S16-ticket-detail.dc.html": {
+   "x": 2020,
+   "y": 43119,
+   "w": 1900,
+   "h": 3082,
+   "title": "S16 · Ticket detail: criteria and copyable prompt",
+   "is_interactive": true
+  },
+  "S21-canvas-step.dc.html": {
+   "x": 0,
+   "y": 46613,
+   "w": 1900,
+   "h": 3259,
+   "title": "S21 · Canvas step: approval and sandboxed preview",
+   "is_interactive": true
+  },
   "S30-style-review.dc.html": {
    "x": 0,
-   "y": 26429,
+   "y": 50292,
    "w": 1900,
    "h": 3490,
    "title": "S30 · Style review: tokens learned from references",
@@ -82,15 +170,39 @@
   },
   "S38-genui-panel.dc.html": {
    "x": 2020,
-   "y": 26429,
+   "y": 50292,
    "w": 1900,
    "h": 3973,
    "title": "S38 · Contextual GenUI panel in chat",
    "is_interactive": true
   },
+  "S18-review-report.dc.html": {
+   "x": 0,
+   "y": 54685,
+   "w": 1900,
+   "h": 2895,
+   "title": "S18 · Verification and review report",
+   "is_interactive": true
+  },
+  "S20-agent-inbox.dc.html": {
+   "x": 2020,
+   "y": 54685,
+   "w": 1900,
+   "h": 2702,
+   "title": "S20 · Agent inbox",
+   "is_interactive": true
+  },
+  "S25-export.dc.html": {
+   "x": 0,
+   "y": 57700,
+   "w": 1900,
+   "h": 2658,
+   "title": "S25 · Export (Markdown, zip, yravgbuilder)",
+   "is_interactive": true
+  },
   "S32-targeted-change.dc.html": {
    "x": 0,
-   "y": 30822,
+   "y": 60778,
    "w": 1900,
    "h": 4311,
    "title": "S32 · Targeted change: select a part, instruct, review in place",
@@ -98,7 +210,7 @@
   },
   "S33-review-accept.dc.html": {
    "x": 2020,
-   "y": 30822,
+   "y": 60778,
    "w": 1900,
    "h": 4393,
    "title": "S33 · Review and accept: nitpick pins, stale items and the S08 exact diff",
@@ -106,7 +218,7 @@
   },
   "S34-coding-handoff.dc.html": {
    "x": 0,
-   "y": 35635,
+   "y": 65591,
    "w": 1900,
    "h": 3616,
    "title": "S34 · Coding hand-off",
@@ -114,7 +226,7 @@
   },
   "S37-build-contracts.dc.html": {
    "x": 2020,
-   "y": 35635,
+   "y": 65591,
    "w": 1900,
    "h": 3803,
    "title": "S37 · Build contracts and release readiness",
@@ -122,7 +234,7 @@
   },
   "S36-models-usage.dc.html": {
    "x": 0,
-   "y": 39858,
+   "y": 69814,
    "w": 1900,
    "h": 5060,
    "title": "S36 · Models and usage: source, local CLI, API key, estimate, ledger and caps",
@@ -130,7 +242,7 @@
   },
   "T01-tablet-phone.dc.html": {
    "x": 2020,
-   "y": 39858,
+   "y": 69814,
    "w": 1900,
    "h": 3543,
    "title": "T01 · Tablet and phone: frame list, review and hand off",
@@ -138,7 +250,7 @@
   },
   "S40-skills-library.dc.html": {
    "x": 0,
-   "y": 45338,
+   "y": 75294,
    "w": 1900,
    "h": 3087,
    "title": "S40 · Skills library: free templates, your own copies, GitHub sources that update",
@@ -150,12 +262,26 @@
   "F00-feature-map.dc.html",
   "R00-references-engine.dc.html",
   "S35-project-shell.dc.html",
+  "S41-enhance-prompt.dc.html",
+  "S02-sign-in.dc.html",
+  "S04-interview.dc.html",
+  "S05-decision-log.dc.html",
+  "S06-pitch.dc.html",
   "S27-projects.dc.html",
   "S28-reference-intake.dc.html",
   "S29-frames-canvas.dc.html",
   "S31-alternatives.dc.html",
+  "S07-spec-depth.dc.html",
+  "S14-design-system.dc.html",
+  "S19-adrs-glossary.dc.html",
+  "S15-ticket-board.dc.html",
+  "S16-ticket-detail.dc.html",
+  "S21-canvas-step.dc.html",
   "S30-style-review.dc.html",
   "S38-genui-panel.dc.html",
+  "S18-review-report.dc.html",
+  "S20-agent-inbox.dc.html",
+  "S25-export.dc.html",
   "S32-targeted-change.dc.html",
   "S33-review-accept.dc.html",
   "S34-coding-handoff.dc.html",
@@ -175,48 +301,83 @@
   "t1": {
    "x": 0,
    "y": 16712,
-   "text": "Start: projects and reference intake",
+   "text": "Enhance prompt",
    "kind": "title1",
    "maxW": 1600
   },
   "t2": {
    "x": 0,
-   "y": 21402,
-   "text": "Frames: board canvas and alternatives",
+   "y": 20366,
+   "text": "Start: sign-in, interview, decisions and pitch",
    "kind": "title1",
    "maxW": 1600
   },
   "t3": {
    "x": 0,
-   "y": 26129,
-   "text": "Style and contextual GenUI",
+   "y": 26950,
+   "text": "Start: projects and reference intake",
    "kind": "title1",
    "maxW": 1600
   },
   "t4": {
    "x": 0,
-   "y": 30522,
-   "text": "Change: targeted edit and review",
+   "y": 31640,
+   "text": "Frames: board canvas and alternatives",
    "kind": "title1",
    "maxW": 1600
   },
   "t5": {
    "x": 0,
-   "y": 35335,
-   "text": "Delivery: hand-off and build contracts",
+   "y": 36367,
+   "text": "Living spec: depth, design system, ADRs and glossary",
    "kind": "title1",
    "maxW": 1600
   },
   "t6": {
    "x": 0,
-   "y": 39558,
-   "text": "Models, usage and devices",
+   "y": 42819,
+   "text": "Build plan: tickets, ticket detail, canvas step",
    "kind": "title1",
    "maxW": 1600
   },
   "t7": {
    "x": 0,
-   "y": 45038,
+   "y": 49992,
+   "text": "Style and contextual GenUI",
+   "kind": "title1",
+   "maxW": 1600
+  },
+  "t8": {
+   "x": 0,
+   "y": 54385,
+   "text": "Delivery: review report, agent inbox, export",
+   "kind": "title1",
+   "maxW": 1600
+  },
+  "t9": {
+   "x": 0,
+   "y": 60478,
+   "text": "Change: targeted edit and review",
+   "kind": "title1",
+   "maxW": 1600
+  },
+  "t10": {
+   "x": 0,
+   "y": 65291,
+   "text": "Delivery: hand-off and build contracts",
+   "kind": "title1",
+   "maxW": 1600
+  },
+  "t11": {
+   "x": 0,
+   "y": 69514,
+   "text": "Models, usage and devices",
+   "kind": "title1",
+   "maxW": 1600
+  },
+  "t12": {
+   "x": 0,
+   "y": 74994,
    "text": "Skills library",
    "kind": "title1",
    "maxW": 1600

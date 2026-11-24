@@ -1,0 +1,29 @@
+You are build worker N6 on Spekin (github.com/yravg/Spekin, public, Apache-2.0). Lane: ui. Your cards, in order: IMP-64 (S18), then IMP-65 (S20). One board per pull request.
+Your git worktree is the current folder (../Spekin-n6); npm ci is done. Work ONLY inside it. Never touch other folders, never push to main, never merge any pull request, never force-push, never delete branches or worktrees, never use git stash pop on stashes you did not make.
+
+Read first: AGENTS.md, docs/GLOSSARY.md, the ADRs in docs/adr/. The full text of your cards and their rules is pasted below; do not rely on reading it from implementation.md (a hook may summarise long reads).
+
+### Rules for IMP-54 to IMP-67 (gap and enhance boards, 24 Nov 2026)
+
+The owner approved the 13 gaps-canvas boards and S41 on 24 Nov 2026. IMP-53 (lead) moved them into the main canvas: `docs/design/spekin-canvas/project/` now has 28 boards and `canvas-states.json` 160 states, so the harness, the board lint and the parity page cover them. Several Neon 4 workers build in parallel, one board per pull request:
+- Do not edit `docs/handoff/lanes/*.md`, `docs/handoff/implementation.md`, `AGENTS.md`, boards or anything under `docs/design/`, `tools/harness/state-gate.mjs`, `tools/live/` or CI. Put status, evidence and "not checked" in the PR body; requests to the lead go under "Requests to lead" in the PR body.
+- Edit only your screen's files, its test and `tools/harness/paths/<board>.json`. Shared files (`routes.tsx`, `ProjectShell.tsx`, `app.css`, `data/source.ts`): smallest possible change, named in the PR.
+- Build exactly what the board draws. A control marked LATER is drawn disabled with its LATER tag and carries its id. No "not built yet" anywhere. R11: no HTML markup in strings.
+- Done = `npm run gate` passes; `npm run harness -- <board>` passes every state of the board; the full `npm run harness` still passes the 81 states that passed before; `node tools/live/parity-export.mjs` shows your F-ids proven; `gh pr checks <n>` all green.
+
+### IMP-64 · S18 Verification and review report: F501-F509 (ui)
+
+Branch `imp-64-s18-review-report` from origin/main. Board `docs/design/spekin-canvas/project/S18-review-report.dc.html` (open it with `npm run canvas:serve`; the behaviour text for each F-id is in `docs/design/spekin-canvas/boards-gap-*.mjs`). States: report, none, split, risk, prop (5). Features: F501, F502, F503, F504, F505, F506, F507, F508, F509. Build the screen where the board's "Where it lives" card says, as React components with the board's classes, labels, order and `data-feature` ids, reading data from `@spekin/sample` (its sample part is already exported). Write `tools/harness/paths/S18.json` with a click path for every state (status "checked" only after the harness reached it and you looked at the PNG). Tests first in a new `review-report.test.tsx` next to the screen.
+
+### IMP-65 · S20 Agent inbox: F511-F519 (ui)
+
+Branch `imp-65-s20-agent-inbox` from origin/main. Board `docs/design/spekin-canvas/project/S20-agent-inbox.dc.html` (open it with `npm run canvas:serve`; the behaviour text for each F-id is in `docs/design/spekin-canvas/boards-gap-*.mjs`). States: list, steer, approve, done, cap, empty (6). Features: F511, F512, F513, F514, F515, F516, F517, F518, F519. Build the screen where the board's "Where it lives" card says, as React components with the board's classes, labels, order and `data-feature` ids, reading data from `@spekin/sample` (its sample part is already exported). Write `tools/harness/paths/S20.json` with a click path for every state (status "checked" only after the harness reached it and you looked at the PNG). Tests first in a new `agent-inbox.test.tsx` next to the screen.
+
+For each card, in order:
+1. git fetch origin && git status (must be clean) && git switch -c <branch of the card> origin/main. If origin/main does not yet contain docs/design/spekin-canvas/project/S18-review-report.dc.html, use origin/imp-53-promote-boards as the start point instead, and before you push run git fetch origin && git merge --no-edit origin/main.
+2. Write the failing test first and run it to see it fail; then build; commit in small steps with conventional messages naming the card, e.g. "feat(IMP-64): ...". No Python. No new dependency.
+3. Start the app with "SPK_WEB_PORT=5240 npm run dev" in the background and run "APP_URL=http://127.0.0.1:5240 npm run harness -- <board code>". Open and look at the PNGs in tools/harness/out/ for every state. Then run the full "APP_URL=http://127.0.0.1:5240 npm run harness" and confirm the 81 states that passed before still pass. Stop the dev server when done.
+4. npm run gate must pass. node tools/live/parity-export.mjs must show your F-ids proven.
+5. git push -u origin <branch>, open the PR with "gh pr create --base main --fill", then gh pr edit --body-file with a body that follows .github/pull_request_template.md: status word (done / done, part open / done, part blocked), evidence (test names, gate result, harness table), what you did not check, and "Requests to lead". Wait for CI and run gh pr checks <n>; if a job fails, read gh run view <id> --log-failed and fix it.
+If a card is too big, stop at a clean point with everything passing, mark it "done, part open" with the exact remaining items, and still push and open the PR. Then go to the next card.
+Final answer: each PR URL, its status word, and what is not done or not checked. Be honest; never claim a check you did not run.
