@@ -31,13 +31,19 @@ Publish build: `SPK_PUBLISH=1 SPK_BLOBS=blobs-gaps.json node build-gaps.mjs` wri
 blobs-gaps.json holds the canvas's own upload ids (stylesheet and 6 reference images). If the stylesheet changes, upload it
 again to the canvas and update the id.
 
-## Open decisions (owner)
+## Owner decisions (24 Nov 2026)
 
-1. The 27 "later" rows: mark them deferred on the parity page, or keep them open. Recommendation: mark deferred, with the PRD line as the reason.
-2. S21: block canvas approval while a UI part has no component? Recommendation: block, with a GAP entry as the way out.
-3. Install-line format on ticket prompts (S16).
-4. Q-10 hand-off transport and Q-11 where the canvas tool lives (PRD open questions).
-5. S02 legal text is sample Bahasa, marked "Teks contoh, belum ditinjau hukum"; routes /masuk /syarat /privasi are TO CONFIRM (AC-43).
+1. The 27 "later" rows are **deferred**: tools/live/parity-export.mjs shows them as "dropped" with the PRD reason and
+   leaves them out of the score (score 92.4 -> 94.8).
+2. S21: **block** "Setujui kanvas" while a UI part has no component; a GAP register entry unblocks it. Build cards for
+   S21 must implement the block; the board's open-question note is answered by this line.
+3. S02: **keep** the marked sample legal text and the routes /masuk /syarat /privasi on the board; real legal text and
+   route names are confirmed before S02 is built (PRD AC-43).
+
+## Still open (owner)
+
+- Install-line format on ticket prompts (S16).
+- Q-10 hand-off transport and Q-11 where the canvas tool lives (PRD open questions).
 
 ## Known gaps in this work
 
