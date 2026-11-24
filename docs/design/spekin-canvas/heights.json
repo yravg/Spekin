@@ -16,5 +16,18 @@
  "S33-review-accept": 4393,
  "S36-models-usage": 5060,
  "T01-tablet-phone": 3543,
- "S40-skills-library": 3087
+ "S40-skills-library": 3087,
+ "S07-spec-depth": 3034,
+ "S18-review-report": 2895,
+ "S20-agent-inbox": 2702,
+ "S25-export": 2658,
+ "S14-design-system": 2847,
+ "S15-ticket-board": 3374,
+ "S16-ticket-detail": 3082,
+ "S21-canvas-step": 3259,
+ "S19-adrs-glossary": 2878,
+ "S02-sign-in": 2486,
+ "S04-interview": 3104,
+ "S05-decision-log": 2577,
+ "S06-pitch": 2940
 }
