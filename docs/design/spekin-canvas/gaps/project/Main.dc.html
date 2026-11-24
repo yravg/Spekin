@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spekin gaps canvas</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="spekin.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div class="board" style="min-height:1240px"><div class="hd"><div class="hdt"><span class="ey"><span class="tier">CANVAS</span>SPEKIN · GAPS CANVAS · BY YRAVG</span><h1 class="ttl">Spekin: gaps canvas, the screens the PRD asks for that nothing draws yet</h1><p class="ext">The main canvas covers 15 boards and every one of their 314 feature cells is now built and proven in the app. This second canvas draws what is still missing: the PRD v0.2.3 requirements that no board and no screen covers. The list comes from the IMP-52 classification of the 80 unmapped requirements (24 Nov 2026): 38 are real gaps. 29 of them become screens on 13 boards here; 9 are engineering rules listed on G00 for task cards. Same look, kit and sample project (Meranti Yard) as the main canvas.</p></div></div>
+<div style="display:flex;gap:12px"><div class="card" style="flex:1"><span class="lbl">Boards drawn</span><b style="font-size:34px;line-height:1.1">0</b><span style="color:var(--ink-3)">of 13 planned</span></div><div class="card" style="flex:1"><span class="lbl">Gap requirements</span><b style="font-size:34px;line-height:1.1">38</b><span style="color:var(--ink-3)">from the IMP-52 classification</span></div><div class="card" style="flex:1"><span class="lbl">On boards</span><b style="font-size:34px;line-height:1.1">29</b><span style="color:var(--ink-3)">screen requirements</span></div><div class="card" style="flex:1"><span class="lbl">Rules (no screen)</span><b style="font-size:34px;line-height:1.1">9</b><span style="color:var(--ink-3)">task cards, see G00</span></div></div>
+<div class="rw" style="flex-wrap:wrap;gap:12px">
+<div class="card" style="width:600px"><span class="lbl">A · Start: sign-in, interview, decisions and pitch</span><div class="where"><span><b>S02</b> · Sign-in and legal pages · R-ONB-9, R-LANG-4 · <i>not drawn yet</i></span><span><b>S04</b> · Interview · R-ONB-5, R-ONB-6, R-STD-1, R-STD-8 · <i>not drawn yet</i></span><span><b>S05</b> · Decision log · R-ONB-4, R-DS-2 · <i>not drawn yet</i></span><span><b>S06</b> · Pitch (Simple) · R-ONB-7 · <i>not drawn yet</i></span></div></div><div class="card" style="width:600px"><span class="lbl">B · Living spec: depth, design system, ADRs and glossary</span><div class="where"><span><b>S07</b> · Spec document at every depth · R-EDT-5, R-EDT-8, R-PRI-1, R-PRI-3, R-EVD-6 · <i>not drawn yet</i></span><span><b>S14</b> · Design system: kit and GAP register · R-DS-4, R-DS-8 · <i>not drawn yet</i></span><span><b>S19</b> · ADRs and glossary · R-STD-2 · <i>not drawn yet</i></span></div></div><div class="card" style="width:600px"><span class="lbl">C · Build plan: tickets, ticket detail, canvas step</span><div class="where"><span><b>S15</b> · Ticket board · R-KEEP-1, R-KEEP-2, R-DS-3, R-STD-4, R-WF-7, R-KEEP-6 · <i>not drawn yet</i></span><span><b>S16</b> · Ticket detail and criteria · R-DS-6 · <i>not drawn yet</i></span><span><b>S21</b> · Canvas step and sandboxed preview · R-KEEP-5, R-SEC-3 · <i>not drawn yet</i></span></div></div><div class="card" style="width:600px"><span class="lbl">D · Delivery: review report, agent inbox, export</span><div class="where"><span><b>S18</b> · Verification and review report · R-STD-5 · <i>not drawn yet</i></span><span><b>S20</b> · Agent inbox · R-AGT-1 · <i>not drawn yet</i></span><span><b>S25</b> · Export (Markdown, zip, yravgbuilder) · R-KEEP-4 · <i>not drawn yet</i></span></div></div>
+<div class="card" style="width:600px"><span class="lbl">How this canvas was made</span><div class="where"><span>Classification: docs/handoff/req-map-2026-11-24.md, 80 rows: 2 map, 13 core, 27 later, 38 gap.</span><span>Plan: docs/design/spekin-canvas/gaps-plan.mjs. The build fails if a gap is on no board or on two.</span><span>Boards use the PRD's own screen codes and new feature IDs from F401.</span><span>The 27 "later" rows (deferred by the PRD) and 13 "core" rows are not drawn here; they need an owner decision or a test, not a screen.</span></div></div>
+<div class="card" style="width:600px"><span class="lbl">How to read a board</span><div class="where"><span>Same as the main canvas: yellow outline = NEW, navy note = behaviour, state buttons switch real states, every control says what it does, LATER marks a future control.</span><span>Each board's Stories card names the PRD requirement IDs it answers.</span></div></div>
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1900,"height":1240}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

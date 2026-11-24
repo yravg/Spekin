@@ -22,7 +22,7 @@ const heights = existsSync(HERE + 'heights.json') ? JSON.parse(readFileSync(HERE
 const add = (o) => K.board(R, writeFileSync, heights, o);
 
 const ONLY = (process.env.SPK_ONLY || '').split(',').filter(Boolean);
-const mods = readdirSync(HERE).filter((f) => /^boards-.*\.mjs$/.test(f) && (!ONLY.length || ONLY.some((o) => f.includes(o)))).sort();
+const mods = readdirSync(HERE).filter((f) => /^boards-.*\.mjs$/.test(f) && !f.startsWith('boards-gap-') && (!ONLY.length || ONLY.some((o) => f.includes(o)))).sort();
 const tiers = [];
 for (const f of mods) {
   const m = await import(pathToFileURL(HERE + f).href);

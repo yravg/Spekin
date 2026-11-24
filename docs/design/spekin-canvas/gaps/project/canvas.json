@@ -1,0 +1,34 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-24T12:00:00Z"
+ },
+ "title": "Spekin: gaps canvas for review before build",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 300,
+   "w": 1900,
+   "h": 1240,
+   "title": "Cover"
+  },
+  "G00-gap-map.dc.html": {
+   "x": 2020,
+   "y": 300,
+   "w": 1900,
+   "h": 2400,
+   "title": "G00 · Gap map"
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "G00-gap-map.dc.html"
+ ],
+ "notes": {},
+ "designSystems": []
+}
