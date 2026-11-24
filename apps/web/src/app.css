@@ -65,6 +65,16 @@ body { background: var(--ground); }
   .sp-top > .ap-grp { min-width: 0; }
   .int-app, .int-body { min-width: 0; }
   .ap-root { overflow-x: clip; }
+  /* IMP-51: keep controls clear of overlays at 1024-1439 (1440 and T01 are untouched).
+     S28: the 560px empty-state card is wider than the narrow canvas, so centring it
+     pushed "Choose files" out of the canvas under the chat pane; fit it inside. */
+  .int-start { left: 12px; margin-left: 0; width: calc(100% - 24px); }
+  /* S31: the 450px take is taller than the short grid-stage, so its toolbar (.ut)
+     rode up over the viewer's Grid control; keep the take inside the stage. */
+  .can-vb .can-take { max-height: 100%; }
+  /* S32/S29: the bottom-right zoom pill covered the bottom floating toolbar
+     (Ask on select, and the S32 action buttons) when the canvas shrank. */
+  .sp-zoom { bottom: 52px; }
 }
 
 .can-cover .ac { gap: 0; }
