@@ -1,0 +1,55 @@
+{
+  "board": "S18-review-report.dc.html",
+  "states": {
+    "report": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"testing\"]" },
+        { "wait": "[data-screen=\"S18\"] [data-feature=\"F501\"]" }
+      ]
+    },
+    "none": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"testing\"]" },
+        { "type": [".ap-ta-input", "Review the build against r14."] },
+        { "click": "button[aria-label=\"Send\"]" },
+        { "wait": "[data-screen=\"S18\"] .gpd-empty" }
+      ]
+    },
+    "split": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"testing\"]" },
+        { "click": "tr:has-text(\"FND-02\")" },
+        { "wait": "[data-screen=\"S18\"] .gpd-verdict" }
+      ]
+    },
+    "risk": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"testing\"]" },
+        { "click": ".gpd-sub button:has-text(\"Risk review\")" },
+        { "wait": "[data-screen=\"S18\"] .gpd-risk" }
+      ]
+    },
+    "prop": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"testing\"]" },
+        { "click": ".gpd-sub button:has-text(\"Findings\")" },
+        { "wait": "[data-screen=\"S18\"] [data-feature=\"F507\"] .gpd-list" }
+      ]
+    }
+  }
+}
