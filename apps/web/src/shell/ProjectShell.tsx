@@ -12,6 +12,7 @@ import { BackendWorkArea } from './BackendWorkArea';
 import { SkillsWorkArea } from '../skills/SkillsWorkArea';
 import { SpecDepthWorkArea, isSpecDepthView } from '../spec/SpecDepthWorkArea';
 import { DecisionLogWorkArea, type PlanningShellOverride } from '../planning/DecisionLogWorkArea';
+import { TicketBoardWorkArea } from '../tickets/TicketBoardWorkArea';
 import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/FramesCanvasWorkArea';
 import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/ReviewAcceptWorkArea';
 import { TargetedChangeWorkArea } from '../review/TargetedChangeWorkArea';
@@ -198,6 +199,7 @@ export function ProjectShell({ usageView = false, designSystemView = false }: { 
       ? 'S37'
       : stage === 'planning'
         ? (planningOverride.screen ?? 'S05')
+        ? 'S15'
       : stage === 'spec'
         ? (specDepth ? 'S07' : 'S40')
       : stage === 'design' && designSub === 'canvas'
@@ -406,6 +408,8 @@ export function ProjectShell({ usageView = false, designSystemView = false }: { 
                 onOpenDesignSystem={() => navigate('/p/' + projectId + '/design/system')}
               />
             )
+          ) : stage === 'planning' ? (
+            <TicketBoardWorkArea />
           ) : stage === 'backend' ? (
             <BackendWorkArea onOpenDelivery={() => openDelivery('backend')} />
           ) : stage === 'planning' ? (
