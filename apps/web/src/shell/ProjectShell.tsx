@@ -24,6 +24,7 @@ import { StyleReviewWorkArea, type StyleShellOverride } from '../style/StyleRevi
 import { ReferenceIntakeWorkArea, type IntakeShellOverride } from '../intake/ReferenceIntakeWorkArea';
 import { CodingHandoffWorkArea, type HandoffMode, type HandoffShellOverride } from '../delivery/CodingHandoffWorkArea';
 import { GenUiWorkArea, type GenUiMode, type GenUiShellOverride } from '../genui/GenUiWorkArea';
+import { EnhancePromptWorkArea, type EnhanceShellOverride } from '../enhance/EnhancePromptWorkArea';
 import { useLayoutTier } from '../mobile/layoutTier';
 import { ResponsiveProjectShell } from '../mobile/ResponsiveProjectShell';
 import { ModelsUsageWorkArea, isUsageMoment, isUsageSection, usagePct, type UsageMoment, type UsageSection } from '../models/ModelsUsageWorkArea';
@@ -220,6 +221,7 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
   const [reportOverride, setReportOverride] = useState<ReportShellOverride>({});
   const [inboxOverride, setInboxOverride] = useState<AgentInboxShellOverride | null>(null);
   const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style' | 'intake' | 'handoff' | 'genui'>('shell');
+  const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style' | 'intake' | 'handoff' | 'genui' | 'enhance'>('shell');
   const [handoffInitialMode, setHandoffInitialMode] = useState<HandoffMode>('select');
   const [genUiInitialMode, setGenUiInitialMode] = useState<GenUiMode>('stream');
   const [canvasOverride, setCanvasOverride] = useState<CanvasShellOverride>({});
@@ -228,6 +230,7 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
   const [intakeOverride, setIntakeOverride] = useState<IntakeShellOverride>({});
   const [handoffOverride, setHandoffOverride] = useState<HandoffShellOverride>({});
   const [genUiOverride, setGenUiOverride] = useState<GenUiShellOverride>({});
+  const [enhanceOverride, setEnhanceOverride] = useState<EnhanceShellOverride>({});
   const layoutTier = useLayoutTier();
   const save = useWorkspace((s) => s.save);
   const conflict = useWorkspace((s) => s.conflict);
@@ -283,7 +286,9 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
                   ? 'S34'
                   : stage === 'design' && designSub === 'genui'
                     ? 'S38'
-                    : 'S35';
+                    : stage === 'design' && designSub === 'enhance'
+                      ? 'S41'
+                      : 'S35';
   const s36Usage = MODELS_USAGE[moment];
   const activeSave =
     usageView || exportView
@@ -371,7 +376,13 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
       <div className="sp-app">
         <TopBar
           project={displayProject}
-          usage={usageView ? { ...usage, used: s36Usage.used, cap: s36Usage.cap } : usage}
+          usage={
+            usageView
+              ? { ...usage, used: s36Usage.used, cap: s36Usage.cap }
+              : stage === 'design' && designSub === 'enhance' && enhanceOverride.usage
+                ? enhanceOverride.usage
+                : usage
+          }
           save={shownSave}
           busy={shownBusy}
           busyNode={activeBusyNode}
@@ -533,6 +544,14 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
                   setDesignSub('handoff');
                 }}
               />
+            ) : designSub === 'enhance' ? (
+              <EnhancePromptWorkArea
+                capped={moment === 'capped' || usage.used >= usage.cap}
+                onShellOverride={setEnhanceOverride}
+                onOpenShell={() => setDesignSub('shell')}
+                onOpenStyle={() => setDesignSub('style')}
+                onOpenUsage={() => navigate('/p/' + projectId + '/usage?section=models')}
+              />
             ) : (
               <DesignWorkArea
                 onOpenCanvas={() => setDesignSub('canvas')}
@@ -550,6 +569,7 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
                 }}
                 onOpenUsage={() => navigate('/p/' + projectId + '/usage?section=models')}
                 onOpenDesignSystem={() => navigate('/p/' + projectId + '/design/system')}
+                onOpenEnhance={() => setDesignSub('enhance')}
               />
             )
           ) : stage === 'planning' ? (

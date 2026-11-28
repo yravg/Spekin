@@ -815,5 +815,27 @@ export type SampleAgentStep = ['ok' | 'run' | 'mute', string];
 export declare const GAPD_RUNS: SampleAgentRun[];
 export declare const GAPD_STEPS: SampleAgentStep[];
 export declare const GAPD_CTX: ContextItem[];
+// S41 Enhance prompt (F531–F539).
+export type SampleEnhanceSeg = ['k' | 'c' | 'a' | 'd' | 's', string, string?];
+export type SampleEnhanceCtxItem = ['flag' | 'lock' | 'frame' | 'doc' | 'req' | 'history', string, string];
+export interface SampleEnhanceCost {
+  est: string;
+  actual: string;
+  max: string;
+  time: string;
+  send: string;
+  words: [string, string];
+}
+export type SampleEnhanceBlockedVariant = [string, 'bad' | 'warn', string, string[]];
+export declare const ENH_READY: boolean;
+export declare const ENH_ORIGINAL: string;
+export declare const ENH_SEGS: SampleEnhanceSeg[];
+export declare const ENH_ORIG_SEGS: SampleEnhanceSeg[];
+export declare const ENH_ASSUMPTIONS: [string, string][];
+export declare const ENH_CTX: SampleEnhanceCtxItem[];
+export declare const ENH_NOT_SENT: string;
+export declare const ENH_COST: SampleEnhanceCost;
+export declare const ENH_SHORTCUT: string;
+export declare const ENH_BLOCKED: SampleEnhanceBlockedVariant[];
 
 // Everything else the boards use is exported too; declare it here before use.
