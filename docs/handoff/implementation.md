@@ -8,7 +8,7 @@ Owner: Enrico (lead, with Claude Code). Last updated 28 Nov 2026 (IMP-54 to IMP-
 
 **28 Nov 2026, later (IMP-68, lead):** the 1024 × 768 sweep (`npm run e2e:sweep`) was run on all 160 states for the first time since the gap boards landed: 151/160. Fixed in `apps/web/src/app.css` (1024–1439 band only, so 1440 and T01 pixels are untouched) and one wrapper span in `apps/web/src/shell/TopBar.tsx`: S02 legal pages ran 114 px past the edge; the top-bar project group overflowed under the busy chip, so S07's Spec chip could not be clicked; S07's PRN-4 hunk was squeezed to 0 px because `.gpb-page` clipped instead of scrolling; S15's ticket-title column was 0 px. A new report-only check, `npm run e2e:reach` (`tools/e2e/reach.mjs`), compares every control at 1440 and 1024: it found 304 controls in 78 states; after the band fixes (panes scroll, toolbars wrap, S15 popovers and the S41 sheet stay inside the work area) the new boards are clear and 79 remain (12 on S15 are rows under an open popover, by design; 67 on older boards, card IMP-69). Result: sweep **160/160**, harness **160/160**, `npm run gate` exit 0.
 
-**Next step:** owner decision D-PLAN-1 below (how a user clicks from S04 into S05, S06 and S15), then a lead card to draw and build that link. Open card: IMP-69 (older boards at 1024).
+**Next step:** owner decision D-PLAN-1 below (how a user clicks from S04 into S05, S06 and S15), then a lead card to draw and build that link. Open: IMP-70 (S30, S32, S34 at 1024) waits on owner decision D-RESP-1.
 
 
 The historical tables and lane files below are a record of the build, not the current status. This section is authoritative: `main` is clean at `0aba2c5`, all pull requests #1–#47 are merged, and there is no open worker card. The older "waiting for owner merge" and `part blocked` wording is superseded by it.
@@ -189,7 +189,8 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-66 | ui | S25 Export (Markdown, zip, yravgbuilder) (F521-F529) | – | done (#77, merged via #85) |
 | IMP-67 | ui | S41 Enhance prompt (F531-F539) | – | done, part open (#84, merged via #85) |
 | IMP-68 | lead | 1024 px band on the 28 Nov boards: sweep 151 → 160/160 (S02 legal overflow, S07 Spec chip under the busy chip, S07 PRN-4 hunk squeezed to 0 px, S15 title column 0 px) and the new reach check (`npm run e2e:reach`): every control clickable at 1440 stays clickable at 1024 on S02–S41 | – | done (PR for branch `fix-sweep-1024-gaps`) |
-| IMP-69 | ui | Reach at 1024 on the older boards: 67 controls in 16 states (S29, S30, S31, S32, S33, S34, S35, S36, S38, S40) are covered at 1024 although clickable at 1440 (`npm run e2e:reach`, report `tools/e2e/out/reach.md`) | IMP-68 | open |
+| IMP-69 | ui | Reach at 1024 on the older boards: 67 controls in 16 states (S29, S30, S31, S32, S33, S34, S35, S36, S38, S40) are covered at 1024 although clickable at 1440 (`npm run e2e:reach`, report `tools/e2e/out/reach.md`) | IMP-68 | done, part open (lead, branch `imp-69-reach-1024-older`): chat messages scroll and suggestions stay inside the chat; S36 side column stacks (all 6 states clear); S30 token columns stack; S31 takes 2 per row; S34 file list gives way; S29 bottom edge marker clears the composer. 57 controls in 16 states remain: S15 12 and S40 2 sit under an open popover or menu (by design); S29 8 are canvas content or an open zoom menu; S30 12, S32 20 and S34 3 need a 1024 layout (IMP-70, D-RESP-1) |
+| IMP-70 | lead | S30, S32 and S34 at 1024: header actions (Promote to spec, Accept inferred, Re-finalize, Copy for a coding agent) and the S32 in-place inspector are wider than the work area. Clipping sideways scroll breaks the click paths, so these need a drawn 1024 layout | IMP-69, D-RESP-1 | open |
 
 ### IMP-21 · Screens read through one data source; API mode (ui)
 
@@ -642,11 +643,12 @@ These change boards, so only the lead does them: edit the generator, rebuild, li
 See [docs/DECISIONS.md](../DECISIONS.md) → Open. Agents never decide these.
 
 - **D-PLAN-1 (28 Nov 2026): how a user reaches S05, S06 and S15 by clicking.** Clicking Planning opens the S04 interview (its card: `/p/:project/planning` is the add-feature interview). S05, S06 and S15 open only by URL (`?artifact=…`); S15 is also linked from S21 ("open tickets") and S16 from the ticket board. Recommendation: add a drawn link row on S04 (Decision log, Pitch, Tickets) and let the S05/S06/S15 artifact tabs switch `?artifact=`. That is a board change, so the owner approves it first.
+- **D-RESP-1 (28 Nov 2026): a drawn 1024 layout for S30, S32 and S34.** The boards are drawn at 1440 only. At 1024 their header actions and the S32 inspector are wider than the work area (IMP-70). Recommendation: add one 1024 state per board on the canvas (header actions move into a second row or an overflow menu; the S32 inspector overlays the canvas instead of sitting beside it), then build to it. Board change, so the owner approves it first.
 
 ## Known failures and limits
 
 - No known failing build check: gate exit 0, harness 160/160 and sweep 160/160 on 28 Nov 2026 (IMP-68 branch `fix-sweep-1024-gaps`).
-- `npm run e2e:reach` (report only): 79 controls in 25 states are clickable at 1440 but covered at 1024. 12 are S15 rows under an open popover (by design); 67 are on older boards (IMP-69).
+- `npm run e2e:reach` (report only): after IMP-69, 57 controls in 16 states are clickable at 1440 but covered at 1024: S15 12 and S40 2 under an open popover or menu (by design), S29 8 canvas content or an open zoom menu, S30 12, S32 20 and S34 3 need a 1024 layout (IMP-70). Do not set `overflow: clip` on `.sp-main` or `.sp-cv`: Playwright (and keyboard focus) reach those controls by scrolling the hidden overflow, and 7 click paths broke when it was tried.
 - S05, S06 and S15 harness paths start with a deep link (first-step `goto`), because no drawn control reaches them from S04 yet (D-PLAN-1).
 - The board's `.sp-app` measures 1440 × 901 and the app's 1440 × 900. The harness compares the common area and fails only on a gap over 2 px.
 - All 81 states have checked click paths; `check:rules` still reports the count.
