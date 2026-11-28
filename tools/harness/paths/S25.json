@@ -2,7 +2,7 @@
   "board": "S25-export.dc.html",
   "states": {
     "md": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/" },
         { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
@@ -13,7 +13,7 @@
       ]
     },
     "yb": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/" },
         { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
@@ -25,7 +25,7 @@
       ]
     },
     "left": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/" },
         { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
@@ -37,7 +37,7 @@
       ]
     },
     "build": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/" },
         { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
@@ -50,7 +50,7 @@
       ]
     },
     "done": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/" },
         { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
@@ -63,7 +63,7 @@
       ]
     },
     "back": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/" },
         { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
