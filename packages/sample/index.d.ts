@@ -601,5 +601,34 @@ export declare const GAPB_EXPERT: SampleGapbExpertBlock[];
 export declare const GAPB_MISSING: SampleGapbMissingBlock[];
 export declare const GAPB_IMPACT: SampleGapbImpactRow[];
 export declare const GAPB_KIT: SampleGapbKit;
+// S05 Decision log (gap-a.mjs, IMP-56).
+export interface SampleDecisionLogEntry {
+  id: string;
+  q: string;
+  qt: string;
+  dec: string;
+  alts: string[];
+  by: string;
+  at: string;
+  how: string;
+  kind: 'Interview' | 'Plan' | 'Kit';
+  field?: string;
+}
+export interface SampleOpenQuestion {
+  id: string;
+  q: string;
+  qt: string;
+  at: string;
+  where: string;
+}
+export interface SampleNoBasis {
+  text: string;
+  where: string;
+  note: string;
+}
+export declare const GAPA_LOG: SampleDecisionLogEntry[];
+export declare const GAPA_OPEN: SampleOpenQuestion[];
+export declare const GAPA_KIT: SampleDecisionLogEntry;
+export declare const GAPA_NOBASIS: SampleNoBasis;
 
 // Everything else the boards use is exported too; declare it here before use.

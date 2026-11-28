@@ -11,6 +11,7 @@ import { DesignWorkArea } from './DesignWorkArea';
 import { BackendWorkArea } from './BackendWorkArea';
 import { SkillsWorkArea } from '../skills/SkillsWorkArea';
 import { SpecDepthWorkArea, isSpecDepthView } from '../spec/SpecDepthWorkArea';
+import { DecisionLogWorkArea, type PlanningShellOverride } from '../planning/DecisionLogWorkArea';
 import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/FramesCanvasWorkArea';
 import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/ReviewAcceptWorkArea';
 import { TargetedChangeWorkArea } from '../review/TargetedChangeWorkArea';
@@ -167,6 +168,7 @@ export function ProjectShell({ usageView = false, designSystemView = false }: { 
   const specDepth = stage === 'spec' && isSpecDepthView(depthParam) ? depthParam : null;
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
+  const [planningOverride, setPlanningOverride] = useState<PlanningShellOverride>({});
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
   const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style' | 'intake' | 'handoff' | 'genui'>('shell');
   const [handoffInitialMode, setHandoffInitialMode] = useState<HandoffMode>('select');
@@ -194,6 +196,8 @@ export function ProjectShell({ usageView = false, designSystemView = false }: { 
       ? 'S14'
     : delivery
       ? 'S37'
+      : stage === 'planning'
+        ? (planningOverride.screen ?? 'S05')
       : stage === 'spec'
         ? (specDepth ? 'S07' : 'S40')
       : stage === 'design' && designSub === 'canvas'
@@ -217,6 +221,8 @@ export function ProjectShell({ usageView = false, designSystemView = false }: { 
       ? save
       : designSystemView
         ? { status: 'saved' as const, tone: 'ok' as const, text: 'Saved 12:44' }
+      : stage === 'planning'
+        ? (planningOverride.save ?? { status: 'saved', tone: 'ok', text: 'Saved 12:06' })
       : stage === 'spec' && specOverride.save
       ? specOverride.save
       : stage === 'design' && designSub === 'canvas' && canvasOverride.save
@@ -402,6 +408,8 @@ export function ProjectShell({ usageView = false, designSystemView = false }: { 
             )
           ) : stage === 'backend' ? (
             <BackendWorkArea onOpenDelivery={() => openDelivery('backend')} />
+          ) : stage === 'planning' ? (
+            <DecisionLogWorkArea onShellOverride={setPlanningOverride} />
           ) : stage === 'spec' ? (
             specDepth ? (
               <SpecDepthWorkArea
