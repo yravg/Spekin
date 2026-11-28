@@ -585,4 +585,36 @@ export interface SampleGenUiCard {
 }
 export declare const GENUI_CARDS: SampleGenUiCard[];
 
+// S04 Interview (Group A, IMP-55).
+export interface SampleInterviewQuestion {
+  id: string;
+  n: number;
+  text: string;
+  rec: string;
+  why: string;
+  alts: string[];
+}
+export interface SampleInterviewWhy {
+  plain: string;
+  evidence: string[];
+  tradeoffs: [string, string][];
+}
+export interface SampleInterviewOpen {
+  id: string;
+  q: string;
+  qt: string;
+  at: string;
+  where: string;
+}
+export type SampleInterviewGroundRow = ['req' | 'frame' | 'doc', string, string, string, PillTone, string];
+export declare const GAPA_IDEA: string;
+export declare const GAPA_ANSWERED: [string, string, string, string][];
+export declare const GAPA_SKIPPED: [string, string];
+export declare const GAPA_Q5: SampleInterviewQuestion;
+export declare const GAPA_PITCH_FIELDS: [string, StageTone, string][];
+export declare const GAPA_GROUND: SampleInterviewGroundRow[];
+export declare const GAPA_WHY: SampleInterviewWhy;
+export declare const GAPA_OPEN: SampleInterviewOpen[];
+export declare const GAPA_PITCH: [string, string, string[], string][];
+
 // Everything else the boards use is exported too; declare it here before use.

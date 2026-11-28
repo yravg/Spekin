@@ -1,0 +1,55 @@
+{
+  "board": "S04-interview.dc.html",
+  "states": {
+    "ask": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/new/interview" },
+        { "wait": "[data-screen=\"S04\"] .gpa-q" }
+      ]
+    },
+    "skip": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/new/interview?q=4" },
+        { "wait": "[data-screen=\"S04\"] .gpa-q" },
+        { "click": ".gpa-q button:has-text(\"Skip\")" },
+        { "wait": ".gpa-bn.ok[data-feature=\"F413\"]" }
+      ]
+    },
+    "ground": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/p/meranti-yard/planning" },
+        { "wait": "[data-screen=\"S04\"] [data-feature=\"F414\"]" }
+      ]
+    },
+    "why": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/new/interview" },
+        { "wait": "[data-screen=\"S04\"] .gpa-q" },
+        { "click": "button:has-text(\"Why this?\")" },
+        { "wait": ".gpa-why[data-feature=\"F417\"]" }
+      ]
+    },
+    "cukup": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/new/interview" },
+        { "wait": "[data-screen=\"S04\"] .gpa-q" },
+        { "click": "header.gpa-ih button:has-text(\"Cukup, buat pitch\")" },
+        { "wait": "[role=\"dialog\"][aria-label=\"Cukup, buat pitch\"]" }
+      ]
+    },
+    "twelve": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/new/interview?q=12" },
+        { "wait": "[data-screen=\"S04\"] .gpa-q" },
+        { "click": ".gpa-q button:has-text(\"Accept\")" },
+        { "wait": ".sp-gc.prop[data-feature=\"F416\"]" }
+      ]
+    }
+  }
+}
