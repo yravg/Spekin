@@ -1,8 +1,13 @@
 # Implementation handoff: canvas to app
 
-Owner: Enrico (lead, with Claude Code). Last updated 23 Nov 2026 (statuses refreshed after the merge). Baseline commit: see `git log -1 --format=%h docs/handoff/implementation.md`.
+Owner: Enrico (lead, with Claude Code). Last updated 28 Nov 2026 (IMP-54 to IMP-67 merged via #85). Baseline commit: see `git log -1 --format=%h docs/handoff/implementation.md`.
 
-## Current state (verified 23 Nov 2026, lead)
+## Current state (verified 28 Nov 2026, lead)
+
+**28 Nov 2026:** IMP-54 to IMP-67 (PRs #71–#84, one board each) are merged into main through the integration PR #85 (branch `merge-imp-54-67`): 14 merge commits plus one lead integration commit. On that tree `npm run gate` exits 0 (vitest 35 files / 249 tests, Rust, contracts) and `npm run harness` passes **160/160 states on 28 boards**. The integration commit routes the five Planning boards by query, as their "Where it lives" cards say: bare `/p/:project/planning` is S04 (interview), `?artifact=decisions` S05, `pitch` S06, `tickets` S15, `ticket-<id>` S16 (`apps/web/src/routes.tsx` `PlanningRoute`). S02 and S04 click paths are now `checked` (`APP_ROOT` includes `.gpa-pub` and `.gpa-iv`). "Part open" items per card are in each PR body. The 23 Nov text below is the earlier snapshot.
+
+**Next step:** owner decision D-PLAN-1 below (how a user clicks from S04 into S05, S06 and S15), then a lead card to draw and build that link. No worker card is open.
+
 
 The historical tables and lane files below are a record of the build, not the current status. This section is authoritative: `main` is clean at `0aba2c5`, all pull requests #1–#47 are merged, and there is no open worker card. The older "waiting for owner merge" and `part blocked` wording is superseded by it.
 
@@ -167,20 +172,20 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-51 | ui | Every state reachable at 1024 × 768 (overlays in the 1024–1439 band) | – | open (worker: OpenCode Go `hy4`) |
 | IMP-52 | lead-assist | Classify the 80 PRD requirements no canvas feature maps to | – | open (worker: OpenCode Go `hy4`) |
 | IMP-53 | lead | Approved gap boards and S41 moved into the main canvas (28 boards, 160 states) | – | done |
-| IMP-54 | ui | S02 Sign-in and legal pages (F401-F409) | – | open (worker: Antigravity Neon 4) |
-| IMP-55 | ui | S04 Interview (F411-F419) | – | open (worker: Antigravity Neon 4) |
-| IMP-56 | ui | S05 Decision log (F421-F429) | – | open (worker: Antigravity Neon 4) |
-| IMP-57 | ui | S06 Pitch (Simple) (F431-F439) | – | open (worker: Antigravity Neon 4) |
-| IMP-58 | ui | S07 Spec document at every depth (F441-F449) | – | open (worker: Antigravity Neon 4) |
-| IMP-59 | ui | S19 ADRs and glossary (F461-F469) | – | open (worker: Antigravity Neon 4) |
-| IMP-60 | ui | S14 Design system: kit and GAP register (F451-F459) | – | open (worker: Antigravity Neon 4) |
-| IMP-61 | ui | S21 Canvas step and sandboxed preview (F491-F499) | – | open (worker: Antigravity Neon 4) |
-| IMP-62 | ui | S15 Ticket board (F471-F479) | – | open (worker: Antigravity Neon 4) |
-| IMP-63 | ui | S16 Ticket detail and criteria (F481-F489) | – | open (worker: Antigravity Neon 4) |
-| IMP-64 | ui | S18 Verification and review report (F501-F509) | – | open (worker: Antigravity Neon 4) |
-| IMP-65 | ui | S20 Agent inbox (F511-F519) | – | open (worker: Antigravity Neon 4) |
-| IMP-66 | ui | S25 Export (Markdown, zip, yravgbuilder) (F521-F529) | – | open (worker: Antigravity Neon 4) |
-| IMP-67 | ui | S41 Enhance prompt (F531-F539) | – | open (worker: Antigravity Neon 4) |
+| IMP-54 | ui | S02 Sign-in and legal pages (F401-F409) | – | done (#74, merged via #85) |
+| IMP-55 | ui | S04 Interview (F411-F419) | – | done (#80, merged via #85) |
+| IMP-56 | ui | S05 Decision log (F421-F429) | – | done (#73, merged via #85) |
+| IMP-57 | ui | S06 Pitch (Simple) (F431-F439) | – | done, part open (#78, merged via #85) |
+| IMP-58 | ui | S07 Spec document at every depth (F441-F449) | – | done (#72, merged via #85) |
+| IMP-59 | ui | S19 ADRs and glossary (F461-F469) | – | done, part open (#79, merged via #85) |
+| IMP-60 | ui | S14 Design system: kit and GAP register (F451-F459) | – | done (#71, merged via #85) |
+| IMP-61 | ui | S21 Canvas step and sandboxed preview (F491-F499) | – | done, part open (#81, merged via #85) |
+| IMP-62 | ui | S15 Ticket board (F471-F479) | – | done (#75, merged via #85) |
+| IMP-63 | ui | S16 Ticket detail and criteria (F481-F489) | – | done (#82, merged via #85) |
+| IMP-64 | ui | S18 Verification and review report (F501-F509) | – | done (#76, merged via #85) |
+| IMP-65 | ui | S20 Agent inbox (F511-F519) | – | done, part open (#83, merged via #85) |
+| IMP-66 | ui | S25 Export (Markdown, zip, yravgbuilder) (F521-F529) | – | done (#77, merged via #85) |
+| IMP-67 | ui | S41 Enhance prompt (F531-F539) | – | done, part open (#84, merged via #85) |
 
 ### IMP-21 · Screens read through one data source; API mode (ui)
 
@@ -632,9 +637,12 @@ These change boards, so only the lead does them: edit the generator, rebuild, li
 
 See [docs/DECISIONS.md](../DECISIONS.md) → Open. Agents never decide these.
 
+- **D-PLAN-1 (28 Nov 2026): how a user reaches S05, S06 and S15 by clicking.** Clicking Planning opens the S04 interview (its card: `/p/:project/planning` is the add-feature interview). S05, S06 and S15 open only by URL (`?artifact=…`); S15 is also linked from S21 ("open tickets") and S16 from the ticket board. Recommendation: add a drawn link row on S04 (Decision log, Pitch, Tickets) and let the S05/S06/S15 artifact tabs switch `?artifact=`. That is a board change, so the owner approves it first.
+
 ## Known failures and limits
 
-- No known failing build check: gate exit 0 and harness 81/81 on 23 Nov 2026.
+- No known failing build check: gate exit 0 and harness 160/160 on 28 Nov 2026 (integration branch for #85).
+- S05, S06 and S15 harness paths start with a deep link (first-step `goto`), because no drawn control reaches them from S04 yet (D-PLAN-1).
 - The board's `.sp-app` measures 1440 × 901 and the app's 1440 × 900. The harness compares the common area and fails only on a gap over 2 px.
 - All 81 states have checked click paths; `check:rules` still reports the count.
 - CI's state gate is required (`GATE=checked`), not report-only.
