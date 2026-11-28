@@ -1,0 +1,57 @@
+{
+  "board": "S02-sign-in.dc.html",
+  "states": {
+    "signin": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/masuk" },
+        { "wait": "[data-screen=\"S02\"] [data-feature=\"F401\"]" }
+      ]
+    },
+    "code": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/masuk" },
+        { "click": "button:has-text(\"Send me a code\")" },
+        { "wait": "h2:has-text(\"Check your email\")" }
+      ]
+    },
+    "wrong": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/masuk" },
+        { "click": "button:has-text(\"Send me a code\")" },
+        { "type": [".gpa-otp input[aria-label=\"Digit 4\"]", "9"] },
+        { "type": [".gpa-otp input[aria-label=\"Digit 5\"]", "0"] },
+        { "type": [".gpa-otp input[aria-label=\"Digit 6\"]", "2"] },
+        { "click": "button:has-text(\"Sign in\")" },
+        { "wait": ".gpa-otp.err" }
+      ]
+    },
+    "google": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/masuk" },
+        { "click": "button:has-text(\"Continue with Google\")" },
+        { "wait": "button:has-text(\"Try Google again\")" }
+      ]
+    },
+    "terms": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/masuk" },
+        { "click": ".gpa-fine button:has-text(\"Syarat\")" },
+        { "wait": "h1:has-text(\"Syarat Penggunaan\")" }
+      ]
+    },
+    "privacy": {
+      "status": "draft",
+      "steps": [
+        { "goto": "/masuk" },
+        { "click": ".gpa-fine button:has-text(\"Privasi\")" },
+        { "click": "[data-feature=\"F406\"] button:has-text(\"EN\")" },
+        { "wait": "text=English text is not available yet." }
+      ]
+    }
+  }
+}

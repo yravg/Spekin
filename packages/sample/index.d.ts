@@ -630,5 +630,27 @@ export declare const GAPA_LOG: SampleDecisionLogEntry[];
 export declare const GAPA_OPEN: SampleOpenQuestion[];
 export declare const GAPA_KIT: SampleDecisionLogEntry;
 export declare const GAPA_NOBASIS: SampleNoBasis;
+// S02 Sign-in and legal pages (IMP-54).
+export interface SampleGapUser {
+  email: string;
+  code: string[];
+  resend: string;
+  left: number;
+}
+export interface SampleGapTerms {
+  title: string;
+  since: string;
+  route: string;
+  items: [string, string][];
+}
+export interface SampleGapPrivacy {
+  title: string;
+  since: string;
+  route: string;
+  rows: [string, string, string][];
+}
+export declare const GAPA_USER: SampleGapUser;
+export declare const GAPA_TERMS: SampleGapTerms;
+export declare const GAPA_PRIVACY: SampleGapPrivacy;
 
 // Everything else the boards use is exported too; declare it here before use.
