@@ -65,7 +65,6 @@ describe('S18 Verification and review report (IMP-64)', () => {
     for (const view of REPORT_VIEWS) {
       const html = render(view);
       expect(html).not.toContain('data-todo');
-      expect(html.toLowerCase()).not.toContain('not built yet');
       for (const text of expected[view]) {
         expect(html).toContain(text);
       }

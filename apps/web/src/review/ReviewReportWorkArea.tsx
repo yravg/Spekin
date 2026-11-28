@@ -362,9 +362,15 @@ export function ReviewReportWorkArea(props: {
   const toggleChatCollapsed = useWorkspace((s) => s.toggleChatCollapsed);
   const recordIntent = useWorkspace((s) => s.recordIntent);
 
+  const switchView = (next: ReportView) => {
+    onShellOverride?.({ busy: next === 'report' ? '1 reviewing' : undefined });
+    setView(next);
+  };
+
   useEffect(() => {
     setView(initialView);
-  }, [initialView]);
+    onShellOverride?.({ busy: initialView === 'report' ? '1 reviewing' : undefined });
+  }, [initialView, onShellOverride]);
 
   useEffect(() => {
     onShellOverride?.({ busy: view === 'report' ? '1 reviewing' : undefined });
@@ -375,19 +381,19 @@ export function ReviewReportWorkArea(props: {
     const q = wsView.draft.trim().toLowerCase();
     setWsView('testing', { draft: '' });
     if (q.includes('review the build') || q.includes('no repo') || q.includes('not connected')) {
-      setView('none');
+      switchView('none');
       recordIntent('F502:no-inputs');
     } else if (q.includes('ship') || q.includes('standard') || q.includes('split')) {
-      setView('split');
+      switchView('split');
       recordIntent('F504:split');
     } else if (q.includes('decide') || q.includes('risk')) {
-      setView('risk');
+      switchView('risk');
       recordIntent('F506:risk');
     } else if (q.includes('propose') || q.includes('ticket')) {
-      setView('prop');
+      switchView('prop');
       recordIntent('F507:propose');
     } else {
-      setView('report');
+      switchView('report');
       recordIntent('F509:independent-review');
     }
   };
@@ -447,7 +453,7 @@ export function ReviewReportWorkArea(props: {
   const selectedCount = R.proposals.filter((p) => selectedProposals[p[0]]).length;
 
   const head = (sub: string, extra?: ReactNode) => (
-    <div className="gpd-head">
+    <div className="gpd-head" data-feature="F509">
       <div className="t">
         <h2>Review of build 0412 against spec {R.rev}</h2>
         <p>{sub}</p>
@@ -497,7 +503,7 @@ export function ReviewReportWorkArea(props: {
             does="Opens S08 with proposed tickets for the unmet and untested items; nothing is added to S15 until accepted"
             feature="F507"
             onClick={() => {
-              setView('prop');
+              switchView('prop');
               recordIntent('F507:propose');
             }}
           />,
@@ -505,19 +511,19 @@ export function ReviewReportWorkArea(props: {
         <EvidenceSection rows={R.evidence} miss={R.missing} missTone="warn" />
         <AxesOverview
           onOpenSpec={() => {
-            setView('split');
+            switchView('split');
             recordIntent('F503:open-spec');
           }}
           onOpenStd={() => {
-            setView('split');
+            switchView('split');
             recordIntent('F504:open-std');
           }}
         />
         <FindingsTable
           rows={R.findings}
           onSelect={(id) => {
-            if (id === 'FND-02') setView('split');
-            else setView('prop');
+            if (id === 'FND-02') switchView('split');
+            else switchView('prop');
             recordIntent('F505:select:' + id);
           }}
         />
@@ -729,7 +735,7 @@ export function ReviewReportWorkArea(props: {
           rows={R.findings}
           sel={0}
           onSelect={(id) => {
-            if (id === 'FND-02') setView('split');
+            if (id === 'FND-02') switchView('split');
             recordIntent('F505:select:' + id);
           }}
         />
@@ -830,7 +836,7 @@ export function ReviewReportWorkArea(props: {
             aria-pressed={activeSection === 0 ? 'true' : 'false'}
             data-does="Shows evidence, missing inputs and both axes"
             data-feature="F501"
-            onClick={() => setView('report')}
+            onClick={() => switchView('report')}
           >
             Overview
           </button>
@@ -840,7 +846,7 @@ export function ReviewReportWorkArea(props: {
             aria-pressed={activeSection === 1 ? 'true' : 'false'}
             data-does="Lists requirements and outcomes"
             data-feature="F503"
-            onClick={() => setView('split')}
+            onClick={() => switchView('split')}
           >
             Spec coverage<span className="n">5</span>
           </button>
@@ -850,7 +856,7 @@ export function ReviewReportWorkArea(props: {
             aria-pressed={activeSection === 2 ? 'true' : 'false'}
             data-does="Lists standards and outcomes"
             data-feature="F504"
-            onClick={() => setView('split')}
+            onClick={() => switchView('split')}
           >
             Standards<span className="n">4</span>
           </button>
@@ -860,7 +866,7 @@ export function ReviewReportWorkArea(props: {
             aria-pressed={activeSection === 3 ? 'true' : 'false'}
             data-does="Shows the six risk dimensions and the human decisions they need"
             data-feature="F506"
-            onClick={() => setView('risk')}
+            onClick={() => switchView('risk')}
           >
             Risk review<span className="n">3</span>
           </button>
@@ -870,7 +876,7 @@ export function ReviewReportWorkArea(props: {
             aria-pressed={activeSection === 4 ? 'true' : 'false'}
             data-does="Lists findings and the tickets proposed from them"
             data-feature="F505"
-            onClick={() => setView('prop')}
+            onClick={() => switchView('prop')}
           >
             Findings<span className="n">4</span>
           </button>
