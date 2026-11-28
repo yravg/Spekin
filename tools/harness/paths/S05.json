@@ -1,0 +1,49 @@
+{
+  "board": "S05-decision-log.dc.html",
+  "states": {
+    "log": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/p/meranti-yard/planning?artifact=decisions" },
+        { "wait": "[data-screen=\"S05\"]" }
+      ]
+    },
+    "entry": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/p/meranti-yard/planning?artifact=decisions" },
+        { "wait": "[data-screen=\"S05\"]" },
+        { "click": "button.gpa-idb:has-text(\"D-002\")" },
+        { "wait": ".sp-insp:has-text(\"D-002 Appetite\")" }
+      ]
+    },
+    "kit": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/p/meranti-yard/planning?artifact=decisions" },
+        { "wait": "[data-screen=\"S05\"]" },
+        { "click": "button.gpa-fc:has-text(\"Kit\")" },
+        { "wait": "[data-feature=\"F426\"]" }
+      ]
+    },
+    "open": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/p/meranti-yard/planning?artifact=decisions" },
+        { "wait": "[data-screen=\"S05\"]" },
+        { "click": "button.gpa-fc:has-text(\"Open questions\")" },
+        { "wait": "[data-feature=\"F425\"]" }
+      ]
+    },
+    "empty": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/p/meranti-yard/planning?artifact=decisions" },
+        { "wait": "[data-screen=\"S05\"]" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "role=menuitem[name=\"New project (empty log)\"]" },
+        { "wait": "[data-feature=\"F428\"]" }
+      ]
+    }
+  }
+}

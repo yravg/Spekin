@@ -54,6 +54,8 @@ import type {
   SkillManifest,
 } from '@spekin/contracts';
 import type {
+  ContextItem,
+  PillTone,
   SampleDeliveryContract,
   SampleGenUiVerdict,
   SampleModelRegistryRow,
@@ -73,6 +75,40 @@ export type SampleSurface = typeof sampleModule;
 
 /** The sample-only datasets themselves, read through the same door in both modes. */
 export const sampleData: SampleSurface = sampleModule;
+
+/** Typed view of S14 design-system sample data from sample/parts/gap-b.mjs (IMP-60). */
+export interface SampleGapBKit {
+  name: string;
+  rev: string;
+  picked: number;
+  decision: string;
+  by: string;
+}
+export type SampleGapBPick = [string, string, string, 'ok' | 'gap'];
+export type SampleGapBToken = [string, string, string, string];
+export interface SampleGapBGap {
+  id: string;
+  need: string;
+  closest: string;
+  why: string;
+  used: string;
+  st: ['ok' | 'warn' | 'bad' | 'acc' | 'mute', string];
+}
+export interface SampleGapBProv {
+  file: string;
+  src: string;
+  lic: string;
+  obl: string;
+  v: ['ok' | 'warn' | 'bad' | 'acc' | 'mute', string];
+}
+export interface SampleGapBDesignSystem {
+  GAPB_KIT: SampleGapBKit;
+  GAPB_PICKS: SampleGapBPick[];
+  GAPB_TOKENS: SampleGapBToken[];
+  GAPB_GAPS: SampleGapBGap[];
+  GAPB_PROV: SampleGapBProv[];
+}
+export const gapBDesignSystem: SampleGapBDesignSystem = sampleModule as unknown as SampleGapBDesignSystem;
 
 export type DataMode = 'sample' | 'api';
 
@@ -777,4 +813,66 @@ export function getUsage(id: string): SampleUsage | null {
 export function isStageId(stages: SampleStage[], s: string | undefined): s is StageId {
   return !!s && stages.some((x) => x.id === s);
 }
+
+export interface GapCLane {
+  id: string;
+  n: number;
+  name: string;
+  sub: string;
+}
+
+export interface GapCTicket {
+  id: string;
+  lane: string;
+  title: string;
+  ui: boolean;
+  comp: string | null;
+  stages: string[];
+  blockers: string[];
+  owns: string;
+  st: 'ready' | 'blocked' | 'locked' | 'proposed';
+  crit: number;
+}
+
+export type GapCComponentOption = [slug: string, desc: string, src: string];
+
+export interface GapCTicketDetail {
+  id: string;
+  title: string;
+  lane: string;
+  rev: string;
+  summary: string;
+  comp: { slug: string; name: string; install: string; ver: string } | null;
+  blockers: [string, string, PillTone, string][];
+  owns: string;
+  criteria: [string, string, string, [PillTone, string]][];
+  rules: string[];
+  designRev: string;
+  newRev: string;
+  stagesL?: string[];
+}
+
+export interface GapCSample {
+  ctx: ContextItem[];
+  ctxS16: ContextItem[];
+  lanes: GapCLane[];
+  tickets: GapCTicket[];
+  components: GapCComponentOption[];
+  lockedIds: string[];
+  t05: GapCTicketDetail;
+}
+
+export function gapCSample(): GapCSample {
+  const m = sampleModule as unknown as Record<string, unknown>;
+  return {
+    ctx: m.GAPC_CTX as ContextItem[],
+    ctxS16: m.GAPC_CTX_S16 as ContextItem[],
+    lanes: m.GAPC_LANES as GapCLane[],
+    tickets: m.GAPC_TICKETS as GapCTicket[],
+    components: m.GAPC_COMPONENTS as GapCComponentOption[],
+    lockedIds: m.GAPC_LOCKED_TICKETS as string[],
+    t05: m.GAPC_T05 as GapCTicketDetail,
+  };
+}
+
 

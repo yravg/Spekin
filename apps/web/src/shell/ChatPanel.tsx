@@ -19,6 +19,7 @@ export function ChatPanel(props: {
   run?: [string, string, string];
   jump?: boolean;
   beforeComposer?: ReactNode;
+  composer?: ReactNode;
   onResize: (delta: number) => void;
   onHistory: () => void;
   onNewChat: () => void;
@@ -49,6 +50,7 @@ export function ChatPanel(props: {
     run,
     jump,
     beforeComposer,
+    composer,
     onResize,
     onHistory,
     onNewChat,
@@ -148,17 +150,19 @@ export function ChatPanel(props: {
         </div>
       ) : null}
       {beforeComposer}
-      <Composer
-        placeholder={placeholder}
-        draft={draft}
-        model={model}
-        onDraftChange={onDraftChange}
-        onKeyDown={onComposerKeyDown}
-        onAttach={onAttach}
-        onMention={onMention}
-        onOpenModel={onOpenModel}
-        onSend={onSend}
-      />
+      {composer ?? (
+        <Composer
+          placeholder={placeholder}
+          draft={draft}
+          model={model}
+          onDraftChange={onDraftChange}
+          onKeyDown={onComposerKeyDown}
+          onAttach={onAttach}
+          onMention={onMention}
+          onOpenModel={onOpenModel}
+          onSend={onSend}
+        />
+      )}
     </aside>
   );
 }

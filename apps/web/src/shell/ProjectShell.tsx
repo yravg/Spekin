@@ -9,18 +9,30 @@ import { StageBar } from './StageBar';
 import { NotFound } from './NotFound';
 import { DesignWorkArea } from './DesignWorkArea';
 import { BackendWorkArea } from './BackendWorkArea';
+import { PitchWorkArea, PITCH_SAVE } from '../planning/PitchWorkArea';
 import { SkillsWorkArea } from '../skills/SkillsWorkArea';
+import { SpecDepthWorkArea, isSpecDepthView } from '../spec/SpecDepthWorkArea';
+import { DecisionLogWorkArea, type PlanningShellOverride } from '../planning/DecisionLogWorkArea';
+import { TicketBoardWorkArea } from '../tickets/TicketBoardWorkArea';
+import { AdrsGlossaryWorkArea, isRecordsView, type RecordsView } from '../records/AdrsGlossaryWorkArea';
 import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/FramesCanvasWorkArea';
+import { CanvasStepWorkArea } from '../canvas/CanvasStepWorkArea';
 import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/ReviewAcceptWorkArea';
+import { ReviewReportWorkArea, isReportView, type ReportShellOverride } from '../review/ReviewReportWorkArea';
 import { TargetedChangeWorkArea } from '../review/TargetedChangeWorkArea';
 import { StyleReviewWorkArea, type StyleShellOverride } from '../style/StyleReviewWorkArea';
 import { ReferenceIntakeWorkArea, type IntakeShellOverride } from '../intake/ReferenceIntakeWorkArea';
 import { CodingHandoffWorkArea, type HandoffMode, type HandoffShellOverride } from '../delivery/CodingHandoffWorkArea';
 import { GenUiWorkArea, type GenUiMode, type GenUiShellOverride } from '../genui/GenUiWorkArea';
+import { EnhancePromptWorkArea, type EnhanceShellOverride } from '../enhance/EnhancePromptWorkArea';
 import { useLayoutTier } from '../mobile/layoutTier';
 import { ResponsiveProjectShell } from '../mobile/ResponsiveProjectShell';
 import { ModelsUsageWorkArea, isUsageMoment, isUsageSection, usagePct, type UsageMoment, type UsageSection } from '../models/ModelsUsageWorkArea';
 import { DeliveryWorkArea, deliveryStageView, deliveryViewStage, isDeliveryView } from '../delivery/DeliveryWorkArea';
+import { DesignSystemWorkArea, isDesignSystemState } from '../design-system/DesignSystemWorkArea';
+import { ExportWorkArea, type ExportFormat, type ExportMode } from '../export/ExportWorkArea';
+import { TicketDetailWorkArea } from '../tickets/TicketDetailWorkArea';
+import { AgentInboxWorkArea, defaultInboxBusy, type AgentInboxShellOverride, type InboxMoment } from '../inbox/AgentInboxWorkArea';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -29,7 +41,15 @@ import { Btn, IconBtn } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { Pill } from '../ui/Pill';
 
-function StagePlaceholderWorkArea({ stage, onOpenDelivery }: { stage: SampleStage; onOpenDelivery?: (stage: SampleStage) => void }) {
+function StagePlaceholderWorkArea({
+  stage,
+  onOpenDelivery,
+  onOpenTicket,
+}: {
+  stage: SampleStage;
+  onOpenDelivery?: (stage: SampleStage) => void;
+  onOpenTicket?: (ticketId: string) => void;
+}) {
   const view = useWorkspace((s) => s.view(stage.id));
   const setView = useWorkspace((s) => s.setView);
   const chatWidth = useWorkspace((s) => s.chatWidth);
@@ -91,7 +111,12 @@ function StagePlaceholderWorkArea({ stage, onOpenDelivery }: { stage: SampleStag
                     onSelect: () => (onOpenDelivery ? onOpenDelivery(stage) : recordIntent('F104:release-readiness')),
                   },
                 ]
-              : undefined
+              : stage.id === 'planning' && onOpenTicket
+                ? [
+                    { icon: 'doc', name: 'T-05 Variance table flags', onSelect: () => onOpenTicket('T-05') },
+                    { icon: 'doc', name: 'T-08 Drill down to cost lines', onSelect: () => onOpenTicket('T-08') },
+                  ]
+                : undefined
           }
           right={
             <>
@@ -149,20 +174,64 @@ function StagePlaceholderWorkArea({ stage, onOpenDelivery }: { stage: SampleStag
 }
 
 // S35 Project shell. Board: docs/design/spekin-canvas/project/S35-project-shell.dc.html (data-screen="S35").
-export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}) {
+export function ProjectShell({
+  usageView = false,
+  designSystemView = false,
+  reportView = false,
+  exportView = false,
+  recordsView = false,
+  planningView = false,
+}: {
+  usageView?: boolean;
+  designSystemView?: boolean;
+  reportView?: boolean;
+  exportView?: boolean;
+  recordsView?: boolean;
+  /** /p/:project/planning has no :stage segment (routes.tsx PlanningRoute). */
+  planningView?: boolean;
+} = {}) {
   const { project: projectId = '', stage: stageParam } = useParams();
-  const stage = stageParam ?? 'design';
+  const stage = planningView ? 'planning' : reportView ? 'testing' : exportView ? 'spec' : (stageParam ?? (recordsView ? 'spec' : 'design'));
   const navigate = useNavigate();
   const [search, setSearch] = useSearchParams();
   const section: UsageSection = isUsageSection(search.get('section')) ? (search.get('section') as UsageSection) : 'models';
   const moment: UsageMoment = isUsageMoment(search.get('moment')) ? (search.get('moment') as UsageMoment) : 'calm';
+  const dsTab = search.get('tab');
+  const designSystemState = isDesignSystemState(dsTab) ? dsTab : 'kit';
+  const reportRev = search.get('rev');
+  const initialReportView = isReportView(reportRev) ? reportRev : 'report';
+  const exportFormatParam = search.get('format');
+  const exportInitialMode: ExportMode =
+    exportFormatParam === 'yb' ? 'yb' : exportFormatParam === 'zip' ? 'left' : 'md';
+  const recordsType = search.get('type');
+  const recordsMode: RecordsView = isRecordsView(recordsType) ? recordsType : 'glossary';
   // S37 keeps its artifact view in the query (never draft text): /p/meranti-yard/backend?view=contracts.
   const viewParam = search.get('view');
   const delivery = isDeliveryView(viewParam) ? viewParam : null;
+  const depthParam = search.get('depth');
+  const specDepth = stage === 'spec' && isSpecDepthView(depthParam) ? depthParam : null;
+  // S21 Canvas step lives at /p/:project/design?artifact=canvas-step (frame id in the query; never comment text).
+  const isCanvasStep = stage === 'design' && search.get('artifact') === 'canvas-step';
+  // Planning artifacts live in the query (never prompt text): ?artifact=decisions (S05), pitch (S06), tickets (S15),
+  // ticket-T-05 (S16). The bare /p/:project/planning URL is the S04 interview (routes.tsx PlanningRoute).
+  const artifactParam = search.get('artifact');
+  const ticketId = stage === 'planning' && artifactParam?.startsWith('ticket-') ? artifactParam.slice('ticket-'.length) : null;
+  const planningArtifact =
+    stage !== 'planning' || ticketId ? null : artifactParam === 'pitch' ? 'pitch' : artifactParam === 'tickets' ? 'tickets' : 'decisions';
+  // S20 Agent inbox opens as a docked panel on any stage: /p/meranti-yard/:stage?inbox=1 (run id in query).
+  const inboxOpen = !usageView && search.get('inbox') === '1';
+  const inboxRun = search.get('run') ?? undefined;
+  const inboxMomentParam = search.get('moment');
+  const inboxMoment: InboxMoment | undefined =
+    inboxMomentParam === 'cap' || inboxMomentParam === 'empty' ? inboxMomentParam : undefined;
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
+  const [planningOverride, setPlanningOverride] = useState<PlanningShellOverride>({});
+  const [pitchOverride, setPitchOverride] = useState<{ save?: SaveState }>({});
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
-  const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style' | 'intake' | 'handoff' | 'genui'>('shell');
+  const [reportOverride, setReportOverride] = useState<ReportShellOverride>({});
+  const [inboxOverride, setInboxOverride] = useState<AgentInboxShellOverride | null>(null);
+  const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style' | 'intake' | 'handoff' | 'genui' | 'enhance'>('shell');
   const [handoffInitialMode, setHandoffInitialMode] = useState<HandoffMode>('select');
   const [genUiInitialMode, setGenUiInitialMode] = useState<GenUiMode>('stream');
   const [canvasOverride, setCanvasOverride] = useState<CanvasShellOverride>({});
@@ -171,6 +240,7 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   const [intakeOverride, setIntakeOverride] = useState<IntakeShellOverride>({});
   const [handoffOverride, setHandoffOverride] = useState<HandoffShellOverride>({});
   const [genUiOverride, setGenUiOverride] = useState<GenUiShellOverride>({});
+  const [enhanceOverride, setEnhanceOverride] = useState<EnhanceShellOverride>({});
   const layoutTier = useLayoutTier();
   const save = useWorkspace((s) => s.save);
   const conflict = useWorkspace((s) => s.conflict);
@@ -184,10 +254,30 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   const currentStage = stages.find((s) => s.id === stage)!;
   const screenId = usageView
     ? 'S36'
+    : designSystemView
+      ? 'S14'
+    : exportView
+      ? 'S25'
+    : recordsView
+      ? 'S19'
+    : inboxOpen
+      ? 'S20'
     : delivery
       ? 'S37'
+      : ticketId
+        ? 'S16'
+      : planningArtifact === 'tickets'
+        ? 'S15'
+      : planningArtifact === 'pitch'
+        ? 'S06'
+      : planningArtifact === 'decisions'
+        ? (planningOverride.screen ?? 'S05')
+      : isCanvasStep
+        ? 'S21'
       : stage === 'spec'
-        ? 'S40'
+        ? (specDepth ? 'S07' : 'S40')
+      : stage === 'testing'
+        ? 'S18'
       : stage === 'design' && designSub === 'canvas'
         ? (canvasOverride.screen ?? 'S29')
         : stage === 'design' && designSub === 'review'
@@ -202,11 +292,21 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
                   ? 'S34'
                   : stage === 'design' && designSub === 'genui'
                     ? 'S38'
-                    : 'S35';
+                    : stage === 'design' && designSub === 'enhance'
+                      ? 'S41'
+                      : 'S35';
   const s36Usage = MODELS_USAGE[moment];
-  const activeSave =
-    usageView
+  const activeSave: SaveState =
+    usageView || exportView
       ? save
+      : designSystemView
+        ? { status: 'saved' as const, tone: 'ok' as const, text: 'Saved 12:44' }
+      : recordsView
+        ? { status: 'saved', tone: 'ok', text: 'Saved 12:52' }
+      : planningArtifact === 'pitch'
+        ? (pitchOverride.save ?? PITCH_SAVE.proposal)
+      : planningArtifact === 'decisions'
+        ? (planningOverride.save ?? { status: 'saved', tone: 'ok', text: 'Saved 12:06' })
       : stage === 'spec' && specOverride.save
       ? specOverride.save
       : stage === 'design' && designSub === 'canvas' && canvasOverride.save
@@ -223,10 +323,14 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
                   ? genUiOverride.save
                   : save;
   const activeBusy =
-    usageView
+    usageView || designSystemView || exportView || recordsView || isCanvasStep
       ? undefined
+      : inboxOpen
+        ? (inboxOverride ? inboxOverride.busy : defaultInboxBusy(inboxMoment))
       : stage === 'spec'
       ? specOverride.busy
+      : stage === 'testing'
+      ? reportOverride.busy
       : stage === 'design' && designSub === 'shell' && !conflict
         ? '1 designing · 1 waiting'
         : undefined;
@@ -271,7 +375,13 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
       <div className="sp-app">
         <TopBar
           project={displayProject}
-          usage={usageView ? { ...usage, used: s36Usage.used, cap: s36Usage.cap } : usage}
+          usage={
+            usageView
+              ? { ...usage, used: s36Usage.used, cap: s36Usage.cap }
+              : stage === 'design' && designSub === 'enhance' && enhanceOverride.usage
+                ? enhanceOverride.usage
+                : usage
+          }
           save={shownSave}
           busy={shownBusy}
           busyNode={activeBusyNode}
@@ -279,12 +389,23 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
           usagePct={usageView ? usagePct(s36Usage) : undefined}
           onOpenSwitcher={() => setPanel('switcher')}
           onOpenIncrement={() => setPanel('increment')}
-          onOpenSpec={() => setPanel('spec')}
+          onOpenSpec={() => navigate('/p/' + projectId + '/spec?depth=detailed')}
           onOpenUsage={() => {
             if (usageView) setSearch({ section: 'limits', moment });
             else navigate('/p/' + projectId + '/usage?section=models');
           }}
-          onOpenInbox={() => setPanel('inbox')}
+          onOpenInbox={() => {
+            const next = new URLSearchParams(search);
+            if (inboxOpen) {
+              next.delete('inbox');
+              next.delete('run');
+            } else {
+              next.set('inbox', '1');
+            }
+            setInboxOverride(null);
+            if (usageView) navigate('/p/' + projectId + '/spec?' + next.toString());
+            else setSearch(next);
+          }}
           lang={lang}
           onLang={setLang}
         />
@@ -310,6 +431,74 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
               }}
               onIntent={recordIntent}
             />
+          ) : designSystemView ? (
+            <DesignSystemWorkArea
+              state={designSystemState}
+              onStateChange={(next) => setSearch(next === 'gap' ? { tab: next, gap: 'GAP-01' } : { tab: next })}
+              onOpenReview={() => {
+                setDesignSub('review');
+                navigate('/p/' + projectId + '/design');
+              }}
+              onOpenCanvas={() => {
+                setDesignSub('canvas');
+                navigate('/p/' + projectId + '/design');
+              }}
+              onOpenUsage={() => navigate('/p/' + projectId + '/usage?section=models')}
+            />
+          ) : exportView ? (
+            <ExportWorkArea
+              initialMode={exportInitialMode}
+              onFormatChange={(next: ExportFormat) => setSearch({ format: next }, { replace: true })}
+              onCloseExport={() => navigate('/p/' + projectId + '/spec')}
+              onOpenHandoff={() => {
+                setHandoffInitialMode('select');
+                setDesignSub('handoff');
+                navigate('/p/' + projectId + '/design');
+              }}
+              onOpenReview={() => {
+                setDesignSub('review');
+                navigate('/p/' + projectId + '/design');
+              }}
+            />
+          ) : recordsView ? (
+            <AdrsGlossaryWorkArea
+              key={recordsMode}
+              view={recordsMode}
+              onView={(next) => setSearch({ type: next })}
+              onOpenSpec={() => navigate('/p/' + projectId + '/spec')}
+              onIntent={recordIntent}
+            />
+          ) : inboxOpen ? (
+            <AgentInboxWorkArea
+              key={inboxMoment ?? 'live'}
+              initialOpenRun={inboxRun}
+              moment={inboxMoment}
+              onClose={() => {
+                const next = new URLSearchParams(search);
+                next.delete('inbox');
+                next.delete('run');
+                setInboxOverride(null);
+                setSearch(next);
+              }}
+              onSelectRun={(runId) => {
+                const next = new URLSearchParams(search);
+                next.set('inbox', '1');
+                if (runId) next.set('run', runId);
+                else next.delete('run');
+                setSearch(next, { replace: true });
+              }}
+              onOpenUsage={() => navigate('/p/' + projectId + '/usage?section=limits')}
+              onOpenReview={() => {
+                setDesignSub('review');
+                navigate('/p/' + projectId + '/design');
+              }}
+              onOpenHandoff={() => {
+                setHandoffInitialMode('select');
+                setDesignSub('handoff');
+                navigate('/p/' + projectId + '/design');
+              }}
+              onShellOverride={setInboxOverride}
+            />
           ) : delivery ? (
             <DeliveryWorkArea
               view={delivery}
@@ -317,7 +506,16 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
               onIntent={recordIntent}
             />
           ) : stage === 'design' ? (
-            designSub === 'canvas' ? (
+            isCanvasStep ? (
+              <CanvasStepWorkArea
+                onOpenTickets={() => navigate('/p/' + projectId + '/planning?artifact=tickets')}
+                onOpenHandoff={() => {
+                  setHandoffInitialMode('select');
+                  setDesignSub('handoff');
+                  navigate('/p/' + projectId + '/design');
+                }}
+              />
+            ) : designSub === 'canvas' ? (
               <FramesCanvasWorkArea onShellOverride={setCanvasOverride} />
             ) : designSub === 'review' ? (
               <ReviewAcceptWorkArea
@@ -357,6 +555,14 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
                   setDesignSub('handoff');
                 }}
               />
+            ) : designSub === 'enhance' ? (
+              <EnhancePromptWorkArea
+                capped={moment === 'capped' || usage.used >= usage.cap}
+                onShellOverride={setEnhanceOverride}
+                onOpenShell={() => setDesignSub('shell')}
+                onOpenStyle={() => setDesignSub('style')}
+                onOpenUsage={() => navigate('/p/' + projectId + '/usage?section=models')}
+              />
             ) : (
               <DesignWorkArea
                 onOpenCanvas={() => setDesignSub('canvas')}
@@ -373,14 +579,54 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
                   setDesignSub('genui');
                 }}
                 onOpenUsage={() => navigate('/p/' + projectId + '/usage?section=models')}
+                onOpenDesignSystem={() => navigate('/p/' + projectId + '/design/system')}
+                onOpenEnhance={() => setDesignSub('enhance')}
               />
             )
+          ) : ticketId ? (
+            <TicketDetailWorkArea
+              key={ticketId}
+              ticketId={ticketId}
+              onSelectTicket={(id) => navigate('/p/' + projectId + '/planning?artifact=ticket-' + id)}
+              onBackToBoard={() => navigate('/p/' + projectId + '/planning?artifact=tickets')}
+              onIntent={recordIntent}
+            />
+          ) : planningArtifact === 'tickets' ? (
+            <TicketBoardWorkArea onOpenTicket={(id) => navigate('/p/' + projectId + '/planning?artifact=ticket-' + id)} />
+          ) : planningArtifact === 'pitch' ? (
+            <PitchWorkArea onShellOverride={setPitchOverride} />
+          ) : planningArtifact === 'decisions' ? (
+            <DecisionLogWorkArea onShellOverride={setPlanningOverride} />
           ) : stage === 'backend' ? (
             <BackendWorkArea onOpenDelivery={() => openDelivery('backend')} />
           ) : stage === 'spec' ? (
-            <SkillsWorkArea onShellOverride={setSpecOverride} />
+            specDepth ? (
+              <SpecDepthWorkArea
+                initialView={specDepth}
+                onDepthChange={(next) => setSearch({ depth: next })}
+              />
+            ) : (
+              <SkillsWorkArea
+                onShellOverride={setSpecOverride}
+                onOpenExport={() => navigate('/p/' + projectId + '/spec/export')}
+                onOpenRecords={() => navigate('/p/' + projectId + '/spec/records?type=glossary')}
+              />
+            )
+          ) : stage === 'testing' ? (
+            <ReviewReportWorkArea
+              initialView={initialReportView}
+              onShellOverride={setReportOverride}
+              onOpenReview={() => {
+                setDesignSub('review');
+                navigate('/p/' + projectId + '/design');
+              }}
+            />
           ) : (
-            <StagePlaceholderWorkArea stage={currentStage} onOpenDelivery={(s) => openDelivery(s.id)} />
+            <StagePlaceholderWorkArea
+              stage={currentStage}
+              onOpenDelivery={(s) => openDelivery(s.id)}
+              onOpenTicket={(id) => navigate('/p/' + projectId + '/planning?artifact=ticket-' + id)}
+            />
           )}
         </div>
       </div>

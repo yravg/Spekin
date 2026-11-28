@@ -1,0 +1,70 @@
+{
+  "board": "S19-adrs-glossary.dc.html",
+  "states": {
+    "glossary": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"spec\"]" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "button:has-text(\"ADRs and glossary\")" },
+        { "wait": "[data-screen=\"S19\"]" }
+      ]
+    },
+    "adrs": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"spec\"]" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "button:has-text(\"ADRs and glossary\")" },
+        { "wait": "[data-screen=\"S19\"]" },
+        { "click": ".sp-seg button:has-text(\"ADRs\")" },
+        { "wait": ".gpb-two" }
+      ]
+    },
+    "propose": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"spec\"]" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "button:has-text(\"ADRs and glossary\")" },
+        { "wait": "[data-screen=\"S19\"]" },
+        { "click": ".sp-sugg button" },
+        { "click": "button[aria-label=\"Send\"]" },
+        { "wait": ".gpb-hunk" }
+      ]
+    },
+    "contradiction": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"spec\"]" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "button:has-text(\"ADRs and glossary\")" },
+        { "wait": "[data-screen=\"S19\"]" },
+        { "click": "button:has-text(\"Check contradictions\")" },
+        { "wait": ".gpb-card.warn" }
+      ]
+    },
+    "stale": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"spec\"]" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "button:has-text(\"ADRs and glossary\")" },
+        { "wait": "[data-screen=\"S19\"]" },
+        { "click": ".sp-seg button:has-text(\"ADRs\")" },
+        { "click": "button:has-text(\"Propose change\")" },
+        { "wait": "button[disabled][aria-disabled=\"true\"]:has-text(\"Accept\")" }
+      ]
+    }
+  }
+}

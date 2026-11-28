@@ -585,4 +585,254 @@ export interface SampleGenUiCard {
 }
 export declare const GENUI_CARDS: SampleGenUiCard[];
 
+// S07 Spec document at every depth (sample/parts/gap-b.mjs).
+export interface SampleGapbPrinciple { id: string; t: string; rev: string; src: string; pill: PillTuple }
+export interface SampleGapbSimpleRow { k: string; t: string }
+export interface SampleGapbBlock { id: string; k: string; t: string; basis: string[]; rev: string }
+export interface SampleGapbExpertBlock { id: string; k: string; t: string; basis: string[]; pill: PillTuple }
+export interface SampleGapbMissingBlock { id: string; t: string; from: string }
+export interface SampleGapbImpactRow { area: string; item: string; n: number; pill: PillTuple }
+export interface SampleGapbKit { name: string; rev: string; picked: number; decision: string; by: string }
+export declare const GAPB_HASH: string;
+export declare const GAPB_PRINCIPLES: SampleGapbPrinciple[];
+export declare const GAPB_SIMPLE: SampleGapbSimpleRow[];
+export declare const GAPB_BLOCKS: SampleGapbBlock[];
+export declare const GAPB_EXPERT: SampleGapbExpertBlock[];
+export declare const GAPB_MISSING: SampleGapbMissingBlock[];
+export declare const GAPB_IMPACT: SampleGapbImpactRow[];
+export declare const GAPB_KIT: SampleGapbKit;
+// S05 Decision log (gap-a.mjs, IMP-56).
+export interface SampleDecisionLogEntry {
+  id: string;
+  q: string;
+  qt: string;
+  dec: string;
+  alts: string[];
+  by: string;
+  at: string;
+  how: string;
+  kind: 'Interview' | 'Plan' | 'Kit';
+  field?: string;
+}
+export interface SampleOpenQuestion {
+  id: string;
+  q: string;
+  qt: string;
+  at: string;
+  where: string;
+}
+export interface SampleNoBasis {
+  text: string;
+  where: string;
+  note: string;
+}
+export declare const GAPA_LOG: SampleDecisionLogEntry[];
+export declare const GAPA_OPEN: SampleOpenQuestion[];
+export declare const GAPA_KIT: SampleDecisionLogEntry;
+export declare const GAPA_NOBASIS: SampleNoBasis;
+// S02 Sign-in and legal pages (IMP-54).
+export interface SampleGapUser {
+  email: string;
+  code: string[];
+  resend: string;
+  left: number;
+}
+export interface SampleGapTerms {
+  title: string;
+  since: string;
+  route: string;
+  items: [string, string][];
+}
+export interface SampleGapPrivacy {
+  title: string;
+  since: string;
+  route: string;
+  rows: [string, string, string][];
+}
+export declare const GAPA_USER: SampleGapUser;
+export declare const GAPA_TERMS: SampleGapTerms;
+export declare const GAPA_PRIVACY: SampleGapPrivacy;
+// S25 Export (IMP-66).
+export interface SampleGapdExport {
+  rev: string;
+  name: string;
+  tree: ['dir' | 'file', string, string][];
+  tickets: [string, string, string, string, PillTone][];
+  layers: [string, string, string][];
+  left: [string, string][];
+  statusBack: [string, string, string, PillTone][];
+}
+export declare const GAPD_EXPORT: SampleGapdExport;
+export declare const GAPD_CTX: ContextItem[];
+// S06 Pitch (Simple) (IMP-57).
+export type SamplePitchField = [string, string, string[], '' | 'nobasis'];
+export type SampleTicketSlice = [string, string, string, string];
+export declare const GAPA_PITCH: SamplePitchField[];
+export declare const GAPA_SLICES: SampleTicketSlice[];
+// S19 ADRs and glossary (IMP-59, boards-gap-b.mjs).
+export interface SampleGlossaryTerm {
+  term: string;
+  id: string;
+  al: string;
+  ctx: string;
+  def: string;
+  rev: string;
+  pill: PillTuple;
+}
+export interface SampleAdrRow {
+  id: string;
+  t: string;
+  st: PillTuple;
+  rev: string;
+  link: string;
+}
+export interface SampleAdrDetail {
+  ctx: string;
+  alts: string[];
+  decision: string;
+  cons: string;
+}
+export interface SampleRecordProposal {
+  src: string;
+  base: string;
+  affects: string[];
+}
+export declare const GAPB_TERMS: SampleGlossaryTerm[];
+export declare const GAPB_ADRS: SampleAdrRow[];
+export declare const GAPB_ADR3: SampleAdrDetail;
+export declare const GAPB_PROPOSAL: SampleRecordProposal;
+// S04 Interview (Group A, IMP-55).
+export interface SampleInterviewQuestion {
+  id: string;
+  n: number;
+  text: string;
+  rec: string;
+  why: string;
+  alts: string[];
+}
+export interface SampleInterviewWhy {
+  plain: string;
+  evidence: string[];
+  tradeoffs: [string, string][];
+}
+export interface SampleInterviewOpen {
+  id: string;
+  q: string;
+  qt: string;
+  at: string;
+  where: string;
+}
+export type SampleInterviewGroundRow = ['req' | 'frame' | 'doc', string, string, string, PillTone, string];
+export declare const GAPA_IDEA: string;
+export declare const GAPA_ANSWERED: [string, string, string, string][];
+export declare const GAPA_SKIPPED: [string, string];
+export declare const GAPA_Q5: SampleInterviewQuestion;
+export declare const GAPA_PITCH_FIELDS: [string, StageTone, string][];
+export declare const GAPA_GROUND: SampleInterviewGroundRow[];
+export declare const GAPA_WHY: SampleInterviewWhy;
+// S14 GAP register and S21 Canvas step (IMP-60, IMP-61).
+export interface SampleGapBEntry {
+  id: string;
+  need: string;
+  closest: string;
+  why: string;
+  used: string;
+  st: PillTuple;
+}
+export type SampleGapCFrameKind = 'overview' | 'table' | 'drawer' | 'lines';
+export interface SampleGapCFrame {
+  id: string;
+  title: string;
+  rev: string;
+  comps: string[];
+  noComp: number;
+  st: PillTuple;
+  comments: number;
+  kind: SampleGapCFrameKind;
+}
+export type SampleGapCPin = [string, string, string, string, 'open' | 'done'];
+export type SampleGapCPolicy = [string, string, PillTone];
+export type SampleGapCBlocked = [string, string, string, string];
+export interface SampleGapCUntrusted {
+  src: string;
+  text: string;
+  outcome: [string, string][];
+}
+export type SampleGapCTool = [string, string, PillTone];
+export declare const GAPB_GAPS: SampleGapBEntry[];
+export declare const GAPC_CTX_S21: ContextItem[];
+export declare const GAPC_FRAMES: SampleGapCFrame[];
+export declare const GAPC_PINS: SampleGapCPin[];
+export declare const GAPC_POLICY: SampleGapCPolicy[];
+export declare const GAPC_BLOCKED: SampleGapCBlocked[];
+export declare const GAPC_UNTRUSTED: SampleGapCUntrusted;
+export declare const GAPC_LOCKED_TICKETS: string[];
+export declare const GAPC_TOOLS: SampleGapCTool[];
+// Gap group C: S16 Ticket detail and criteria (IMP-63).
+export type SampleGapcComponentOption = [string, string, string];
+export interface SampleGapcTicketComponent {
+  slug: string;
+  name: string;
+  install: string;
+  ver: string;
+}
+export type SampleGapcBlocker = [string, string, PillTone, string];
+export type SampleGapcCriterion = [string, string, string, PillTuple];
+export interface SampleGapcTicketDetail {
+  id: string;
+  title: string;
+  lane: string;
+  rev: string;
+  summary: string;
+  comp: SampleGapcTicketComponent | null;
+  blockers: SampleGapcBlocker[];
+  owns: string;
+  criteria: SampleGapcCriterion[];
+  rules: string[];
+  designRev: string;
+  newRev: string;
+  stagesL?: string[];
+}
+export declare const GAPC_CTX_S16: ContextItem[];
+export declare const GAPC_T05: SampleGapcTicketDetail;
+export declare const GAPC_COMPONENTS: SampleGapcComponentOption[];
+// S20 Agent inbox (IMP-65). The six background-run types of R-AGT-1.
+export type AgentRunStatus = 'run' | 'wait' | 'done' | 'fail';
+export interface SampleAgentRun {
+  id: string;
+  type: string;
+  icon: 'comment' | 'doc' | 'image' | 'eye' | 'list' | 'check';
+  title: string;
+  where: string;
+  st: AgentRunStatus;
+  step: string;
+  cost: string;
+  cr: string;
+}
+export type SampleAgentStep = ['ok' | 'run' | 'mute', string];
+export declare const GAPD_RUNS: SampleAgentRun[];
+export declare const GAPD_STEPS: SampleAgentStep[];
+// S41 Enhance prompt (F531–F539).
+export type SampleEnhanceSeg = ['k' | 'c' | 'a' | 'd' | 's', string, string?];
+export type SampleEnhanceCtxItem = ['flag' | 'lock' | 'frame' | 'doc' | 'req' | 'history', string, string];
+export interface SampleEnhanceCost {
+  est: string;
+  actual: string;
+  max: string;
+  time: string;
+  send: string;
+  words: [string, string];
+}
+export type SampleEnhanceBlockedVariant = [string, 'bad' | 'warn', string, string[]];
+export declare const ENH_READY: boolean;
+export declare const ENH_ORIGINAL: string;
+export declare const ENH_SEGS: SampleEnhanceSeg[];
+export declare const ENH_ORIG_SEGS: SampleEnhanceSeg[];
+export declare const ENH_ASSUMPTIONS: [string, string][];
+export declare const ENH_CTX: SampleEnhanceCtxItem[];
+export declare const ENH_NOT_SENT: string;
+export declare const ENH_COST: SampleEnhanceCost;
+export declare const ENH_SHORTCUT: string;
+export declare const ENH_BLOCKED: SampleEnhanceBlockedVariant[];
+
 // Everything else the boards use is exported too; declare it here before use.

@@ -46,7 +46,11 @@ const STAGE_IDS: Record<string, StageId> = {
 };
 
 // S40 Skills library work area inside the Specification stage (boards-skills.mjs).
-export function SkillsWorkArea(props: { onShellOverride?: (o: { save?: SaveState; busy?: string }) => void }) {
+export function SkillsWorkArea(props: {
+  onShellOverride?: (o: { save?: SaveState; busy?: string }) => void;
+  onOpenExport?: () => void;
+  onOpenRecords?: () => void;
+}) {
   // IMP-37: the library and one skill's history come through the data door.
   const data = useData();
   const skills = useDataRead('skills', data.sample.SKL_SKILLS, (s) => s.skills(), []).value ?? [];
@@ -323,6 +327,14 @@ export function SkillsWorkArea(props: { onShellOverride?: (o: { save?: SaveState
           onSelect={selectTab}
           onClose={(name) => recordIntent('F104:close:' + name)}
           onOpenArtifact={() => recordIntent('F104:open')}
+          openItems={
+            props.onOpenExport || props.onOpenRecords
+              ? [
+                  ...(props.onOpenExport ? [{ icon: 'download' as const, name: 'Export', onSelect: props.onOpenExport }] : []),
+                  ...(props.onOpenRecords ? [{ icon: 'doc' as const, name: 'ADRs and glossary', onSelect: props.onOpenRecords }] : []),
+                ]
+              : undefined
+          }
           right={right}
         />
 

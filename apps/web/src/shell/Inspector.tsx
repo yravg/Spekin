@@ -4,10 +4,10 @@ import { IconBtn } from '../ui/Button';
 import { Pill } from '../ui/Pill';
 
 // Mirrors kit.mjs row(id, name, sub, p).
-export function InspectorRow(props: { id: string; name: string; sub: string; pill: PillTuple }) {
-  const { id, name, sub, pill } = props;
+export function InspectorRow(props: { id: string; name: string; sub: string; pill: PillTuple; onClick?: () => void }) {
+  const { id, name, sub, pill, onClick } = props;
   return (
-    <div className="sp-row">
+    <div className="sp-row" onClick={onClick}>
       <span className="id">{id}</span>
       <span className="nm">
         {name}
