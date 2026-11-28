@@ -14,6 +14,7 @@ import { SkillsWorkArea } from '../skills/SkillsWorkArea';
 import { SpecDepthWorkArea, isSpecDepthView } from '../spec/SpecDepthWorkArea';
 import { DecisionLogWorkArea, type PlanningShellOverride } from '../planning/DecisionLogWorkArea';
 import { TicketBoardWorkArea } from '../tickets/TicketBoardWorkArea';
+import { AdrsGlossaryWorkArea, isRecordsView, type RecordsView } from '../records/AdrsGlossaryWorkArea';
 import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/FramesCanvasWorkArea';
 import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/ReviewAcceptWorkArea';
 import { ReviewReportWorkArea, isReportView, type ReportShellOverride } from '../review/ReviewReportWorkArea';
@@ -163,6 +164,9 @@ export function ProjectShell({ usageView = false, reportView = false }: { usageV
 export function ProjectShell({ usageView = false, exportView = false }: { usageView?: boolean; exportView?: boolean } = {}) {
   const { project: projectId = '', stage: stageParam } = useParams();
   const stage = exportView ? 'spec' : (stageParam ?? 'design');
+export function ProjectShell({ usageView = false, recordsView = false }: { usageView?: boolean; recordsView?: boolean } = {}) {
+  const { project: projectId = '', stage: stageParam } = useParams();
+  const stage = stageParam ?? (recordsView ? 'spec' : 'design');
   const navigate = useNavigate();
   const [search, setSearch] = useSearchParams();
   const section: UsageSection = isUsageSection(search.get('section')) ? (search.get('section') as UsageSection) : 'models';
@@ -174,6 +178,8 @@ export function ProjectShell({ usageView = false, exportView = false }: { usageV
   const exportFormatParam = search.get('format');
   const exportInitialMode: ExportMode =
     exportFormatParam === 'yb' ? 'yb' : exportFormatParam === 'zip' ? 'left' : 'md';
+  const recordsType = search.get('type');
+  const recordsMode: RecordsView = isRecordsView(recordsType) ? recordsType : 'glossary';
   // S37 keeps its artifact view in the query (never draft text): /p/meranti-yard/backend?view=contracts.
   const viewParam = search.get('view');
   const delivery = isDeliveryView(viewParam) ? viewParam : null;
@@ -210,6 +216,9 @@ export function ProjectShell({ usageView = false, exportView = false }: { usageV
     : designSystemView
       ? 'S14'
     : delivery
+    : recordsView
+      ? 'S19'
+      : delivery
       ? 'S37'
       : stage === 'planning'
         ? (planningOverride.screen ?? 'S05')
@@ -252,6 +261,12 @@ export function ProjectShell({ usageView = false, exportView = false }: { usageV
       : stage === 'planning'
         ? (planningOverride.save ?? PITCH_SAVE.proposal)
       : stage === 'spec' && specOverride.save
+  const activeSave: SaveState =
+    usageView
+      ? save
+      : recordsView
+        ? { status: 'saved', tone: 'ok', text: 'Saved 12:52' }
+        : stage === 'spec' && specOverride.save
       ? specOverride.save
       : stage === 'design' && designSub === 'canvas' && canvasOverride.save
         ? canvasOverride.save
@@ -269,6 +284,7 @@ export function ProjectShell({ usageView = false, exportView = false }: { usageV
   const activeBusy =
     usageView || designSystemView
     usageView || exportView
+    usageView || recordsView
       ? undefined
       : stage === 'spec'
       ? specOverride.busy
@@ -380,6 +396,13 @@ export function ProjectShell({ usageView = false, exportView = false }: { usageV
                 navigate('/p/' + projectId + '/design');
               }}
               onOpenUsage={() => navigate('/p/' + projectId + '/usage?section=models')}
+          ) : recordsView ? (
+            <AdrsGlossaryWorkArea
+              key={recordsMode}
+              view={recordsMode}
+              onView={(next) => setSearch({ type: next })}
+              onOpenSpec={() => navigate('/p/' + projectId + '/spec')}
+              onIntent={recordIntent}
             />
           ) : delivery ? (
             <DeliveryWorkArea
@@ -475,6 +498,9 @@ export function ProjectShell({ usageView = false, exportView = false }: { usageV
             <SkillsWorkArea
               onShellOverride={setSpecOverride}
               onOpenExport={() => navigate('/p/' + projectId + '/spec/export')}
+            <SkillsWorkArea
+              onShellOverride={setSpecOverride}
+              onOpenRecords={() => navigate('/p/' + projectId + '/spec/records?type=glossary')}
             />
           ) : (
             <StagePlaceholderWorkArea stage={currentStage} onOpenDelivery={(s) => openDelivery(s.id)} />

@@ -49,6 +49,7 @@ const STAGE_IDS: Record<string, StageId> = {
 export function SkillsWorkArea(props: {
   onShellOverride?: (o: { save?: SaveState; busy?: string }) => void;
   onOpenExport?: () => void;
+  onOpenRecords?: () => void;
 }) {
   // IMP-37: the library and one skill's history come through the data door.
   const data = useData();
@@ -329,6 +330,8 @@ export function SkillsWorkArea(props: {
           openItems={
             props.onOpenExport
               ? [{ icon: 'download', name: 'Export', onSelect: props.onOpenExport }]
+            props.onOpenRecords
+              ? [{ icon: 'doc', name: 'ADRs and glossary', onSelect: props.onOpenRecords }]
               : undefined
           }
           right={right}
