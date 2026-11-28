@@ -110,6 +110,7 @@ export function DesignWorkArea(
     onOpenHandoff?: () => void;
     onOpenGenUi?: (mode: GenUiMode) => void;
     onOpenUsage?: () => void;
+    onOpenEnhance?: () => void;
   } = {},
 ) {
   const view = useWorkspace((s) => s.view('design'));
@@ -278,6 +279,8 @@ export function DesignWorkArea(
           onSelect={(tab) => {
             if (tab === 'F-04 Alert drawer') {
               triggerConflict();
+            } else if (tab === 'F-03 Variance table' && props.onOpenEnhance) {
+              props.onOpenEnhance();
             } else if (tab === 'DESIGN.md' && props.onOpenStyle) {
               props.onOpenStyle();
             } else if (tab === 'Variance flows' && activeTab === 'Variance flows' && props.onOpenCanvas) {

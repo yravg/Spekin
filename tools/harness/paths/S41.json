@@ -1,0 +1,70 @@
+{
+  "board": "S41-enhance-prompt.dc.html",
+  "states": {
+    "empty": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "role=tab[name=/F-03 Variance table/]" },
+        { "wait": "[data-screen=\"S41\"] .enh-comp .ta.ph" }
+      ]
+    },
+    "ready": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "role=tab[name=/F-03 Variance table/]" },
+        { "type": ["textarea.ap-ta-input", "tambahin drawer alert di tabel varians buat paket yang lewat 3%"] },
+        { "wait": "[data-screen=\"S41\"] button[aria-label=\"Enhance prompt\"]:not([aria-disabled])" }
+      ]
+    },
+    "busy": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "role=tab[name=/F-03 Variance table/]" },
+        { "type": ["textarea.ap-ta-input", "tambahin drawer alert di tabel varians buat paket yang lewat 3%"] },
+        { "click": "button[aria-label=\"Enhance prompt\"]" },
+        { "wait": "[data-screen=\"S41\"] .enh-prog" }
+      ]
+    },
+    "review": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "role=tab[name=/F-03 Variance table/]" },
+        { "type": ["textarea.ap-ta-input", "tambahin drawer alert di tabel varians buat paket yang lewat 3%"] },
+        { "click": "button[aria-label=\"Enhance prompt\"]" },
+        { "click": ".enh-prog span:not(.enh-spin)" },
+        { "wait": "[data-screen=\"S41\"] .enh-sheet" }
+      ]
+    },
+    "applied": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "role=tab[name=/F-03 Variance table/]" },
+        { "type": ["textarea.ap-ta-input", "tambahin drawer alert di tabel varians buat paket yang lewat 3%"] },
+        { "click": "button[aria-label=\"Enhance prompt\"]" },
+        { "click": ".enh-prog span:not(.enh-spin)" },
+        { "click": ".enh-acts button:has-text(\"Use\")" },
+        { "wait": "[data-screen=\"S41\"] .enh-chip" }
+      ]
+    },
+    "blocked": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/p/meranti-yard/design?moment=capped" },
+        { "click": "role=tab[name=/F-03 Variance table/]" },
+        { "type": ["textarea.ap-ta-input", "tambahin drawer alert di tabel varians buat paket yang lewat 3%"] },
+        { "click": "button[aria-label=\"Enhance prompt\"]" },
+        { "wait": "[data-screen=\"S41\"] .sp-meter.crit" }
+      ]
+    }
+  }
+}

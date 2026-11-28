@@ -31,10 +31,10 @@ const EXTRA = {
 export type IconName = keyof typeof icons | keyof typeof EXTRA;
 
 // Same stroke icons as the boards (kit.mjs ic()). Paths come from our own generated icons.json, never from user input.
-export function Icon({ name, size = 16, stroke = 1.75 }: { name: IconName; size?: number; stroke?: number }) {
+export function Icon({ name, size = 16, stroke = 1.75, className }: { name: IconName; size?: number; stroke?: number; className?: string }) {
   return (
     <svg
-      className="ic"
+      className={className ? 'ic ' + className : 'ic'}
       width={size}
       height={size}
       viewBox="0 0 24 24"
