@@ -70,11 +70,15 @@ export function DecisionLogWorkArea(props: { onShellOverride?: (o: PlanningShell
   const isOpen = !emptyMode && filter === 'open';
   const counts = emptyMode ? COUNTS_EMPTY : isKit || isOpen ? COUNTS_DETAILED : COUNTS_BASE;
 
+  function saveFor(empty: boolean, f: DecisionFilter): SaveState {
+    const text = empty ? 'Saved 12:00' : f === 'kit' || f === 'open' ? 'Saved 14:20' : 'Saved 12:06';
+    return { status: 'saved', tone: 'ok', text };
+  }
+
   useEffect(() => {
     if (!onShellOverride) return;
-    const text = emptyMode ? 'Saved 12:00' : isKit || isOpen ? 'Saved 14:20' : 'Saved 12:06';
-    onShellOverride({ screen: 'S05', save: { status: 'saved', tone: 'ok', text } });
-  }, [emptyMode, isKit, isOpen, onShellOverride]);
+    onShellOverride({ screen: 'S05', save: saveFor(emptyMode, filter) });
+  }, [emptyMode, filter, onShellOverride]);
 
   const allEntries = [...GAPA_LOG, ...extraRows];
   const visibleRows = isKit
@@ -94,10 +98,12 @@ export function DecisionLogWorkArea(props: { onShellOverride?: (o: PlanningShell
   const activeTab = view.tab ?? 'Decision log';
 
   function selectEntry(id: string) {
+    const nextFilter = id !== KIT_ROW.id && filter === 'kit' ? 'all' : filter;
     setEmptyMode(false);
     setSelectedId(id);
     setInspTab('Entry');
-    if (id !== KIT_ROW.id && filter === 'kit') setFilter('all');
+    if (nextFilter !== filter) setFilter(nextFilter);
+    onShellOverride?.({ screen: 'S05', save: saveFor(false, nextFilter) });
     setSearch((prev) => {
       const next = new URLSearchParams(prev);
       next.set('d', id);
@@ -113,6 +119,7 @@ export function DecisionLogWorkArea(props: { onShellOverride?: (o: PlanningShell
     }
     setFilter(next);
     setInspTab(null);
+    onShellOverride?.({ screen: 'S05', save: saveFor(false, next) });
     if (next === 'kit') {
       setSelectedId(KIT_ROW.id);
     } else if (next === 'open') {
@@ -127,6 +134,7 @@ export function DecisionLogWorkArea(props: { onShellOverride?: (o: PlanningShell
     setFilter('all');
     setSelectedId(null);
     setQuery('');
+    onShellOverride?.({ screen: 'S05', save: saveFor(true, 'all') });
     setSearch((prev) => {
       const next = new URLSearchParams(prev);
       next.delete('d');
@@ -138,6 +146,7 @@ export function DecisionLogWorkArea(props: { onShellOverride?: (o: PlanningShell
     setEmptyMode(false);
     setFilter('all');
     setSelectedId(null);
+    onShellOverride?.({ screen: 'S05', save: saveFor(false, 'all') });
   }
 
   function appendRevision(base: SampleDecisionLogEntry) {

@@ -2,7 +2,7 @@
   "board": "S05-decision-log.dc.html",
   "states": {
     "log": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/" },
         { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
@@ -11,7 +11,7 @@
       ]
     },
     "entry": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/" },
         { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
@@ -22,7 +22,7 @@
       ]
     },
     "kit": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/" },
         { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
@@ -33,7 +33,7 @@
       ]
     },
     "open": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/" },
         { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
@@ -44,7 +44,7 @@
       ]
     },
     "empty": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/" },
         { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
