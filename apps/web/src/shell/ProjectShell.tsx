@@ -9,6 +9,7 @@ import { StageBar } from './StageBar';
 import { NotFound } from './NotFound';
 import { DesignWorkArea } from './DesignWorkArea';
 import { BackendWorkArea } from './BackendWorkArea';
+import { PitchWorkArea, PITCH_SAVE } from '../planning/PitchWorkArea';
 import { SkillsWorkArea } from '../skills/SkillsWorkArea';
 import { SpecDepthWorkArea, isSpecDepthView } from '../spec/SpecDepthWorkArea';
 import { DecisionLogWorkArea, type PlanningShellOverride } from '../planning/DecisionLogWorkArea';
@@ -181,6 +182,7 @@ export function ProjectShell({ usageView = false, exportView = false }: { usageV
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [planningOverride, setPlanningOverride] = useState<PlanningShellOverride>({});
+  const [planningOverride, setPlanningOverride] = useState<{ save?: SaveState }>({});
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
   const [reportOverride, setReportOverride] = useState<ReportShellOverride>({});
   const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style' | 'intake' | 'handoff' | 'genui'>('shell');
@@ -212,6 +214,7 @@ export function ProjectShell({ usageView = false, exportView = false }: { usageV
       : stage === 'planning'
         ? (planningOverride.screen ?? 'S05')
         ? 'S15'
+        ? 'S06'
       : stage === 'spec'
         ? (specDepth ? 'S07' : 'S40')
         ? 'S40'
@@ -246,6 +249,8 @@ export function ProjectShell({ usageView = false, exportView = false }: { usageV
         ? { status: 'saved' as const, tone: 'ok' as const, text: 'Saved 12:44' }
       : stage === 'planning'
         ? (planningOverride.save ?? { status: 'saved', tone: 'ok', text: 'Saved 12:06' })
+      : stage === 'planning'
+        ? (planningOverride.save ?? PITCH_SAVE.proposal)
       : stage === 'spec' && specOverride.save
       ? specOverride.save
       : stage === 'design' && designSub === 'canvas' && canvasOverride.save
@@ -444,6 +449,7 @@ export function ProjectShell({ usageView = false, exportView = false }: { usageV
             )
           ) : stage === 'planning' ? (
             <TicketBoardWorkArea />
+            <PitchWorkArea onShellOverride={setPlanningOverride} />
           ) : stage === 'backend' ? (
             <BackendWorkArea onOpenDelivery={() => openDelivery('backend')} />
           ) : stage === 'planning' ? (

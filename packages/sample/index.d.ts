@@ -664,5 +664,10 @@ export interface SampleGapdExport {
 }
 export declare const GAPD_EXPORT: SampleGapdExport;
 export declare const GAPD_CTX: ContextItem[];
+// S06 Pitch (Simple) (IMP-57).
+export type SamplePitchField = [string, string, string[], '' | 'nobasis'];
+export type SampleTicketSlice = [string, string, string, string];
+export declare const GAPA_PITCH: SamplePitchField[];
+export declare const GAPA_SLICES: SampleTicketSlice[];
 
 // Everything else the boards use is exported too; declare it here before use.
