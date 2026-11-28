@@ -21,6 +21,7 @@ import { useLayoutTier } from '../mobile/layoutTier';
 import { ResponsiveProjectShell } from '../mobile/ResponsiveProjectShell';
 import { ModelsUsageWorkArea, isUsageMoment, isUsageSection, usagePct, type UsageMoment, type UsageSection } from '../models/ModelsUsageWorkArea';
 import { DeliveryWorkArea, deliveryStageView, deliveryViewStage, isDeliveryView } from '../delivery/DeliveryWorkArea';
+import { AgentInboxWorkArea, defaultInboxBusy, type AgentInboxShellOverride, type InboxMoment } from '../inbox/AgentInboxWorkArea';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -159,9 +160,16 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   // S37 keeps its artifact view in the query (never draft text): /p/meranti-yard/backend?view=contracts.
   const viewParam = search.get('view');
   const delivery = isDeliveryView(viewParam) ? viewParam : null;
+  // S20 Agent inbox opens as a docked panel on any stage: /p/meranti-yard/:stage?inbox=1 (run id in query).
+  const inboxOpen = !usageView && search.get('inbox') === '1';
+  const inboxRun = search.get('run') ?? undefined;
+  const inboxMomentParam = search.get('moment');
+  const inboxMoment: InboxMoment | undefined =
+    inboxMomentParam === 'cap' || inboxMomentParam === 'empty' ? inboxMomentParam : undefined;
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
+  const [inboxOverride, setInboxOverride] = useState<AgentInboxShellOverride | null>(null);
   const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style' | 'intake' | 'handoff' | 'genui'>('shell');
   const [handoffInitialMode, setHandoffInitialMode] = useState<HandoffMode>('select');
   const [genUiInitialMode, setGenUiInitialMode] = useState<GenUiMode>('stream');
@@ -184,6 +192,8 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   const currentStage = stages.find((s) => s.id === stage)!;
   const screenId = usageView
     ? 'S36'
+    : inboxOpen
+      ? 'S20'
     : delivery
       ? 'S37'
       : stage === 'spec'
@@ -225,6 +235,8 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   const activeBusy =
     usageView
       ? undefined
+      : inboxOpen
+        ? (inboxOverride ? inboxOverride.busy : defaultInboxBusy(inboxMoment))
       : stage === 'spec'
       ? specOverride.busy
       : stage === 'design' && designSub === 'shell' && !conflict
@@ -284,7 +296,18 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
             if (usageView) setSearch({ section: 'limits', moment });
             else navigate('/p/' + projectId + '/usage?section=models');
           }}
-          onOpenInbox={() => setPanel('inbox')}
+          onOpenInbox={() => {
+            const next = new URLSearchParams(search);
+            if (inboxOpen) {
+              next.delete('inbox');
+              next.delete('run');
+            } else {
+              next.set('inbox', '1');
+            }
+            setInboxOverride(null);
+            if (usageView) navigate('/p/' + projectId + '/spec?' + next.toString());
+            else setSearch(next);
+          }}
           lang={lang}
           onLang={setLang}
         />
@@ -309,6 +332,37 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
                 navigate('/p/' + projectId + '/design');
               }}
               onIntent={recordIntent}
+            />
+          ) : inboxOpen ? (
+            <AgentInboxWorkArea
+              key={inboxMoment ?? 'live'}
+              initialOpenRun={inboxRun}
+              moment={inboxMoment}
+              onClose={() => {
+                const next = new URLSearchParams(search);
+                next.delete('inbox');
+                next.delete('run');
+                setInboxOverride(null);
+                setSearch(next);
+              }}
+              onSelectRun={(runId) => {
+                const next = new URLSearchParams(search);
+                next.set('inbox', '1');
+                if (runId) next.set('run', runId);
+                else next.delete('run');
+                setSearch(next, { replace: true });
+              }}
+              onOpenUsage={() => navigate('/p/' + projectId + '/usage?section=limits')}
+              onOpenReview={() => {
+                setDesignSub('review');
+                navigate('/p/' + projectId + '/design');
+              }}
+              onOpenHandoff={() => {
+                setHandoffInitialMode('select');
+                setDesignSub('handoff');
+                navigate('/p/' + projectId + '/design');
+              }}
+              onShellOverride={setInboxOverride}
             />
           ) : delivery ? (
             <DeliveryWorkArea

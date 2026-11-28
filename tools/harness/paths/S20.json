@@ -1,0 +1,68 @@
+{
+  "board": "S20-agent-inbox.dc.html",
+  "states": {
+    "list": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-stage:has-text(\"Specification\")" },
+        { "click": "button[aria-label=\"Agent inbox: 2 jobs need approval\"]" },
+        { "wait": "[data-screen=\"S20\"]" }
+      ]
+    },
+    "steer": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-stage:has-text(\"Specification\")" },
+        { "click": "button[aria-label=\"Agent inbox: 2 jobs need approval\"]" },
+        { "wait": "[data-screen=\"S20\"]" },
+        { "click": ".gpd-run[data-run=\"RUN-0420\"] button[aria-label=\"Steer this run\"]" },
+        { "wait": ".gpd-steer" }
+      ]
+    },
+    "approve": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-stage:has-text(\"Specification\")" },
+        { "click": "button[aria-label=\"Agent inbox: 2 jobs need approval\"]" },
+        { "wait": "[data-screen=\"S20\"]" },
+        { "click": ".gpd-ibf button:has-text(\"Needs you\")" },
+        { "click": ".gpd-run[data-run=\"RUN-0417\"]" },
+        { "wait": ".gpd-run[data-run=\"RUN-0417\"].open" }
+      ]
+    },
+    "done": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-stage:has-text(\"Specification\")" },
+        { "click": "button[aria-label=\"Agent inbox: 2 jobs need approval\"]" },
+        { "wait": "[data-screen=\"S20\"]" },
+        { "click": ".gpd-ibf button:has-text(\"Finished\")" },
+        { "wait": ".gpd-run[data-run=\"RUN-0418\"].open" }
+      ]
+    },
+    "cap": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/p/meranti-yard/spec?moment=cap" },
+        { "click": "button[aria-label=\"Agent inbox: 2 jobs need approval\"]" },
+        { "wait": ".sp-banner.bad" }
+      ]
+    },
+    "empty": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/p/meranti-yard/spec?moment=empty" },
+        { "click": "button[aria-label=\"Agent inbox: 2 jobs need approval\"]" },
+        { "wait": ".gpd-empty" }
+      ]
+    }
+  }
+}

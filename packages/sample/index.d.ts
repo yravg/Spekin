@@ -585,4 +585,22 @@ export interface SampleGenUiCard {
 }
 export declare const GENUI_CARDS: SampleGenUiCard[];
 
+// S20 Agent inbox (IMP-65). The six background-run types of R-AGT-1.
+export type AgentRunStatus = 'run' | 'wait' | 'done' | 'fail';
+export interface SampleAgentRun {
+  id: string;
+  type: string;
+  icon: 'comment' | 'doc' | 'image' | 'eye' | 'list' | 'check';
+  title: string;
+  where: string;
+  st: AgentRunStatus;
+  step: string;
+  cost: string;
+  cr: string;
+}
+export type SampleAgentStep = ['ok' | 'run' | 'mute', string];
+export declare const GAPD_RUNS: SampleAgentRun[];
+export declare const GAPD_STEPS: SampleAgentStep[];
+export declare const GAPD_CTX: ContextItem[];
+
 // Everything else the boards use is exported too; declare it here before use.
