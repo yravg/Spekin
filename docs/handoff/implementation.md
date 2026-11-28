@@ -1,12 +1,14 @@
 # Implementation handoff: canvas to app
 
-Owner: Enrico (lead, with Claude Code). Last updated 28 Nov 2026 (IMP-54 to IMP-67 merged via #85). Baseline commit: see `git log -1 --format=%h docs/handoff/implementation.md`.
+Owner: Enrico (lead, with Claude Code). Last updated 28 Nov 2026 (IMP-54 to IMP-67 merged via #85; IMP-68 1024 px band). Baseline commit: see `git log -1 --format=%h docs/handoff/implementation.md`.
 
 ## Current state (verified 28 Nov 2026, lead)
 
 **28 Nov 2026:** IMP-54 to IMP-67 (PRs #71–#84, one board each) are merged into main through the integration PR #85 (branch `merge-imp-54-67`): 14 merge commits plus one lead integration commit. On that tree `npm run gate` exits 0 (vitest 35 files / 249 tests, Rust, contracts) and `npm run harness` passes **160/160 states on 28 boards**. The integration commit routes the five Planning boards by query, as their "Where it lives" cards say: bare `/p/:project/planning` is S04 (interview), `?artifact=decisions` S05, `pitch` S06, `tickets` S15, `ticket-<id>` S16 (`apps/web/src/routes.tsx` `PlanningRoute`). S02 and S04 click paths are now `checked` (`APP_ROOT` includes `.gpa-pub` and `.gpa-iv`). "Part open" items per card are in each PR body. The 23 Nov text below is the earlier snapshot.
 
-**Next step:** owner decision D-PLAN-1 below (how a user clicks from S04 into S05, S06 and S15), then a lead card to draw and build that link. No worker card is open.
+**28 Nov 2026, later (IMP-68, lead):** the 1024 × 768 sweep (`npm run e2e:sweep`) was run on all 160 states for the first time since the gap boards landed: 151/160. Fixed in `apps/web/src/app.css` (1024–1439 band only, so 1440 and T01 pixels are untouched) and one wrapper span in `apps/web/src/shell/TopBar.tsx`: S02 legal pages ran 114 px past the edge; the top-bar project group overflowed under the busy chip, so S07's Spec chip could not be clicked; S07's PRN-4 hunk was squeezed to 0 px because `.gpb-page` clipped instead of scrolling; S15's ticket-title column was 0 px. A new report-only check, `npm run e2e:reach` (`tools/e2e/reach.mjs`), compares every control at 1440 and 1024: it found 304 controls in 78 states; after the band fixes (panes scroll, toolbars wrap, S15 popovers and the S41 sheet stay inside the work area) the new boards are clear and 79 remain (12 on S15 are rows under an open popover, by design; 67 on older boards, card IMP-69). Result: sweep **160/160**, harness **160/160**, `npm run gate` exit 0.
+
+**Next step:** owner decision D-PLAN-1 below (how a user clicks from S04 into S05, S06 and S15), then a lead card to draw and build that link. Open card: IMP-69 (older boards at 1024).
 
 
 The historical tables and lane files below are a record of the build, not the current status. This section is authoritative: `main` is clean at `0aba2c5`, all pull requests #1–#47 are merged, and there is no open worker card. The older "waiting for owner merge" and `part blocked` wording is superseded by it.
@@ -161,16 +163,16 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-42 | core | The API on Postgres end to end: route tests on both backends, a live server smoke over HTTP, concurrent HTTP accepts | IMP-40 | done: PR #45, stacked on #44 (lead re-ran the Postgres stage: route, audit and contract tests on both backends, a live server smoke over HTTP, 20 concurrent HTTP accept rounds; gate passes) |
 | IMP-41 | ui | Screens write through the data door (accept, revert, reserve and settle, skill copy, edit and rollback, delete and restore) | IMP-39 | done, part open: PR #43, stacked on #42 (lead re-ran 81/81; lead fix: browser never settles; revert, delete and source rollback have no drawn control yet) |
 | IMP-36 | core | GenUI sample verdicts equal the Rust validator | IMP-21 | done: PR #40, stacked on #39 (lead re-ran 80/80; Rust test pins verdicts) |
-| IMP-43 | core | Skills audit client for `GET /api/skills/audit` | – | open (worker: OpenCode Go `hy4`) |
-| IMP-44 | core | Stage id and tone values generated from Rust, api.ts mirrors removed | – | open (worker: OpenCode Go `hy4`) |
-| IMP-45 | ui | Skills audit in the data door; S35 offline proven with a real server stop | IMP-43 | open (worker: OpenCode Go `hy4`) |
-| IMP-46 | ui | Sweep: 0 page errors, no sideways scroll at 1024 px, reduced motion, on every checked state | – | open (worker: OpenCode Go `hy4`) |
-| IMP-47 | ui | S28 parity: F145, F147, F153, F154 | – | open (worker: OpenCode Go `hy4`) |
-| IMP-48 | ui | S29 and S32 parity: F165, F173, F231, F234, F235 | – | open (worker: OpenCode Go `hy4`) |
-| IMP-49 | ui | S33 parity: F244, F248, F250, F253, F255 | – | open (worker: OpenCode Go `hy4`) |
-| IMP-50 | ui | S34, S37, S38, T01 parity: F275, F314, F321, F322, F329, F352 | – | open (worker: OpenCode Go `hy4`) |
-| IMP-51 | ui | Every state reachable at 1024 × 768 (overlays in the 1024–1439 band) | – | open (worker: OpenCode Go `hy4`) |
-| IMP-52 | lead-assist | Classify the 80 PRD requirements no canvas feature maps to | – | open (worker: OpenCode Go `hy4`) |
+| IMP-43 | core | Skills audit client for `GET /api/skills/audit` | – | done (#52, merged; status corrected 28 Nov) |
+| IMP-44 | core | Stage id and tone values generated from Rust, api.ts mirrors removed | – | done (#51, merged; status corrected 28 Nov) |
+| IMP-45 | ui | Skills audit in the data door; S35 offline proven with a real server stop | IMP-43 | done (#58, merged; status corrected 28 Nov) |
+| IMP-46 | ui | Sweep: 0 page errors, no sideways scroll at 1024 px, reduced motion, on every checked state | – | done (#56, merged; status corrected 28 Nov) |
+| IMP-47 | ui | S28 parity: F145, F147, F153, F154 | – | done (#59, merged; status corrected 28 Nov) |
+| IMP-48 | ui | S29 and S32 parity: F165, F173, F231, F234, F235 | – | done (#60, merged; status corrected 28 Nov) |
+| IMP-49 | ui | S33 parity: F244, F248, F250, F253, F255 | – | done (#61, merged; status corrected 28 Nov) |
+| IMP-50 | ui | S34, S37, S38, T01 parity: F275, F314, F321, F322, F329, F352 | – | done (#62, merged; status corrected 28 Nov) |
+| IMP-51 | ui | Every state reachable at 1024 × 768 (overlays in the 1024–1439 band) | – | done (#66, merged; status corrected 28 Nov) |
+| IMP-52 | lead-assist | Classify the 80 PRD requirements no canvas feature maps to | – | done (#67, merged; status corrected 28 Nov) |
 | IMP-53 | lead | Approved gap boards and S41 moved into the main canvas (28 boards, 160 states) | – | done |
 | IMP-54 | ui | S02 Sign-in and legal pages (F401-F409) | – | done (#74, merged via #85) |
 | IMP-55 | ui | S04 Interview (F411-F419) | – | done (#80, merged via #85) |
@@ -186,6 +188,8 @@ Status words: `done`, `done, part open`, `done, part blocked`, `open`, `blocked`
 | IMP-65 | ui | S20 Agent inbox (F511-F519) | – | done, part open (#83, merged via #85) |
 | IMP-66 | ui | S25 Export (Markdown, zip, yravgbuilder) (F521-F529) | – | done (#77, merged via #85) |
 | IMP-67 | ui | S41 Enhance prompt (F531-F539) | – | done, part open (#84, merged via #85) |
+| IMP-68 | lead | 1024 px band on the 28 Nov boards: sweep 151 → 160/160 (S02 legal overflow, S07 Spec chip under the busy chip, S07 PRN-4 hunk squeezed to 0 px, S15 title column 0 px) and the new reach check (`npm run e2e:reach`): every control clickable at 1440 stays clickable at 1024 on S02–S41 | – | done (PR for branch `fix-sweep-1024-gaps`) |
+| IMP-69 | ui | Reach at 1024 on the older boards: 67 controls in 16 states (S29, S30, S31, S32, S33, S34, S35, S36, S38, S40) are covered at 1024 although clickable at 1440 (`npm run e2e:reach`, report `tools/e2e/out/reach.md`) | IMP-68 | open |
 
 ### IMP-21 · Screens read through one data source; API mode (ui)
 
@@ -641,7 +645,8 @@ See [docs/DECISIONS.md](../DECISIONS.md) → Open. Agents never decide these.
 
 ## Known failures and limits
 
-- No known failing build check: gate exit 0 and harness 160/160 on 28 Nov 2026 (integration branch for #85).
+- No known failing build check: gate exit 0, harness 160/160 and sweep 160/160 on 28 Nov 2026 (IMP-68 branch `fix-sweep-1024-gaps`).
+- `npm run e2e:reach` (report only): 79 controls in 25 states are clickable at 1440 but covered at 1024. 12 are S15 rows under an open popover (by design); 67 are on older boards (IMP-69).
 - S05, S06 and S15 harness paths start with a deep link (first-step `goto`), because no drawn control reaches them from S04 yet (D-PLAN-1).
 - The board's `.sp-app` measures 1440 × 901 and the app's 1440 × 900. The harness compares the common area and fails only on a gap over 2 px.
 - All 81 states have checked click paths; `check:rules` still reports the count.
@@ -652,7 +657,7 @@ See [docs/DECISIONS.md](../DECISIONS.md) → Open. Agents never decide these.
 ## Not checked in this lead re-run
 
 - Windows and Linux local setup: only macOS was tried.
-- 390 px and 1024 px viewport sweeps, keyboard-only traversal, reduced motion, long-text truncation and EN/ID copy translations (listed per card in `lanes/ui.md`). The header language switch exists; translations are not wired.
+- 390 px sweep, keyboard-only traversal, long-text truncation and EN/ID copy translations (listed per card in `lanes/ui.md`). The header language switch exists; translations are not wired. 1024 px (errors, sideways scroll, path reach) and reduced motion are now checked on all 160 states by `npm run e2e:sweep`; control reach at 1024 by `npm run e2e:reach`.
 - The full CI matrix; only local `npm run gate` and `npm run harness` were re-run here.
 
 ## Where the canvas lives

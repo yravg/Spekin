@@ -78,6 +78,39 @@ body { background: var(--ground); }
   /* S32/S29: the bottom-right zoom pill covered the bottom floating toolbar
      (Ask on select, and the S32 action buttons) when the canvas shrank. */
   .sp-zoom { bottom: 52px; }
+  /* 28 Nov sweep (160 states): at 1024 the top bar's project group overflowed under the
+     busy chip, so S07's Spec chip could not be clicked. Clip the group, let the project
+     name and the increment value shrink with an ellipsis; the Spec chip keeps its size. */
+  .sp-top > .ap-grp { overflow: hidden; }
+  .ap-grp > .sp-proj, .ap-grp > .sp-chip { min-width: 0; flex-shrink: 1; }
+  .ap-grp > .sp-chip:last-child { flex-shrink: 0; }
+  .sp-top > .sp-save, .sp-top > .sp-meter, .sp-top > .sp-busy { flex-shrink: 0; white-space: nowrap; }
+  .ap-grp > .sp-proj > *, .ap-grp > .sp-chip > * { flex-shrink: 0; white-space: nowrap; }
+  .ap-grp > .sp-proj > span:last-of-type, .ap-grp .ap-chip-v { flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  /* S02 legal pages: contents 230 + article 720 + side 250 ran 114 px past 1024; let the article shrink. */
+  .gpa-legal { padding-left: 24px; padding-right: 24px; gap: 20px; }
+  .gpa-art { flex: 0 1 720px; min-width: 0; }
+  /* S15: the fixed ticket-table columns squeezed the title column to 0 px (locked rows could
+     not be hovered). Keep the title readable; the component and stages columns give way. */
+  .gpc-th, .gpc-tr { grid-template-columns: 44px minmax(110px, 1fr) minmax(60px, 188px) 216px 92px 40px; }
+  /* S07/S19 (.gpb pages): narrow columns wrap taller than the page, and the page clipped
+     (overflow hidden), so S07's PRN-4 hunk was squeezed to 0 px. Let the page scroll and
+     keep every card at its own height. */
+  .gpb-page { overflow-y: auto; }
+  .gpb-two { flex: 1 0 auto; }
+  .gpb-col > * { flex-shrink: 0; }
+  /* 28 Nov reach check (1024 vs 1440): controls clipped or covered at 1024 on the new boards.
+     Panes that clipped taller content now scroll (S04 thread, S05 table, S06 pitch, S16 ticket). */
+  .gpa-th, .sp-doc, .gpc-doc { overflow-y: auto; }
+  .gpa-dt { overflow: auto; }
+  /* Toolbars wider than the work area wrap to a second row (S07 Revisions, S21 Setujui kanvas). */
+  .sp-tool, .gpc-bar { flex-wrap: wrap; height: auto; min-height: 46px; padding-top: 6px; padding-bottom: 6px; row-gap: 6px; }
+  /* S15 popovers carry 1440 board coordinates inline; the right-hand ones ran past the work
+     area. Pin them to its bottom-right corner and keep every popover inside the area. */
+  .gpc-body > .gpc-pop { max-width: calc(100% - 24px); max-height: calc(100% - 24px); overflow-y: auto; }
+  .gpc-body > .gpc-pop[data-feature="F473"], .gpc-body > .gpc-pop[data-feature="F475"], .gpc-body > .gpc-pop[data-feature="F476"] { left: auto !important; top: auto !important; right: 12px; bottom: 12px; }
+  /* S41 compare sheet: 690 px wide at left 372 ran past the stage; keep it inside. */
+  .enh-sheet { left: auto; right: 8px; max-width: calc(100% - 16px); max-height: calc(100% - 140px); overflow-y: auto; }
 }
 
 .can-cover .ac { gap: 0; }

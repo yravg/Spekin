@@ -30,7 +30,8 @@
     "server": "cargo run -p spekin-server",
     "canvas:serve": "node tools/canvas/serve.mjs",
     "e2e:sweep": "node tools/e2e/sweep.mjs",
-    "e2e:offline": "node tools/e2e/offline-real-server.mjs"
+    "e2e:offline": "node tools/e2e/offline-real-server.mjs",
+    "e2e:reach": "node tools/e2e/reach.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
