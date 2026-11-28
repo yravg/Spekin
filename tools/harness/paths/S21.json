@@ -1,0 +1,61 @@
+{
+  "board": "S21-canvas-step.dc.html",
+  "states": {
+    "grid": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/p/meranti-yard/design?artifact=canvas-step" },
+        { "wait": "[data-screen=\"S21\"] .gpc-fg" }
+      ]
+    },
+    "detail": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/p/meranti-yard/design?artifact=canvas-step" },
+        { "wait": "[data-screen=\"S21\"] .gpc-fg" },
+        { "click": ".gpc-fc:has-text(\"F-04\") button:has-text(\"3 pinned\")" },
+        { "wait": "[data-screen=\"S21\"] .gpc-pin" }
+      ]
+    },
+    "sandbox": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/p/meranti-yard/design?artifact=canvas-step" },
+        { "wait": "[data-screen=\"S21\"] .gpc-fg" },
+        { "click": ".gpc-fc:has-text(\"F-03\") button:has-text(\"Preview\")" },
+        { "wait": "[data-screen=\"S21\"] .gpc-frame" }
+      ]
+    },
+    "untrusted": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/p/meranti-yard/design?artifact=canvas-step" },
+        { "wait": "[data-screen=\"S21\"] .gpc-fg" },
+        { "click": ".gpc-fc:has-text(\"F-03\") button:has-text(\"Preview\")" },
+        { "wait": "[data-screen=\"S21\"] .gpc-frame" },
+        { "click": "button:has-text(\"Fixture data only\")" },
+        { "wait": "[data-screen=\"S21\"] .gpc-q" }
+      ]
+    },
+    "approve": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/p/meranti-yard/design?artifact=canvas-step" },
+        { "wait": "[data-screen=\"S21\"] .gpc-fg" },
+        { "click": "button:has-text(\"Setujui kanvas\")" },
+        { "wait": "[data-screen=\"S21\"] .gpc-dlg" }
+      ]
+    },
+    "approved": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/p/meranti-yard/design?artifact=canvas-step" },
+        { "wait": "[data-screen=\"S21\"] .gpc-fg" },
+        { "click": "button:has-text(\"Setujui kanvas\")" },
+        { "wait": "[data-screen=\"S21\"] .gpc-dlg" },
+        { "click": ".gpc-dlg button:has-text(\"Create approval proposal\")" },
+        { "wait": "[data-screen=\"S21\"] .gpc-lock.open" }
+      ]
+    }
+  }
+}

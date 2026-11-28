@@ -16,6 +16,7 @@ import { DecisionLogWorkArea, type PlanningShellOverride } from '../planning/Dec
 import { TicketBoardWorkArea } from '../tickets/TicketBoardWorkArea';
 import { AdrsGlossaryWorkArea, isRecordsView, type RecordsView } from '../records/AdrsGlossaryWorkArea';
 import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/FramesCanvasWorkArea';
+import { CanvasStepWorkArea } from '../canvas/CanvasStepWorkArea';
 import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/ReviewAcceptWorkArea';
 import { ReviewReportWorkArea, isReportView, type ReportShellOverride } from '../review/ReviewReportWorkArea';
 import { TargetedChangeWorkArea } from '../review/TargetedChangeWorkArea';
@@ -185,6 +186,8 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
   const delivery = isDeliveryView(viewParam) ? viewParam : null;
   const depthParam = search.get('depth');
   const specDepth = stage === 'spec' && isSpecDepthView(depthParam) ? depthParam : null;
+  // S21 Canvas step lives at /p/:project/design?artifact=canvas-step (frame id in the query; never comment text).
+  const isCanvasStep = stage === 'design' && search.get('artifact') === 'canvas-step';
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [planningOverride, setPlanningOverride] = useState<PlanningShellOverride>({});
@@ -224,6 +227,8 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
         ? (planningOverride.screen ?? 'S05')
         ? 'S15'
         ? 'S06'
+      : isCanvasStep
+        ? 'S21'
       : stage === 'spec'
         ? (specDepth ? 'S07' : 'S40')
         ? 'S40'
@@ -285,6 +290,7 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
     usageView || designSystemView
     usageView || exportView
     usageView || recordsView
+    usageView || isCanvasStep
       ? undefined
       : stage === 'spec'
       ? specOverride.busy
@@ -411,7 +417,16 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
               onIntent={recordIntent}
             />
           ) : stage === 'design' ? (
-            designSub === 'canvas' ? (
+            isCanvasStep ? (
+              <CanvasStepWorkArea
+                onOpenTickets={() => navigate('/p/' + projectId + '/planning?artifact=tickets')}
+                onOpenHandoff={() => {
+                  setHandoffInitialMode('select');
+                  setDesignSub('handoff');
+                  navigate('/p/' + projectId + '/design');
+                }}
+              />
+            ) : designSub === 'canvas' ? (
               <FramesCanvasWorkArea onShellOverride={setCanvasOverride} />
             ) : designSub === 'review' ? (
               <ReviewAcceptWorkArea
