@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router';
 import { ProjectShell } from './shell/ProjectShell';
 import { ProjectsHome } from './projects/ProjectsHome';
 import { SignInScreen } from './auth/SignInScreen';
+import { InterviewScreen } from './interview/InterviewScreen';
 import { NotFound } from './shell/NotFound';
 import { SAMPLE_PROJECT_ID } from './data/source';
 
@@ -14,6 +15,8 @@ export const router = createBrowserRouter([
   { path: '/masuk', element: <SignInScreen page="signin" /> },
   { path: '/syarat', element: <SignInScreen page="terms" /> },
   { path: '/privasi', element: <SignInScreen page="privacy" /> },
+  { path: '/new/interview', element: <InterviewScreen mode="new" /> },
+  { path: '/p/:project/planning', element: <InterviewScreen mode="ground" /> },
   { path: '/skills', element: <Navigate to={'/p/' + SAMPLE_PROJECT_ID + '/spec'} replace /> },
   { path: '/p/:project/testing/report', element: <ProjectShell reportView /> },
   { path: '/p/:project/:stage', element: <ProjectShell /> },
