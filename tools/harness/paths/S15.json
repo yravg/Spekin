@@ -4,7 +4,9 @@
     "ladder": {
       "status": "checked",
       "steps": [
-        { "goto": "/p/meranti-yard/planning?artifact=tickets" },
+        { "goto": "/p/meranti-yard/planning" },
+        { "wait": "[data-screen=\"S04\"] [data-feature=\"F540\"]" },
+        { "click": "[data-feature=\"F540\"] button:has-text(\"Tickets\")" },
         { "wait": "[data-screen=\"S15\"]" }
       ]
     },

@@ -4,7 +4,9 @@
     "log": {
       "status": "checked",
       "steps": [
-        { "goto": "/p/meranti-yard/planning?artifact=decisions" },
+        { "goto": "/p/meranti-yard/planning" },
+        { "wait": "[data-screen=\"S04\"] [data-feature=\"F540\"]" },
+        { "click": "[data-feature=\"F540\"] button:has-text(\"Decision log\")" },
         { "wait": "[data-screen=\"S05\"]" }
       ]
     },

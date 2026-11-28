@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MemoryRouter, Route, Routes } from 'react-router';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router';
 import {
   GAPA_ANSWERED,
   GAPA_GROUND,
@@ -175,4 +175,46 @@ describe('S04 Interview (IMP-55)', () => {
     expect(el.textContent).toContain('D-004');
     expect(el.textContent).toContain('Question 6 of 12');
   });
+it('opens S05, S06 and S15 by click from an add-feature increment (F540, D-PLAN-1)', async () => {
+    let seen = '';
+    function Probe() {
+      const loc = useLocation();
+      seen = loc.pathname + loc.search;
+      return null;
+    }
+    const links: [string, string][] = [
+      ['Decision log', 'decisions'],
+      ['Pitch', 'pitch'],
+      ['Tickets', 'tickets'],
+    ];
+    for (const [label, artifact] of links) {
+      container = document.createElement('div');
+      document.body.appendChild(container);
+      root = createRoot(container);
+      await act(async () => {
+        root?.render(
+          <MemoryRouter initialEntries={['/p/meranti-yard/planning']}>
+            <Probe />
+            <Routes>
+              <Route path="/p/:project/planning" element={<InterviewScreen mode="ground" />} />
+            </Routes>
+          </MemoryRouter>,
+        );
+      });
+      const card = container.querySelector('[data-feature="F540"]') as HTMLElement;
+      expect(card).not.toBeNull();
+      await clickBtn(card, label);
+      expect(seen).toBe('/p/meranti-yard/planning?artifact=' + artifact);
+      await act(async () => root?.unmount());
+      root = null;
+      container.remove();
+      container = null;
+    }
+  });
+
+  it('shows no planning artifacts row before a project exists (F540)', async () => {
+    const el = await renderInterview('/new/interview');
+    expect(el.querySelector('[data-feature="F540"]')).toBeNull();
+  });
 });
+

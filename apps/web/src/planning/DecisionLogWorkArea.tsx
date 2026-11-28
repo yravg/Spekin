@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { sampleData, type ContextItem, type SampleDecisionLogEntry } from '../data/source';
 import { useWorkspace, type SaveState } from '../state/workspace';
 import { ChatPanel } from '../shell/ChatPanel';
@@ -48,6 +48,8 @@ const KIT_ROW: SampleDecisionLogEntry = { ...GAPA_KIT, field: 'Design kit' };
 
 // S05 Decision log work area inside the Planning stage (boards-gap-a.mjs).
 export function DecisionLogWorkArea(props: { onShellOverride?: (o: PlanningShellOverride) => void }) {
+  const navigate = useNavigate();
+  const { project: projectId } = useParams();
   const { onShellOverride } = props;
   const [search, setSearch] = useSearchParams();
   const view = useWorkspace((s) => s.view('planning'));
@@ -253,6 +255,11 @@ export function DecisionLogWorkArea(props: { onShellOverride?: (o: PlanningShell
           tabs={emptyMode ? EMPTY_TABS : LOG_TABS}
           activeTab={activeTab}
           onSelect={(tab) => {
+            // D-PLAN-1: the Pitch tab switches the artifact (S06) instead of a local view.
+            if (tab === 'Pitch r1' && projectId) {
+              navigate('/p/' + projectId + '/planning?artifact=pitch');
+              return;
+            }
             setView('planning', { tab });
             if (tab === 'Spec · open questions') changeFilter('open');
             else if (tab === 'Decision log' && filter === 'open') changeFilter('all');

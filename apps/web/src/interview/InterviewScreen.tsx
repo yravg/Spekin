@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router';
+import { useNavigate, useParams, useSearchParams } from 'react-router';
 import {
   SAMPLE_PROJECT_ID,
   sampleData,
@@ -162,6 +162,10 @@ function IdBtn({
 // S04 Interview. Board: docs/design/spekin-canvas/project/S04-interview.dc.html (data-screen="S04").
 export function InterviewScreen({ mode = 'new' }: { mode?: InterviewMode }) {
   const { project: projectId } = useParams();
+  const navigate = useNavigate();
+  // D-PLAN-1: in a project the planning artifacts open by click (S05, S06, S15 via ?artifact=).
+  const openArtifact = (artifact: string) =>
+    projectId ? navigate('/p/' + projectId + '/planning?artifact=' + artifact) : undefined;
   const [search] = useSearchParams();
   const recordIntent = useWorkspace((s) => s.recordIntent);
 
@@ -773,6 +777,38 @@ export function InterviewScreen({ mode = 'new' }: { mode?: InterviewMode }) {
             </div>
 
             {mode === 'ground' ? (
+              <>
+              <div className="gpa-pc" data-feature="F540">
+                <h4>
+                  Planning artifacts<span>Meranti Yard</span>
+                </h4>
+                <div className="gpa-acts">
+                  <Btn
+                    label="Decision log"
+                    sm
+                    icon="list"
+                    does="Opens the decision log (S05) for this project; the interview keeps its answers"
+                    feature="F540"
+                    onClick={() => openArtifact('decisions')}
+                  />
+                  <Btn
+                    label="Pitch"
+                    sm
+                    icon="doc"
+                    does="Opens the pitch (S06) for this project; nothing is accepted by opening it"
+                    feature="F540"
+                    onClick={() => openArtifact('pitch')}
+                  />
+                  <Btn
+                    label="Tickets"
+                    sm
+                    icon="list"
+                    does="Opens the ticket board (S15) for this project"
+                    feature="F540"
+                    onClick={() => openArtifact('tickets')}
+                  />
+                </div>
+              </div>
               <div className="gpa-pc" data-feature="F418">
                 <h4>Reviews and outside actions</h4>
                 <p className="gpa-hint">
@@ -787,6 +823,7 @@ export function InterviewScreen({ mode = 'new' }: { mode?: InterviewMode }) {
                   onClick={() => recordIntent('F418:open-s08-review')}
                 />
               </div>
+              </>
             ) : (
               <>
                 <div className="gpa-pc" data-feature="F419">
@@ -800,7 +837,10 @@ export function InterviewScreen({ mode = 'new' }: { mode?: InterviewMode }) {
                       icon="list"
                       does="Opens the decision log (S05) beside the interview"
                       feature="F419"
-                      onClick={() => recordIntent('F419:open-log')}
+                      onClick={() => {
+                        recordIntent('F419:open-log');
+                        openArtifact('decisions');
+                      }}
                     />
                     {!stoppedAtTwelve ? (
                       <Btn
