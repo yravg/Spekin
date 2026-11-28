@@ -30,6 +30,7 @@ import { ModelsUsageWorkArea, isUsageMoment, isUsageSection, usagePct, type Usag
 import { DeliveryWorkArea, deliveryStageView, deliveryViewStage, isDeliveryView } from '../delivery/DeliveryWorkArea';
 import { DesignSystemWorkArea, isDesignSystemState } from '../design-system/DesignSystemWorkArea';
 import { ExportWorkArea, type ExportFormat, type ExportMode } from '../export/ExportWorkArea';
+import { TicketDetailWorkArea } from '../tickets/TicketDetailWorkArea';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -38,7 +39,15 @@ import { Btn, IconBtn } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { Pill } from '../ui/Pill';
 
-function StagePlaceholderWorkArea({ stage, onOpenDelivery }: { stage: SampleStage; onOpenDelivery?: (stage: SampleStage) => void }) {
+function StagePlaceholderWorkArea({
+  stage,
+  onOpenDelivery,
+  onOpenTicket,
+}: {
+  stage: SampleStage;
+  onOpenDelivery?: (stage: SampleStage) => void;
+  onOpenTicket?: (ticketId: string) => void;
+}) {
   const view = useWorkspace((s) => s.view(stage.id));
   const setView = useWorkspace((s) => s.setView);
   const chatWidth = useWorkspace((s) => s.chatWidth);
@@ -100,7 +109,12 @@ function StagePlaceholderWorkArea({ stage, onOpenDelivery }: { stage: SampleStag
                     onSelect: () => (onOpenDelivery ? onOpenDelivery(stage) : recordIntent('F104:release-readiness')),
                   },
                 ]
-              : undefined
+              : stage.id === 'planning' && onOpenTicket
+                ? [
+                    { icon: 'doc', name: 'T-05 Variance table flags', onSelect: () => onOpenTicket('T-05') },
+                    { icon: 'doc', name: 'T-08 Drill down to cost lines', onSelect: () => onOpenTicket('T-08') },
+                  ]
+                : undefined
           }
           right={
             <>
@@ -188,6 +202,9 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
   const specDepth = stage === 'spec' && isSpecDepthView(depthParam) ? depthParam : null;
   // S21 Canvas step lives at /p/:project/design?artifact=canvas-step (frame id in the query; never comment text).
   const isCanvasStep = stage === 'design' && search.get('artifact') === 'canvas-step';
+  // S16 keeps its ticket id in the query (never prompt text): /p/meranti-yard/planning?artifact=ticket-T-05.
+  const artifactParam = search.get('artifact');
+  const ticketId = stage === 'planning' && artifactParam?.startsWith('ticket-') ? artifactParam.slice('ticket-'.length) : null;
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [planningOverride, setPlanningOverride] = useState<PlanningShellOverride>({});
@@ -238,6 +255,8 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
       ? 'S25'
       : delivery
         ? 'S37'
+      : ticketId
+        ? 'S16'
         : stage === 'spec'
           ? 'S40'
       : stage === 'design' && designSub === 'canvas'
@@ -516,9 +535,20 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
             <SkillsWorkArea
               onShellOverride={setSpecOverride}
               onOpenRecords={() => navigate('/p/' + projectId + '/spec/records?type=glossary')}
+          ) : stage === 'planning' && ticketId ? (
+            <TicketDetailWorkArea
+              key={ticketId}
+              ticketId={ticketId}
+              onSelectTicket={(id) => navigate('/p/' + projectId + '/planning?artifact=ticket-' + id)}
+              onBackToBoard={() => navigate('/p/' + projectId + '/planning')}
+              onIntent={recordIntent}
             />
           ) : (
-            <StagePlaceholderWorkArea stage={currentStage} onOpenDelivery={(s) => openDelivery(s.id)} />
+            <StagePlaceholderWorkArea
+              stage={currentStage}
+              onOpenDelivery={(s) => openDelivery(s.id)}
+              onOpenTicket={(id) => navigate('/p/' + projectId + '/planning?artifact=ticket-' + id)}
+            />
           )}
         </div>
       </div>

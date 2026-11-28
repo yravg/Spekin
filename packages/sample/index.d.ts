@@ -770,5 +770,33 @@ export declare const GAPC_BLOCKED: SampleGapCBlocked[];
 export declare const GAPC_UNTRUSTED: SampleGapCUntrusted;
 export declare const GAPC_LOCKED_TICKETS: string[];
 export declare const GAPC_TOOLS: SampleGapCTool[];
+// Gap group C: S16 Ticket detail and criteria (IMP-63).
+export type SampleGapcComponentOption = [string, string, string];
+export interface SampleGapcTicketComponent {
+  slug: string;
+  name: string;
+  install: string;
+  ver: string;
+}
+export type SampleGapcBlocker = [string, string, PillTone, string];
+export type SampleGapcCriterion = [string, string, string, PillTuple];
+export interface SampleGapcTicketDetail {
+  id: string;
+  title: string;
+  lane: string;
+  rev: string;
+  summary: string;
+  comp: SampleGapcTicketComponent | null;
+  blockers: SampleGapcBlocker[];
+  owns: string;
+  criteria: SampleGapcCriterion[];
+  rules: string[];
+  designRev: string;
+  newRev: string;
+  stagesL?: string[];
+}
+export declare const GAPC_CTX_S16: ContextItem[];
+export declare const GAPC_T05: SampleGapcTicketDetail;
+export declare const GAPC_COMPONENTS: SampleGapcComponentOption[];
 
 // Everything else the boards use is exported too; declare it here before use.
