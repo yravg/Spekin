@@ -428,11 +428,13 @@ export function SignInScreen({ page }: { page: SignInPage }) {
                   onClick={handleUseAnotherEmail}
                 />
                 {codeError ? (
-                  <p className="gpa-fine">
-                    <span className="gpa-bn warn" data-feature="F405">
+                  <>
+                    <p className="gpa-fine" />
+                    <div className="gpa-bn warn" data-feature="F405">
                       We never say whether an email already has an account. The same message shows either way.
-                    </span>
-                  </p>
+                    </div>
+                    <p />
+                  </>
                 ) : null}
               </div>
             )}
