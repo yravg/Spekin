@@ -585,4 +585,21 @@ export interface SampleGenUiCard {
 }
 export declare const GENUI_CARDS: SampleGenUiCard[];
 
+// S07 Spec document at every depth (sample/parts/gap-b.mjs).
+export interface SampleGapbPrinciple { id: string; t: string; rev: string; src: string; pill: PillTuple }
+export interface SampleGapbSimpleRow { k: string; t: string }
+export interface SampleGapbBlock { id: string; k: string; t: string; basis: string[]; rev: string }
+export interface SampleGapbExpertBlock { id: string; k: string; t: string; basis: string[]; pill: PillTuple }
+export interface SampleGapbMissingBlock { id: string; t: string; from: string }
+export interface SampleGapbImpactRow { area: string; item: string; n: number; pill: PillTuple }
+export interface SampleGapbKit { name: string; rev: string; picked: number; decision: string; by: string }
+export declare const GAPB_HASH: string;
+export declare const GAPB_PRINCIPLES: SampleGapbPrinciple[];
+export declare const GAPB_SIMPLE: SampleGapbSimpleRow[];
+export declare const GAPB_BLOCKS: SampleGapbBlock[];
+export declare const GAPB_EXPERT: SampleGapbExpertBlock[];
+export declare const GAPB_MISSING: SampleGapbMissingBlock[];
+export declare const GAPB_IMPACT: SampleGapbImpactRow[];
+export declare const GAPB_KIT: SampleGapbKit;
+
 // Everything else the boards use is exported too; declare it here before use.

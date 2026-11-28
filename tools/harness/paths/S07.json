@@ -1,0 +1,72 @@
+{
+  "board": "S07-spec-depth.dc.html",
+  "states": {
+    "simple": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-chip:has-text(\"Spec\")" },
+        { "wait": "[data-screen=\"S07\"]" },
+        { "click": "[aria-label=\"Depth\"] button:has-text(\"Simple\")" },
+        { "wait": ".sp-banner:has-text(\"Shallower view\")" }
+      ]
+    },
+    "detailed": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-chip:has-text(\"Spec\")" },
+        { "wait": ".gpb-blk.nb" }
+      ]
+    },
+    "expert": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-chip:has-text(\"Spec\")" },
+        { "wait": "[data-screen=\"S07\"]" },
+        { "click": "[aria-label=\"Depth\"] button:has-text(\"Expert\")" },
+        { "wait": ".gpb-head:has-text(\"ADRs, glossary and traceability\")" }
+      ]
+    },
+    "deeper": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-chip:has-text(\"Spec\")" },
+        { "wait": "[data-screen=\"S07\"]" },
+        { "click": "[aria-label=\"Depth\"] button:has-text(\"Simple\")" },
+        { "wait": ".sp-banner:has-text(\"Shallower view\")" },
+        { "click": "[aria-label=\"Depth\"] button:has-text(\"Detailed\")" },
+        { "wait": ".gpb-blk.prop" }
+      ]
+    },
+    "principles": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-chip:has-text(\"Spec\")" },
+        { "wait": "[data-screen=\"S07\"]" },
+        { "click": "button[data-feature=\"F446\"]:has-text(\"Edit\")" },
+        { "wait": ".gpb-hunk" }
+      ]
+    },
+    "impact": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "button.sp-chip:has-text(\"Spec\")" },
+        { "wait": "[data-screen=\"S07\"]" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "role=menuitem[name=\"Add feature\"]" },
+        { "wait": ".gpb-imp" }
+      ]
+    }
+  }
+}
