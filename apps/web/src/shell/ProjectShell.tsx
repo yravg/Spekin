@@ -21,6 +21,7 @@ import { useLayoutTier } from '../mobile/layoutTier';
 import { ResponsiveProjectShell } from '../mobile/ResponsiveProjectShell';
 import { ModelsUsageWorkArea, isUsageMoment, isUsageSection, usagePct, type UsageMoment, type UsageSection } from '../models/ModelsUsageWorkArea';
 import { DeliveryWorkArea, deliveryStageView, deliveryViewStage, isDeliveryView } from '../delivery/DeliveryWorkArea';
+import { TicketDetailWorkArea } from '../tickets/TicketDetailWorkArea';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -29,7 +30,15 @@ import { Btn, IconBtn } from '../ui/Button';
 import { Icon } from '../ui/Icon';
 import { Pill } from '../ui/Pill';
 
-function StagePlaceholderWorkArea({ stage, onOpenDelivery }: { stage: SampleStage; onOpenDelivery?: (stage: SampleStage) => void }) {
+function StagePlaceholderWorkArea({
+  stage,
+  onOpenDelivery,
+  onOpenTicket,
+}: {
+  stage: SampleStage;
+  onOpenDelivery?: (stage: SampleStage) => void;
+  onOpenTicket?: (ticketId: string) => void;
+}) {
   const view = useWorkspace((s) => s.view(stage.id));
   const setView = useWorkspace((s) => s.setView);
   const chatWidth = useWorkspace((s) => s.chatWidth);
@@ -91,7 +100,12 @@ function StagePlaceholderWorkArea({ stage, onOpenDelivery }: { stage: SampleStag
                     onSelect: () => (onOpenDelivery ? onOpenDelivery(stage) : recordIntent('F104:release-readiness')),
                   },
                 ]
-              : undefined
+              : stage.id === 'planning' && onOpenTicket
+                ? [
+                    { icon: 'doc', name: 'T-05 Variance table flags', onSelect: () => onOpenTicket('T-05') },
+                    { icon: 'doc', name: 'T-08 Drill down to cost lines', onSelect: () => onOpenTicket('T-08') },
+                  ]
+                : undefined
           }
           right={
             <>
@@ -159,6 +173,9 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   // S37 keeps its artifact view in the query (never draft text): /p/meranti-yard/backend?view=contracts.
   const viewParam = search.get('view');
   const delivery = isDeliveryView(viewParam) ? viewParam : null;
+  // S16 keeps its ticket id in the query (never prompt text): /p/meranti-yard/planning?artifact=ticket-T-05.
+  const artifactParam = search.get('artifact');
+  const ticketId = stage === 'planning' && artifactParam?.startsWith('ticket-') ? artifactParam.slice('ticket-'.length) : null;
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
@@ -186,8 +203,10 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
     ? 'S36'
     : delivery
       ? 'S37'
-      : stage === 'spec'
-        ? 'S40'
+      : ticketId
+        ? 'S16'
+        : stage === 'spec'
+          ? 'S40'
       : stage === 'design' && designSub === 'canvas'
         ? (canvasOverride.screen ?? 'S29')
         : stage === 'design' && designSub === 'review'
@@ -379,8 +398,20 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
             <BackendWorkArea onOpenDelivery={() => openDelivery('backend')} />
           ) : stage === 'spec' ? (
             <SkillsWorkArea onShellOverride={setSpecOverride} />
+          ) : stage === 'planning' && ticketId ? (
+            <TicketDetailWorkArea
+              key={ticketId}
+              ticketId={ticketId}
+              onSelectTicket={(id) => navigate('/p/' + projectId + '/planning?artifact=ticket-' + id)}
+              onBackToBoard={() => navigate('/p/' + projectId + '/planning')}
+              onIntent={recordIntent}
+            />
           ) : (
-            <StagePlaceholderWorkArea stage={currentStage} onOpenDelivery={(s) => openDelivery(s.id)} />
+            <StagePlaceholderWorkArea
+              stage={currentStage}
+              onOpenDelivery={(s) => openDelivery(s.id)}
+              onOpenTicket={(id) => navigate('/p/' + projectId + '/planning?artifact=ticket-' + id)}
+            />
           )}
         </div>
       </div>
