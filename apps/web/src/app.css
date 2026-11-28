@@ -79,6 +79,7 @@ body { background: var(--ground); }
 
 .can-cover .ac { gap: 0; }
 .int-cv:focus:not(:focus-visible) { outline: none; }
+.ap-sbx-frame { position: absolute; width: 0; height: 0; border: 0; pointer-events: none; }
 
 /* T01 Tablet and phone (< 1024 px): same ProjectShell route at narrower widths, zero horizontal scroll. */
 .sp-app.ap-t01 { display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 100%; overflow-x: hidden; font: 400 16px/1.4 var(--font); background: var(--canvas); position: relative; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); box-sizing: border-box; }

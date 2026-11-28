@@ -11,6 +11,7 @@ import { DesignWorkArea } from './DesignWorkArea';
 import { BackendWorkArea } from './BackendWorkArea';
 import { SkillsWorkArea } from '../skills/SkillsWorkArea';
 import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/FramesCanvasWorkArea';
+import { CanvasStepWorkArea } from '../canvas/CanvasStepWorkArea';
 import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/ReviewAcceptWorkArea';
 import { TargetedChangeWorkArea } from '../review/TargetedChangeWorkArea';
 import { StyleReviewWorkArea, type StyleShellOverride } from '../style/StyleReviewWorkArea';
@@ -159,6 +160,8 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   // S37 keeps its artifact view in the query (never draft text): /p/meranti-yard/backend?view=contracts.
   const viewParam = search.get('view');
   const delivery = isDeliveryView(viewParam) ? viewParam : null;
+  // S21 Canvas step lives at /p/:project/design?artifact=canvas-step (frame id in the query; never comment text).
+  const isCanvasStep = stage === 'design' && search.get('artifact') === 'canvas-step';
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
@@ -186,6 +189,8 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
     ? 'S36'
     : delivery
       ? 'S37'
+      : isCanvasStep
+        ? 'S21'
       : stage === 'spec'
         ? 'S40'
       : stage === 'design' && designSub === 'canvas'
@@ -223,7 +228,7 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
                   ? genUiOverride.save
                   : save;
   const activeBusy =
-    usageView
+    usageView || isCanvasStep
       ? undefined
       : stage === 'spec'
       ? specOverride.busy
@@ -317,7 +322,16 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
               onIntent={recordIntent}
             />
           ) : stage === 'design' ? (
-            designSub === 'canvas' ? (
+            isCanvasStep ? (
+              <CanvasStepWorkArea
+                onOpenTickets={() => navigate('/p/' + projectId + '/planning?artifact=tickets')}
+                onOpenHandoff={() => {
+                  setHandoffInitialMode('select');
+                  setDesignSub('handoff');
+                  navigate('/p/' + projectId + '/design');
+                }}
+              />
+            ) : designSub === 'canvas' ? (
               <FramesCanvasWorkArea onShellOverride={setCanvasOverride} />
             ) : designSub === 'review' ? (
               <ReviewAcceptWorkArea

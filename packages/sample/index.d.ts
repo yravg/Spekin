@@ -585,4 +585,43 @@ export interface SampleGenUiCard {
 }
 export declare const GENUI_CARDS: SampleGenUiCard[];
 
+// S14 GAP register and S21 Canvas step (IMP-60, IMP-61).
+export interface SampleGapBEntry {
+  id: string;
+  need: string;
+  closest: string;
+  why: string;
+  used: string;
+  st: PillTuple;
+}
+export type SampleGapCFrameKind = 'overview' | 'table' | 'drawer' | 'lines';
+export interface SampleGapCFrame {
+  id: string;
+  title: string;
+  rev: string;
+  comps: string[];
+  noComp: number;
+  st: PillTuple;
+  comments: number;
+  kind: SampleGapCFrameKind;
+}
+export type SampleGapCPin = [string, string, string, string, 'open' | 'done'];
+export type SampleGapCPolicy = [string, string, PillTone];
+export type SampleGapCBlocked = [string, string, string, string];
+export interface SampleGapCUntrusted {
+  src: string;
+  text: string;
+  outcome: [string, string][];
+}
+export type SampleGapCTool = [string, string, PillTone];
+export declare const GAPB_GAPS: SampleGapBEntry[];
+export declare const GAPC_CTX_S21: ContextItem[];
+export declare const GAPC_FRAMES: SampleGapCFrame[];
+export declare const GAPC_PINS: SampleGapCPin[];
+export declare const GAPC_POLICY: SampleGapCPolicy[];
+export declare const GAPC_BLOCKED: SampleGapCBlocked[];
+export declare const GAPC_UNTRUSTED: SampleGapCUntrusted;
+export declare const GAPC_LOCKED_TICKETS: string[];
+export declare const GAPC_TOOLS: SampleGapCTool[];
+
 // Everything else the boards use is exported too; declare it here before use.
