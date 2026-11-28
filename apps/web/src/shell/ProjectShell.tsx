@@ -9,6 +9,7 @@ import { StageBar } from './StageBar';
 import { NotFound } from './NotFound';
 import { DesignWorkArea } from './DesignWorkArea';
 import { BackendWorkArea } from './BackendWorkArea';
+import { PitchWorkArea, PITCH_SAVE } from '../planning/PitchWorkArea';
 import { SkillsWorkArea } from '../skills/SkillsWorkArea';
 import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/FramesCanvasWorkArea';
 import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/ReviewAcceptWorkArea';
@@ -161,6 +162,7 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   const delivery = isDeliveryView(viewParam) ? viewParam : null;
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
+  const [planningOverride, setPlanningOverride] = useState<{ save?: SaveState }>({});
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
   const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style' | 'intake' | 'handoff' | 'genui'>('shell');
   const [handoffInitialMode, setHandoffInitialMode] = useState<HandoffMode>('select');
@@ -186,6 +188,8 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
     ? 'S36'
     : delivery
       ? 'S37'
+      : stage === 'planning'
+        ? 'S06'
       : stage === 'spec'
         ? 'S40'
       : stage === 'design' && designSub === 'canvas'
@@ -207,6 +211,8 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   const activeSave =
     usageView
       ? save
+      : stage === 'planning'
+        ? (planningOverride.save ?? PITCH_SAVE.proposal)
       : stage === 'spec' && specOverride.save
       ? specOverride.save
       : stage === 'design' && designSub === 'canvas' && canvasOverride.save
@@ -375,6 +381,8 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
                 onOpenUsage={() => navigate('/p/' + projectId + '/usage?section=models')}
               />
             )
+          ) : stage === 'planning' ? (
+            <PitchWorkArea onShellOverride={setPlanningOverride} />
           ) : stage === 'backend' ? (
             <BackendWorkArea onOpenDelivery={() => openDelivery('backend')} />
           ) : stage === 'spec' ? (
