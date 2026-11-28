@@ -26,6 +26,7 @@ import { ResponsiveProjectShell } from '../mobile/ResponsiveProjectShell';
 import { ModelsUsageWorkArea, isUsageMoment, isUsageSection, usagePct, type UsageMoment, type UsageSection } from '../models/ModelsUsageWorkArea';
 import { DeliveryWorkArea, deliveryStageView, deliveryViewStage, isDeliveryView } from '../delivery/DeliveryWorkArea';
 import { DesignSystemWorkArea, isDesignSystemState } from '../design-system/DesignSystemWorkArea';
+import { ExportWorkArea, type ExportFormat, type ExportMode } from '../export/ExportWorkArea';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -158,6 +159,9 @@ export function ProjectShell({ usageView = false, designSystemView = false }: { 
 export function ProjectShell({ usageView = false, reportView = false }: { usageView?: boolean; reportView?: boolean } = {}) {
   const { project: projectId = '', stage: stageParam } = useParams();
   const stage = reportView ? 'testing' : (stageParam ?? 'design');
+export function ProjectShell({ usageView = false, exportView = false }: { usageView?: boolean; exportView?: boolean } = {}) {
+  const { project: projectId = '', stage: stageParam } = useParams();
+  const stage = exportView ? 'spec' : (stageParam ?? 'design');
   const navigate = useNavigate();
   const [search, setSearch] = useSearchParams();
   const section: UsageSection = isUsageSection(search.get('section')) ? (search.get('section') as UsageSection) : 'models';
@@ -166,6 +170,9 @@ export function ProjectShell({ usageView = false, reportView = false }: { usageV
   const designSystemState = isDesignSystemState(dsTab) ? dsTab : 'kit';
   const reportRev = search.get('rev');
   const initialReportView = isReportView(reportRev) ? reportRev : 'report';
+  const exportFormatParam = search.get('format');
+  const exportInitialMode: ExportMode =
+    exportFormatParam === 'yb' ? 'yb' : exportFormatParam === 'zip' ? 'left' : 'md';
   // S37 keeps its artifact view in the query (never draft text): /p/meranti-yard/backend?view=contracts.
   const viewParam = search.get('view');
   const delivery = isDeliveryView(viewParam) ? viewParam : null;
@@ -210,6 +217,12 @@ export function ProjectShell({ usageView = false, reportView = false }: { usageV
         ? 'S40'
       : stage === 'testing'
         ? 'S18'
+    : exportView
+      ? 'S25'
+      : delivery
+        ? 'S37'
+        : stage === 'spec'
+          ? 'S40'
       : stage === 'design' && designSub === 'canvas'
         ? (canvasOverride.screen ?? 'S29')
         : stage === 'design' && designSub === 'review'
@@ -227,7 +240,7 @@ export function ProjectShell({ usageView = false, reportView = false }: { usageV
                     : 'S35';
   const s36Usage = MODELS_USAGE[moment];
   const activeSave =
-    usageView
+    usageView || exportView
       ? save
       : designSystemView
         ? { status: 'saved' as const, tone: 'ok' as const, text: 'Saved 12:44' }
@@ -250,6 +263,7 @@ export function ProjectShell({ usageView = false, reportView = false }: { usageV
                   : save;
   const activeBusy =
     usageView || designSystemView
+    usageView || exportView
       ? undefined
       : stage === 'spec'
       ? specOverride.busy
@@ -342,6 +356,16 @@ export function ProjectShell({ usageView = false, reportView = false }: { usageV
             <DesignSystemWorkArea
               state={designSystemState}
               onStateChange={(next) => setSearch(next === 'gap' ? { tab: next, gap: 'GAP-01' } : { tab: next })}
+          ) : exportView ? (
+            <ExportWorkArea
+              initialMode={exportInitialMode}
+              onFormatChange={(next: ExportFormat) => setSearch({ format: next }, { replace: true })}
+              onCloseExport={() => navigate('/p/' + projectId + '/spec')}
+              onOpenHandoff={() => {
+                setHandoffInitialMode('select');
+                setDesignSub('handoff');
+                navigate('/p/' + projectId + '/design');
+              }}
               onOpenReview={() => {
                 setDesignSub('review');
                 navigate('/p/' + projectId + '/design');
@@ -442,6 +466,9 @@ export function ProjectShell({ usageView = false, reportView = false }: { usageV
                 setDesignSub('review');
                 navigate('/p/' + projectId + '/design');
               }}
+            <SkillsWorkArea
+              onShellOverride={setSpecOverride}
+              onOpenExport={() => navigate('/p/' + projectId + '/spec/export')}
             />
           ) : (
             <StagePlaceholderWorkArea stage={currentStage} onOpenDelivery={(s) => openDelivery(s.id)} />

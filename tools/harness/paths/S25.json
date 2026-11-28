@@ -1,0 +1,80 @@
+{
+  "board": "S25-export.dc.html",
+  "states": {
+    "md": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"spec\"]" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "button[role=\"menuitem\"]:has-text(\"Export\")" },
+        { "wait": "[data-screen=\"S25\"]" }
+      ]
+    },
+    "yb": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"spec\"]" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "button[role=\"menuitem\"]:has-text(\"Export\")" },
+        { "click": "button.gpd-fmt:has-text(\"yravgbuilder\")" },
+        { "wait": "h3:has-text(\"yravgbuilder bundle\")" }
+      ]
+    },
+    "left": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"spec\"]" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "button[role=\"menuitem\"]:has-text(\"Export\")" },
+        { "click": "button.gpd-fmt:has-text(\"Zip\")" },
+        { "wait": "h3:has-text(\"Left out of this export\")" }
+      ]
+    },
+    "build": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"spec\"]" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "button[role=\"menuitem\"]:has-text(\"Export\")" },
+        { "click": "button.gpd-fmt:has-text(\"Zip\")" },
+        { "click": "button:has-text(\"Export accepted only\")" },
+        { "wait": "h3:has-text(\"Building the zip\")" }
+      ]
+    },
+    "done": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"spec\"]" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "button[role=\"menuitem\"]:has-text(\"Export\")" },
+        { "click": "button.gpd-fmt:has-text(\"yravgbuilder\")" },
+        { "click": "button:has-text(\"Export for yravgbuilder\")" },
+        { "wait": "h3:has-text(\"Export ready\")" }
+      ]
+    },
+    "back": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": "[data-stage=\"spec\"]" },
+        { "click": "button[aria-label=\"Open an artifact\"]" },
+        { "click": "button[role=\"menuitem\"]:has-text(\"Export\")" },
+        { "click": "button.gpd-fmt:has-text(\"yravgbuilder\")" },
+        { "click": "button:has-text(\"Export for yravgbuilder\")" },
+        { "click": "button:has-text(\"Choose file\")" },
+        { "wait": "h3:has-text(\"Ticket status from yravgbuilder\")" }
+      ]
+    }
+  }
+}
