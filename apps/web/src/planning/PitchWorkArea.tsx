@@ -1,5 +1,5 @@
 import { useEffect, useState, type KeyboardEvent } from 'react';
-import { useSearchParams } from 'react-router';
+import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { sampleData, type ContextItem } from '../data/source';
 import { useWorkspace, type SaveState } from '../state/workspace';
 import { ChatPanel } from '../shell/ChatPanel';
@@ -44,6 +44,8 @@ function parseDepth(raw: string | null): SpecDepth | null {
 
 // S06 Pitch (Simple) work area inside the Planning stage (boards-gap-a.mjs).
 export function PitchWorkArea(props: { onShellOverride?: (o: { save?: SaveState }) => void }) {
+  const navigate = useNavigate();
+  const { project: projectId } = useParams();
   const { onShellOverride } = props;
   const [search, setSearch] = useSearchParams();
   const view = useWorkspace((s) => s.view('planning'));
@@ -154,6 +156,11 @@ export function PitchWorkArea(props: { onShellOverride?: (o: { save?: SaveState 
           tabs={PITCH_TABS}
           activeTab={activeTab}
           onSelect={(name) => {
+            // D-PLAN-1: the Decision log tab switches the artifact (S05).
+            if (name === 'Decision log' && projectId) {
+              navigate('/p/' + projectId + '/planning?artifact=decisions');
+              return;
+            }
             setActiveTab(name);
             recordIntent('F104:tab:' + name);
           }}

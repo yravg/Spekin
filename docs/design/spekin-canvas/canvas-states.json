@@ -267,7 +267,7 @@
   },
   {
     "board": "S04-interview.dc.html",
-    "hash": "93fbf12648cfc56f",
+    "hash": "55c8aac3f1c30459",
     "screen": "S04",
     "features": [
       "F411",
@@ -278,7 +278,8 @@
       "F416",
       "F417",
       "F418",
-      "F419"
+      "F419",
+      "F540"
     ],
     "states": [
       {
@@ -456,6 +457,18 @@
       {
         "does": "Sends your own answer to the current question",
         "feature": "F411"
+      },
+      {
+        "does": "Opens the decision log (S05) for this project; the interview keeps its answers",
+        "feature": "F540"
+      },
+      {
+        "does": "Opens the pitch (S06) for this project; nothing is accepted by opening it",
+        "feature": "F540"
+      },
+      {
+        "does": "Opens the ticket board (S15) for this project",
+        "feature": "F540"
       },
       {
         "does": "Opens S08 review with the pending canonical changes; none are accepted by the interview",
