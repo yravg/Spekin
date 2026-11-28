@@ -15,6 +15,7 @@ export const router = createBrowserRouter([
   { path: '/syarat', element: <SignInScreen page="terms" /> },
   { path: '/privasi', element: <SignInScreen page="privacy" /> },
   { path: '/skills', element: <Navigate to={'/p/' + SAMPLE_PROJECT_ID + '/spec'} replace /> },
+  { path: '/p/:project/testing/report', element: <ProjectShell reportView /> },
   { path: '/p/:project/:stage', element: <ProjectShell /> },
   // S14 Design system: kit and GAP register: /p/meranti-yard/design/system (tab and gap in the query)
   { path: '/p/:project/design/system', element: <ProjectShell designSystemView /> },

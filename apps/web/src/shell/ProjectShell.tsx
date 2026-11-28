@@ -15,6 +15,7 @@ import { DecisionLogWorkArea, type PlanningShellOverride } from '../planning/Dec
 import { TicketBoardWorkArea } from '../tickets/TicketBoardWorkArea';
 import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/FramesCanvasWorkArea';
 import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/ReviewAcceptWorkArea';
+import { ReviewReportWorkArea, isReportView, type ReportShellOverride } from '../review/ReviewReportWorkArea';
 import { TargetedChangeWorkArea } from '../review/TargetedChangeWorkArea';
 import { StyleReviewWorkArea, type StyleShellOverride } from '../style/StyleReviewWorkArea';
 import { ReferenceIntakeWorkArea, type IntakeShellOverride } from '../intake/ReferenceIntakeWorkArea';
@@ -154,14 +155,17 @@ function StagePlaceholderWorkArea({ stage, onOpenDelivery }: { stage: SampleStag
 
 // S35 Project shell. Board: docs/design/spekin-canvas/project/S35-project-shell.dc.html (data-screen="S35").
 export function ProjectShell({ usageView = false, designSystemView = false }: { usageView?: boolean; designSystemView?: boolean } = {}) {
+export function ProjectShell({ usageView = false, reportView = false }: { usageView?: boolean; reportView?: boolean } = {}) {
   const { project: projectId = '', stage: stageParam } = useParams();
-  const stage = stageParam ?? 'design';
+  const stage = reportView ? 'testing' : (stageParam ?? 'design');
   const navigate = useNavigate();
   const [search, setSearch] = useSearchParams();
   const section: UsageSection = isUsageSection(search.get('section')) ? (search.get('section') as UsageSection) : 'models';
   const moment: UsageMoment = isUsageMoment(search.get('moment')) ? (search.get('moment') as UsageMoment) : 'calm';
   const dsTab = search.get('tab');
   const designSystemState = isDesignSystemState(dsTab) ? dsTab : 'kit';
+  const reportRev = search.get('rev');
+  const initialReportView = isReportView(reportRev) ? reportRev : 'report';
   // S37 keeps its artifact view in the query (never draft text): /p/meranti-yard/backend?view=contracts.
   const viewParam = search.get('view');
   const delivery = isDeliveryView(viewParam) ? viewParam : null;
@@ -171,6 +175,7 @@ export function ProjectShell({ usageView = false, designSystemView = false }: { 
   const [panel, setPanel] = useState<string | null>(null);
   const [planningOverride, setPlanningOverride] = useState<PlanningShellOverride>({});
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
+  const [reportOverride, setReportOverride] = useState<ReportShellOverride>({});
   const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style' | 'intake' | 'handoff' | 'genui'>('shell');
   const [handoffInitialMode, setHandoffInitialMode] = useState<HandoffMode>('select');
   const [genUiInitialMode, setGenUiInitialMode] = useState<GenUiMode>('stream');
@@ -202,6 +207,9 @@ export function ProjectShell({ usageView = false, designSystemView = false }: { 
         ? 'S15'
       : stage === 'spec'
         ? (specDepth ? 'S07' : 'S40')
+        ? 'S40'
+      : stage === 'testing'
+        ? 'S18'
       : stage === 'design' && designSub === 'canvas'
         ? (canvasOverride.screen ?? 'S29')
         : stage === 'design' && designSub === 'review'
@@ -245,6 +253,8 @@ export function ProjectShell({ usageView = false, designSystemView = false }: { 
       ? undefined
       : stage === 'spec'
       ? specOverride.busy
+      : stage === 'testing'
+      ? reportOverride.busy
       : stage === 'design' && designSub === 'shell' && !conflict
         ? '1 designing · 1 waiting'
         : undefined;
@@ -423,6 +433,16 @@ export function ProjectShell({ usageView = false, designSystemView = false }: { 
             ) : (
               <SkillsWorkArea onShellOverride={setSpecOverride} />
             )
+            <SkillsWorkArea onShellOverride={setSpecOverride} />
+          ) : stage === 'testing' ? (
+            <ReviewReportWorkArea
+              initialView={initialReportView}
+              onShellOverride={setReportOverride}
+              onOpenReview={() => {
+                setDesignSub('review');
+                navigate('/p/' + projectId + '/design');
+              }}
+            />
           ) : (
             <StagePlaceholderWorkArea stage={currentStage} onOpenDelivery={(s) => openDelivery(s.id)} />
           )}
