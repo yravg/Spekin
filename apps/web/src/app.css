@@ -111,6 +111,24 @@ body { background: var(--ground); }
   .gpc-body > .gpc-pop[data-feature="F473"], .gpc-body > .gpc-pop[data-feature="F475"], .gpc-body > .gpc-pop[data-feature="F476"] { left: auto !important; top: auto !important; right: 12px; bottom: 12px; }
   /* S41 compare sheet: 690 px wide at left 372 ran past the stage; keep it inside. */
   .enh-sheet { left: auto; right: 8px; max-width: calc(100% - 16px); max-height: calc(100% - 140px); overflow-y: auto; }
+  /* IMP-69 (older boards at 1024). Chat: messages scroll instead of clipping, nothing in the
+     list is squeezed to 0 px, and suggestion rows stay inside the chat width (S33 S35 S38 S40). */
+  .sp-msgs { overflow-y: auto; }
+  .sp-msgs > * { flex-shrink: 0; }
+  .sp-sugg button { min-width: 0; overflow: hidden; }
+  /* S36 Models and usage: the side column stacks under the caps; the header row wraps. */
+  .mod-cols { grid-template-columns: minmax(0, 1fr); grid-auto-rows: max-content; overflow-y: auto; }
+  .mod-cols > .mod-left > *, .mod-cols > .mod-side > * { flex: none; }
+  .mod-ph { flex-wrap: wrap; height: auto; min-height: 54px; padding-top: 8px; padding-bottom: 8px; row-gap: 8px; }
+  /* S30 Style review: the two token columns stack instead of overlapping. */
+  .sty-cols { grid-template-columns: minmax(0, 1fr); grid-auto-rows: max-content; }
+  /* S29: a bottom edge marker ("F-05 is below") sat under the floating composer. */
+  .sp-cv > .can-edge[style*="bottom"] { bottom: 76px !important; }
+  /* S34 Hand-off: the 424 px file list gives way; the right-hand tab row wraps. */
+  .del-left { flex: 0 1 424px; min-width: 260px; }
+  .del-rt { flex-wrap: wrap; height: auto; min-height: 44px; row-gap: 6px; }
+  /* S31 take viewer: three 294 px takes do not fit; show two per row and scroll. */
+  .can-grid { grid-template-columns: repeat(2, auto); align-content: start; overflow-y: auto; padding: 14px 0; }
 }
 
 .can-cover .ac { gap: 0; }

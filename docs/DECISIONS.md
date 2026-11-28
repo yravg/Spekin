@@ -25,5 +25,7 @@ One line per decision, newest first. The owner decides product questions. Agents
 | Payment method for paid plans (PRD T-404). | Midtrans QRIS. This is a recommendation only, not decided. |
 | When to build the MCP server that serves skills to the user's own agent. | After P5, with its own ADR (auth, tokens, connector). |
 | Which other skill sets join the library (each needs a licence check). | Start with mattpocock/skills (MIT) and Spekin templates; add others one repo at a time. |
+| D-PLAN-1 (28 Nov 2026): how a user clicks from S04 (Planning) into S05 Decision log, S06 Pitch and S15 Tickets; today they open only by URL (`?artifact=`). | Draw a link row on S04 (Decision log, Pitch, Tickets) and let the artifact tabs switch `?artifact=`. Board change. |
+| D-RESP-1 (28 Nov 2026): a drawn 1024 layout for S30, S32 and S34, whose header actions and S32 inspector are wider than the work area at 1024 (IMP-70). | Add one 1024 state per board (actions to a second row or an overflow menu; S32 inspector overlays the canvas), then build to it. Board change. |
 | 23 Nov 2026 | Persistence: Postgres via sqlx behind a Store trait, memory store by default (ADR 0008) | owner approved lead recommendation |
 | 23 Nov 2026 | Drive links outside the PRD may stay where they are needed: only the owner can open them | owner |
