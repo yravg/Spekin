@@ -38,7 +38,7 @@ export function TopBar(props: {
         <span className="sp-sep" />
         <button type="button" className="sp-chip" data-does="Opens the increment picker: which feature increment the stages describe" data-feature="F103" onClick={props.onOpenIncrement}>
           <span className="k">Increment</span>
-          {project.increment}
+          <span className="ap-chip-v">{project.increment}</span>
           <Icon name="chev" size={12} />
         </button>
         <button type="button" className="sp-chip" data-does="Opens the accepted spec revision and its history (S07); never edits it" data-feature="F103" onClick={props.onOpenSpec}>
