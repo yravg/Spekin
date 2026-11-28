@@ -585,4 +585,37 @@ export interface SampleGenUiCard {
 }
 export declare const GENUI_CARDS: SampleGenUiCard[];
 
+// S19 ADRs and glossary (IMP-59, boards-gap-b.mjs).
+export interface SampleGlossaryTerm {
+  term: string;
+  id: string;
+  al: string;
+  ctx: string;
+  def: string;
+  rev: string;
+  pill: PillTuple;
+}
+export interface SampleAdrRow {
+  id: string;
+  t: string;
+  st: PillTuple;
+  rev: string;
+  link: string;
+}
+export interface SampleAdrDetail {
+  ctx: string;
+  alts: string[];
+  decision: string;
+  cons: string;
+}
+export interface SampleRecordProposal {
+  src: string;
+  base: string;
+  affects: string[];
+}
+export declare const GAPB_TERMS: SampleGlossaryTerm[];
+export declare const GAPB_ADRS: SampleAdrRow[];
+export declare const GAPB_ADR3: SampleAdrDetail;
+export declare const GAPB_PROPOSAL: SampleRecordProposal;
+
 // Everything else the boards use is exported too; declare it here before use.

@@ -10,6 +10,7 @@ import { NotFound } from './NotFound';
 import { DesignWorkArea } from './DesignWorkArea';
 import { BackendWorkArea } from './BackendWorkArea';
 import { SkillsWorkArea } from '../skills/SkillsWorkArea';
+import { AdrsGlossaryWorkArea, isRecordsView, type RecordsView } from '../records/AdrsGlossaryWorkArea';
 import { FramesCanvasWorkArea, type CanvasShellOverride } from '../canvas/FramesCanvasWorkArea';
 import { ReviewAcceptWorkArea, type ReviewShellOverride } from '../review/ReviewAcceptWorkArea';
 import { TargetedChangeWorkArea } from '../review/TargetedChangeWorkArea';
@@ -149,13 +150,15 @@ function StagePlaceholderWorkArea({ stage, onOpenDelivery }: { stage: SampleStag
 }
 
 // S35 Project shell. Board: docs/design/spekin-canvas/project/S35-project-shell.dc.html (data-screen="S35").
-export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}) {
+export function ProjectShell({ usageView = false, recordsView = false }: { usageView?: boolean; recordsView?: boolean } = {}) {
   const { project: projectId = '', stage: stageParam } = useParams();
-  const stage = stageParam ?? 'design';
+  const stage = stageParam ?? (recordsView ? 'spec' : 'design');
   const navigate = useNavigate();
   const [search, setSearch] = useSearchParams();
   const section: UsageSection = isUsageSection(search.get('section')) ? (search.get('section') as UsageSection) : 'models';
   const moment: UsageMoment = isUsageMoment(search.get('moment')) ? (search.get('moment') as UsageMoment) : 'calm';
+  const recordsType = search.get('type');
+  const recordsMode: RecordsView = isRecordsView(recordsType) ? recordsType : 'glossary';
   // S37 keeps its artifact view in the query (never draft text): /p/meranti-yard/backend?view=contracts.
   const viewParam = search.get('view');
   const delivery = isDeliveryView(viewParam) ? viewParam : null;
@@ -184,7 +187,9 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
   const currentStage = stages.find((s) => s.id === stage)!;
   const screenId = usageView
     ? 'S36'
-    : delivery
+    : recordsView
+      ? 'S19'
+      : delivery
       ? 'S37'
       : stage === 'spec'
         ? 'S40'
@@ -204,10 +209,12 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
                     ? 'S38'
                     : 'S35';
   const s36Usage = MODELS_USAGE[moment];
-  const activeSave =
+  const activeSave: SaveState =
     usageView
       ? save
-      : stage === 'spec' && specOverride.save
+      : recordsView
+        ? { status: 'saved', tone: 'ok', text: 'Saved 12:52' }
+        : stage === 'spec' && specOverride.save
       ? specOverride.save
       : stage === 'design' && designSub === 'canvas' && canvasOverride.save
         ? canvasOverride.save
@@ -223,7 +230,7 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
                   ? genUiOverride.save
                   : save;
   const activeBusy =
-    usageView
+    usageView || recordsView
       ? undefined
       : stage === 'spec'
       ? specOverride.busy
@@ -310,6 +317,14 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
               }}
               onIntent={recordIntent}
             />
+          ) : recordsView ? (
+            <AdrsGlossaryWorkArea
+              key={recordsMode}
+              view={recordsMode}
+              onView={(next) => setSearch({ type: next })}
+              onOpenSpec={() => navigate('/p/' + projectId + '/spec')}
+              onIntent={recordIntent}
+            />
           ) : delivery ? (
             <DeliveryWorkArea
               view={delivery}
@@ -378,7 +393,10 @@ export function ProjectShell({ usageView = false }: { usageView?: boolean } = {}
           ) : stage === 'backend' ? (
             <BackendWorkArea onOpenDelivery={() => openDelivery('backend')} />
           ) : stage === 'spec' ? (
-            <SkillsWorkArea onShellOverride={setSpecOverride} />
+            <SkillsWorkArea
+              onShellOverride={setSpecOverride}
+              onOpenRecords={() => navigate('/p/' + projectId + '/spec/records?type=glossary')}
+            />
           ) : (
             <StagePlaceholderWorkArea stage={currentStage} onOpenDelivery={(s) => openDelivery(s.id)} />
           )}
