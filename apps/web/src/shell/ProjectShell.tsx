@@ -31,6 +31,7 @@ import { DeliveryWorkArea, deliveryStageView, deliveryViewStage, isDeliveryView 
 import { DesignSystemWorkArea, isDesignSystemState } from '../design-system/DesignSystemWorkArea';
 import { ExportWorkArea, type ExportFormat, type ExportMode } from '../export/ExportWorkArea';
 import { TicketDetailWorkArea } from '../tickets/TicketDetailWorkArea';
+import { AgentInboxWorkArea, defaultInboxBusy, type AgentInboxShellOverride, type InboxMoment } from '../inbox/AgentInboxWorkArea';
 import { ChatPanel } from './ChatPanel';
 import { ArtifactTabs } from './ArtifactTabs';
 import { ViewSwitch } from './ViewSwitch';
@@ -205,12 +206,19 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
   // S16 keeps its ticket id in the query (never prompt text): /p/meranti-yard/planning?artifact=ticket-T-05.
   const artifactParam = search.get('artifact');
   const ticketId = stage === 'planning' && artifactParam?.startsWith('ticket-') ? artifactParam.slice('ticket-'.length) : null;
+  // S20 Agent inbox opens as a docked panel on any stage: /p/meranti-yard/:stage?inbox=1 (run id in query).
+  const inboxOpen = !usageView && search.get('inbox') === '1';
+  const inboxRun = search.get('run') ?? undefined;
+  const inboxMomentParam = search.get('moment');
+  const inboxMoment: InboxMoment | undefined =
+    inboxMomentParam === 'cap' || inboxMomentParam === 'empty' ? inboxMomentParam : undefined;
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [planningOverride, setPlanningOverride] = useState<PlanningShellOverride>({});
   const [planningOverride, setPlanningOverride] = useState<{ save?: SaveState }>({});
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
   const [reportOverride, setReportOverride] = useState<ReportShellOverride>({});
+  const [inboxOverride, setInboxOverride] = useState<AgentInboxShellOverride | null>(null);
   const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style' | 'intake' | 'handoff' | 'genui'>('shell');
   const [handoffInitialMode, setHandoffInitialMode] = useState<HandoffMode>('select');
   const [genUiInitialMode, setGenUiInitialMode] = useState<GenUiMode>('stream');
@@ -235,6 +243,8 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
     ? 'S36'
     : designSystemView
       ? 'S14'
+    : inboxOpen
+      ? 'S20'
     : delivery
     : recordsView
       ? 'S19'
@@ -311,6 +321,8 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
     usageView || recordsView
     usageView || isCanvasStep
       ? undefined
+      : inboxOpen
+        ? (inboxOverride ? inboxOverride.busy : defaultInboxBusy(inboxMoment))
       : stage === 'spec'
       ? specOverride.busy
       : stage === 'testing'
@@ -372,7 +384,18 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
             if (usageView) setSearch({ section: 'limits', moment });
             else navigate('/p/' + projectId + '/usage?section=models');
           }}
-          onOpenInbox={() => setPanel('inbox')}
+          onOpenInbox={() => {
+            const next = new URLSearchParams(search);
+            if (inboxOpen) {
+              next.delete('inbox');
+              next.delete('run');
+            } else {
+              next.set('inbox', '1');
+            }
+            setInboxOverride(null);
+            if (usageView) navigate('/p/' + projectId + '/spec?' + next.toString());
+            else setSearch(next);
+          }}
           lang={lang}
           onLang={setLang}
         />
@@ -407,6 +430,30 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
               initialMode={exportInitialMode}
               onFormatChange={(next: ExportFormat) => setSearch({ format: next }, { replace: true })}
               onCloseExport={() => navigate('/p/' + projectId + '/spec')}
+          ) : inboxOpen ? (
+            <AgentInboxWorkArea
+              key={inboxMoment ?? 'live'}
+              initialOpenRun={inboxRun}
+              moment={inboxMoment}
+              onClose={() => {
+                const next = new URLSearchParams(search);
+                next.delete('inbox');
+                next.delete('run');
+                setInboxOverride(null);
+                setSearch(next);
+              }}
+              onSelectRun={(runId) => {
+                const next = new URLSearchParams(search);
+                next.set('inbox', '1');
+                if (runId) next.set('run', runId);
+                else next.delete('run');
+                setSearch(next, { replace: true });
+              }}
+              onOpenUsage={() => navigate('/p/' + projectId + '/usage?section=limits')}
+              onOpenReview={() => {
+                setDesignSub('review');
+                navigate('/p/' + projectId + '/design');
+              }}
               onOpenHandoff={() => {
                 setHandoffInitialMode('select');
                 setDesignSub('handoff');
@@ -428,6 +475,7 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
               onView={(next) => setSearch({ type: next })}
               onOpenSpec={() => navigate('/p/' + projectId + '/spec')}
               onIntent={recordIntent}
+              onShellOverride={setInboxOverride}
             />
           ) : delivery ? (
             <DeliveryWorkArea
