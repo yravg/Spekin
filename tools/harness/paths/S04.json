@@ -2,14 +2,14 @@
   "board": "S04-interview.dc.html",
   "states": {
     "ask": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/new/interview" },
         { "wait": "[data-screen=\"S04\"] .gpa-q" }
       ]
     },
     "skip": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/new/interview?q=4" },
         { "wait": "[data-screen=\"S04\"] .gpa-q" },
@@ -18,14 +18,14 @@
       ]
     },
     "ground": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/p/meranti-yard/planning" },
         { "wait": "[data-screen=\"S04\"] [data-feature=\"F414\"]" }
       ]
     },
     "why": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/new/interview" },
         { "wait": "[data-screen=\"S04\"] .gpa-q" },
@@ -34,7 +34,7 @@
       ]
     },
     "cukup": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/new/interview" },
         { "wait": "[data-screen=\"S04\"] .gpa-q" },
@@ -43,7 +43,7 @@
       ]
     },
     "twelve": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/new/interview?q=12" },
         { "wait": "[data-screen=\"S04\"] .gpa-q" },

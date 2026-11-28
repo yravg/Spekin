@@ -4,22 +4,14 @@
     "detail": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "button.sp-stage:has-text(\"Planning\")" },
-        { "click": "button[aria-label=\"Open an artifact\"]" },
-        { "click": "button:has-text(\"T-05 Variance table flags\")" },
+        { "goto": "/p/meranti-yard/planning?artifact=ticket-T-05" },
         { "wait": "[data-screen=\"S16\"]" }
       ]
     },
     "copied": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "button.sp-stage:has-text(\"Planning\")" },
-        { "click": "button[aria-label=\"Open an artifact\"]" },
-        { "click": "button:has-text(\"T-05 Variance table flags\")" },
+        { "goto": "/p/meranti-yard/planning?artifact=ticket-T-05" },
         { "wait": "[data-screen=\"S16\"]" },
         { "click": "button[data-feature=\"F484\"]:has-text(\"Copy prompt\")" },
         { "wait": ".gpc-toast" }
@@ -28,11 +20,7 @@
     "pulled": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "button.sp-stage:has-text(\"Planning\")" },
-        { "click": "button[aria-label=\"Open an artifact\"]" },
-        { "click": "button:has-text(\"T-05 Variance table flags\")" },
+        { "goto": "/p/meranti-yard/planning?artifact=ticket-T-05" },
         { "wait": "[data-screen=\"S16\"]" },
         { "click": "button[data-feature=\"F486\"]:has-text(\"Agent pull link\")" },
         { "wait": ".gpc-log" }
@@ -41,22 +29,14 @@
     "nocomp": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "button.sp-stage:has-text(\"Planning\")" },
-        { "click": "button[aria-label=\"Open an artifact\"]" },
-        { "click": "button:has-text(\"T-08 Drill down to cost lines\")" },
+        { "goto": "/p/meranti-yard/planning?artifact=ticket-T-08" },
         { "wait": ".gpc-cc.bad" }
       ]
     },
     "stale": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "button.sp-stage:has-text(\"Planning\")" },
-        { "click": "button[aria-label=\"Open an artifact\"]" },
-        { "click": "button:has-text(\"T-05 Variance table flags\")" },
+        { "goto": "/p/meranti-yard/planning?artifact=ticket-T-05" },
         { "wait": "[data-screen=\"S16\"]" },
         { "click": "button[aria-label=\"Rebuild prompt\"]" },
         { "wait": ".sp-banner.warn" }

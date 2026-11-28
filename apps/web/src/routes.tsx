@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router';
+import { createBrowserRouter, Navigate, useSearchParams } from 'react-router';
 import { ProjectShell } from './shell/ProjectShell';
 import { ProjectsHome } from './projects/ProjectsHome';
 import { SignInScreen } from './auth/SignInScreen';
@@ -8,6 +8,13 @@ import { SAMPLE_PROJECT_ID } from './data/source';
 
 // Routes follow the boards' "Where it lives" cards. Stage and artifact are in the path or query, never draft text (R-WF-11).
 // "/" renders S27 Projects home (IMP-05); clicking a project opens /p/:project/:stage.
+// Planning holds five boards on one route ("Where it lives" cards): the bare URL is the S04 add-feature interview;
+// ?artifact=decisions (S05), pitch (S06), tickets (S15) and ticket-<id> (S16) open that artifact in the project shell.
+function PlanningRoute() {
+  const [search] = useSearchParams();
+  return search.get('artifact') ? <ProjectShell planningView /> : <InterviewScreen mode="ground" />;
+}
+
 export const router = createBrowserRouter([
   { path: '/', element: <ProjectsHome initialView="home" /> },
   { path: '/projects', element: <ProjectsHome initialView="all" /> },
@@ -16,7 +23,7 @@ export const router = createBrowserRouter([
   { path: '/syarat', element: <SignInScreen page="terms" /> },
   { path: '/privasi', element: <SignInScreen page="privacy" /> },
   { path: '/new/interview', element: <InterviewScreen mode="new" /> },
-  { path: '/p/:project/planning', element: <InterviewScreen mode="ground" /> },
+  { path: '/p/:project/planning', element: <PlanningRoute /> },
   { path: '/skills', element: <Navigate to={'/p/' + SAMPLE_PROJECT_ID + '/spec'} replace /> },
   { path: '/p/:project/testing/report', element: <ProjectShell reportView /> },
   { path: '/p/:project/:stage', element: <ProjectShell /> },

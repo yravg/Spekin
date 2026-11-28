@@ -4,18 +4,14 @@
     "proposal": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "[data-stage=\"planning\"]" },
+        { "goto": "/p/meranti-yard/planning?artifact=pitch" },
         { "wait": "[data-screen=\"S06\"]" }
       ]
     },
     "accepted": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "[data-stage=\"planning\"]" },
+        { "goto": "/p/meranti-yard/planning?artifact=pitch" },
         { "click": "button:has-text(\"Accept pitch\")" },
         { "wait": "[data-feature=\"F435\"]" }
       ]
@@ -23,11 +19,14 @@
     "guard": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "[data-stage=\"planning\"]" },
+        { "goto": "/p/meranti-yard/planning?artifact=pitch" },
         { "click": "button:has-text(\"Accept pitch\")" },
-        { "type": [".ap-ta-input", "Make the tickets now."] },
+        {
+          "type": [
+            ".ap-ta-input",
+            "Make the tickets now."
+          ]
+        },
         { "click": ".sp-send" },
         { "wait": "[data-feature=\"F436\"]" }
       ]
@@ -35,9 +34,7 @@
     "breakdown": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "[data-stage=\"planning\"]" },
+        { "goto": "/p/meranti-yard/planning?artifact=pitch" },
         { "click": "button:has-text(\"Accept pitch\")" },
         { "click": "button:has-text(\"Lanjut ke Detail\")" },
         { "wait": "[data-feature=\"F437\"]" }
@@ -46,9 +43,7 @@
     "made": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "[data-stage=\"planning\"]" },
+        { "goto": "/p/meranti-yard/planning?artifact=pitch" },
         { "click": "button:has-text(\"Accept pitch\")" },
         { "click": "button:has-text(\"Lanjut ke Detail\")" },
         { "click": "button:has-text(\"Accept breakdown\")" },

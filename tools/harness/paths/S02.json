@@ -2,14 +2,14 @@
   "board": "S02-sign-in.dc.html",
   "states": {
     "signin": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/masuk" },
         { "wait": "[data-screen=\"S02\"] [data-feature=\"F401\"]" }
       ]
     },
     "code": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/masuk" },
         { "click": "button:has-text(\"Send me a code\")" },
@@ -17,7 +17,7 @@
       ]
     },
     "wrong": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/masuk" },
         { "click": "button:has-text(\"Send me a code\")" },
@@ -29,7 +29,7 @@
       ]
     },
     "google": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/masuk" },
         { "click": "button:has-text(\"Continue with Google\")" },
@@ -37,7 +37,7 @@
       ]
     },
     "terms": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/masuk" },
         { "click": ".gpa-fine button:has-text(\"Syarat\")" },
@@ -45,7 +45,7 @@
       ]
     },
     "privacy": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/masuk" },
         { "click": ".gpa-fine button:has-text(\"Privasi\")" },

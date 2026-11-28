@@ -328,10 +328,11 @@ export function SkillsWorkArea(props: {
           onClose={(name) => recordIntent('F104:close:' + name)}
           onOpenArtifact={() => recordIntent('F104:open')}
           openItems={
-            props.onOpenExport
-              ? [{ icon: 'download', name: 'Export', onSelect: props.onOpenExport }]
-            props.onOpenRecords
-              ? [{ icon: 'doc', name: 'ADRs and glossary', onSelect: props.onOpenRecords }]
+            props.onOpenExport || props.onOpenRecords
+              ? [
+                  ...(props.onOpenExport ? [{ icon: 'download' as const, name: 'Export', onSelect: props.onOpenExport }] : []),
+                  ...(props.onOpenRecords ? [{ icon: 'doc' as const, name: 'ADRs and glossary', onSelect: props.onOpenRecords }] : []),
+                ]
               : undefined
           }
           right={right}

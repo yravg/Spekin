@@ -174,16 +174,24 @@ function StagePlaceholderWorkArea({
 }
 
 // S35 Project shell. Board: docs/design/spekin-canvas/project/S35-project-shell.dc.html (data-screen="S35").
-export function ProjectShell({ usageView = false, designSystemView = false }: { usageView?: boolean; designSystemView?: boolean } = {}) {
-export function ProjectShell({ usageView = false, reportView = false }: { usageView?: boolean; reportView?: boolean } = {}) {
+export function ProjectShell({
+  usageView = false,
+  designSystemView = false,
+  reportView = false,
+  exportView = false,
+  recordsView = false,
+  planningView = false,
+}: {
+  usageView?: boolean;
+  designSystemView?: boolean;
+  reportView?: boolean;
+  exportView?: boolean;
+  recordsView?: boolean;
+  /** /p/:project/planning has no :stage segment (routes.tsx PlanningRoute). */
+  planningView?: boolean;
+} = {}) {
   const { project: projectId = '', stage: stageParam } = useParams();
-  const stage = reportView ? 'testing' : (stageParam ?? 'design');
-export function ProjectShell({ usageView = false, exportView = false }: { usageView?: boolean; exportView?: boolean } = {}) {
-  const { project: projectId = '', stage: stageParam } = useParams();
-  const stage = exportView ? 'spec' : (stageParam ?? 'design');
-export function ProjectShell({ usageView = false, recordsView = false }: { usageView?: boolean; recordsView?: boolean } = {}) {
-  const { project: projectId = '', stage: stageParam } = useParams();
-  const stage = stageParam ?? (recordsView ? 'spec' : 'design');
+  const stage = planningView ? 'planning' : reportView ? 'testing' : exportView ? 'spec' : (stageParam ?? (recordsView ? 'spec' : 'design'));
   const navigate = useNavigate();
   const [search, setSearch] = useSearchParams();
   const section: UsageSection = isUsageSection(search.get('section')) ? (search.get('section') as UsageSection) : 'models';
@@ -204,9 +212,12 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
   const specDepth = stage === 'spec' && isSpecDepthView(depthParam) ? depthParam : null;
   // S21 Canvas step lives at /p/:project/design?artifact=canvas-step (frame id in the query; never comment text).
   const isCanvasStep = stage === 'design' && search.get('artifact') === 'canvas-step';
-  // S16 keeps its ticket id in the query (never prompt text): /p/meranti-yard/planning?artifact=ticket-T-05.
+  // Planning artifacts live in the query (never prompt text): ?artifact=decisions (S05), pitch (S06), tickets (S15),
+  // ticket-T-05 (S16). The bare /p/:project/planning URL is the S04 interview (routes.tsx PlanningRoute).
   const artifactParam = search.get('artifact');
   const ticketId = stage === 'planning' && artifactParam?.startsWith('ticket-') ? artifactParam.slice('ticket-'.length) : null;
+  const planningArtifact =
+    stage !== 'planning' || ticketId ? null : artifactParam === 'pitch' ? 'pitch' : artifactParam === 'tickets' ? 'tickets' : 'decisions';
   // S20 Agent inbox opens as a docked panel on any stage: /p/meranti-yard/:stage?inbox=1 (run id in query).
   const inboxOpen = !usageView && search.get('inbox') === '1';
   const inboxRun = search.get('run') ?? undefined;
@@ -216,11 +227,10 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
   const [lang, setLang] = useState<'en' | 'id'>('en');
   const [panel, setPanel] = useState<string | null>(null);
   const [planningOverride, setPlanningOverride] = useState<PlanningShellOverride>({});
-  const [planningOverride, setPlanningOverride] = useState<{ save?: SaveState }>({});
+  const [pitchOverride, setPitchOverride] = useState<{ save?: SaveState }>({});
   const [specOverride, setSpecOverride] = useState<{ save?: SaveState; busy?: string }>({});
   const [reportOverride, setReportOverride] = useState<ReportShellOverride>({});
   const [inboxOverride, setInboxOverride] = useState<AgentInboxShellOverride | null>(null);
-  const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style' | 'intake' | 'handoff' | 'genui'>('shell');
   const [designSub, setDesignSub] = useState<'shell' | 'canvas' | 'review' | 'targeted' | 'style' | 'intake' | 'handoff' | 'genui' | 'enhance'>('shell');
   const [handoffInitialMode, setHandoffInitialMode] = useState<HandoffMode>('select');
   const [genUiInitialMode, setGenUiInitialMode] = useState<GenUiMode>('stream');
@@ -246,32 +256,28 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
     ? 'S36'
     : designSystemView
       ? 'S14'
+    : exportView
+      ? 'S25'
+    : recordsView
+      ? 'S19'
     : inboxOpen
       ? 'S20'
     : delivery
-    : recordsView
-      ? 'S19'
-      : delivery
       ? 'S37'
-      : stage === 'planning'
-        ? (planningOverride.screen ?? 'S05')
+      : ticketId
+        ? 'S16'
+      : planningArtifact === 'tickets'
         ? 'S15'
+      : planningArtifact === 'pitch'
         ? 'S06'
+      : planningArtifact === 'decisions'
+        ? (planningOverride.screen ?? 'S05')
       : isCanvasStep
         ? 'S21'
       : stage === 'spec'
         ? (specDepth ? 'S07' : 'S40')
-        ? 'S40'
       : stage === 'testing'
         ? 'S18'
-    : exportView
-      ? 'S25'
-      : delivery
-        ? 'S37'
-      : ticketId
-        ? 'S16'
-        : stage === 'spec'
-          ? 'S40'
       : stage === 'design' && designSub === 'canvas'
         ? (canvasOverride.screen ?? 'S29')
         : stage === 'design' && designSub === 'review'
@@ -290,22 +296,18 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
                       ? 'S41'
                       : 'S35';
   const s36Usage = MODELS_USAGE[moment];
-  const activeSave =
+  const activeSave: SaveState =
     usageView || exportView
       ? save
       : designSystemView
         ? { status: 'saved' as const, tone: 'ok' as const, text: 'Saved 12:44' }
-      : stage === 'planning'
-        ? (planningOverride.save ?? { status: 'saved', tone: 'ok', text: 'Saved 12:06' })
-      : stage === 'planning'
-        ? (planningOverride.save ?? PITCH_SAVE.proposal)
-      : stage === 'spec' && specOverride.save
-  const activeSave: SaveState =
-    usageView
-      ? save
       : recordsView
         ? { status: 'saved', tone: 'ok', text: 'Saved 12:52' }
-        : stage === 'spec' && specOverride.save
+      : planningArtifact === 'pitch'
+        ? (pitchOverride.save ?? PITCH_SAVE.proposal)
+      : planningArtifact === 'decisions'
+        ? (planningOverride.save ?? { status: 'saved', tone: 'ok', text: 'Saved 12:06' })
+      : stage === 'spec' && specOverride.save
       ? specOverride.save
       : stage === 'design' && designSub === 'canvas' && canvasOverride.save
         ? canvasOverride.save
@@ -321,10 +323,7 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
                   ? genUiOverride.save
                   : save;
   const activeBusy =
-    usageView || designSystemView
-    usageView || exportView
-    usageView || recordsView
-    usageView || isCanvasStep
+    usageView || designSystemView || exportView || recordsView || isCanvasStep
       ? undefined
       : inboxOpen
         ? (inboxOverride ? inboxOverride.busy : defaultInboxBusy(inboxMoment))
@@ -436,11 +435,39 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
             <DesignSystemWorkArea
               state={designSystemState}
               onStateChange={(next) => setSearch(next === 'gap' ? { tab: next, gap: 'GAP-01' } : { tab: next })}
+              onOpenReview={() => {
+                setDesignSub('review');
+                navigate('/p/' + projectId + '/design');
+              }}
+              onOpenCanvas={() => {
+                setDesignSub('canvas');
+                navigate('/p/' + projectId + '/design');
+              }}
+              onOpenUsage={() => navigate('/p/' + projectId + '/usage?section=models')}
+            />
           ) : exportView ? (
             <ExportWorkArea
               initialMode={exportInitialMode}
               onFormatChange={(next: ExportFormat) => setSearch({ format: next }, { replace: true })}
               onCloseExport={() => navigate('/p/' + projectId + '/spec')}
+              onOpenHandoff={() => {
+                setHandoffInitialMode('select');
+                setDesignSub('handoff');
+                navigate('/p/' + projectId + '/design');
+              }}
+              onOpenReview={() => {
+                setDesignSub('review');
+                navigate('/p/' + projectId + '/design');
+              }}
+            />
+          ) : recordsView ? (
+            <AdrsGlossaryWorkArea
+              key={recordsMode}
+              view={recordsMode}
+              onView={(next) => setSearch({ type: next })}
+              onOpenSpec={() => navigate('/p/' + projectId + '/spec')}
+              onIntent={recordIntent}
+            />
           ) : inboxOpen ? (
             <AgentInboxWorkArea
               key={inboxMoment ?? 'live'}
@@ -470,22 +497,6 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
                 setDesignSub('handoff');
                 navigate('/p/' + projectId + '/design');
               }}
-              onOpenReview={() => {
-                setDesignSub('review');
-                navigate('/p/' + projectId + '/design');
-              }}
-              onOpenCanvas={() => {
-                setDesignSub('canvas');
-                navigate('/p/' + projectId + '/design');
-              }}
-              onOpenUsage={() => navigate('/p/' + projectId + '/usage?section=models')}
-          ) : recordsView ? (
-            <AdrsGlossaryWorkArea
-              key={recordsMode}
-              view={recordsMode}
-              onView={(next) => setSearch({ type: next })}
-              onOpenSpec={() => navigate('/p/' + projectId + '/spec')}
-              onIntent={recordIntent}
               onShellOverride={setInboxOverride}
             />
           ) : delivery ? (
@@ -572,13 +583,22 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
                 onOpenEnhance={() => setDesignSub('enhance')}
               />
             )
-          ) : stage === 'planning' ? (
-            <TicketBoardWorkArea />
-            <PitchWorkArea onShellOverride={setPlanningOverride} />
+          ) : ticketId ? (
+            <TicketDetailWorkArea
+              key={ticketId}
+              ticketId={ticketId}
+              onSelectTicket={(id) => navigate('/p/' + projectId + '/planning?artifact=ticket-' + id)}
+              onBackToBoard={() => navigate('/p/' + projectId + '/planning?artifact=tickets')}
+              onIntent={recordIntent}
+            />
+          ) : planningArtifact === 'tickets' ? (
+            <TicketBoardWorkArea onOpenTicket={(id) => navigate('/p/' + projectId + '/planning?artifact=ticket-' + id)} />
+          ) : planningArtifact === 'pitch' ? (
+            <PitchWorkArea onShellOverride={setPitchOverride} />
+          ) : planningArtifact === 'decisions' ? (
+            <DecisionLogWorkArea onShellOverride={setPlanningOverride} />
           ) : stage === 'backend' ? (
             <BackendWorkArea onOpenDelivery={() => openDelivery('backend')} />
-          ) : stage === 'planning' ? (
-            <DecisionLogWorkArea onShellOverride={setPlanningOverride} />
           ) : stage === 'spec' ? (
             specDepth ? (
               <SpecDepthWorkArea
@@ -586,9 +606,12 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
                 onDepthChange={(next) => setSearch({ depth: next })}
               />
             ) : (
-              <SkillsWorkArea onShellOverride={setSpecOverride} />
+              <SkillsWorkArea
+                onShellOverride={setSpecOverride}
+                onOpenExport={() => navigate('/p/' + projectId + '/spec/export')}
+                onOpenRecords={() => navigate('/p/' + projectId + '/spec/records?type=glossary')}
+              />
             )
-            <SkillsWorkArea onShellOverride={setSpecOverride} />
           ) : stage === 'testing' ? (
             <ReviewReportWorkArea
               initialView={initialReportView}
@@ -597,19 +620,6 @@ export function ProjectShell({ usageView = false, recordsView = false }: { usage
                 setDesignSub('review');
                 navigate('/p/' + projectId + '/design');
               }}
-            <SkillsWorkArea
-              onShellOverride={setSpecOverride}
-              onOpenExport={() => navigate('/p/' + projectId + '/spec/export')}
-            <SkillsWorkArea
-              onShellOverride={setSpecOverride}
-              onOpenRecords={() => navigate('/p/' + projectId + '/spec/records?type=glossary')}
-          ) : stage === 'planning' && ticketId ? (
-            <TicketDetailWorkArea
-              key={ticketId}
-              ticketId={ticketId}
-              onSelectTicket={(id) => navigate('/p/' + projectId + '/planning?artifact=ticket-' + id)}
-              onBackToBoard={() => navigate('/p/' + projectId + '/planning')}
-              onIntent={recordIntent}
             />
           ) : (
             <StagePlaceholderWorkArea

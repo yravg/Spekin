@@ -4,18 +4,14 @@
     "ladder": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "[data-stage=\"planning\"]" },
+        { "goto": "/p/meranti-yard/planning?artifact=tickets" },
         { "wait": "[data-screen=\"S15\"]" }
       ]
     },
     "comp": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "[data-stage=\"planning\"]" },
+        { "goto": "/p/meranti-yard/planning?artifact=tickets" },
         { "wait": "[data-screen=\"S15\"]" },
         { "click": ".gpc-comp.none" },
         { "wait": ".gpc-pop:has-text(\"Primary component for T-08\")" }
@@ -24,9 +20,7 @@
     "graph": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "[data-stage=\"planning\"]" },
+        { "goto": "/p/meranti-yard/planning?artifact=tickets" },
         { "wait": "[data-screen=\"S15\"]" },
         { "click": ".gpc-seg button:has-text(\"Task graph\")" },
         { "wait": ".gpc-graph" }
@@ -35,9 +29,7 @@
     "stages": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "[data-stage=\"planning\"]" },
+        { "goto": "/p/meranti-yard/planning?artifact=tickets" },
         { "wait": "[data-screen=\"S15\"]" },
         { "click": "button[aria-label=\"Edit stage labels of T-05\"]" },
         { "wait": ".gpc-pop:has-text(\"Stage labels for T-05\")" }
@@ -46,9 +38,7 @@
     "locked": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "[data-stage=\"planning\"]" },
+        { "goto": "/p/meranti-yard/planning?artifact=tickets" },
         { "wait": "[data-screen=\"S15\"]" },
         { "hover": ".gpc-tr.locked button:has-text(\"Slice: variance table flags packages over 3%\")" },
         { "wait": ".gpc-pop:has-text(\"T-05 is locked\")" }
@@ -57,9 +47,7 @@
     "empty": {
       "status": "checked",
       "steps": [
-        { "goto": "/" },
-        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
-        { "click": "[data-stage=\"planning\"]" },
+        { "goto": "/p/meranti-yard/planning?artifact=tickets" },
         { "wait": "[data-screen=\"S15\"]" },
         { "click": "button[aria-label=\"Open an artifact\"]" },
         { "wait": ".gpc-empty" }

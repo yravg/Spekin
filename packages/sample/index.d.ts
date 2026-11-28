@@ -730,8 +730,6 @@ export declare const GAPA_Q5: SampleInterviewQuestion;
 export declare const GAPA_PITCH_FIELDS: [string, StageTone, string][];
 export declare const GAPA_GROUND: SampleInterviewGroundRow[];
 export declare const GAPA_WHY: SampleInterviewWhy;
-export declare const GAPA_OPEN: SampleInterviewOpen[];
-export declare const GAPA_PITCH: [string, string, string[], string][];
 // S14 GAP register and S21 Canvas step (IMP-60, IMP-61).
 export interface SampleGapBEntry {
   id: string;
@@ -814,7 +812,6 @@ export interface SampleAgentRun {
 export type SampleAgentStep = ['ok' | 'run' | 'mute', string];
 export declare const GAPD_RUNS: SampleAgentRun[];
 export declare const GAPD_STEPS: SampleAgentStep[];
-export declare const GAPD_CTX: ContextItem[];
 // S41 Enhance prompt (F531–F539).
 export type SampleEnhanceSeg = ['k' | 'c' | 'a' | 'd' | 's', string, string?];
 export type SampleEnhanceCtxItem = ['flag' | 'lock' | 'frame' | 'doc' | 'req' | 'history', string, string];
