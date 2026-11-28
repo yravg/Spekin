@@ -9,6 +9,7 @@ const port = Number(process.env.SPK_WEB_PORT || 5173);
 
 export default defineConfig({
   plugins: [react()],
-  server: { host: '127.0.0.1', port, strictPort: true, fs: { allow: [repoRoot] }, proxy: { '/api': 'http://127.0.0.1:8787' } },
-  preview: { host: '127.0.0.1', port, strictPort: true },
+  // Tailnet preview (owner): tailscale serve proxies *.ts.net to this loopback-only server.
+  server: { host: '127.0.0.1', port, strictPort: true, allowedHosts: ['.ts.net'], fs: { allow: [repoRoot] }, proxy: { '/api': 'http://127.0.0.1:8787' } },
+  preview: { host: '127.0.0.1', port, strictPort: true, allowedHosts: ['.ts.net'] },
 });

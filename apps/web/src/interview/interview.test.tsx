@@ -182,11 +182,12 @@ it('opens S05, S06 and S15 by click from an add-feature increment (F540, D-PLAN-
       seen = loc.pathname + loc.search;
       return null;
     }
-    for (const [label, artifact] of [
+    const links: [string, string][] = [
       ['Decision log', 'decisions'],
       ['Pitch', 'pitch'],
       ['Tickets', 'tickets'],
-    ]) {
+    ];
+    for (const [label, artifact] of links) {
       container = document.createElement('div');
       document.body.appendChild(container);
       root = createRoot(container);
