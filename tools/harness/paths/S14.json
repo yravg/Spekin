@@ -1,0 +1,71 @@
+{
+  "board": "S14-design-system.dc.html",
+  "states": {
+    "kit": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": ".sp-insp .sp-row:has-text(\"DESIGN.md\")" },
+        { "wait": "[data-screen=\"S14\"] [data-feature=\"F451\"]" }
+      ]
+    },
+    "tokens": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": ".sp-insp .sp-row:has-text(\"DESIGN.md\")" },
+        { "wait": "[data-screen=\"S14\"]" },
+        { "click": "button[role=\"tab\"]:has-text(\"DESIGN.md\")" },
+        { "wait": "[data-feature=\"F459\"] table.sp-tbl" }
+      ]
+    },
+    "gap": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": ".sp-insp .sp-row:has-text(\"DESIGN.md\")" },
+        { "wait": "[data-screen=\"S14\"]" },
+        { "click": "button[role=\"tab\"]:has-text(\"F-05 Variance bridge\")" },
+        { "wait": "[data-feature=\"F452\"]" }
+      ]
+    },
+    "register": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": ".sp-insp .sp-row:has-text(\"DESIGN.md\")" },
+        { "wait": "[data-screen=\"S14\"]" },
+        { "click": "button[role=\"tab\"]:has-text(\"GAP register\")" },
+        { "wait": "[data-feature=\"F454\"] table.sp-tbl" }
+      ]
+    },
+    "reuse": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": ".sp-insp .sp-row:has-text(\"DESIGN.md\")" },
+        { "wait": "[data-screen=\"S14\"]" },
+        { "type": [".ap-ta-input", "Can we reuse the pill and diff code from the reference?"] },
+        { "click": "button[aria-label=\"Send\"]" },
+        { "wait": "[data-feature=\"F456\"] table.sp-tbl" }
+      ]
+    },
+    "policy": {
+      "status": "checked",
+      "steps": [
+        { "goto": "/" },
+        { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
+        { "click": ".sp-insp .sp-row:has-text(\"DESIGN.md\")" },
+        { "wait": "[data-screen=\"S14\"]" },
+        { "type": [".ap-ta-input", "Refactor the whole repo to use the kit."] },
+        { "click": "button[aria-label=\"Send\"]" },
+        { "wait": "[data-feature=\"F457\"]" }
+      ]
+    }
+  }
+}

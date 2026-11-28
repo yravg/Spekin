@@ -110,6 +110,7 @@ export function DesignWorkArea(
     onOpenHandoff?: () => void;
     onOpenGenUi?: (mode: GenUiMode) => void;
     onOpenUsage?: () => void;
+    onOpenDesignSystem?: () => void;
   } = {},
 ) {
   const view = useWorkspace((s) => s.view('design'));
@@ -566,6 +567,7 @@ export function DesignWorkArea(
                 name="Tokens and type scale"
                 sub="Accepted r3 · 18 tokens"
                 pill={['ok', 'Accepted']}
+                onClick={props.onOpenDesignSystem}
               />
             </div>
             <div className="sp-sec">

@@ -36,6 +36,8 @@ body { background: var(--ground); }
 .ap-sticky b { color: var(--ink); font-weight: 600; }
 /* App-only: custom answer row (design .sty-note-in values; the bare board-only token "note" cannot ship as an app class name). */
 .ap-custom-answer { display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 9px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--line-strong); font: 12px/1 var(--font); color: var(--ink-faint); }
+/* App-only: S14 muted inline hint (design .gpb-note-in values; avoids board-only token "note"). */
+.ap-gpb-hint { font-size: 12px; color: var(--ink-dim); line-height: 1.45; margin: 0; }
 
 /* App-only: the artifact picker menu (the plus in the tab row). It opens artifacts the board draws, such as Release readiness. */
 .ap-open-wrap { position: relative; display: inline-flex; }
