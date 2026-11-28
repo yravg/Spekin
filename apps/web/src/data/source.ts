@@ -54,6 +54,8 @@ import type {
   SkillManifest,
 } from '@spekin/contracts';
 import type {
+  ContextItem,
+  PillTone,
   SampleDeliveryContract,
   SampleGenUiVerdict,
   SampleModelRegistryRow,

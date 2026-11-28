@@ -2,7 +2,7 @@
   "board": "S15-ticket-board.dc.html",
   "states": {
     "ladder": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/" },
         { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
@@ -11,7 +11,7 @@
       ]
     },
     "comp": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/" },
         { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
@@ -22,7 +22,7 @@
       ]
     },
     "graph": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/" },
         { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
@@ -33,7 +33,7 @@
       ]
     },
     "stages": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/" },
         { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
@@ -44,7 +44,7 @@
       ]
     },
     "locked": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/" },
         { "click": "button.int-cn:has-text(\"Meranti Yard\")" },
@@ -55,7 +55,7 @@
       ]
     },
     "empty": {
-      "status": "draft",
+      "status": "checked",
       "steps": [
         { "goto": "/" },
         { "click": "button.int-cn:has-text(\"Meranti Yard\")" },

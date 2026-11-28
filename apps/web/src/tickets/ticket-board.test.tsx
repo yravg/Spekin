@@ -51,11 +51,11 @@ describe('S15 Ticket board (IMP-62)', () => {
     }
     expect(html.indexOf('Benchmark before')).toBeLessThan(html.indexOf('Vertical slices'));
     expect(html.indexOf('Vertical slices')).toBeLessThan(html.indexOf('Benchmark after'));
-    expect(canReorderTicket(tickets[0])).toBe(false);
-    expect(canReorderTicket(tickets[tickets.length - 1])).toBe(false);
-    expect(canReorderTicket(tickets[4])).toBe(true);
+    expect(canReorderTicket(tickets[0]!)).toBe(false);
+    expect(canReorderTicket(tickets[tickets.length - 1]!)).toBe(false);
+    expect(canReorderTicket(tickets[4]!)).toBe(true);
     expect(html).not.toContain('data-todo');
-    expect(html.toLowerCase()).not.toContain('not built yet');
+    expect(html).not.toContain('data-later');
   });
 
   it('counts UI tanpa komponen and enforces exactly one primary component per UI ticket (F473)', () => {
